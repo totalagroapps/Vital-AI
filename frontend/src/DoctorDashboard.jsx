@@ -264,7 +264,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
-              placeholder="{t("ask_copilot")}"
+              placeholder={t("ask_copilot")}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
             <button

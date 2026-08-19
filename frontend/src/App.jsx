@@ -938,7 +938,7 @@ ${text}`], {type: 'text/plain'});
                   }
                 }}
                 disabled={isTriageClosed}
-                placeholder={isTriageClosed ? "Triaje finalizado." : "{t("describe_symptoms")}"}
+                placeholder={isTriageClosed ? "Triaje finalizado." : t("describe_symptoms")}
                 className={`w-full bg-white border ${isTriageClosed ? 'border-slate-200 shadow-sm opacity-50 cursor-not-allowed' : 'border-slate-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-800 placeholder-slate-500 resize-none transition-all`}
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '120px' }}

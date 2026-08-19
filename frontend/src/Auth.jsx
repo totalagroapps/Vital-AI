@@ -93,7 +93,7 @@ export default function Auth({ onLogin, apiUrl }) {
     textGradient: isDoc ? 'from-indigo-300 to-blue-300' : 'from-rose-300 to-pink-300',
     focusRing: isDoc ? 'focus:border-indigo-500 focus:ring-indigo-500' : 'focus:border-rose-500 focus:ring-rose-500',
     buttonBg: isDoc ? 'from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 shadow-indigo-500/20' : 'from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 shadow-rose-500/20',
-    title: isDoc ? '{t("doctor_login_title")}' : 'Portal Paciente',
+    title: isDoc ? t("doctor_login_title") : 'Portal Paciente',
     Icon: isDoc ? Stethoscope : HeartPulse
   };
 
