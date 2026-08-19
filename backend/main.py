@@ -447,7 +447,14 @@ async def send_triage_message(
             sanitized_messages.append({"role": msg.role, "content": msg.content})
 
     # Preparar el payload con el System Prompt maestro de Triaje
-    messages_payload = [{"role": "system", "content": TRIAGE_SYSTEM_PROMPT_V2}] + sanitized_messages
+    
+    # Language handling
+    lang_instruction = ""
+    if request.language == "en":
+        lang_instruction = "\n\nIMPORTANT: You must communicate with the patient exclusively in English."
+    
+    messages_payload = [{"role": "system", "content": TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction}] + sanitized_messages
+
 
     ollama_host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
     client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
@@ -510,6 +517,7 @@ class PatientProfileSchema(BaseModel):
     chronic_conditions: Optional[str] = None
     current_medications: Optional[str] = None
     emergency_contact: Optional[str] = None
+    preferred_language: Optional[str] = "es"
 
 @app.get("/api/patient/profile")
 async def get_patient_profile(db: AsyncSession = Depends(get_db)):

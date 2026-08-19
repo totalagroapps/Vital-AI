@@ -28,6 +28,7 @@ class TriageSession(Base):
     final_report = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class PatientProfile(Base):
     """
     Historial Médico Digital básico del paciente.
@@ -44,4 +45,5 @@ class PatientProfile(Base):
     chronic_conditions = Column(String, nullable=True)
     current_medications = Column(String, nullable=True)
     emergency_contact = Column(String, nullable=True)
+    preferred_language = Column(String, default="es")
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useLanguage } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import { Stethoscope, Lock, User, ArrowRight, HeartPulse, Activity, ChevronLeft } from 'lucide-react';
 
 export default function Auth({ onLogin, apiUrl }) {
@@ -60,7 +62,7 @@ export default function Auth({ onLogin, apiUrl }) {
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center shadow-lg shadow-rose-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
                 <HeartPulse className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-rose-100 mb-2">Soy Paciente</h2>
+              <h2 className="text-2xl font-bold text-rose-100 mb-2">{t("i_am_patient")}</h2>
               <p className="text-rose-200/60 text-sm text-center">Accede a tu historial clínico, resultados y triaje inteligente.</p>
             </button>
 
@@ -73,7 +75,7 @@ export default function Auth({ onLogin, apiUrl }) {
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
                 <Stethoscope className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-indigo-100 mb-2">Soy Médico</h2>
+              <h2 className="text-2xl font-bold text-indigo-100 mb-2">{t("i_am_doctor")}</h2>
               <p className="text-indigo-200/60 text-sm text-center">Gestiona tus pacientes, revisa expedientes y consulta a la IA.</p>
             </button>
           </div>
@@ -91,7 +93,7 @@ export default function Auth({ onLogin, apiUrl }) {
     textGradient: isDoc ? 'from-indigo-300 to-blue-300' : 'from-rose-300 to-pink-300',
     focusRing: isDoc ? 'focus:border-indigo-500 focus:ring-indigo-500' : 'focus:border-rose-500 focus:ring-rose-500',
     buttonBg: isDoc ? 'from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 shadow-indigo-500/20' : 'from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 shadow-rose-500/20',
-    title: isDoc ? 'Portal Médico' : 'Portal Paciente',
+    title: isDoc ? '{t("doctor_login_title")}' : 'Portal Paciente',
     Icon: isDoc ? Stethoscope : HeartPulse
   };
 
@@ -107,7 +109,7 @@ export default function Auth({ onLogin, apiUrl }) {
           onClick={() => setSelectedRole(null)}
           className="absolute -top-12 left-8 text-slate-400 hover:text-slate-200 flex items-center gap-1 text-sm font-medium transition-colors"
         >
-          <ChevronLeft className="w-4 h-4" /> Volver
+          <ChevronLeft className="w-4 h-4" /> {t("returning")}
         </button>
 
         <div className="text-center mb-10">

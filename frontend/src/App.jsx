@@ -1,5 +1,7 @@
 import DoctorDashboard from './DoctorDashboard';
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Auth from './Auth';
@@ -36,6 +38,7 @@ import {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function App() {
+  const { t, language } = useLanguage();
   const [token, setToken] = useState(localStorage.getItem('med_token') || null);
   const [username, setUsername] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -473,7 +476,7 @@ ${text}`], {type: 'text/plain'});
             </div>
             <div>
               <h1 className="font-bold text-lg leading-none gradient-text">MedIA Hub</h1>
-              <span className="text-[11px] text-slate-400 font-medium">Asistente Clínico IA</span>
+              <span className="text-[11px] text-slate-400 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
           {/* Close button for mobile inside sidebar */}
@@ -489,7 +492,7 @@ ${text}`], {type: 'text/plain'});
             className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" />
-            <span>Nueva Consulta</span>
+            <span>{t("new_consult")}</span>
           </button>
         </div>
 
@@ -501,7 +504,7 @@ ${text}`], {type: 'text/plain'});
             className="w-full py-2 px-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-slate-300 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-800"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Mi Historial Clínico</span>
+            <span>{t("my_history")}</span>
           </button>
         </div>
 
@@ -524,7 +527,7 @@ ${text}`], {type: 'text/plain'});
           <div className="text-[11px] font-semibold text-slate-500 uppercase px-2 mb-1 tracking-wider">Historial de Consultas</div>
           {filteredSessions.length === 0 ? (
             <div className="text-center py-8 px-4 text-slate-500 text-xs">
-              No hay consultas registradas.
+              {t("no_consults")}
             </div>
           ) : (
             filteredSessions.map((session) => {
@@ -935,7 +938,7 @@ ${text}`], {type: 'text/plain'});
                   }
                 }}
                 disabled={isTriageClosed}
-                placeholder={isTriageClosed ? "Triaje finalizado." : "Describa los síntomas clínicos..."}
+                placeholder={isTriageClosed ? "Triaje finalizado." : "{t("describe_symptoms")}"}
                 className={`w-full bg-slate-900 border ${isTriageClosed ? 'border-slate-800 opacity-50 cursor-not-allowed' : 'border-slate-700 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 placeholder-slate-500 resize-none transition-all`}
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '120px' }}
@@ -974,15 +977,15 @@ ${text}`], {type: 'text/plain'});
               <form onSubmit={savePatientProfile} className="flex-1 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">Nombre Completo</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("full_name")}</label>
                     <input type="text" required value={patientProfile.full_name || ''} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">Fecha de Nacimiento</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("dob")}</label>
                     <input type="date" required value={patientProfile.date_of_birth || ''} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">Género</label>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("gender")}</label>
                     <select value={patientProfile.gender || ''} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500">
                       <option value="">Seleccione</option>
                       <option value="Masculino">Masculino</option>
@@ -1011,11 +1014,11 @@ ${text}`], {type: 'text/plain'});
                   <textarea value={patientProfile.chronic_conditions || ''} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" rows={2} placeholder="Ej. Hipertensión, asma..."></textarea>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Medicación Habitual</label>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">{t("meds")}</label>
                   <textarea value={patientProfile.current_medications || ''} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" rows={2} placeholder="Ej. Losartán 50mg..."></textarea>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Contacto de Emergencia</label>
+                  <label className="block text-xs font-medium text-slate-400 mb-1">{t("emergency")}</label>
                   <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" placeholder="Nombre y teléfono" />
                 </div>
 

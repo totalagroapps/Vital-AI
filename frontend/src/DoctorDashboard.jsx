@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import { User, Activity, FileText, Send, Bot, Clock, ChevronRight } from 'lucide-react';
 
@@ -110,14 +112,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <h2 className="font-bold text-slate-100 flex items-center gap-2">
             <Activity className="w-5 h-5 text-indigo-400" />
-            Base de Pacientes
+            {t("patients_base")}
           </h2>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {isLoadingPatients ? (
-            <div className="p-4 text-center text-sm text-slate-500 animate-pulse">Cargando pacientes...</div>
+            <div className="p-4 text-center text-sm text-slate-500 animate-pulse">{t("loading_patients")}</div>
           ) : patients.length === 0 ? (
-            <div className="p-4 text-center text-sm text-slate-500">No hay pacientes registrados.</div>
+            <div className="p-4 text-center text-sm text-slate-500">{t("no_patients")}</div>
           ) : (
             patients.map(p => (
               <button
@@ -150,7 +152,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       <div className="flex-1 flex flex-col border-r border-slate-800 bg-slate-950 overflow-hidden relative">
         {selectedPatient ? (
           isLoadingDetail ? (
-            <div className="flex-1 flex items-center justify-center text-slate-500 animate-pulse">Cargando expediente...</div>
+            <div className="flex-1 flex items-center justify-center text-slate-500 animate-pulse">{t("loading_record")}</div>
           ) : patientDetail ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
@@ -210,7 +212,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
             <User className="w-16 h-16 opacity-20 mb-4" />
-            <p>Seleccione un paciente para ver su expediente</p>
+            <p>{t("select_patient")}</p>
           </div>
         )}
       </div>
@@ -220,14 +222,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         <div className="p-4 border-b border-slate-800 bg-indigo-950/20">
           <h2 className="font-bold text-indigo-300 flex items-center gap-2">
             <Bot className="w-5 h-5" />
-            Copiloto Médico IA
+            {t("copilot_title")}
           </h2>
-          <p className="text-[10px] text-slate-400 mt-1 leading-tight">Analiza el expediente del paciente seleccionado y cruza información clínica al instante.</p>
+          <p className="text-[10px] text-slate-400 mt-1 leading-tight">{t("copilot_desc")}</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!selectedPatient ? (
-            <div className="text-center text-xs text-slate-500 mt-10">Esperando paciente...</div>
+            <div className="text-center text-xs text-slate-500 mt-10">{t("waiting_patient")}</div>
           ) : (
             copilotMessages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -262,7 +264,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
-              placeholder="Pregunte a la IA sobre este paciente..."
+              placeholder="{t("ask_copilot")}"
               className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
             <button
