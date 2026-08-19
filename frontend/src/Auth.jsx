@@ -42,7 +42,7 @@ export default function Auth({ onLogin, apiUrl }) {
 
   if (!selectedRole) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-100 p-4 relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-100/50 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
@@ -57,7 +57,7 @@ export default function Auth({ onLogin, apiUrl }) {
             {/* Patient Card */}
             <button 
               onClick={() => setSelectedRole('patient')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-rose-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-rose-500/50 hover:bg-white/80"
+              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-rose-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-rose-500/50 hover:bg-white shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center shadow-lg shadow-rose-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -70,7 +70,7 @@ export default function Auth({ onLogin, apiUrl }) {
             {/* Doctor Card */}
             <button 
               onClick={() => setSelectedRole('doctor')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-indigo-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-indigo-500/50 hover:bg-white/80"
+              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-indigo-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-indigo-500/50 hover:bg-white shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-bl from-indigo-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -99,7 +99,7 @@ export default function Auth({ onLogin, apiUrl }) {
   };
 
   return (
-    <div className={`flex h-screen w-full items-center justify-center bg-slate-50 ${theme.bgGradient} relative overflow-hidden transition-colors duration-1000`}>
+    <div className={`flex h-screen w-full items-center justify-center bg-slate-100 ${theme.bgGradient} relative overflow-hidden transition-colors duration-1000`}>
       
       {/* Background decorations */}
       <div className={`absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-indigo-100/50' : 'bg-rose-100/50'}`} />
@@ -123,7 +123,7 @@ export default function Auth({ onLogin, apiUrl }) {
           <p className="text-slate-600 mt-2 font-medium">Bienvenido de nuevo</p>
         </div>
 
-        <div className="glass-card rounded-3xl p-8 border border-slate-200 shadow-sm shadow-2xl backdrop-blur-xl bg-white/80">
+        <div className="glass-card rounded-3xl p-8 border border-slate-200 shadow-sm shadow-2xl backdrop-blur-xl bg-white shadow-xl">
           {error && (
             <div className="p-3 rounded-xl mb-6 text-sm text-center border bg-rose-100/50 border-rose-500/30 text-rose-400">
               {error}
@@ -134,13 +134,13 @@ export default function Auth({ onLogin, apiUrl }) {
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-2 ml-1">Usuario / Email</label>
               <div className="relative">
-                <User className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-500" />
+                <User className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-600" />
                 <input 
                   type="text" 
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className={`w-full bg-slate-50/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-400 ${theme.focusRing}`}
+                  className={`w-full bg-slate-100/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-500 ${theme.focusRing}`}
                   placeholder={isDoc ? "ej. dr_perez" : "ej. paciente@mail.com"}
                 />
               </div>
@@ -149,13 +149,13 @@ export default function Auth({ onLogin, apiUrl }) {
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-2 ml-1">Contraseña</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-500" />
+                <Lock className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-600" />
                 <input 
                   type="password" 
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full bg-slate-50/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-400 ${theme.focusRing}`}
+                  className={`w-full bg-slate-100/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-500 ${theme.focusRing}`}
                   placeholder="••••••••"
                 />
               </div>
@@ -177,7 +177,7 @@ export default function Auth({ onLogin, apiUrl }) {
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-500 mt-6">Modo Demo: Ingresa cualquier usuario y contraseña para acceder.</p>
+          <p className="text-center text-xs text-slate-600 mt-6">Modo Demo: Ingresa cualquier usuario y contraseña para acceder.</p>
         </div>
       </div>
     </div>

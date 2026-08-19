@@ -511,7 +511,7 @@ ${text}`], {type: 'text/plain'});
         {/* Search */}
         <div className="px-3 py-1">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-600" />
             <input
               type="text"
               placeholder="Buscar paciente o fecha..."
@@ -524,9 +524,9 @@ ${text}`], {type: 'text/plain'});
 
         {/* Session List */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          <div className="text-[11px] font-semibold text-slate-500 uppercase px-2 mb-1 tracking-wider">Historial de Consultas</div>
+          <div className="text-[11px] font-semibold text-slate-600 uppercase px-2 mb-1 tracking-wider">Historial de Consultas</div>
           {filteredSessions.length === 0 ? (
-            <div className="text-center py-8 px-4 text-slate-500 text-xs">
+            <div className="text-center py-8 px-4 text-slate-600 text-xs">
               {t("no_consults")}
             </div>
           ) : (
@@ -580,10 +580,10 @@ ${text}`], {type: 'text/plain'});
               <User className="w-3.5 h-3.5 text-cyan-500" /> {username || 'Médico'}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowSettings(true)} className="text-slate-500 hover:text-cyan-400 transition-colors" title="Ajustes de Motor">
+              <button onClick={() => setShowSettings(true)} className="text-slate-600 hover:text-cyan-400 transition-colors" title="Ajustes de Motor">
                 <Settings className="w-4 h-4" />
               </button>
-              <button onClick={handleLogout} className="text-slate-500 hover:text-rose-400 transition-colors" title="Cerrar sesión">
+              <button onClick={handleLogout} className="text-slate-600 hover:text-rose-400 transition-colors" title="Cerrar sesión">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -1037,7 +1037,7 @@ ${text}`], {type: 'text/plain'});
                     <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-40 h-40" />
                   </div>
                 ) : (
-                  <div className="w-40 h-40 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 text-xs text-center p-4 border border-slate-300 border-dashed">
+                  <div className="w-40 h-40 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 text-xs text-center p-4 border border-slate-300 border-dashed">
                     Guarda tu historial para generar el QR
                   </div>
                 )}

@@ -106,7 +106,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   };
 
   return (
-    <div className="flex w-full h-full bg-slate-50 text-slate-800">
+    <div className="flex w-full h-full bg-slate-100 text-slate-800">
       
       {/* LEFT: Patients List */}
       <div className="w-80 border-r border-slate-200 shadow-sm flex flex-col bg-white/50 shrink-0">
@@ -118,9 +118,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
           {isLoadingPatients ? (
-            <div className="p-4 text-center text-sm text-slate-500 animate-pulse">{t("loading_patients")}</div>
+            <div className="p-4 text-center text-sm text-slate-600 animate-pulse">{t("loading_patients")}</div>
           ) : patients.length === 0 ? (
-            <div className="p-4 text-center text-sm text-slate-500">{t("no_patients")}</div>
+            <div className="p-4 text-center text-sm text-slate-600">{t("no_patients")}</div>
           ) : (
             patients.map(p => (
               <button
@@ -134,7 +134,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               >
                 <div>
                   <div className="font-medium text-sm">{p.full_name}</div>
-                  <div className="text-xs text-slate-500">{p.gender} • {p.date_of_birth}</div>
+                  <div className="text-xs text-slate-600">{p.gender} • {p.date_of_birth}</div>
                 </div>
                 <ChevronRight className={`w-4 h-4 ${selectedPatient?.user_id === p.user_id ? 'text-indigo-400' : 'text-slate-600'}`} />
               </button>
@@ -150,10 +150,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       </div>
 
       {/* MIDDLE: Patient Detail */}
-      <div className="flex-1 flex flex-col border-r border-slate-200 shadow-sm bg-slate-50 overflow-hidden relative">
+      <div className="flex-1 flex flex-col border-r border-slate-200 shadow-sm bg-slate-100 overflow-hidden relative">
         {selectedPatient ? (
           isLoadingDetail ? (
-            <div className="flex-1 flex items-center justify-center text-slate-500 animate-pulse">{t("loading_record")}</div>
+            <div className="flex-1 flex items-center justify-center text-slate-600 animate-pulse">{t("loading_record")}</div>
           ) : patientDetail ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
@@ -167,13 +167,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   Ficha Clínica
                 </h3>
                 <div className="grid grid-cols-2 gap-4 text-sm relative z-10">
-                  <div><span className="text-slate-500 block text-xs">Nombre</span><span className="font-medium">{patientDetail.profile.full_name}</span></div>
-                  <div><span className="text-slate-500 block text-xs">Nacimiento</span><span className="font-medium">{patientDetail.profile.date_of_birth}</span></div>
-                  <div><span className="text-slate-500 block text-xs">Género</span><span className="font-medium">{patientDetail.profile.gender}</span></div>
-                  <div><span className="text-slate-500 block text-xs">Sangre</span><span className="font-medium text-rose-400">{patientDetail.profile.blood_type}</span></div>
-                  <div className="col-span-2"><span className="text-slate-500 block text-xs">Alergias</span><span className="font-medium">{patientDetail.profile.allergies || 'Ninguna'}</span></div>
-                  <div className="col-span-2"><span className="text-slate-500 block text-xs">Crónicas</span><span className="font-medium">{patientDetail.profile.chronic_conditions || 'Ninguna'}</span></div>
-                  <div className="col-span-2"><span className="text-slate-500 block text-xs">Medicación</span><span className="font-medium">{patientDetail.profile.current_medications || 'Ninguna'}</span></div>
+                  <div><span className="text-slate-600 block text-xs">Nombre</span><span className="font-medium">{patientDetail.profile.full_name}</span></div>
+                  <div><span className="text-slate-600 block text-xs">Nacimiento</span><span className="font-medium">{patientDetail.profile.date_of_birth}</span></div>
+                  <div><span className="text-slate-600 block text-xs">Género</span><span className="font-medium">{patientDetail.profile.gender}</span></div>
+                  <div><span className="text-slate-600 block text-xs">Sangre</span><span className="font-medium text-rose-400">{patientDetail.profile.blood_type}</span></div>
+                  <div className="col-span-2"><span className="text-slate-600 block text-xs">Alergias</span><span className="font-medium">{patientDetail.profile.allergies || 'Ninguna'}</span></div>
+                  <div className="col-span-2"><span className="text-slate-600 block text-xs">Crónicas</span><span className="font-medium">{patientDetail.profile.chronic_conditions || 'Ninguna'}</span></div>
+                  <div className="col-span-2"><span className="text-slate-600 block text-xs">Medicación</span><span className="font-medium">{patientDetail.profile.current_medications || 'Ninguna'}</span></div>
                 </div>
               </div>
 
@@ -182,17 +182,17 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <h3 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Histórico de Triajes</h3>
                 <div className="space-y-3">
                   {patientDetail.triages.length === 0 ? (
-                    <div className="text-sm text-slate-500 italic">No hay triajes registrados.</div>
+                    <div className="text-sm text-slate-600 italic">No hay triajes registrados.</div>
                   ) : (
                     patientDetail.triages.map(t => (
                       <div key={t.id} className="bg-white/50 border border-slate-200 shadow-sm rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
-                          <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleString()}</span>
+                          <span className="text-xs text-slate-600">{new Date(t.created_at).toLocaleString()}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold border ${
                             t.status === 'closed_red' ? 'bg-rose-100/50 text-rose-400 border-rose-500/20' :
                             t.status === 'closed_yellow' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                             t.status === 'closed_green' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                            'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                            'bg-slate-1000/10 text-slate-600 border-slate-500/20'
                           }`}>
                             {t.status.replace('closed_', '') || 'En curso'}
                           </span>
@@ -211,7 +211,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             <div className="flex-1 flex items-center justify-center text-rose-400">Error al cargar expediente.</div>
           )
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
             <User className="w-16 h-16 opacity-20 mb-4" />
             <p>{t("select_patient")}</p>
           </div>
@@ -230,7 +230,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {!selectedPatient ? (
-            <div className="text-center text-xs text-slate-500 mt-10">{t("waiting_patient")}</div>
+            <div className="text-center text-xs text-slate-600 mt-10">{t("waiting_patient")}</div>
           ) : (
             copilotMessages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -266,7 +266,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
               placeholder={t("ask_copilot")}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+              className="w-full bg-slate-100 border border-slate-300 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
             <button
               type="submit"
