@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { User, Activity, FileText, Send, Bot, Clock, ChevronRight } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
+  const { t, language } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientDetail, setPatientDetail] = useState(null);

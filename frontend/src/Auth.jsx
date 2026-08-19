@@ -4,6 +4,7 @@ import LanguageSelector from './components/LanguageSelector';
 import { Stethoscope, Lock, User, ArrowRight, HeartPulse, Activity, ChevronLeft } from 'lucide-react';
 
 export default function Auth({ onLogin, apiUrl }) {
+  const { t } = useLanguage();
   const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
