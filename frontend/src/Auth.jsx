@@ -41,22 +41,22 @@ export default function Auth({ onLogin, apiUrl }) {
 
   if (!selectedRole) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 relative overflow-hidden">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 p-4 relative overflow-hidden">
         {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-100/50 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
 
         <div className="w-full max-w-4xl relative z-10 flex flex-col items-center">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-slate-400 tracking-tight">MedIA Hub</h1>
-            <p className="text-slate-400 mt-3 font-medium text-lg">Selecciona tu portal de acceso</p>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 tracking-tight">MedIA Hub</h1>
+            <p className="text-slate-600 mt-3 font-medium text-lg">Selecciona tu portal de acceso</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl">
             {/* Patient Card */}
             <button 
               onClick={() => setSelectedRole('patient')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-rose-500/20 bg-slate-900/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-rose-500/50 hover:bg-slate-900/80"
+              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-rose-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-rose-500/50 hover:bg-white/80"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center shadow-lg shadow-rose-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -69,7 +69,7 @@ export default function Auth({ onLogin, apiUrl }) {
             {/* Doctor Card */}
             <button 
               onClick={() => setSelectedRole('doctor')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-indigo-500/20 bg-slate-900/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-indigo-500/50 hover:bg-slate-900/80"
+              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-indigo-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-indigo-500/50 hover:bg-white/80"
             >
               <div className="absolute inset-0 bg-gradient-to-bl from-indigo-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 to-blue-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
@@ -98,16 +98,16 @@ export default function Auth({ onLogin, apiUrl }) {
   };
 
   return (
-    <div className={`flex h-screen w-full items-center justify-center bg-slate-950 ${theme.bgGradient} relative overflow-hidden transition-colors duration-1000`}>
+    <div className={`flex h-screen w-full items-center justify-center bg-slate-50 ${theme.bgGradient} relative overflow-hidden transition-colors duration-1000`}>
       
       {/* Background decorations */}
-      <div className={`absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-indigo-500/10' : 'bg-rose-500/10'}`} />
-      <div className={`absolute bottom-1/4 -right-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-blue-500/10' : 'bg-pink-500/10'}`} />
+      <div className={`absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-indigo-100/50' : 'bg-rose-100/50'}`} />
+      <div className={`absolute bottom-1/4 -right-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-blue-100/50' : 'bg-pink-100/50'}`} />
 
       <div className="w-full max-w-md p-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <button 
           onClick={() => setSelectedRole(null)}
-          className="absolute -top-12 left-8 text-slate-400 hover:text-slate-200 flex items-center gap-1 text-sm font-medium transition-colors"
+          className="absolute -top-12 left-8 text-slate-600 hover:text-slate-800 flex items-center gap-1 text-sm font-medium transition-colors"
         >
           <ChevronLeft className="w-4 h-4" /> {t("returning")}
         </button>
@@ -116,22 +116,22 @@ export default function Auth({ onLogin, apiUrl }) {
           <div className={`w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr ${theme.iconGradient} flex items-center justify-center shadow-2xl ${theme.shadow} mb-6`}>
             <theme.Icon className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-100 to-slate-300 tracking-tight">
+          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 tracking-tight">
             {theme.title}
           </h1>
-          <p className="text-slate-400 mt-2 font-medium">Bienvenido de nuevo</p>
+          <p className="text-slate-600 mt-2 font-medium">Bienvenido de nuevo</p>
         </div>
 
-        <div className="glass-card rounded-3xl p-8 border border-slate-800 shadow-2xl backdrop-blur-xl bg-slate-900/80">
+        <div className="glass-card rounded-3xl p-8 border border-slate-200 shadow-sm shadow-2xl backdrop-blur-xl bg-white/80">
           {error && (
-            <div className="p-3 rounded-xl mb-6 text-sm text-center border bg-rose-500/10 border-rose-500/30 text-rose-400">
+            <div className="p-3 rounded-xl mb-6 text-sm text-center border bg-rose-100/50 border-rose-500/30 text-rose-400">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Usuario / Email</label>
+              <label className="block text-xs font-medium text-slate-600 mb-2 ml-1">Usuario / Email</label>
               <div className="relative">
                 <User className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-500" />
                 <input 
@@ -139,14 +139,14 @@ export default function Auth({ onLogin, apiUrl }) {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className={`w-full bg-slate-950/50 border border-slate-700 rounded-2xl py-3 pl-11 pr-4 text-slate-200 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-600 ${theme.focusRing}`}
+                  className={`w-full bg-slate-50/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-400 ${theme.focusRing}`}
                   placeholder={isDoc ? "ej. dr_perez" : "ej. paciente@mail.com"}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-2 ml-1">Contraseña</label>
+              <label className="block text-xs font-medium text-slate-600 mb-2 ml-1">Contraseña</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-500" />
                 <input 
@@ -154,7 +154,7 @@ export default function Auth({ onLogin, apiUrl }) {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full bg-slate-950/50 border border-slate-700 rounded-2xl py-3 pl-11 pr-4 text-slate-200 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-600 ${theme.focusRing}`}
+                  className={`w-full bg-slate-50/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-400 ${theme.focusRing}`}
                   placeholder="••••••••"
                 />
               </div>

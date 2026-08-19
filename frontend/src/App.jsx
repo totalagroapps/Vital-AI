@@ -456,7 +456,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
       
       {/* SIDEBAR DE HISTORIAL */}
       {/* Mobile overlay */}
@@ -467,20 +467,20 @@ ${text}`], {type: 'text/plain'});
         />
       )}
       
-      <aside className={`w-80 glass-panel border-r border-slate-800 flex flex-col z-30 transition-transform absolute md:relative h-full bg-slate-950 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`w-80 glass-panel border-r border-slate-200 shadow-sm flex flex-col z-30 transition-transform absolute md:relative h-full bg-slate-50 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
               <h1 className="font-bold text-lg leading-none gradient-text">MedIA Hub</h1>
-              <span className="text-[11px] text-slate-400 font-medium">{t("medical_assistant")}</span>
+              <span className="text-[11px] text-slate-600 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
           {/* Close button for mobile inside sidebar */}
-          <button className="md:hidden text-slate-400" onClick={() => setIsSidebarOpen(false)}>
+          <button className="md:hidden text-slate-600" onClick={() => setIsSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -501,7 +501,7 @@ ${text}`], {type: 'text/plain'});
         <div className="px-3 pb-3">
           <button
             onClick={() => setShowMedicalHistory(true)}
-            className="w-full py-2 px-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-500/50 text-slate-300 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-800"
+            className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:border-cyan-500/50 text-slate-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-100"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>{t("my_history")}</span>
@@ -517,7 +517,7 @@ ${text}`], {type: 'text/plain'});
               placeholder="Buscar paciente o fecha..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-white/80 border border-slate-200 shadow-sm rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
         </div>
@@ -539,14 +539,14 @@ ${text}`], {type: 'text/plain'});
                   className={`w-full text-left p-3 rounded-xl transition-all flex items-start justify-between group border ${
                     isActive 
                       ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-200' 
-                      : 'hover:bg-slate-900/60 border-transparent text-slate-300'
+                      : 'hover:bg-white/60 border-transparent text-slate-700'
                   }`}
                 >
                   <div className="truncate pr-2">
-                    <div className="font-medium text-xs truncate text-slate-200 group-hover:text-cyan-300">
+                    <div className="font-medium text-xs truncate text-slate-800 group-hover:text-cyan-300">
                       {session.patient_name || 'Paciente Anónimo'}
                     </div>
-                    <div className="text-[11px] text-slate-400 truncate mt-0.5">
+                    <div className="text-[11px] text-slate-600 truncate mt-0.5">
                       {session.title}
                     </div>
                   </div>
@@ -558,9 +558,9 @@ ${text}`], {type: 'text/plain'});
         </div>
 
         {/* Health & User Footer */}
-        <div className="p-3 border-t border-slate-800/80 bg-slate-950/60 text-xs flex flex-col gap-2">
+        <div className="p-3 border-t border-slate-200 shadow-sm/80 bg-slate-50/60 text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 flex items-center gap-1.5">
+            <span className="text-slate-600 flex items-center gap-1.5">
               <Brain className="w-3.5 h-3.5 text-cyan-400" /> Motor Ollama
             </span>
             <div className="flex items-center gap-1.5 font-medium">
@@ -569,14 +569,14 @@ ${text}`], {type: 'text/plain'});
                   <CheckCircle2 className="w-3 h-3" /> Online
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20 text-[11px]">
+                <span className="inline-flex items-center gap-1 text-rose-400 bg-rose-100/50 px-2 py-0.5 rounded-full border border-rose-500/20 text-[11px]">
                   <XCircle className="w-3 h-3" /> Offline
                 </span>
               )}
             </div>
           </div>
-          <div className="flex items-center justify-between border-t border-slate-800/50 pt-2 mt-1">
-            <div className="flex items-center gap-1.5 text-slate-300 font-medium">
+          <div className="flex items-center justify-between border-t border-slate-200 shadow-sm/50 pt-2 mt-1">
+            <div className="flex items-center gap-1.5 text-slate-700 font-medium">
               <User className="w-3.5 h-3.5 text-cyan-500" /> {username || 'Médico'}
             </div>
             <div className="flex items-center gap-2">
@@ -592,32 +592,32 @@ ${text}`], {type: 'text/plain'});
       </aside>
 
       
-      <main className="flex-1 flex flex-col h-full bg-slate-950 relative overflow-hidden">
+      <main className="flex-1 flex flex-col h-full bg-slate-50 relative overflow-hidden">
         
         {/* Background glow effects */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* TOP BAR */}
-        <header className="h-16 border-b border-slate-800/80 px-4 md:px-6 flex items-center justify-between glass-panel z-10 shrink-0 overflow-x-auto no-scrollbar">
+        <header className="h-16 border-b border-slate-200 shadow-sm/80 px-4 md:px-6 flex items-center justify-between glass-panel z-10 shrink-0 overflow-x-auto no-scrollbar">
           <div className="flex items-center gap-3 shrink-0">
             <button 
-              className="md:hidden p-1.5 -ml-2 text-slate-400 hover:text-cyan-400 rounded-lg hover:bg-slate-800"
+              className="md:hidden p-1.5 -ml-2 text-slate-600 hover:text-cyan-400 rounded-lg hover:bg-slate-100"
               onClick={() => setIsSidebarOpen(true)}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
-            <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-300 flex items-center justify-center shrink-0">
               <User className="w-4 h-4 text-cyan-400" />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-medium">Nombre del Paciente</div>
+              <div className="text-xs text-slate-600 font-medium">Nombre del Paciente</div>
               <input
                 type="text"
                 value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
                 placeholder="Nombre del Paciente..."
-                className="bg-transparent text-sm font-semibold text-slate-100 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded px-1 -ml-1 w-32 md:w-auto hover:bg-slate-900/50 transition-colors"
+                className="bg-transparent text-sm font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded px-1 -ml-1 w-32 md:w-auto hover:bg-white/50 transition-colors"
               />
             </div>
           </div>
@@ -694,8 +694,8 @@ ${text}`], {type: 'text/plain'});
                 <Sparkles className="w-8 h-8 text-cyan-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-100">Bienvenido a MedIA Hub</h2>
-                <p className="text-slate-400 text-sm mt-2 max-w-md mx-auto">
+                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a MedIA Hub</h2>
+                <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
                   Asistente clínico multimodal impulsado por inteligencia artificial local para análisis de radiografías, informes médicos en PDF y soporte de diagnóstico.
                 </p>
                 <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 text-xs text-left max-w-sm mx-auto shadow-lg shadow-emerald-500/5">
@@ -712,33 +712,33 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => {
                     imageInputRef.current?.click();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-800 hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
                 >
                   <ImageIcon className="w-5 h-5 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-                  <div className="font-semibold text-xs text-slate-200">Análisis Radiológico</div>
-                  <div className="text-[11px] text-slate-400 mt-1">Sube una radiografía para evaluación por visión artificial.</div>
+                  <div className="font-semibold text-xs text-slate-800">Análisis Radiológico</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Sube una radiografía para evaluación por visión artificial.</div>
                 </button>
 
                 <button
                   onClick={() => {
                     pdfInputRef.current?.click();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-800 hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
                 >
                   <FileText className="w-5 h-5 text-indigo-400 mb-2 group-hover:scale-110 transition-transform" />
-                  <div className="font-semibold text-xs text-slate-200">Procesar PDF</div>
-                  <div className="text-[11px] text-slate-400 mt-1">Adjunta exámenes de laboratorio o historias clínicas.</div>
+                  <div className="font-semibold text-xs text-slate-800">Procesar PDF</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Adjunta exámenes de laboratorio o historias clínicas.</div>
                 </button>
 
                 <button
                   onClick={() => {
                     startTriageSession();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-800 hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
                 >
                   <Stethoscope className="w-5 h-5 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
-                  <div className="font-semibold text-xs text-slate-200">Iniciar Triaje Clínico</div>
-                  <div className="text-[11px] text-slate-400 mt-1">Evaluación de síntomas paso a paso por IA.</div>
+                  <div className="font-semibold text-xs text-slate-800">Iniciar Triaje Clínico</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Evaluación de síntomas paso a paso por IA.</div>
                 </button>
               </div>
             </div>
@@ -754,7 +754,7 @@ ${text}`], {type: 'text/plain'});
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     isUser 
                       ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 text-white' 
-                      : 'bg-slate-900 border border-slate-700 text-cyan-400 shadow-md'
+                      : 'bg-white border border-slate-300 text-cyan-400 shadow-md'
                   }`}>
                     {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
                   </div>
@@ -764,7 +764,7 @@ ${text}`], {type: 'text/plain'});
                     <div className={`rounded-2xl p-4 text-sm leading-relaxed ${
                       isUser
                         ? 'bg-cyan-600 text-white rounded-tr-none shadow-lg shadow-cyan-600/10'
-                        : 'glass-card text-slate-200 rounded-tl-none border border-slate-800 shadow-lg'
+                        : 'glass-card text-slate-800 rounded-tl-none border border-slate-200 shadow-sm shadow-lg'
                     }`}>
                       
                       {/* Attached Image Preview if User */}
@@ -791,7 +791,7 @@ ${text}`], {type: 'text/plain'});
                       )}
 
                       {/* Markdown Content */}
-                      <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
+                      <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-white prose-pre:border prose-pre:border-slate-200 shadow-sm">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.text}
                         </ReactMarkdown>
@@ -802,17 +802,17 @@ ${text}`], {type: 'text/plain'});
 
                       {/* Action Buttons for AI Responses */}
                       {!isUser && msg.text !== '' && (
-                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-700/50">
+                        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-300/50">
                           <button
                             onClick={() => speakText(msg.text)}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-[11px] font-medium transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition-colors"
                             title="Leer en voz alta"
                           >
                             <Volume2 className="w-3.5 h-3.5" /> Leer
                           </button>
                           <button
                             onClick={() => copyToClipboard(msg.text, msg.id)}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-[11px] font-medium transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition-colors"
                           >
                             {copiedMsgId === msg.id ? (
                               <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copiado</>
@@ -826,7 +826,7 @@ ${text}`], {type: 'text/plain'});
                               const sessionTitle = activeSession ? activeSession.title : 'reporte';
                               downloadReport(msg.text, patientName, sessionTitle);
                             }}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-[11px] font-medium transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition-colors"
                           >
                             <Download className="w-3.5 h-3.5" /> Descargar txt
                           </button>
@@ -842,16 +842,16 @@ ${text}`], {type: 'text/plain'});
           {/* Loading Indicator */}
           {isLoading && (
             <div className="flex gap-4 max-w-3xl">
-              <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-700 text-cyan-400 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-white border border-slate-300 text-cyan-400 flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5 animate-pulse" />
               </div>
-              <div className="glass-card text-slate-300 p-4 rounded-2xl rounded-tl-none border border-slate-800 flex items-center gap-3">
+              <div className="glass-card text-slate-700 p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm flex items-center gap-3">
                 <div className="flex space-x-1.5">
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-xs font-medium text-slate-400">MedIA Hub está conectando...</span>
+                <span className="text-xs font-medium text-slate-600">MedIA Hub está conectando...</span>
               </div>
             </div>
           )}
@@ -860,11 +860,11 @@ ${text}`], {type: 'text/plain'});
         </div>
 
         {/* INPUT BAR */}
-        <div className="p-4 glass-panel border-t border-slate-800/80 z-10">
+        <div className="p-4 glass-panel border-t border-slate-200 shadow-sm/80 z-10">
           
           {/* File Previews Bar */}
           {(selectedImagePreview || selectedPdfName) && (
-            <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-800">
+            <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-200 shadow-sm">
               {selectedImagePreview && (
                 <div className="relative group">
                   <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-cyan-500/40" />
@@ -883,7 +883,7 @@ ${text}`], {type: 'text/plain'});
                   <span className="max-w-xs truncate">{selectedPdfName}</span>
                   <button
                     onClick={() => { setSelectedPdf(null); setSelectedPdfName(null); }}
-                    className="text-slate-400 hover:text-rose-400 ml-1"
+                    className="text-slate-600 hover:text-rose-400 ml-1"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -907,7 +907,7 @@ ${text}`], {type: 'text/plain'});
               className={`p-2.5 rounded-xl border transition-all ${
                 selectedImage 
                   ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' 
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-cyan-400 hover:border-slate-700'
+                  : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-cyan-400 hover:border-slate-300'
               }`}
             >
               <ImageIcon className="w-5 h-5" />
@@ -920,7 +920,7 @@ ${text}`], {type: 'text/plain'});
               className={`p-2.5 rounded-xl border transition-all ${
                 selectedPdf 
                   ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300' 
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-slate-700'
+                  : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-indigo-400 hover:border-slate-300'
               }`}
             >
               <FileText className="w-5 h-5" />
@@ -939,7 +939,7 @@ ${text}`], {type: 'text/plain'});
                 }}
                 disabled={isTriageClosed}
                 placeholder={isTriageClosed ? "Triaje finalizado." : "{t("describe_symptoms")}"}
-                className={`w-full bg-slate-900 border ${isTriageClosed ? 'border-slate-800 opacity-50 cursor-not-allowed' : 'border-slate-700 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-200 placeholder-slate-500 resize-none transition-all`}
+                className={`w-full bg-white border ${isTriageClosed ? 'border-slate-200 shadow-sm opacity-50 cursor-not-allowed' : 'border-slate-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-800 placeholder-slate-500 resize-none transition-all`}
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '120px' }}
               />
@@ -962,13 +962,13 @@ ${text}`], {type: 'text/plain'});
       {/* MEDICAL HISTORY MODAL */}
       {showMedicalHistory && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto p-4">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 my-auto">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 my-auto">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 Mi Historial Clínico (Pasaporte QR)
               </h2>
-              <button onClick={() => setShowMedicalHistory(false)} className="text-slate-400 hover:text-rose-400">
+              <button onClick={() => setShowMedicalHistory(false)} className="text-slate-600 hover:text-rose-400">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -977,16 +977,16 @@ ${text}`], {type: 'text/plain'});
               <form onSubmit={savePatientProfile} className="flex-1 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("full_name")}</label>
-                    <input type="text" required value={patientProfile.full_name || ''} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" />
+                    <label className="block text-xs font-medium text-slate-600 mb-1">{t("full_name")}</label>
+                    <input type="text" required value={patientProfile.full_name || ''} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("dob")}</label>
-                    <input type="date" required value={patientProfile.date_of_birth || ''} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" />
+                    <label className="block text-xs font-medium text-slate-600 mb-1">{t("dob")}</label>
+                    <input type="date" required value={patientProfile.date_of_birth || ''} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">{t("gender")}</label>
-                    <select value={patientProfile.gender || ''} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">{t("gender")}</label>
+                    <select value={patientProfile.gender || ''} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500">
                       <option value="">Seleccione</option>
                       <option value="Masculino">Masculino</option>
                       <option value="Femenino">Femenino</option>
@@ -994,8 +994,8 @@ ${text}`], {type: 'text/plain'});
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">Grupo Sanguíneo</label>
-                    <select value={patientProfile.blood_type || ''} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500">
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Grupo Sanguíneo</label>
+                    <select value={patientProfile.blood_type || ''} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500">
                       <option value="">Seleccione</option>
                       <option value="A+">A+</option><option value="A-">A-</option>
                       <option value="B+">B+</option><option value="B-">B-</option>
@@ -1006,20 +1006,20 @@ ${text}`], {type: 'text/plain'});
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Alergias Conocidas</label>
-                  <textarea value={patientProfile.allergies || ''} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" rows={2} placeholder="Ej. Penicilina, polen..."></textarea>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Alergias Conocidas</label>
+                  <textarea value={patientProfile.allergies || ''} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Penicilina, polen..."></textarea>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Enfermedades Crónicas</label>
-                  <textarea value={patientProfile.chronic_conditions || ''} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" rows={2} placeholder="Ej. Hipertensión, asma..."></textarea>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Enfermedades Crónicas</label>
+                  <textarea value={patientProfile.chronic_conditions || ''} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Hipertensión, asma..."></textarea>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">{t("meds")}</label>
-                  <textarea value={patientProfile.current_medications || ''} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" rows={2} placeholder="Ej. Losartán 50mg..."></textarea>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">{t("meds")}</label>
+                  <textarea value={patientProfile.current_medications || ''} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Losartán 50mg..."></textarea>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">{t("emergency")}</label>
-                  <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-cyan-500" placeholder="Nombre y teléfono" />
+                  <label className="block text-xs font-medium text-slate-600 mb-1">{t("emergency")}</label>
+                  <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" placeholder="Nombre y teléfono" />
                 </div>
 
                 <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition-colors">
@@ -1027,17 +1027,17 @@ ${text}`], {type: 'text/plain'});
                 </button>
               </form>
 
-              <div className="w-full md:w-48 flex flex-col items-center justify-start border-t md:border-t-0 md:border-l border-slate-800 pt-6 md:pt-0 md:pl-6">
+              <div className="w-full md:w-48 flex flex-col items-center justify-start border-t md:border-t-0 md:border-l border-slate-200 shadow-sm pt-6 md:pt-0 md:pl-6">
                 <div className="text-center mb-4">
-                  <h3 className="text-sm font-bold text-slate-200">Pasaporte Médico QR</h3>
-                  <p className="text-[10px] text-slate-400 mt-1">Escanea en caso de emergencia médica</p>
+                  <h3 className="text-sm font-bold text-slate-800">Pasaporte Médico QR</h3>
+                  <p className="text-[10px] text-slate-600 mt-1">Escanea en caso de emergencia médica</p>
                 </div>
                 {patientProfile.qr_code_base64 ? (
                   <div className="bg-white p-2 rounded-xl">
                     <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-40 h-40" />
                   </div>
                 ) : (
-                  <div className="w-40 h-40 bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 text-xs text-center p-4 border border-slate-700 border-dashed">
+                  <div className="w-40 h-40 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 text-xs text-center p-4 border border-slate-300 border-dashed">
                     Guarda tu historial para generar el QR
                   </div>
                 )}
@@ -1050,13 +1050,13 @@ ${text}`], {type: 'text/plain'});
       {/* SETTINGS MODAL */}
       {showSettings && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Server className="w-5 h-5 text-cyan-400" />
                 Motor de IA
               </h2>
-              <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-rose-400">
+              <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-rose-400">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1064,21 +1064,21 @@ ${text}`], {type: 'text/plain'});
             <div className="space-y-4">
               <div className="flex flex-col gap-4">
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Modelo de Texto (Ollama)</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Modelo de Texto (Ollama)</label>
                   <input 
                     type="text"
                     value={engineSettings.text_model}
                     onChange={(e) => setEngineSettings({...engineSettings, text_model: e.target.value})}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Modelo de Visión (Ollama)</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Modelo de Visión (Ollama)</label>
                   <input 
                     type="text"
                     value={engineSettings.vision_model}
                     onChange={(e) => setEngineSettings({...engineSettings, vision_model: e.target.value})}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
               </div>

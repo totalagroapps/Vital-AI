@@ -105,12 +105,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   };
 
   return (
-    <div className="flex w-full h-full bg-slate-950 text-slate-200">
+    <div className="flex w-full h-full bg-slate-50 text-slate-800">
       
       {/* LEFT: Patients List */}
-      <div className="w-80 border-r border-slate-800 flex flex-col bg-slate-900/50 shrink-0">
-        <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-          <h2 className="font-bold text-slate-100 flex items-center gap-2">
+      <div className="w-80 border-r border-slate-200 shadow-sm flex flex-col bg-white/50 shrink-0">
+        <div className="p-4 border-b border-slate-200 shadow-sm flex items-center justify-between">
+          <h2 className="font-bold text-slate-900 flex items-center gap-2">
             <Activity className="w-5 h-5 text-indigo-400" />
             {t("patients_base")}
           </h2>
@@ -128,7 +128,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 className={`w-full text-left p-3 rounded-lg border transition-all flex items-center justify-between ${
                   selectedPatient?.user_id === p.user_id 
                   ? 'bg-indigo-950/40 border-indigo-500/50 text-indigo-200' 
-                  : 'border-transparent hover:bg-slate-800 text-slate-300'
+                  : 'border-transparent hover:bg-slate-100 text-slate-700'
                 }`}
               >
                 <div>
@@ -141,15 +141,15 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           )}
         </div>
 
-        <div className="p-4 border-t border-slate-800">
-          <button onClick={onLogout} className="w-full py-2 bg-slate-800 hover:bg-rose-900/50 text-slate-300 hover:text-rose-400 rounded-lg text-sm transition-colors border border-slate-700 hover:border-rose-900">
+        <div className="p-4 border-t border-slate-200 shadow-sm">
+          <button onClick={onLogout} className="w-full py-2 bg-slate-100 hover:bg-rose-900/50 text-slate-700 hover:text-rose-400 rounded-lg text-sm transition-colors border border-slate-300 hover:border-rose-900">
             Cerrar Sesión
           </button>
         </div>
       </div>
 
       {/* MIDDLE: Patient Detail */}
-      <div className="flex-1 flex flex-col border-r border-slate-800 bg-slate-950 overflow-hidden relative">
+      <div className="flex-1 flex flex-col border-r border-slate-200 shadow-sm bg-slate-50 overflow-hidden relative">
         {selectedPatient ? (
           isLoadingDetail ? (
             <div className="flex-1 flex items-center justify-center text-slate-500 animate-pulse">{t("loading_record")}</div>
@@ -157,11 +157,11 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               
               {/* Profile Card */}
-              <div className="bg-slate-900 border border-slate-700 rounded-xl p-5 shadow-lg relative overflow-hidden">
+              <div className="bg-white border border-slate-300 rounded-xl p-5 shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                   <User className="w-32 h-32" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
+                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-indigo-400" />
                   Ficha Clínica
                 </h3>
@@ -178,20 +178,20 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
               {/* Triage History */}
               <div>
-                <h3 className="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Histórico de Triajes</h3>
+                <h3 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Histórico de Triajes</h3>
                 <div className="space-y-3">
                   {patientDetail.triages.length === 0 ? (
                     <div className="text-sm text-slate-500 italic">No hay triajes registrados.</div>
                   ) : (
                     patientDetail.triages.map(t => (
-                      <div key={t.id} className="bg-slate-900/50 border border-slate-800 rounded-lg p-4">
+                      <div key={t.id} className="bg-white/50 border border-slate-200 shadow-sm rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleString()}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold border ${
-                            t.status === 'closed_red' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                            t.status === 'closed_red' ? 'bg-rose-100/50 text-rose-400 border-rose-500/20' :
                             t.status === 'closed_yellow' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                             t.status === 'closed_green' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                            'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                            'bg-slate-500/10 text-slate-600 border-slate-500/20'
                           }`}>
                             {t.status.replace('closed_', '') || 'En curso'}
                           </span>
@@ -218,13 +218,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       </div>
 
       {/* RIGHT: Copilot AI */}
-      <div className="w-96 flex flex-col bg-slate-900 shrink-0 border-l border-slate-800">
-        <div className="p-4 border-b border-slate-800 bg-indigo-950/20">
+      <div className="w-96 flex flex-col bg-white shrink-0 border-l border-slate-200 shadow-sm">
+        <div className="p-4 border-b border-slate-200 shadow-sm bg-indigo-950/20">
           <h2 className="font-bold text-indigo-300 flex items-center gap-2">
             <Bot className="w-5 h-5" />
             {t("copilot_title")}
           </h2>
-          <p className="text-[10px] text-slate-400 mt-1 leading-tight">{t("copilot_desc")}</p>
+          <p className="text-[10px] text-slate-600 mt-1 leading-tight">{t("copilot_desc")}</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -236,7 +236,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className={`max-w-[85%] rounded-xl p-3 text-sm ${
                   msg.role === 'user' 
                   ? 'bg-indigo-600 text-white rounded-br-none' 
-                  : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
+                  : 'bg-slate-100 text-slate-800 border border-slate-300 rounded-bl-none'
                 }`}>
                   <div className="prose prose-invert prose-sm max-w-none leading-snug">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -247,7 +247,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           )}
           {isCopilotThinking && (
             <div className="flex justify-start">
-              <div className="bg-slate-800 border border-slate-700 rounded-xl rounded-bl-none p-3 flex gap-1.5">
+              <div className="bg-slate-100 border border-slate-300 rounded-xl rounded-bl-none p-3 flex gap-1.5">
                 <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -257,7 +257,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           <div ref={copilotEndRef} />
         </div>
 
-        <div className="p-3 border-t border-slate-800">
+        <div className="p-3 border-t border-slate-200 shadow-sm">
           <form onSubmit={handleCopilotSend} className="relative">
             <input
               type="text"
@@ -265,7 +265,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
               placeholder="{t("ask_copilot")}"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
+              className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2.5 pl-3 pr-10 text-xs text-slate-800 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
             />
             <button
               type="submit"
