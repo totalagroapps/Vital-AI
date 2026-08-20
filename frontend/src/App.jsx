@@ -53,6 +53,79 @@ export default function App() {
 
   const [showSettings, setShowSettings] = useState(false);
   const [showMedicalHistory, setShowMedicalHistory] = useState(false);
+  const [showDocuments, setShowDocuments] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docType, setDocType] = useState('informe_medico');
+  const [docNotes, setDocNotes] = useState('');
+  const [docFile, setDocFile] = useState(null);
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/patients/mock_user/documents`, {
+        headers: authHeaders
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDocuments(data);
+      }
+    } catch (error) {
+      console.error('Error fetching documents', error);
+    }
+  };
+
+  const uploadDocument = async (e) => {
+    e.preventDefault();
+    if (!docFile) return;
+    setUploadingDoc(true);
+    
+    const formData = new FormData();
+    formData.append('file', docFile);
+    formData.append('document_type', docType);
+    if (docNotes) formData.append('notes', docNotes);
+
+    try {
+      const res = await fetch(`${API_URL}/api/patients/mock_user/documents`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      if (res.ok) {
+        setDocFile(null);
+        setDocNotes('');
+        alert('Documento subido correctamente');
+        fetchDocuments();
+      } else {
+        const err = await res.json();
+        alert('Error: ' + err.detail);
+      }
+    } catch (error) {
+      alert('Error subiendo documento');
+    }
+    setUploadingDoc(false);
+  };
+
+  const deleteDocument = async (docId) => {
+    if (!confirm('¿Seguro que quieres borrar este documento?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/patients/mock_user/documents/${docId}`, {
+        method: 'DELETE',
+        headers: authHeaders
+      });
+      if (res.ok) fetchDocuments();
+    } catch(error) {
+      console.error('Error', error);
+    }
+  };
+
+  useEffect(() => {
+    if (showDocuments) {
+      fetchDocuments();
+    }
+  }, [showDocuments]);
+
   const [viewMode, setViewMode] = useState('patient');
   const [patientProfile, setPatientProfile] = useState({
     full_name: '', date_of_birth: '', gender: '', blood_type: '',
@@ -959,7 +1032,139 @@ ${text}`], {type: 'text/plain'});
 
 
 
-      {/* MEDICAL HISTORY MODAL */}
+      
+        {/* DOCUMENTS MODAL */}
+        {showDocuments && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto p-4">
+            <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-4xl shadow-2xl animate-in zoom-in-95 my-auto">
+              
+              <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200 shadow-sm">
+                <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <FolderOpen className="w-6 h-6 text-cyan-500" />
+                  Mis Documentos Médicos
+                </h2>
+                <button onClick={() => setShowDocuments(false)} className="text-slate-600 hover:text-rose-400 bg-slate-100 p-1.5 rounded-lg transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* UPLOAD FORM */}
+                <div className="md:col-span-1 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
+                  <h3 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-cyan-500"/> Subir Nuevo
+                  </h3>
+                  <form onSubmit={uploadDocument} className="space-y-4">
+                    
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Tipo de Documento</label>
+                      <select 
+                        value={docType}
+                        onChange={(e) => setDocType(e.target.value)}
+                        className="w-full p-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-cyan-500 outline-none shadow-sm"
+                      >
+                        <option value="informe_medico">Informe Médico</option>
+                        <option value="analitica">Analítica de Sangre</option>
+                        <option value="medicacion">Receta / Medicación</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Archivo (PDF max 10MB)</label>
+                      <input 
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) => setDocFile(e.target.files[0])}
+                        className="w-full text-xs text-slate-600 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-100 file:text-cyan-700 hover:file:bg-cyan-200 file:cursor-pointer file:transition-colors bg-white border border-slate-300 rounded-lg shadow-sm"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1">Notas (Opcional)</label>
+                      <textarea 
+                        value={docNotes}
+                        onChange={(e) => setDocNotes(e.target.value)}
+                        placeholder="Ej: Análisis del 15 de agosto..."
+                        className="w-full p-2 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-cyan-500 outline-none resize-none shadow-sm"
+                        rows="2"
+                      ></textarea>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      disabled={!docFile || uploadingDoc}
+                      className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white font-medium rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
+                    >
+                      {uploadingDoc ? 'Subiendo...' : <><Upload className="w-4 h-4"/> Confirmar Subida</>}
+                    </button>
+                  </form>
+                </div>
+
+                {/* DOCUMENTS LIST */}
+                <div className="md:col-span-2">
+                  <h3 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide">Tus Archivos ({documents.length})</h3>
+                  
+                  {documents.length === 0 ? (
+                    <div className="text-center py-12 px-4 bg-slate-50 border border-slate-200 border-dashed rounded-xl h-full flex flex-col justify-center">
+                      <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-500 text-sm font-medium">Aún no has subido ningún documento.</p>
+                      <p className="text-slate-400 text-xs mt-1">Usa el formulario de la izquierda para empezar.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                      {documents.map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 shadow-sm rounded-xl hover:border-cyan-400 hover:shadow-md transition-all group">
+                          <div className="flex items-center gap-4 overflow-hidden">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center text-cyan-600 shrink-0 border border-cyan-100 group-hover:scale-105 transition-transform">
+                              <FileText className="w-6 h-6" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-800 truncate" title={doc.original_filename}>{doc.original_filename}</h4>
+                              <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                                <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-medium uppercase text-[10px] tracking-wider border border-slate-200">
+                                  {doc.document_type.replace('_', ' ')}
+                                </span>
+                                <span>•</span>
+                                <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                              </div>
+                              {doc.notes && (
+                                <p className="text-xs text-slate-400 mt-1 truncate max-w-sm" title={doc.notes}>{doc.notes}</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-1 shrink-0 ml-3">
+                            <a 
+                              href={doc.download_url} 
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2.5 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors border border-transparent hover:border-cyan-100"
+                              title="Descargar/Ver PDF"
+                            >
+                              <Download className="w-5 h-5" />
+                            </a>
+                            <button 
+                              onClick={() => deleteDocument(doc.id)}
+                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100"
+                              title="Eliminar documento"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* MEDICAL HISTORY MODAL */}
       {showMedicalHistory && (
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center overflow-y-auto p-4">
           <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 my-auto">
