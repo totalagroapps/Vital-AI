@@ -2,13 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
-import { User, Activity, FileText, Send, Bot, Clock, ChevronRight } from 'lucide-react';
+import { Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, ChevronRight } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const { t, language } = useLanguage();
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientDetail, setPatientDetail] = useState(null);
+  const [patientDocuments, setPatientDocuments] = useState([]);
+
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
@@ -54,6 +56,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       if (res.ok) {
         const data = await res.json();
         setPatientDetail(data);
+        const docRes = await fetch(`${apiUrl}/api/patients/${userId}/documents`, { headers: authHeaders });
+        if (docRes.ok) {
+          const docData = await docRes.json();
+          setPatientDocuments(docData);
+        } else {
+          setPatientDocuments([]);
+        }
+
       }
     } catch (e) {
       console.error(e);
@@ -177,7 +187,38 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 </div>
               </div>
 
-              {/* Triage History */}
+              
+                {/* Documents Attached */}
+                <div className="mt-6 mb-6">
+                  <h3 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider flex items-center gap-2">
+                    <FolderOpen className="w-4 h-4 text-cyan-500" />
+                    Documentos Adjuntos
+                  </h3>
+                  <div className="space-y-3">
+                    {patientDocuments.length === 0 ? (
+                      <div className="text-sm text-slate-600 italic">No hay documentos adjuntos.</div>
+                    ) : (
+                      patientDocuments.map(doc => (
+                        <div key={doc.id} className="flex justify-between items-center bg-white/50 border border-slate-200 shadow-sm rounded-lg p-3 hover:border-cyan-400 transition-colors">
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-semibold text-slate-800 truncate" title={doc.original_filename}>{doc.original_filename}</h4>
+                            <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                              <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded capitalize font-medium">{doc.document_type.replace('_', ' ')}</span>
+                              <span>•</span>
+                              <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                            </div>
+                            {doc.notes && <p className="text-xs text-slate-400 mt-1 truncate max-w-sm" title={doc.notes}>{doc.notes}</p>}
+                          </div>
+                          <a href={doc.download_url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors ml-2 shrink-0">
+                            <Download className="w-5 h-5" />
+                          </a>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Triage History */}
               <div>
                 <h3 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider">Histórico de Triajes</h3>
                 <div className="space-y-3">
