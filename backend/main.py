@@ -555,7 +555,7 @@ class PatientProfileSchema(BaseModel):
 async def get_patient_profile(db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     user_id = "mock_user"
-    result = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == user_id))
+    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     if not profile:
         return {}
@@ -588,7 +588,7 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db)):
 async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     user_id = "mock_user"
-    result = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == user_id))
+    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     
     if not profile:
@@ -625,7 +625,7 @@ async def get_all_patients(db: AsyncSession = Depends(get_db)):
 async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     # Get Profile
-    profile_res = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == patient_id))
+    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id))
     profile = profile_res.scalars().first()
     
     if not profile:
@@ -661,7 +661,7 @@ async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)
 async def ask_doctor_copilot(request: DoctorQueryRequest, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     # Load patient context
-    profile_res = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == request.patient_id))
+    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == request.patient_id))
     profile = profile_res.scalars().first()
     
     triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == request.patient_id).order_by(models.TriageSession.created_at.desc()))
