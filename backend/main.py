@@ -60,14 +60,15 @@ async def startup_event():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         
-        # Ensure is_deleted column exists for medical_documents
+        # Ensure new columns exist in production database
         try:
             from sqlalchemy import text
             await conn.execute(text("SET statement_timeout = 5000;"))
             await conn.execute(text("ALTER TABLE medical_documents ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;"))
+            await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS preferred_language VARCHAR DEFAULT 'es';"))
             await conn.execute(text("RESET statement_timeout;"))
         except Exception as e:
-            logger.error(f"Failed to alter table: {e}")
+            logger.error(f"Failed to alter tables: {e}")
 
 app.add_middleware(
     CORSMiddleware,
