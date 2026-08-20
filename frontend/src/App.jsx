@@ -570,6 +570,16 @@ ${text}`], {type: 'text/plain'});
         </div>
 
         
+          {/* Mis Documentos Button */}
+          <div className="px-3 pb-3">
+            <button
+              onClick={() => setShowDocuments(true)}
+              className="w-full py-2 px-4 rounded-xl bg-cyan-50 border border-cyan-200 hover:border-cyan-400 text-cyan-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-cyan-100 shadow-sm"
+            >
+              <FolderOpen className="w-4 h-4 text-cyan-600" />
+              <span>Mis Documentos Médicos</span>
+            </button>
+          </div>
         {/* Historial Medico Button */}
         <div className="px-3 pb-3">
           <button
