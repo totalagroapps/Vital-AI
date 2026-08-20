@@ -22,6 +22,31 @@ import models
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("media_v2")
 
+import boto3
+from botocore.config import Config
+from botocore.exceptions import ClientError
+import uuid
+import os
+from sqlalchemy import select, update
+from fastapi import Form
+
+# Storage Configuration
+R2_ACCOUNT_ID = os.environ.get("R2_ACCOUNT_ID")
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
+R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME", "media-hub-docs")
+
+s3_client = None
+if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID:
+    s3_client = boto3.client(
+        "s3",
+        endpoint_url=f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com",
+        aws_access_key_id=R2_ACCESS_KEY_ID,
+        aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+        config=Config(signature_version="s3v4"),
+        region_name="auto"
+    )
+
 app = FastAPI(title="MedIA Hub V2 - Team API", version="2.0")
 
 @app.on_event("startup")
@@ -692,4 +717,137 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
     except Exception as e:
         print(f"Ollama Doctor API Error: {e}")
         return StreamingResponse(iter([f"Error: No se pudo procesar la respuesta del modelo de IA. {str(e)}"]), media_type="text/plain")
+
+
+
+@app.post("/api/patients/{patient_id}/documents")
+async def upload_document(
+    patient_id: str,
+    file: UploadFile = File(...),
+    document_type: str = Form(...),
+    notes: str = Form(None),
+    db: AsyncSession = Depends(get_db)
+):
+    if not s3_client:
+        raise HTTPException(status_code=500, detail="Storage client is not configured (Missing R2 credentials).")
+    
+    # 1. Validate File Size (Max 10MB)
+    file_bytes = await file.read()
+    if len(file_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 10MB.")
+        
+    # 2. Validate PDF magic bytes
+    if not file_bytes.startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
+        
+    # Check if patient exists
+    stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    result = await db.execute(stmt)
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found.")
+
+    # 3. Upload to R2
+    file_extension = ".pdf"
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    object_key = f"patients/{patient.id}/documents/{unique_filename}"
+    
+    try:
+        s3_client.put_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=object_key,
+            Body=file_bytes,
+            ContentType="application/pdf"
+        )
+    except ClientError as e:
+        print(f"S3 Upload Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to upload document to storage.")
+
+    # 4. Create Database Record
+    new_doc = MedicalDocument(
+        patient_id=patient.id,
+        document_type=document_type,
+        file_url=object_key,
+        original_filename=file.filename,
+        notes=notes
+    )
+    db.add(new_doc)
+    await db.commit()
+    await db.refresh(new_doc)
+    
+    return {
+        "id": new_doc.id,
+        "document_type": new_doc.document_type.value,
+        "original_filename": new_doc.original_filename,
+        "uploaded_at": new_doc.uploaded_at,
+        "notes": new_doc.notes
+    }
+
+
+@app.get("/api/patients/{patient_id}/documents")
+async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db)):
+    if not s3_client:
+        raise HTTPException(status_code=500, detail="Storage client is not configured.")
+
+    stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    result = await db.execute(stmt)
+    patient = result.scalar_one_or_none()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found.")
+
+    # Get documents that are not deleted
+    doc_stmt = select(MedicalDocument).where(
+        MedicalDocument.patient_id == patient.id,
+        MedicalDocument.is_deleted == False
+    ).order_by(MedicalDocument.uploaded_at.desc())
+    
+    doc_result = await db.execute(doc_stmt)
+    documents = doc_result.scalars().all()
+    
+    docs_response = []
+    for doc in documents:
+        # Generate presigned URL for secure download (expires in 1 hour)
+        try:
+            presigned_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': R2_BUCKET_NAME, 'Key': doc.file_url},
+                ExpiresIn=3600
+            )
+        except ClientError:
+            presigned_url = None
+            
+        docs_response.append({
+            "id": doc.id,
+            "document_type": doc.document_type.value,
+            "original_filename": doc.original_filename,
+            "uploaded_at": doc.uploaded_at,
+            "notes": doc.notes,
+            "download_url": presigned_url
+        })
+        
+    return docs_response
+
+
+@app.delete("/api/patients/{patient_id}/documents/{document_id}")
+async def delete_document(patient_id: str, document_id: str, db: AsyncSession = Depends(get_db)):
+    stmt = select(MedicalDocument).where(MedicalDocument.id == document_id, MedicalDocument.is_deleted == False)
+    result = await db.execute(stmt)
+    doc = result.scalar_one_or_none()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    # Validate patient ownership
+    p_stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    p_result = await db.execute(p_stmt)
+    patient = p_result.scalar_one_or_none()
+    
+    if not patient or doc.patient_id != patient.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this document.")
+        
+    # Soft delete
+    doc.is_deleted = True
+    await db.commit()
+    
+    return {"status": "success", "message": "Document deleted successfully."}
 

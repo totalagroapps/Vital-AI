@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey, Enum, Text
+from sqlalchemy import Column, Boolean, Integer, String, DateTime, func, ForeignKey, Enum, Text
 import enum
 import uuid
 from sqlalchemy.orm import relationship
@@ -51,6 +51,7 @@ class MedicalDocument(Base):
     uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
     extracted_text = Column(Text, nullable=True)
     notes = Column(Text, nullable=True)
+    is_deleted = Column(Boolean, default=False)
 
     patient = relationship("PatientProfile", back_populates="medical_documents")
 
