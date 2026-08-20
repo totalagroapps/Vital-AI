@@ -54,6 +54,13 @@ async def startup_event():
     from database import engine, Base
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        
+        # Ensure is_deleted column exists for medical_documents
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE medical_documents ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;"))
+        except Exception as e:
+            logger.error(f"Failed to alter table: {e}")
 
 app.add_middleware(
     CORSMiddleware,
