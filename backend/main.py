@@ -555,7 +555,7 @@ class PatientProfileSchema(BaseModel):
 async def get_patient_profile(db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     user_id = "mock_user"
-    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
+    result = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     if not profile:
         return {}
@@ -588,7 +588,7 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db)):
 async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     user_id = "mock_user"
-    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
+    result = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     
     if not profile:
@@ -625,7 +625,7 @@ async def get_all_patients(db: AsyncSession = Depends(get_db)):
 async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     # Get Profile
-    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id))
+    profile_res = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == patient_id))
     profile = profile_res.scalars().first()
     
     if not profile:
@@ -661,7 +661,7 @@ async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)
 async def ask_doctor_copilot(request: DoctorQueryRequest, db: AsyncSession = Depends(get_db)):
     from sqlalchemy.future import select
     # Load patient context
-    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == request.patient_id))
+    profile_res = await db.execute(select(models.PatientProfile).where(models.models.PatientProfile.user_id == request.patient_id))
     profile = profile_res.scalars().first()
     
     triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == request.patient_id).order_by(models.TriageSession.created_at.desc()))
@@ -748,7 +748,7 @@ async def upload_document(
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
         
     # Check if patient exists
-    stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:
@@ -771,7 +771,7 @@ async def upload_document(
         raise HTTPException(status_code=500, detail="Failed to upload document to storage.")
 
     # 4. Create Database Record
-    new_doc = MedicalDocument(
+    new_doc = models.MedicalDocument(
         patient_id=patient.id,
         document_type=document_type,
         file_url=object_key,
@@ -796,17 +796,17 @@ async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db)):
     if not s3_client:
         raise HTTPException(status_code=500, detail="Storage client is not configured.")
 
-    stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found.")
 
     # Get documents that are not deleted
-    doc_stmt = select(MedicalDocument).where(
-        MedicalDocument.patient_id == patient.id,
-        MedicalDocument.is_deleted == False
-    ).order_by(MedicalDocument.uploaded_at.desc())
+    doc_stmt = select(models.MedicalDocument).where(
+        models.MedicalDocument.patient_id == patient.id,
+        models.MedicalDocument.is_deleted == False
+    ).order_by(models.MedicalDocument.uploaded_at.desc())
     
     doc_result = await db.execute(doc_stmt)
     documents = doc_result.scalars().all()
@@ -837,7 +837,7 @@ async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db)):
 
 @app.delete("/api/patients/{patient_id}/documents/{document_id}")
 async def delete_document(patient_id: str, document_id: str, db: AsyncSession = Depends(get_db)):
-    stmt = select(MedicalDocument).where(MedicalDocument.id == document_id, MedicalDocument.is_deleted == False)
+    stmt = select(models.MedicalDocument).where(models.MedicalDocument.id == document_id, models.MedicalDocument.is_deleted == False)
     result = await db.execute(stmt)
     doc = result.scalar_one_or_none()
     
@@ -845,7 +845,7 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession = 
         raise HTTPException(status_code=404, detail="Document not found.")
         
     # Validate patient ownership
-    p_stmt = select(PatientProfile).where(PatientProfile.id == int(patient_id) if patient_id.isdigit() else PatientProfile.user_id == patient_id)
+    p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
     p_result = await db.execute(p_stmt)
     patient = p_result.scalar_one_or_none()
     
