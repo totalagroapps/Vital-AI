@@ -49,6 +49,11 @@ if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID:
 
 app = FastAPI(title="MedIA Hub V2 - Team API", version="2.0")
 
+@app.get("/")
+def healthcheck():
+    return {"status": "ok"}
+
+
 @app.on_event("startup")
 async def startup_event():
     from database import engine, Base
