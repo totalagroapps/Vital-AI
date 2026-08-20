@@ -58,7 +58,9 @@ async def startup_event():
         # Ensure is_deleted column exists for medical_documents
         try:
             from sqlalchemy import text
+            await conn.execute(text("SET statement_timeout = 5000;"))
             await conn.execute(text("ALTER TABLE medical_documents ADD COLUMN IF NOT EXISTS is_deleted BOOLEAN DEFAULT FALSE;"))
+            await conn.execute(text("RESET statement_timeout;"))
         except Exception as e:
             logger.error(f"Failed to alter table: {e}")
 
