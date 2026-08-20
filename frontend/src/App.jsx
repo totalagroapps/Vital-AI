@@ -6,6 +6,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Auth from './Auth';
 import { 
+  FolderOpen,
+  Upload,
+  Trash2,
   Activity, 
   Send, 
   Paperclip, 
