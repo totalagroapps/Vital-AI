@@ -779,8 +779,8 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
 
 @app.post("/api/patients/{patient_id}/documents")
 async def upload_document(
-    current_user_id: str = Depends(get_current_user_id),
     patient_id: str,
+    current_user_id: str = Depends(get_current_user_id),
     file: UploadFile = File(...),
     document_type: str = Form(...),
     notes: str = Form(None),
