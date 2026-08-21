@@ -36,7 +36,6 @@ import {
   Volume2,
   Settings,
   Server,
-  Sparkles,
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
