@@ -146,17 +146,60 @@ async def health_check():
         "ollama_running": True
     }
 
-# --- MOCK AUTH ENDPOINTS FOR DEMO FRONTEND ---
+from fastapi.security import OAuth2PasswordRequestForm
+from security import verify_password, get_password_hash, create_access_token, get_current_user_id
+from sqlalchemy.future import select
+
+# --- AUTH ENDPOINTS ---
+class RegisterRequest(BaseModel):
+    username: str
+    password: str
+    role: str = "patient"
+
+@app.post("/api/auth/register")
+async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(models.User).where(models.User.username == request.username))
+    if result.scalars().first():
+        raise HTTPException(status_code=400, detail="El nombre de usuario ya está registrado")
+    
+    hashed_pwd = get_password_hash(request.password)
+    new_user = models.User(username=request.username, hashed_password=hashed_pwd, role=request.role)
+    db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+    
+    # If it's a patient, create a blank profile for them automatically
+    if new_user.role == "patient":
+        new_profile = models.PatientProfile(
+            user_id=new_user.id,
+            full_name=new_user.username
+        )
+        db.add(new_profile)
+        await db.commit()
+        
+    return {"message": "Usuario registrado exitosamente"}
+
 @app.post("/api/auth/login")
-async def login():
-    return {"access_token": "demo-token"}
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(models.User).where(models.User.username == form_data.username))
+    user = result.scalars().first()
+    
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
+        
+    access_token = create_access_token(data={"sub": user.id})
+    return {"access_token": access_token, "token_type": "bearer", "role": user.role}
 
 @app.get("/api/auth/me")
-async def get_me():
-    return {"username": "Dr. Demo"}
+async def get_me(user_id: str = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return {"id": user.id, "username": user.username, "role": user.role}
 
 @app.get("/api/sessions")
-async def get_sessions():
+async def get_sessions(user_id: str = Depends(get_current_user_id)):
     return []
 
 # --- DOCUMENT PROCESSING ENDPOINTS ---
@@ -424,12 +467,12 @@ Cuando se cumpla un Criterio de Cierre, tu respuesta DEBE tener este formato mar
 
 # 2. Endpoint: Iniciar una SesiÃ³n de Triaje
 @app.post("/api/triage/start")
-async def start_triage_session(db: AsyncSession = Depends(get_db)):
+async def start_triage_session(db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     """
     Crea una nueva sesiÃ³n de triaje en la base de datos asociada al usuario.
     """
     # mock user ID (asumiendo que auth real se agregarÃ¡ despuÃ©s)
-    current_user_id = "user_123" 
+    # user_id is injected via Depends 
     
     new_session = models.TriageSession(
         user_id=current_user_id,
@@ -561,9 +604,8 @@ class PatientProfileSchema(BaseModel):
     preferred_language: Optional[str] = "es"
 
 @app.get("/api/patient/profile")
-async def get_patient_profile(db: AsyncSession = Depends(get_db)):
+async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_id)):
     from sqlalchemy.future import select
-    user_id = "mock_user"
     result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     if not profile:
@@ -594,9 +636,8 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db)):
     }
 
 @app.post("/api/patient/profile")
-async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSession = Depends(get_db)):
+async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_id)):
     from sqlalchemy.future import select
-    user_id = "mock_user"
     result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
     profile = result.scalars().first()
     
@@ -624,14 +665,14 @@ class DoctorQueryRequest(BaseModel):
     text_model: str = "llama3.1"
 
 @app.get("/api/doctor/patients")
-async def get_all_patients(db: AsyncSession = Depends(get_db)):
+async def get_all_patients(db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     from sqlalchemy.future import select
     result = await db.execute(select(models.PatientProfile))
     patients = result.scalars().all()
     return [{"user_id": p.user_id, "full_name": p.full_name, "date_of_birth": p.date_of_birth, "gender": p.gender} for p in patients]
 
 @app.get("/api/doctor/patients/{patient_id}")
-async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)):
+async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     from sqlalchemy.future import select
     # Get Profile
     profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id))
@@ -738,6 +779,7 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
 
 @app.post("/api/patients/{patient_id}/documents")
 async def upload_document(
+    current_user_id: str = Depends(get_current_user_id),
     patient_id: str,
     file: UploadFile = File(...),
     document_type: str = Form(...),
@@ -757,7 +799,8 @@ async def upload_document(
         raise HTTPException(status_code=400, detail="Invalid file format. Only PDF files are allowed.")
         
     # Check if patient exists
-    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
+    actual_patient_id = current_user_id if patient_id == "me" or patient_id == "mock_user" else patient_id
+    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(actual_patient_id) if actual_patient_id.isdigit() else models.PatientProfile.user_id == actual_patient_id)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:
@@ -801,11 +844,12 @@ async def upload_document(
 
 
 @app.get("/api/patients/{patient_id}/documents")
-async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db)):
+async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     if not s3_client:
         raise HTTPException(status_code=500, detail="Storage client is not configured.")
 
-    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
+    actual_patient_id = current_user_id if patient_id == "me" or patient_id == "mock_user" else patient_id
+    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(actual_patient_id) if actual_patient_id.isdigit() else models.PatientProfile.user_id == actual_patient_id)
     result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
     if not patient:
@@ -845,7 +889,7 @@ async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @app.delete("/api/patients/{patient_id}/documents/{document_id}")
-async def delete_document(patient_id: str, document_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_document(patient_id: str, document_id: str, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     stmt = select(models.MedicalDocument).where(models.MedicalDocument.id == document_id, models.MedicalDocument.is_deleted == False)
     result = await db.execute(stmt)
     doc = result.scalar_one_or_none()
@@ -854,7 +898,8 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession = 
         raise HTTPException(status_code=404, detail="Document not found.")
         
     # Validate patient ownership
-    p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id) if patient_id.isdigit() else models.PatientProfile.user_id == patient_id)
+    p_actual_patient_id = current_user_id if patient_id == "me" or patient_id == "mock_user" else patient_id
+    stmt = select(models.PatientProfile).where(models.PatientProfile.id == int(actual_patient_id) if actual_patient_id.isdigit() else models.PatientProfile.user_id == actual_patient_id)
     p_result = await db.execute(p_stmt)
     patient = p_result.scalar_one_or_none()
     

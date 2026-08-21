@@ -65,7 +65,7 @@ export default function App() {
 
   const fetchDocuments = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/patients/mock_user/documents`, {
+      const res = await fetch(`${API_URL}/api/patients/me/documents`, {
         headers: authHeaders
       });
       if (res.ok) {
@@ -88,7 +88,7 @@ export default function App() {
     if (docNotes) formData.append('notes', docNotes);
 
     try {
-      const res = await fetch(`${API_URL}/api/patients/mock_user/documents`, {
+      const res = await fetch(`${API_URL}/api/patients/me/documents`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -113,7 +113,7 @@ export default function App() {
   const deleteDocument = async (docId) => {
     if (!confirm('¿Seguro que quieres borrar este documento?')) return;
     try {
-      const res = await fetch(`${API_URL}/api/patients/mock_user/documents/${docId}`, {
+      const res = await fetch(`${API_URL}/api/patients/me/documents/${docId}`, {
         method: 'DELETE',
         headers: authHeaders
       });
@@ -468,6 +468,7 @@ ${text}`], {type: 'text/plain'});
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 
+          ...authHeaders,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ messages: chatMessages })

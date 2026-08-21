@@ -10,28 +10,62 @@ export default function Auth({ onLogin, apiUrl }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-      });
-      const data = await res.json();
-      
-      if (res.ok) {
-        onLogin(data.access_token, selectedRole);
+      if (isRegistering) {
+        // Register API call
+        const res = await fetch(`${apiUrl}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, role: selectedRole })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          // Immediately login after successful registration
+          setIsRegistering(false);
+          setError('¡Cuenta creada exitosamente! Iniciando sesión...');
+          
+          const formData = new URLSearchParams();
+          formData.append('username', username);
+          formData.append('password', password);
+          const loginRes = await fetch(`${apiUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+          });
+          const loginData = await loginRes.json();
+          if (loginRes.ok) {
+            onLogin(loginData.access_token, selectedRole);
+          }
+        } else {
+          setError(data.detail || 'Error al registrar la cuenta');
+        }
       } else {
-        setError(data.detail || 'Error al iniciar sesión');
+        // Login API call
+        const formData = new URLSearchParams();
+        formData.append('username', username);
+        formData.append('password', password);
+
+        const res = await fetch(`${apiUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString()
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          onLogin(data.access_token, selectedRole);
+        } else {
+          setError(data.detail || 'Error al iniciar sesión');
+        }
       }
     } catch (err) {
       setError('Error de conexión con el servidor.');
@@ -120,7 +154,7 @@ export default function Auth({ onLogin, apiUrl }) {
           <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 tracking-tight">
             {theme.title}
           </h1>
-          <p className="text-slate-600 mt-2 font-medium">Bienvenido de nuevo</p>
+          {isRegistering ? <p className="text-slate-600 mt-2 font-medium">Crea tu cuenta nueva</p> : <p className="text-slate-600 mt-2 font-medium">Bienvenido de nuevo</p>}
         </div>
 
         <div className="glass-card rounded-3xl p-8 border border-slate-200 shadow-sm shadow-2xl backdrop-blur-xl bg-white shadow-xl">
@@ -170,14 +204,22 @@ export default function Auth({ onLogin, apiUrl }) {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Ingresar
+                  {isRegistering ? 'Crear Cuenta' : 'Ingresar'}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-600 mt-6">Modo Demo: Ingresa cualquier usuario y contraseña para acceder.</p>
+          
+          <button 
+            type="button"
+            onClick={() => setIsRegistering(!isRegistering)}
+            className="w-full text-center text-sm font-medium text-slate-600 hover:text-slate-800 transition-colors mt-6"
+          >
+            {isRegistering ? "¿Ya tienes cuenta? Inicia sesión aquí" : "¿No tienes cuenta? Regístrate aquí"}
+          </button>
+
         </div>
       </div>
     </div>

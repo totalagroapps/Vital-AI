@@ -18,6 +18,16 @@ class DocumentMetadata(Base):
     document_type = Column(String) # e.g. 'radiografia', 'analitica'
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    username = Column(String, unique=True, index=True) # or email
+    hashed_password = Column(String)
+    role = Column(String, default="patient") # patient, doctor, admin
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class TriageSession(Base):
     """
     Guarda el estado de una sesión de triaje estructurada.
