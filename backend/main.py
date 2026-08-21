@@ -806,7 +806,49 @@ async def upload_document(
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found.")
 
+    
+    # --- OCR and Data Extraction via Ollama ---
+    extracted_insights = ""
+    try:
+        import io
+        import PyPDF2
+        import ollama
+        import os
+        
+        pdf_file = io.BytesIO(file_bytes)
+        reader = PyPDF2.PdfReader(pdf_file)
+        raw_text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                raw_text += page_text + "\n"
+        
+        if raw_text.strip():
+            ollama_host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+            client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
+            
+            prompt = f"""Eres un asistente médico experto. A continuación tienes el texto extraído de un documento clínico de un paciente.
+Tu tarea es hacer un resumen clínico conciso destacando:
+1. Diagnósticos principales.
+2. Valores de laboratorio fuera de rango o anormales (si los hay).
+3. Medicamentos mencionados.
+OMITE estrictamente cualquier dato personal identificable (Nombres completos, DNI, dirección).
+Si el texto es ininteligible o no es médico, indícalo.
+
+Texto:
+{raw_text[:4000]}
+"""
+            resp = await client.chat(
+                model="llama3.1",
+                messages=[{"role": "user", "content": prompt}]
+            )
+            extracted_insights = resp.get("message", {}).get("content", "")
+    except Exception as e:
+        print(f"Ollama OCR Error: {e}")
+        extracted_insights = f"Error extrayendo datos con IA: {str(e)}"
+    
     # 3. Upload to R2
+
     file_extension = ".pdf"
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     object_key = f"patients/{patient.id}/documents/{unique_filename}"
@@ -828,7 +870,8 @@ async def upload_document(
         document_type=document_type,
         file_url=object_key,
         original_filename=file.filename,
-        notes=notes
+        notes=notes,
+        extracted_text=extracted_insights
     )
     db.add(new_doc)
     await db.commit()
@@ -882,6 +925,7 @@ async def list_documents(patient_id: str, db: AsyncSession = Depends(get_db), cu
             "original_filename": doc.original_filename,
             "uploaded_at": doc.uploaded_at,
             "notes": doc.notes,
+            "extracted_text": doc.extracted_text,
             "download_url": presigned_url
         })
         
