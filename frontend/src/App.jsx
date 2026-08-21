@@ -52,7 +52,7 @@ export default function App() {
   const [isTriageClosed, setIsTriageClosed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [patientName, setPatientName] = useState('Paciente Anónimo');
+  
 
   const [showSettings, setShowSettings] = useState(false);
   const [showMedicalHistory, setShowMedicalHistory] = useState(false);
@@ -410,7 +410,7 @@ ${text}`], {type: 'text/plain'});
       image_base64: selectedImage,
       pdf_base64: selectedPdf,
       session_id: currentSessionId,
-      patient_name: patientName || 'Paciente Anónimo',
+      patient_name: username || 'Paciente Anónimo',
       ...engineSettings
     };
 
@@ -471,7 +471,7 @@ ${text}`], {type: 'text/plain'});
           ...authHeaders,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ messages: chatMessages })
+        body: JSON.stringify({ messages: chatMessages, language: language })
       });
 
       if (res.status === 401) {
@@ -701,8 +701,8 @@ ${text}`], {type: 'text/plain'});
               <div className="text-xs text-slate-600 font-medium">Nombre del Paciente</div>
               <input
                 type="text"
-                value={patientName}
-                onChange={(e) => setPatientName(e.target.value)}
+                value={username || 'Paciente Anónimo'}
+                readOnly
                 placeholder="Nombre del Paciente..."
                 className="bg-transparent text-sm font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 rounded px-1 -ml-1 w-32 md:w-auto hover:bg-white/50 transition-colors"
               />
@@ -911,7 +911,7 @@ ${text}`], {type: 'text/plain'});
                             onClick={() => {
                               const activeSession = sessions.find(s => s.id === currentSessionId);
                               const sessionTitle = activeSession ? activeSession.title : 'reporte';
-                              downloadReport(msg.text, patientName, sessionTitle);
+                              downloadReport(msg.text, username || 'Paciente', sessionTitle);
                             }}
                             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition-colors"
                           >
