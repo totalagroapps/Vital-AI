@@ -534,7 +534,6 @@ ${text}`], {type: 'text/plain'});
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
-      <LanguageSelector />
       
       {/* SIDEBAR DE HISTORIAL */}
       {/* Mobile overlay */}
@@ -711,6 +710,7 @@ ${text}`], {type: 'text/plain'});
           </div>
 
           <div className="flex items-center gap-2 md:gap-3 relative shrink-0">
+            <LanguageSelector />
             {/* HIPAA Badge Restored */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs shadow-sm">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
