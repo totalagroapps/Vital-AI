@@ -533,9 +533,16 @@ async def send_triage_message(
     # Preparar el payload con el System Prompt maestro de Triaje
     
     # Language handling
-    lang_instruction = ""
-    if request.language == "en":
-        lang_instruction = "\n\nIMPORTANT: You must communicate with the patient exclusively in English."
+    lang_map = {
+        "es": "Spanish (Español)",
+        "en": "English",
+        "fr": "French (Français)",
+        "ar": "Arabic (العربية)"
+    }
+    target_lang = lang_map.get(request.language, request.language) if request.language else "Spanish (Español)"
+    lang_instruction = f"
+
+CRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your medical triage responses to {target_lang}. Do NOT use Spanish unless {target_lang} is Spanish."
     
     messages_payload = [{"role": "system", "content": TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction}] + sanitized_messages
 
