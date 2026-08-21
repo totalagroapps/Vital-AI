@@ -686,7 +686,7 @@ ${text}`], {type: 'text/plain'});
         <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* TOP BAR */}
-        <header className="h-16 border-b border-slate-200 shadow-sm/80 px-4 md:px-6 flex items-center justify-between glass-panel z-10 shrink-0 overflow-x-auto no-scrollbar">
+        <header className="h-16 border-b border-slate-200 shadow-sm/80 px-4 md:px-6 flex items-center justify-between glass-panel z-10 shrink-0">
           <div className="flex items-center gap-3 shrink-0">
             <button 
               className="md:hidden p-1.5 -ml-2 text-slate-600 hover:text-cyan-400 rounded-lg hover:bg-slate-100"
