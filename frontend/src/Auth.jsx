@@ -8,6 +8,7 @@ export default function Auth({ onLogin, apiUrl }) {
   const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
@@ -20,6 +21,11 @@ export default function Auth({ onLogin, apiUrl }) {
 
     try {
       if (isRegistering) {
+        if (password !== confirmPassword) {
+          setError('Las contraseñas no coinciden');
+          setLoading(false);
+          return;
+        }
         // Register API call
         const res = await fetch(`${apiUrl}/api/auth/register`, {
           method: 'POST',
@@ -193,10 +199,25 @@ export default function Auth({ onLogin, apiUrl }) {
                   placeholder="••••••••"
                 />
               </div>
-            </div>
 
-            <button 
-              type="submit" 
+            {isRegistering && (
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-2 ml-1">Confirmar Contraseña</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3.5 w-5 h-5 text-slate-600" />
+                  <input 
+                    type="password" 
+                    required={isRegistering}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={w-full bg-slate-100/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-500 }
+                    placeholder="Repite tu contraseña"
+                  />
+                </div>
+              </div>
+            )}
+
+            <button type="submit" 
               disabled={loading}
               className={`w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r ${theme.buttonBg} text-white font-bold flex items-center justify-center gap-2 shadow-xl transition-all active:scale-[0.98] disabled:opacity-70 mt-4`}
             >
