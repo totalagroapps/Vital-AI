@@ -199,6 +199,7 @@ export default function Auth({ onLogin, apiUrl }) {
                   placeholder="••••••••"
                 />
               </div>
+            </div>
 
             {isRegistering && (
               <div>
@@ -210,7 +211,7 @@ export default function Auth({ onLogin, apiUrl }) {
                     required={isRegistering}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={w-full bg-slate-100/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-500 }
+                    className={`w-full bg-slate-100/50 border border-slate-300 rounded-2xl py-3 pl-11 pr-4 text-slate-800 focus:outline-none focus:ring-1 transition-all placeholder:text-slate-500 ${theme.focusRing}`}
                     placeholder="Repite tu contraseña"
                   />
                 </div>
