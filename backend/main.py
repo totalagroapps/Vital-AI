@@ -270,6 +270,7 @@ class ChatMessage(BaseModel):
 
 class TriageRequest(BaseModel):
     messages: List[ChatMessage]
+    language: Optional[str] = "es"
 
 TRIAGE_SYSTEM_PROMPT = """
 Eres un asistente médico experto en triaje y prediagnóstico.
