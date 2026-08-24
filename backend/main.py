@@ -833,20 +833,27 @@ async def upload_document(
             client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
             
             prompt = f"""Eres un asistente médico experto. A continuación tienes el texto extraído de un documento clínico de un paciente.
-Tu tarea es hacer un resumen clínico conciso destacando:
-1. Diagnósticos principales.
-2. Valores de laboratorio fuera de rango o anormales (si los hay).
-3. Medicamentos mencionados.
+Tu tarea es analizar el documento y devolver el resultado ESTRICTAMENTE en formato JSON, usando esta estructura exacta:
+{{
+  "resumen": "Explicación del resultado en lenguaje sencillo y amigable para el paciente",
+  "diagnosticos": ["diag 1", "diag 2"],
+  "anomalias": ["anomalía 1", "anomalía 2"],
+  "medicamentos": ["med 1", "med 2"],
+  "severidad": "verde", // verde (normal), amarillo (atención) o rojo (urgencia)
+  "preguntas_sugeridas": ["pregunta 1", "pregunta 2"]
+}}
+
 OMITE estrictamente cualquier dato personal identificable (Nombres completos, DNI, dirección).
-Si el texto es ininteligible o no es médico, indícalo.
+Si el texto es ininteligible o no es médico, devuelve un JSON con severidad "amarillo" indicando el error en el "resumen".
 
 Texto:
 {raw_text[:4000]}
 """
-            resp = await client.chat(
-                model="llama3.1",
-                messages=[{"role": "user", "content": prompt}]
-            )
+              resp = await client.chat(
+                  model="llama3.1",
+                  messages=[{"role": "user", "content": prompt}],
+                  format="json"
+              )
             extracted_insights = resp.get("message", {}).get("content", "")
     except Exception as e:
         print(f"Ollama OCR Error: {e}")

@@ -63,6 +63,77 @@ export default function App() {
   const [docNotes, setDocNotes] = useState('');
   const [docFile, setDocFile] = useState(null);
 
+  
+  const renderExtractedInsights = (extracted_text) => {
+    if (!extracted_text) return null;
+    
+    let data = null;
+    try {
+      let cleanText = extracted_text.replace(/\\json/g, '').replace(/\\/g, '').trim();
+      data = JSON.parse(cleanText);
+    } catch (e) {
+      return (
+        <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
+          <div className="flex items-center gap-1.5 font-bold text-slate-700 mb-1">
+            <Sparkles className="w-4 h-4 text-cyan-500" /> Resumen IA
+          </div>
+          <p className="whitespace-pre-wrap">{extracted_text}</p>
+        </div>
+      );
+    }
+
+    const severityColors = {
+      'verde': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      'amarillo': 'bg-amber-100 text-amber-700 border-amber-200',
+      'rojo': 'bg-rose-100 text-rose-700 border-rose-200'
+    };
+    const badgeColor = severityColors[data.severidad?.toLowerCase()] || severityColors['amarillo'];
+
+    return (
+      <div className="mt-3 p-3 bg-cyan-50/50 border border-cyan-100 rounded-lg text-xs text-slate-600 space-y-2 w-full">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5 font-bold text-cyan-800">
+            <Sparkles className="w-4 h-4 text-cyan-500" /> Resumen Clínico
+          </div>
+          {data.severidad && (
+            <span className={`px-2 py-0.5 rounded-full border text-[10px] uppercase font-bold tracking-wider ${badgeColor}`}>
+              {data.severidad}
+            </span>
+          )}
+        </div>
+        
+        {data.resumen && <p className="text-slate-700 font-medium">{data.resumen}</p>}
+        
+        {data.diagnosticos && data.diagnosticos.length > 0 && (
+          <div>
+            <strong className="text-slate-700">Diagnósticos:</strong>
+            <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-slate-600">
+              {data.diagnosticos.map((d, i) => <li key={i}>{d}</li>)}
+            </ul>
+          </div>
+        )}
+        
+        {data.anomalias && data.anomalias.length > 0 && (
+          <div>
+            <strong className="text-amber-700">Anomalías / Alertas:</strong>
+            <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-slate-600">
+              {data.anomalias.map((a, i) => <li key={i}>{a}</li>)}
+            </ul>
+          </div>
+        )}
+        
+        {data.preguntas_sugeridas && data.preguntas_sugeridas.length > 0 && (
+          <div className="pt-2 border-t border-cyan-100 mt-2">
+            <strong className="text-cyan-800 flex items-center gap-1">Preguntas sugeridas para tu médico:</strong>
+            <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-600">
+              {data.preguntas_sugeridas.map((p, i) => <li key={i}>{p}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const fetchDocuments = async () => {
     try {
       const res = await fetch(`${API_URL}/api/patients/me/documents`, {
