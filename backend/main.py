@@ -628,6 +628,21 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
     img.save(buffered, format="PNG")
     qr_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
+    # Get patient's triages
+    triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == user_id).order_by(models.TriageSession.created_at.desc()))
+    triages = triage_res.scalars().all()
+    
+    triage_list = []
+    for t in triages:
+        if t.final_report:
+            triage_list.append({
+                "id": t.id,
+                "category": t.category,
+                "status": t.status,
+                "final_report": t.final_report,
+                "created_at": t.created_at.isoformat() if t.created_at else None
+            })
+
     return {
         "full_name": profile.full_name,
         "date_of_birth": profile.date_of_birth,
@@ -637,7 +652,8 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
         "chronic_conditions": profile.chronic_conditions,
         "current_medications": profile.current_medications,
         "emergency_contact": profile.emergency_contact,
-        "qr_code_base64": qr_base64
+        "qr_code_base64": qr_base64,
+        "triages": triage_list
     }
 
 @app.post("/api/patient/profile")
