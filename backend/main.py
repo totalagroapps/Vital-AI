@@ -849,11 +849,11 @@ Si el texto es ininteligible o no es médico, devuelve un JSON con severidad "am
 Texto:
 {raw_text[:4000]}
 """
-              resp = await client.chat(
-                  model="llama3.1",
-                  messages=[{"role": "user", "content": prompt}],
-                  format="json"
-              )
+            resp = await client.chat(
+                model="llama3.1",
+                messages=[{"role": "user", "content": prompt}],
+                format="json"
+            )
             extracted_insights = resp.get("message", {}).get("content", "")
     except Exception as e:
         print(f"Ollama OCR Error: {e}")
