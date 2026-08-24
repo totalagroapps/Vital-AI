@@ -69,7 +69,7 @@ export default function App() {
     
     let data = null;
     try {
-      let cleanText = extracted_text.replace(/\\json/g, '').replace(/\\/g, '').trim();
+      let cleanText = extracted_text.replace(/```json/g, '').replace(/```/g, '').trim();
       data = JSON.parse(cleanText);
     } catch (e) {
       return (
@@ -1201,7 +1201,8 @@ ${text}`], {type: 'text/plain'});
                   ) : (
                     <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                       {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-4 bg-white border border-slate-200 shadow-sm rounded-xl hover:border-cyan-400 hover:shadow-md transition-all group">
+                        <div key={doc.id} className="flex flex-col p-4 bg-white border border-slate-200 shadow-sm rounded-xl hover:border-cyan-400 hover:shadow-md transition-all group w-full">
+                          <div className="flex items-start justify-between w-full">
                           <div className="flex items-center gap-4 overflow-hidden">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center text-cyan-600 shrink-0 border border-cyan-100 group-hover:scale-105 transition-transform">
                               <FileText className="w-6 h-6" />
@@ -1239,6 +1240,11 @@ ${text}`], {type: 'text/plain'});
                               <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
+                          </div>
+                          
+                          {/* AI SUMMARY RENDERED HERE */}
+                          {renderExtractedInsights(doc.extracted_text)}
+                          
                         </div>
                       ))}
                     </div>
