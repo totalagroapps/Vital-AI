@@ -37,6 +37,7 @@ import {
   Settings,
   Server,
     BookOpen,
+    Menu,
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -606,7 +607,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden">
+    <div className="flex h-[100dvh] bg-slate-50 text-slate-900 overflow-hidden">
       
       {/* SIDEBAR DE HISTORIAL */}
       {/* Mobile overlay */}
@@ -1071,6 +1072,15 @@ ${text}`], {type: 'text/plain'});
             <input type="file" ref={pdfInputRef} accept="application/pdf" onChange={handlePdfChange} className="hidden" />
 
             {/* Attach Buttons */}
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              title="Abrir Menú"
+              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-white shadow-sm text-slate-600 hover:text-cyan-400 hover:border-slate-300 transition-all"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
