@@ -36,6 +36,7 @@ import {
   Volume2,
   Settings,
   Server,
+    BookOpen,
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -867,7 +868,7 @@ ${text}`], {type: 'text/plain'});
               </div>
 
               {/* Quick Prompt Suggestions */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full pt-4">
                 <button
                   onClick={() => {
                     imageInputRef.current?.click();
@@ -900,6 +901,16 @@ ${text}`], {type: 'text/plain'});
                   <div className="font-semibold text-xs text-slate-800">Iniciar Triaje Clínico</div>
                   <div className="text-[11px] text-slate-600 mt-1">Evaluación de síntomas paso a paso por IA.</div>
                 </button>
+              <button
+                onClick={() => {
+                  alert('Funcionalidad RAG de consulta de artículos en desarrollo por tu compañera.');
+                }}
+                className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+              >
+                <BookOpen className="w-5 h-5 text-fuchsia-400 mb-2 group-hover:scale-110 transition-transform" />
+                <div className="font-semibold text-xs text-slate-800">Consulta Artículos Médicos</div>
+                <div className="text-[11px] text-slate-600 mt-1">Consulta nuestra base de conocimientos (RAG).</div>
+              </button>
               </div>
             </div>
           ) : (
