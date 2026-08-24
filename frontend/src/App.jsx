@@ -202,7 +202,7 @@ export default function App() {
     }
   }, [showDocuments]);
 
-  const [viewMode, setViewMode] = useState('patient');
+  const [viewMode, setViewMode] = useState(localStorage.getItem('med_role') || 'patient');
   const [patientProfile, setPatientProfile] = useState({
     full_name: '', date_of_birth: '', gender: '', blood_type: '',
     allergies: '', chronic_conditions: '', current_medications: '', emergency_contact: '', qr_code_base64: ''
@@ -599,11 +599,11 @@ ${text}`], {type: 'text/plain'});
   );
 
   if (!token) {
-    return <Auth onLogin={(jwt, role) => { setToken(jwt); localStorage.setItem('med_token', jwt); if(role) setViewMode(role); }} apiUrl={API_URL} />;
+    return <Auth onLogin={(jwt, role) => { setToken(jwt); localStorage.setItem('med_token', jwt); if(role) { setViewMode(role); localStorage.setItem('med_role', role); } }} apiUrl={API_URL} />;
   }
 
   if (viewMode === 'doctor') {
-    return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {setToken(null); localStorage.removeItem('med_token'); setViewMode('patient');}} />;
+    return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {setToken(null); localStorage.removeItem('med_token'); localStorage.removeItem('med_role'); setViewMode('patient');}} />;
   }
 
   return (
