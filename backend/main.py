@@ -634,125 +634,42 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
     
     triage_list = []
     for t in triages:
-        if t.final_report:
-            triage_list.append({
-                "id": t.id,
-                "category": t.category,
-                "status": t.status,
-                "final_report": t.final_report,
-                "created_at": t.created_at.isoformat() if t.created_at else None
-            })
-
-    return {
-        "full_name": profile.full_name,
-        "date_of_birth": profile.date_of_birth,
-        "gender": profile.gender,
-        "blood_type": profile.blood_type,
-        "allergies": profile.allergies,
-        "chronic_conditions": profile.chronic_conditions,
-        "current_medications": profile.current_medications,
-        "emergency_contact": profile.emergency_contact,
-        "qr_code_base64": qr_base64,
-        "triages": triage_list
-    }
-
-@app.post("/api/patient/profile")
-async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_id)):
-    from sqlalchemy.future import select
-    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
-    profile = result.scalars().first()
-    
-    if not profile:
-        profile = models.PatientProfile(user_id=user_id)
-        db.add(profile)
-    
-    profile.full_name = profile_data.full_name
-    profile.date_of_birth = profile_data.date_of_birth
-    profile.gender = profile_data.gender
-    profile.blood_type = profile_data.blood_type
-    profile.allergies = profile_data.allergies
-    profile.chronic_conditions = profile_data.chronic_conditions
-    profile.current_medications = profile_data.current_medications
-    profile.emergency_contact = profile_data.emergency_contact
-    
-    await db.commit()
-    return {"status": "success"}
-
-# --- DOCTOR DASHBOARD ENDPOINTS ---
-
-class DoctorQueryRequest(BaseModel):
-    query: str
-    patient_id: str
-    text_model: str = "llama3.1"
-
-@app.get("/api/doctor/patients")
-async def get_all_patients(db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
-    from sqlalchemy.future import select
-    result = await db.execute(select(models.PatientProfile))
-    patients = result.scalars().all()
-    return [{"user_id": p.user_id, "full_name": p.full_name, "date_of_birth": p.date_of_birth, "gender": p.gender} for p in patients]
-
-@app.get("/api/doctor/patients/{patient_id}")
-async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
-    from sqlalchemy.future import select
-    # Get Profile
-    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id))
-    profile = profile_res.scalars().first()
-    
-    if not profile:
-        raise HTTPException(status_code=404, detail="Paciente no encontrado")
-        
-    # Get Triages
-    triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == patient_id).order_by(models.TriageSession.created_at.desc()))
-    triages = triage_res.scalars().all()
-    
-    return {
-        "profile": {
-            "full_name": profile.full_name,
-            "date_of_birth": profile.date_of_birth,
-            "gender": profile.gender,
-            "blood_type": profile.blood_type,
-            "allergies": profile.allergies,
-            "chronic_conditions": profile.chronic_conditions,
-            "current_medications": profile.current_medications,
-            "emergency_contact": profile.emergency_contact
-        },
-        "triages": [
-            {
-                "id": t.id,
-                "category": t.category,
-                "status": t.status,
-                "final_report": t.final_report,
-                "created_at": t.created_at.isoformat() if t.created_at else None
-            } for t in triages
-        ]
-    }
-
-@app.post("/api/doctor/ask")
-async def ask_doctor_copilot(request: DoctorQueryRequest, db: AsyncSession = Depends(get_db)):
-    from sqlalchemy.future import select
-    # Load patient context
-    profile_res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == request.patient_id))
-    profile = profile_res.scalars().first()
-    
-    triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == request.patient_id).order_by(models.TriageSession.created_at.desc()))
-    triages = triage_res.scalars().all()
-    
-    context_text = f"""[EXPEDIENTE CLÍNICO DE {profile.full_name if profile else 'PACIENTE DESCONOCIDO'}]
-Perfil:
-- Nacimiento: {profile.date_of_birth if profile else ''}
-- Género: {profile.gender if profile else ''}
-- Sangre: {profile.blood_type if profile else ''}
-- Alergias: {profile.allergies if profile else ''}
-- Crónicas: {profile.chronic_conditions if profile else ''}
-- Medicación: {profile.current_medications if profile else ''}
-
-[HISTORIAL DE TRIAJES]
-"""
-    for t in triages:
         context_text += f"- Fecha: {t.created_at}, Estado: {t.status}, Categoría: {t.category}\n"
         if t.final_report:
             context_text += f"  Reporte Final: {t.final_report}\n"
+            
+    # GET DOCUMENTS
+    if profile:
+        doc_stmt = select(models.MedicalDocument).where(
+            models.MedicalDocument.patient_id == profile.id,
+            models.MedicalDocument.is_deleted == False
+        ).order_by(models.MedicalDocument.uploaded_at.desc())
+        doc_result = await db.execute(doc_stmt)
+        documents = doc_result.scalars().all()
+        
+        if documents:
+            context_text += "\n[DOCUMENTOS MEDICOS ADJUNTOS]\n"
+            for d in documents:
+                context_text += f"- Documento: {d.original_filename} ({d.document_type})\n"
+                if d.extracted_text:
+                    context_text += f"  Contenido/Resultados:\n{d.extracted_text}\n"
+            
+    # GET DOCUMENTS
+    if profile:
+        doc_stmt = select(models.MedicalDocument).where(
+            models.MedicalDocument.patient_id == profile.id,
+            models.MedicalDocument.is_deleted == False
+        ).order_by(models.MedicalDocument.uploaded_at.desc())
+        doc_result = await db.execute(doc_stmt)
+        documents = doc_result.scalars().all()
+        
+        if documents:
+            context_text += "\n[DOCUMENTOS MÉDICOS ADJUNTOS]\n"
+            for d in documents:
+                context_text += f"- Documento: {d.original_filename} ({d.document_type})\n"
+                if d.extracted_text:
+                    context_text += f"  Contenido/Resultados:\n{d.extracted_text}\n"
+
             
     system_prompt = f"""Eres un Asistente Médico de IA diseñado exclusivamente para ayudar a DOCTORES a revisar expedientes de pacientes.
 El doctor te hará una pregunta sobre el paciente. Analiza la pregunta y responde utilizando ÚNICAMENTE la información del siguiente expediente.
