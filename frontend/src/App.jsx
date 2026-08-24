@@ -204,7 +204,7 @@ export default function App() {
 
   const [viewMode, setViewMode] = useState(localStorage.getItem('med_role') || 'patient');
   const [patientProfile, setPatientProfile] = useState({
-    full_name: '', date_of_birth: '', gender: '', blood_type: '',
+    full_name: '', date_of_birth: '', gender: '', blood_type: '', height: '', weight: '',
     allergies: '', chronic_conditions: '', current_medications: '', emergency_contact: '', qr_code_base64: ''
   });
   const [engineSettings, setEngineSettings] = useState(() => {

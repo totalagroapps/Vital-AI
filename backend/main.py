@@ -603,6 +603,8 @@ class PatientProfileSchema(BaseModel):
     chronic_conditions: Optional[str] = None
     current_medications: Optional[str] = None
     emergency_contact: Optional[str] = None
+    height: Optional[str] = None
+    weight: Optional[str] = None
     preferred_language: Optional[str] = "es"
 
 @app.get("/api/patient/profile")
@@ -614,7 +616,7 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
         return {}
     
     # Generate QR Code dynamically
-    qr_data = f"FICHA MEDICA DE EMERGENCIA\nNombre: {profile.full_name}\nSangre: {profile.blood_type}\nAlergias: {profile.allergies or 'Ninguna'}\nCondiciones: {profile.chronic_conditions or 'Ninguna'}\nContacto: {profile.emergency_contact or 'No especificado'}"
+    qr_data = f"FICHA MEDICA DE EMERGENCIA\nNombre: {profile.full_name}\nSangre: {profile.blood_type}\nAltura: {profile.height or 'N/D'} | Peso: {profile.weight or 'N/D'}\nAlergias: {profile.allergies or 'Ninguna'}\nCondiciones: {profile.chronic_conditions or 'Ninguna'}\nContacto: {profile.emergency_contact or 'No especificado'}"
     
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(qr_data)
@@ -649,6 +651,8 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
         "chronic_conditions": profile.chronic_conditions,
         "current_medications": profile.current_medications,
         "emergency_contact": profile.emergency_contact,
+        "height": profile.height,
+        "weight": profile.weight,
         "qr_code_base64": qr_base64,
         "triages": triage_list
     }
@@ -671,6 +675,8 @@ async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSe
     profile.chronic_conditions = profile_data.chronic_conditions
     profile.current_medications = profile_data.current_medications
     profile.emergency_contact = profile_data.emergency_contact
+    profile.height = profile_data.height
+    profile.weight = profile_data.weight
     
     await db.commit()
     return {"status": "success"}
@@ -712,7 +718,9 @@ async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)
             "allergies": profile.allergies,
             "chronic_conditions": profile.chronic_conditions,
             "current_medications": profile.current_medications,
-            "emergency_contact": profile.emergency_contact
+            "emergency_contact": profile.emergency_contact,
+            "height": profile.height,
+            "weight": profile.weight
         },
         "triages": [
             {
