@@ -1340,6 +1340,36 @@ ${text}`], {type: 'text/plain'});
                   </div>
                 )}
               </div>
+
+              {/* TRIAGE HISTORY UI */}
+              <div className="mt-6 border-t border-slate-200 pt-6">
+                <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-rose-500" />
+                  Mi Historial de Triajes
+                </h3>
+                {patientProfile.triages && patientProfile.triages.length > 0 ? (
+                  <div className="space-y-3">
+                    {patientProfile.triages.map(t => (
+                      <div key={t.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleString()}</span>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold border ${
+                              t.status === 'closed_red' ? 'bg-rose-100 text-rose-500 border-rose-200' :
+                              t.status === 'closed_yellow' ? 'bg-amber-100 text-amber-600 border-amber-200' :
+                              'bg-emerald-100 text-emerald-600 border-emerald-200'
+                            }`}>
+                            {t.status === 'closed_red' ? 'Urgencia' : t.status === 'closed_yellow' ? 'Atención' : 'Normal'}
+                          </span>
+                        </div>
+                        <div className="text-sm text-slate-700 whitespace-pre-wrap">{t.final_report}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-500 italic">No hay consultas previas de triaje.</p>
+                )}
+              </div>
+
             </div>
           </div>
         </div>
