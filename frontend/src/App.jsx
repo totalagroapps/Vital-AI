@@ -306,6 +306,7 @@ ${text}`], {type: 'text/plain'});
       fetchUser();
       checkHealth();
       fetchSessions();
+      fetchPatientProfile();
     }
   }, [token]);
 
