@@ -579,7 +579,7 @@ async def send_triage_message(
                     yield token
             
             # Una vez termina el stream, evaluamos si el modelo decidiÃ³ cerrar el triaje
-            if "📝 Informe de Prediagnóstico y Triaje" in full_response or "Informe de Prediagnóstico y Triaje" in full_response:
+            if "Informe de Prediagn" in full_response or "Informe de Emergencia" in full_response or "Nivel de Urgencia:" in full_response or "Especialidad M" in full_response:
                 # Detectamos qué semáforo emitió
                 if "🔴 Urgencia (Rojo)" in full_response or "Urgencia Inmediata" in full_response or "🔴" in full_response:
                     t_session.status = "closed_red"
