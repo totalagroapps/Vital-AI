@@ -5,6 +5,7 @@ import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Auth from './Auth';
+import MedicalSearchModal from './MedicalSearchModal';
 import { 
   FolderOpen,
   Upload,
@@ -59,6 +60,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showMedicalHistory, setShowMedicalHistory] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
+  const [showMedicalSearch, setShowMedicalSearch] = useState(false);
   const [documents, setDocuments] = useState([]);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [docType, setDocType] = useState('informe_medico');
@@ -904,7 +906,7 @@ ${text}`], {type: 'text/plain'});
                 </button>
               <button
                 onClick={() => {
-                  alert('Funcionalidad RAG de consulta de artículos en desarrollo por tu compañera.');
+                  setShowMedicalSearch(true);
                 }}
                 className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
               >

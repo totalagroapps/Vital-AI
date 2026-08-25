@@ -1,3 +1,16 @@
+from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
+from services.medical_search_service import MedicalSearchService
+from services.pubmed_service import PubMedService
+from services.clinical_trials_service import ClinicalTrialsService
+from services.cochrane_service import CochraneService
+
+def get_medical_search_service() -> MedicalSearchService:
+    return MedicalSearchService(
+        pubmed_service=PubMedService(),
+        clinical_trials_service=ClinicalTrialsService(),
+        cochrane_service=CochraneService(),
+    )
+
 import base64
 import io
 import logging
@@ -1005,3 +1018,26 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession = 
     
     return {"status": "success", "message": "Document deleted successfully."}
 
+
+@app.post("/api/medical/search", response_model=MedicalSearchResponse)
+async def medical_search(
+    request: MedicalSearchRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    service = get_medical_search_service()
+    
+    query = request.query
+    try:
+        result = await service.search(
+            query=query,
+            max_results=request.max_results
+        )
+        if isinstance(result, list):
+            return {"results": result}
+        return result
+    except Exception as e:
+        print(f"Error en búsqueda médica: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible realizar la búsqueda médica."
+        )
