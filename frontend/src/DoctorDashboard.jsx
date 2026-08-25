@@ -153,7 +153,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
 
         <div className="p-4 border-t border-slate-200 shadow-sm">
-          <button onClick={onLogout} className="w-full py-2 bg-slate-100 hover:bg-rose-900/50 text-slate-700 hover:text-rose-400 rounded-lg text-sm transition-colors border border-slate-300 hover:border-rose-900">
+          <button onClick={onLogout} className="w-full py-2 bg-slate-100 hover:bg-semantic-danger-bg/50 text-slate-700 hover:text-semantic-danger-text rounded-lg text-sm transition-colors border border-slate-300 hover:border-semantic-danger-text/20">
             Cerrar Sesión
           </button>
         </div>
@@ -180,7 +180,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   <div><span className="text-slate-600 block text-xs">Nombre</span><span className="font-medium">{patientDetail.profile.full_name}</span></div>
                   <div><span className="text-slate-600 block text-xs">Nacimiento</span><span className="font-medium">{patientDetail.profile.date_of_birth}</span></div>
                   <div><span className="text-slate-600 block text-xs">Género</span><span className="font-medium">{patientDetail.profile.gender}</span></div>
-                  <div><span className="text-slate-600 block text-xs">Sangre</span><span className="font-medium text-rose-400">{patientDetail.profile.blood_type}</span></div>
+                  <div><span className="text-slate-600 block text-xs">Sangre</span><span className="font-medium text-semantic-danger-text">{patientDetail.profile.blood_type}</span></div>
                   <div className="col-span-2"><span className="text-slate-600 block text-xs">Alergias</span><span className="font-medium">{patientDetail.profile.allergies || 'Ninguna'}</span></div>
                   <div className="col-span-2"><span className="text-slate-600 block text-xs">Crónicas</span><span className="font-medium">{patientDetail.profile.chronic_conditions || 'Ninguna'}</span></div>
                   <div className="col-span-2"><span className="text-slate-600 block text-xs">Medicación</span><span className="font-medium">{patientDetail.profile.current_medications || 'Ninguna'}</span></div>
@@ -199,7 +199,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                       <div className="text-sm text-slate-600 italic">No hay documentos adjuntos.</div>
                     ) : (
                       patientDocuments.map(doc => (
-                        <div key={doc.id} className="flex justify-between items-center bg-white/50 border border-slate-200 shadow-sm rounded-lg p-3 hover:border-cyan-400 transition-colors">
+                        <div key={doc.id} className="flex justify-between items-center bg-white/50 border border-slate-200 shadow-sm rounded-lg p-3 hover:border-brand/30 transition-colors">
                           <div className="min-w-0">
                             <h4 className="text-sm font-semibold text-slate-800 truncate" title={doc.original_filename}>{doc.original_filename}</h4>
                             <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
@@ -209,7 +209,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                             </div>
                             {doc.notes && <p className="text-xs text-slate-400 mt-1 truncate max-w-sm" title={doc.notes}>{doc.notes}</p>}
                           </div>
-                          <a href={doc.download_url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors ml-2 shrink-0">
+                          <a href={doc.download_url} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-brand hover:bg-semantic-info-bg rounded-lg transition-colors ml-2 shrink-0">
                             <Download className="w-5 h-5" />
                           </a>
                         </div>
@@ -230,9 +230,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-xs text-slate-600">{new Date(t.created_at).toLocaleString()}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold border ${
-                            t.status === 'closed_red' ? 'bg-rose-100/50 text-rose-400 border-rose-500/20' :
+                            t.status === 'closed_red' ? 'bg-semantic-danger-bg/50 text-semantic-danger-text border-semantic-danger-text/20/20' :
                             t.status === 'closed_yellow' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                            t.status === 'closed_green' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                            t.status === 'closed_green' ? 'bg-semantic-success-bg/10 text-semantic-success-text border-semantic-success-text/20/20' :
                             'bg-slate-1000/10 text-slate-600 border-slate-500/20'
                           }`}>
                             {t.status.replace('closed_', '') || 'En curso'}
@@ -249,7 +249,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-rose-400">Error al cargar expediente.</div>
+            <div className="flex-1 flex items-center justify-center text-semantic-danger-text">Error al cargar expediente.</div>
           )
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
@@ -277,7 +277,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-xl p-3 text-sm ${
                   msg.role === 'user' 
-                  ? 'bg-indigo-600 text-white rounded-br-none' 
+                  ? 'bg-brand text-white rounded-br-none' 
                   : 'bg-slate-100 text-slate-800 border border-slate-300 rounded-bl-none'
                 }`}>
                   <div className="prose prose-invert prose-sm max-w-none leading-snug">
@@ -312,7 +312,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             <button
               type="submit"
               disabled={!copilotInput.trim() || !selectedPatient || isCopilotThinking}
-              className="absolute right-1.5 top-1.5 p-1.5 bg-indigo-600 hover:bg-indigo-500 rounded text-white disabled:opacity-50"
+              className="absolute right-1.5 top-1.5 p-1.5 bg-brand hover:bg-indigo-500 rounded text-white disabled:opacity-50"
             >
               <Send className="w-3 h-3" />
             </button>

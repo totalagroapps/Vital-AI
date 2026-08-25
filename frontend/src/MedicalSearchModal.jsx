@@ -80,7 +80,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           
           <form onSubmit={handleSearch} className="mb-6 relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-fuchsia-500 transition-colors" />
+              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-brand transition-colors" />
             </div>
             <input
               type="text"
@@ -92,7 +92,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="absolute inset-y-1.5 right-1.5 bg-fuchsia-600 hover:bg-fuchsia-700 disabled:bg-slate-300 text-white font-medium rounded-lg px-4 md:px-6 transition-colors shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
+              className="absolute inset-y-1.5 right-1.5 bg-brand hover:bg-brand disabled:bg-slate-300 text-white font-medium rounded-lg px-4 md:px-6 transition-colors shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : 'Buscar'}
             </button>
@@ -118,7 +118,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                 {results.map((doc, idx) => (
                   <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-fuchsia-200">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="bg-fuchsia-100 text-fuchsia-700 text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      <span className="bg-brand text-brand text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
                         {doc.source_type}
                       </span>
                       {doc.publication_date && (
@@ -135,7 +135,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                         href={doc.url} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 text-fuchsia-600 hover:text-fuchsia-800 text-xs font-bold transition-colors"
+                        className="flex items-center gap-1.5 text-brand hover:text-brand text-xs font-bold transition-colors"
                       >
                         Ver original <ExternalLink size={12} />
                       </a>
@@ -156,8 +156,8 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           
           {loading && (
             <div className="text-center text-slate-500 py-16 flex flex-col items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-fuchsia-100 flex items-center justify-center animate-pulse">
-                <Loader2 className="animate-spin text-fuchsia-600" size={24} />
+              <div className="w-12 h-12 rounded-full bg-brand flex items-center justify-center animate-pulse">
+                <Loader2 className="animate-spin text-brand" size={24} />
               </div>
               <p className="text-sm font-medium animate-pulse">Buscando las últimas investigaciones para ti...</p>
             </div>

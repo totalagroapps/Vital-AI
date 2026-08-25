@@ -85,7 +85,7 @@ export default function Auth({ onLogin, apiUrl }) {
       <div className="flex min-h-screen w-full items-center justify-center bg-slate-100 p-4 relative overflow-hidden">
         <LanguageSelector variant="floating" />
         {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-rose-100/50 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-semantic-danger-bg/50 rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3" />
 
         <div className="w-full max-w-4xl relative z-10 flex flex-col items-center">
@@ -98,14 +98,14 @@ export default function Auth({ onLogin, apiUrl }) {
             {/* Patient Card */}
             <button 
               onClick={() => setSelectedRole('patient')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-rose-500/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-rose-500/50 hover:bg-white shadow-xl"
+              className="group relative flex flex-col items-center justify-center p-10 rounded-3xl border border-semantic-danger-text/20/20 bg-white/50 backdrop-blur-xl shadow-2xl overflow-hidden transition-all hover:scale-[1.02] hover:border-semantic-danger-text/20/50 hover:bg-white shadow-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center shadow-lg shadow-rose-500/20 mb-6 group-hover:scale-110 transition-transform duration-500">
                 <HeartPulse className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-rose-100 mb-2">{t("i_am_patient")}</h2>
-              <p className="text-rose-200/60 text-sm text-center">Accede a tu historial clínico, resultados y triaje inteligente.</p>
+              <h2 className="text-2xl font-bold text-semantic-danger-text mb-2">{t("i_am_patient")}</h2>
+              <p className="text-semantic-danger-text/60 text-sm text-center">Accede a tu historial clínico, resultados y triaje inteligente.</p>
             </button>
 
             {/* Doctor Card */}
@@ -133,7 +133,7 @@ export default function Auth({ onLogin, apiUrl }) {
     iconGradient: isDoc ? 'from-indigo-600 to-blue-400' : 'from-rose-500 to-pink-400',
     shadow: isDoc ? 'shadow-indigo-500/20' : 'shadow-rose-500/20',
     textGradient: isDoc ? 'from-indigo-300 to-blue-300' : 'from-rose-300 to-pink-300',
-    focusRing: isDoc ? 'focus:border-indigo-500 focus:ring-indigo-500' : 'focus:border-rose-500 focus:ring-rose-500',
+    focusRing: isDoc ? 'focus:border-indigo-500 focus:ring-indigo-500' : 'focus:border-semantic-danger-text/20 focus:ring-rose-500',
     buttonBg: isDoc ? 'from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400 shadow-indigo-500/20' : 'from-rose-600 to-pink-500 hover:from-rose-500 hover:to-pink-400 shadow-rose-500/20',
     title: isDoc ? t("doctor_login_title") : 'Portal Paciente',
     Icon: isDoc ? Stethoscope : HeartPulse
@@ -143,7 +143,7 @@ export default function Auth({ onLogin, apiUrl }) {
     <div className={`flex h-screen w-full items-center justify-center bg-slate-100 ${theme.bgGradient} relative overflow-hidden transition-colors duration-1000`}>
       
       {/* Background decorations */}
-      <div className={`absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-indigo-100/50' : 'bg-rose-100/50'}`} />
+      <div className={`absolute top-1/4 -left-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-indigo-100/50' : 'bg-semantic-danger-bg/50'}`} />
       <div className={`absolute bottom-1/4 -right-32 w-96 h-96 rounded-full blur-[100px] pointer-events-none ${isDoc ? 'bg-blue-100/50' : 'bg-pink-100/50'}`} />
 
       <div className="w-full max-w-md p-8 relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -166,7 +166,7 @@ export default function Auth({ onLogin, apiUrl }) {
 
         <div className="glass-card rounded-3xl p-8 border border-slate-200 shadow-sm shadow-2xl backdrop-blur-xl bg-white shadow-xl">
           {error && (
-            <div className="p-3 rounded-xl mb-6 text-sm text-center border bg-rose-100/50 border-rose-500/30 text-rose-400">
+            <div className="p-3 rounded-xl mb-6 text-sm text-center border bg-semantic-danger-bg/50 border-semantic-danger-text/20/30 text-semantic-danger-text">
               {error}
             </div>
           )}

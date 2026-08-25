@@ -87,16 +87,16 @@ export default function App() {
     }
 
     const severityColors = {
-      'verde': 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      'verde': 'bg-semantic-success-bg text-semantic-success-text border-semantic-success-text/20',
       'amarillo': 'bg-amber-100 text-amber-700 border-amber-200',
-      'rojo': 'bg-rose-100 text-rose-700 border-rose-200'
+      'rojo': 'bg-semantic-danger-bg text-semantic-danger-text border-semantic-danger-text/20'
     };
     const badgeColor = severityColors[data.severidad?.toLowerCase()] || severityColors['amarillo'];
 
     return (
-      <div className="mt-3 p-3 bg-cyan-50/50 border border-cyan-100 rounded-lg text-xs text-slate-600 space-y-2 w-full">
+      <div className="mt-3 p-3 bg-semantic-info-bg/50 border border-brand/30 rounded-lg text-xs text-slate-600 space-y-2 w-full">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 font-bold text-cyan-800">
+          <div className="flex items-center gap-1.5 font-bold text-brand">
             <Sparkles className="w-4 h-4 text-content-primary0" /> Resumen Clínico
           </div>
           {data.severidad && (
@@ -127,8 +127,8 @@ export default function App() {
         )}
         
         {data.preguntas_sugeridas && data.preguntas_sugeridas.length > 0 && (
-          <div className="pt-2 border-t border-cyan-100 mt-2">
-            <strong className="text-cyan-800 flex items-center gap-1">Preguntas sugeridas para tu médico:</strong>
+          <div className="pt-2 border-t border-brand/30 mt-2">
+            <strong className="text-brand flex items-center gap-1">Preguntas sugeridas para tu médico:</strong>
             <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-600">
               {data.preguntas_sugeridas.map((p, i) => <li key={i}>{p}</li>)}
             </ul>
@@ -624,7 +624,7 @@ ${text}`], {type: 'text/plain'});
         {/* Sidebar Header */}
         <div className="p-4 border-b border-slate-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center shadow-lg shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr bg-surface border border-border-subtle flex items-center justify-center shadow-lg shadow-sm">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -642,7 +642,7 @@ ${text}`], {type: 'text/plain'});
         <div className="p-3">
           <button
             onClick={startNewSession}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r bg-surface border border-border-subtle hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" />
             <span>{t("new_consult")}</span>
@@ -654,9 +654,9 @@ ${text}`], {type: 'text/plain'});
           <div className="px-3 pb-3">
             <button
               onClick={() => setShowDocuments(true)}
-              className="w-full py-2 px-4 rounded-xl bg-cyan-50 border border-cyan-200 hover:border-cyan-400 text-cyan-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-cyan-100 shadow-sm"
+              className="w-full py-2 px-4 rounded-xl bg-semantic-info-bg border border-brand/30 hover:border-brand/30 text-brand font-medium flex items-center justify-center gap-2 transition-all hover:bg-brand shadow-sm"
             >
-              <FolderOpen className="w-4 h-4 text-cyan-600" />
+              <FolderOpen className="w-4 h-4 text-brand" />
               <span>Mis Documentos Médicos</span>
             </button>
           </div>
@@ -664,9 +664,9 @@ ${text}`], {type: 'text/plain'});
         <div className="px-3 pb-3">
           <button
             onClick={() => { fetchPatientProfile(); setShowMedicalHistory(true); }}
-            className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:border-cyan-500/50 text-slate-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-100"
+            className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:border-brand/30/50 text-slate-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-100"
           >
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-semantic-success-text" />
             <span>{t("my_history")}</span>
           </button>
         </div>
@@ -680,7 +680,7 @@ ${text}`], {type: 'text/plain'});
               placeholder="Buscar paciente o fecha..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/80 border border-slate-200 shadow-sm rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
+              className="w-full bg-white/80 border border-slate-200 shadow-sm rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-500 focus:outline-none focus:border-brand/30/50"
             />
           </div>
         </div>
@@ -701,12 +701,12 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => loadSession(session.id)}
                   className={`w-full text-left p-3 rounded-xl transition-all flex items-start justify-between group border ${
                     isActive 
-                      ? 'bg-surface border-r border-border-subtle/40 border-cyan-500/40 text-cyan-200' 
+                      ? 'bg-surface border-r border-border-subtle/40 border-brand/30/40 text-brand' 
                       : 'hover:bg-white/60 border-transparent text-slate-700'
                   }`}
                 >
                   <div className="truncate pr-2">
-                    <div className="font-medium text-xs truncate text-slate-800 group-hover:text-cyan-300">
+                    <div className="font-medium text-xs truncate text-slate-800 group-hover:text-brand">
                       {session.patient_name || 'Paciente Anónimo'}
                     </div>
                     <div className="text-[11px] text-slate-600 truncate mt-0.5">
@@ -728,11 +728,11 @@ ${text}`], {type: 'text/plain'});
             </span>
             <div className="flex items-center gap-1.5 font-medium">
               {healthStatus.ollama_running ? (
-                <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 text-[11px]">
+                <span className="inline-flex items-center gap-1 text-semantic-success-text bg-semantic-success-bg/10 px-2 py-0.5 rounded-full border border-semantic-success-text/20/20 text-[11px]">
                   <CheckCircle2 className="w-3 h-3" /> Online
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-rose-400 bg-rose-100/50 px-2 py-0.5 rounded-full border border-rose-500/20 text-[11px]">
+                <span className="inline-flex items-center gap-1 text-semantic-danger-text bg-semantic-danger-bg/50 px-2 py-0.5 rounded-full border border-semantic-danger-text/20/20 text-[11px]">
                   <XCircle className="w-3 h-3" /> Offline
                 </span>
               )}
@@ -746,7 +746,7 @@ ${text}`], {type: 'text/plain'});
               <button onClick={() => setShowSettings(true)} className="text-slate-600 hover:text-brand transition-colors" title="Ajustes de Motor">
                 <Settings className="w-4 h-4" />
               </button>
-              <button onClick={handleLogout} className="text-slate-600 hover:text-rose-400 transition-colors" title="Cerrar sesión">
+              <button onClick={handleLogout} className="text-slate-600 hover:text-semantic-danger-text transition-colors" title="Cerrar sesión">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
@@ -758,7 +758,7 @@ ${text}`], {type: 'text/plain'});
       <main className="flex-1 flex flex-col h-full bg-slate-50 relative overflow-hidden">
         
         {/* Background glow effects */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-brand/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* TOP BAR */}
@@ -788,15 +788,15 @@ ${text}`], {type: 'text/plain'});
           <div className="flex items-center gap-2 md:gap-3 relative shrink-0">
             <LanguageSelector />
             {/* HIPAA Badge Restored */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs shadow-sm">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-semantic-success-bg/10 border border-semantic-success-text/20/20 text-semantic-success-text text-xs shadow-sm">
+              <ShieldCheck className="w-4 h-4 text-semantic-success-text" />
               <span className="font-medium">Certificado HIPAA / RGPD</span>
             </div>
 
             {/* Visual Engine Dropdown para la Demo */}
             <button
               onClick={() => setShowEngineDropdown(!showEngineDropdown)}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-500 hover:bg-teal-400 text-white font-medium text-sm transition-colors shadow-md"
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-semantic-info-bg hover:bg-semantic-info-bg text-semantic-info-text font-medium text-sm transition-colors shadow-md"
             >
               Motor: {selectedEngine.includes('Local') ? 'Local' : 'API'} <span className="text-xs">▼</span>
             </button>
@@ -824,9 +824,9 @@ ${text}`], {type: 'text/plain'});
                           setSelectedEngine(engine.name);
                           setShowEngineDropdown(false);
                         }}
-                        className="text-left px-4 py-2.5 text-sm font-medium text-teal-800 hover:bg-teal-50 rounded transition-colors flex items-center gap-2"
+                        className="text-left px-4 py-2.5 text-sm font-medium text-semantic-info-text hover:bg-teal-50 rounded transition-colors flex items-center gap-2"
                       >
-                        <span className={`text-teal-600 text-[10px] ${engine.icon === '●' ? 'animate-pulse' : ''}`}>{engine.icon}</span>
+                        <span className={`text-semantic-info-text text-[10px] ${engine.icon === '●' ? 'animate-pulse' : ''}`}>{engine.icon}</span>
                         {engine.name}
                       </button>
                     ))}
@@ -854,7 +854,7 @@ ${text}`], {type: 'text/plain'});
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center space-y-6 my-auto">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 border border-cyan-500/30 flex items-center justify-center shadow-xl shadow-cyan-500/10">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 border border-brand/30/30 flex items-center justify-center shadow-xl shadow-sm">
                 <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
@@ -862,7 +862,7 @@ ${text}`], {type: 'text/plain'});
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
                   Asistente clínico multimodal impulsado por inteligencia artificial local para análisis de radiografías, informes médicos en PDF y soporte de diagnóstico.
                 </p>
-                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 text-xs text-left max-w-sm mx-auto shadow-lg shadow-emerald-500/5">
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-semantic-success-bg/10 border border-semantic-success-text/20/30 rounded-lg text-semantic-success-text text-xs text-left max-w-sm mx-auto shadow-lg shadow-sm">
                   <ShieldCheck className="w-6 h-6 shrink-0" />
                   <span>
                     <strong>100% Privado y Seguro:</strong> Cumplimiento estricto de normativas HIPAA y RGPD. El procesamiento es estrictamente local (Edge AI). Ningún dato clínico sale de esta computadora.
@@ -927,7 +927,7 @@ ${text}`], {type: 'text/plain'});
                   {/* Avatar */}
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     isUser 
-                      ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 text-white' 
+                      ? 'bg-gradient-to-tr bg-surface border border-border-subtle text-white' 
                       : 'bg-white border border-slate-300 text-brand shadow-md'
                   }`}>
                     {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
@@ -937,7 +937,7 @@ ${text}`], {type: 'text/plain'});
                   <div className={`flex flex-col space-y-2 max-w-xl ${isUser ? 'items-end' : 'items-start'}`}>
                     <div className={`rounded-2xl p-4 text-sm leading-relaxed ${
                       isUser
-                        ? 'bg-base border border-border-subtle text-content-primary rounded-tr-none shadow-lg shadow-cyan-600/10'
+                        ? 'bg-base border border-border-subtle text-content-primary rounded-tr-none shadow-lg shadow-sm'
                         : 'glass-card text-slate-800 rounded-tl-none border border-slate-200 shadow-sm shadow-lg'
                     }`}>
                       
@@ -970,7 +970,7 @@ ${text}`], {type: 'text/plain'});
                           {msg.text}
                         </ReactMarkdown>
                         {!isUser && msg.text === '' && (
-                           <span className="inline-block w-1.5 h-4 bg-cyan-400 animate-pulse ml-1 align-middle"></span>
+                           <span className="inline-block w-1.5 h-4 bg-brand animate-pulse ml-1 align-middle"></span>
                         )}
                       </div>
 
@@ -989,7 +989,7 @@ ${text}`], {type: 'text/plain'});
                             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-800 text-[11px] font-medium transition-colors"
                           >
                             {copiedMsgId === msg.id ? (
-                              <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copiado</>
+                              <><Check className="w-3.5 h-3.5 text-semantic-success-text" /> Copiado</>
                             ) : (
                               <><Copy className="w-3.5 h-3.5" /> Copiar</>
                             )}
@@ -1021,9 +1021,9 @@ ${text}`], {type: 'text/plain'});
               </div>
               <div className="glass-card text-slate-700 p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm flex items-center gap-3">
                 <div className="flex space-x-1.5">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
                 <span className="text-xs font-medium text-slate-600">MedIA Hub está conectando...</span>
               </div>
@@ -1041,10 +1041,10 @@ ${text}`], {type: 'text/plain'});
             <div className="flex items-center gap-3 mb-3 pb-2 border-b border-slate-200 shadow-sm">
               {selectedImagePreview && (
                 <div className="relative group">
-                  <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-cyan-500/40" />
+                  <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-brand/30/40" />
                   <button
                     onClick={() => { setSelectedImage(null); setSelectedImagePreview(null); }}
-                    className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white rounded-full p-0.5 shadow-md hover:scale-110 transition-transform"
+                    className="absolute -top-1.5 -right-1.5 bg-semantic-danger-bg text-white rounded-full p-0.5 shadow-md hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -1057,7 +1057,7 @@ ${text}`], {type: 'text/plain'});
                   <span className="max-w-xs truncate">{selectedPdfName}</span>
                   <button
                     onClick={() => { setSelectedPdf(null); setSelectedPdfName(null); }}
-                    className="text-slate-600 hover:text-rose-400 ml-1"
+                    className="text-slate-600 hover:text-semantic-danger-text ml-1"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1089,7 +1089,7 @@ ${text}`], {type: 'text/plain'});
               title="Adjuntar Radiografía o Imagen Médica"
               className={`p-2.5 rounded-xl border transition-all ${
                 selectedImage 
-                  ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' 
+                  ? 'bg-brand/20 border-brand/30 text-brand' 
                   : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-brand hover:border-slate-300'
               }`}
             >
@@ -1122,14 +1122,14 @@ ${text}`], {type: 'text/plain'});
                 }}
                 disabled={isTriageClosed}
                 placeholder={isTriageClosed ? "Triaje finalizado." : t("describe_symptoms")}
-                className={`w-full bg-white border ${isTriageClosed ? 'border-slate-200 shadow-sm opacity-50 cursor-not-allowed' : 'border-slate-300 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-800 placeholder-slate-500 resize-none transition-all`}
+                className={`w-full bg-white border ${isTriageClosed ? 'border-slate-200 shadow-sm opacity-50 cursor-not-allowed' : 'border-slate-300 focus:border-brand/30/50 focus:ring-1 focus:ring-cyan-500/50'} rounded-xl py-3 pl-4 pr-12 text-sm text-slate-800 placeholder-slate-500 resize-none transition-all`}
                 rows={1}
                 style={{ minHeight: '44px', maxHeight: '120px' }}
               />
               <button
                 type="submit"
                 disabled={isLoading || (!inputMessage.trim() && !selectedImage && !selectedPdf) || isTriageClosed}
-                className="absolute right-2 top-2 p-1.5 rounded-lg bg-cyan-600 hover:bg-semantic-info-bg text-semantic-info-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="absolute right-2 top-2 p-1.5 rounded-lg bg-brand hover:bg-semantic-info-bg text-semantic-info-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -1153,7 +1153,7 @@ ${text}`], {type: 'text/plain'});
                   <FolderOpen className="w-6 h-6 text-content-primary0" />
                   Mis Documentos Médicos
                 </h2>
-                <button onClick={() => setShowDocuments(false)} className="text-slate-600 hover:text-rose-400 bg-slate-100 p-1.5 rounded-lg transition-colors">
+                <button onClick={() => setShowDocuments(false)} className="text-slate-600 hover:text-semantic-danger-text bg-slate-100 p-1.5 rounded-lg transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1186,7 +1186,7 @@ ${text}`], {type: 'text/plain'});
                         type="file"
                         accept="application/pdf"
                         onChange={(e) => setDocFile(e.target.files[0])}
-                        className="w-full text-xs text-slate-600 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-cyan-100 file:text-cyan-700 hover:file:bg-cyan-200 file:cursor-pointer file:transition-colors bg-white border border-slate-300 rounded-lg shadow-sm"
+                        className="w-full text-xs text-slate-600 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand file:text-brand hover:file:bg-brand file:cursor-pointer file:transition-colors bg-white border border-slate-300 rounded-lg shadow-sm"
                         required
                       />
                     </div>
@@ -1205,7 +1205,7 @@ ${text}`], {type: 'text/plain'});
                     <button 
                       type="submit" 
                       disabled={!docFile || uploadingDoc}
-                      className="w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white font-medium rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
+                      className="w-full py-2.5 bg-brand hover:bg-brand text-white font-medium rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
                     >
                       {uploadingDoc ? 'Subiendo...' : <><Upload className="w-4 h-4"/> Confirmar Subida</>}
                     </button>
@@ -1225,10 +1225,10 @@ ${text}`], {type: 'text/plain'});
                   ) : (
                     <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                       {documents.map((doc) => (
-                        <div key={doc.id} className="flex flex-col p-4 bg-white border border-slate-200 shadow-sm rounded-xl hover:border-cyan-400 hover:shadow-md transition-all group w-full">
+                        <div key={doc.id} className="flex flex-col p-4 bg-white border border-slate-200 shadow-sm rounded-xl hover:border-brand/30 hover:shadow-md transition-all group w-full">
                           <div className="flex items-start justify-between w-full">
                           <div className="flex items-center gap-4 overflow-hidden">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-50 to-blue-50 flex items-center justify-center text-cyan-600 shrink-0 border border-cyan-100 group-hover:scale-105 transition-transform">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br bg-surface border border-border-subtle flex items-center justify-center text-brand shrink-0 border border-brand/30 group-hover:scale-105 transition-transform">
                               <FileText className="w-6 h-6" />
                             </div>
                             <div className="min-w-0">
@@ -1251,14 +1251,14 @@ ${text}`], {type: 'text/plain'});
                               href={doc.download_url} 
                               target="_blank"
                               rel="noreferrer"
-                              className="p-2.5 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors border border-transparent hover:border-cyan-100"
+                              className="p-2.5 text-slate-400 hover:text-brand hover:bg-semantic-info-bg rounded-lg transition-colors border border-transparent hover:border-brand/30"
                               title="Descargar/Ver PDF"
                             >
                               <Download className="w-5 h-5" />
                             </a>
                             <button 
                               onClick={() => deleteDocument(doc.id)}
-                              className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100"
+                              className="p-2.5 text-slate-400 hover:text-semantic-danger-text hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-semantic-danger-text/20"
                               title="Eliminar documento"
                             >
                               <Trash2 className="w-5 h-5" />
@@ -1286,10 +1286,10 @@ ${text}`], {type: 'text/plain'});
           <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in-95 my-auto">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 shadow-sm">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                <ShieldCheck className="w-5 h-5 text-semantic-success-text" />
                 Mi Historial Clínico (Pasaporte QR)
               </h2>
-              <button onClick={() => setShowMedicalHistory(false)} className="text-slate-600 hover:text-rose-400">
+              <button onClick={() => setShowMedicalHistory(false)} className="text-slate-600 hover:text-semantic-danger-text">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1299,15 +1299,15 @@ ${text}`], {type: 'text/plain'});
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">{t("full_name")}</label>
-                    <input type="text" required value={patientProfile.full_name || ''} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" />
+                    <input type="text" required value={patientProfile.full_name || ''} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">{t("dob")}</label>
-                    <input type="date" required value={patientProfile.date_of_birth || ''} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" />
+                    <input type="date" required value={patientProfile.date_of_birth || ''} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">{t("gender")}</label>
-                    <select value={patientProfile.gender || ''} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500">
+                    <select value={patientProfile.gender || ''} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30">
                       <option value="">Seleccione</option>
                       <option value="Masculino">Masculino</option>
                       <option value="Femenino">Femenino</option>
@@ -1316,7 +1316,7 @@ ${text}`], {type: 'text/plain'});
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Grupo Sanguíneo</label>
-                    <select value={patientProfile.blood_type || ''} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500">
+                    <select value={patientProfile.blood_type || ''} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30">
                       <option value="">Seleccione</option>
                       <option value="A+">A+</option><option value="A-">A-</option>
                       <option value="B+">B+</option><option value="B-">B-</option>
@@ -1327,11 +1327,11 @@ ${text}`], {type: 'text/plain'});
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Altura (cm)</label>
-                    <input type="text" value={patientProfile.height || ""} onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" placeholder="Ej. 175" />
+                    <input type="text" value={patientProfile.height || ""} onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" placeholder="Ej. 175" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-1">Peso (kg)</label>
-                    <input type="text" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" placeholder="Ej. 70" />
+                    <input type="text" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" placeholder="Ej. 70" />
                   </div>
                 </div>
                 </div>
@@ -1339,22 +1339,22 @@ ${text}`], {type: 'text/plain'});
 
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Alergias Conocidas</label>
-                  <textarea value={patientProfile.allergies || ''} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Penicilina, polen..."></textarea>
+                  <textarea value={patientProfile.allergies || ''} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" rows={2} placeholder="Ej. Penicilina, polen..."></textarea>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">Enfermedades Crónicas</label>
-                  <textarea value={patientProfile.chronic_conditions || ''} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Hipertensión, asma..."></textarea>
+                  <textarea value={patientProfile.chronic_conditions || ''} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" rows={2} placeholder="Ej. Hipertensión, asma..."></textarea>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">{t("meds")}</label>
-                  <textarea value={patientProfile.current_medications || ''} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" rows={2} placeholder="Ej. Losartán 50mg..."></textarea>
+                  <textarea value={patientProfile.current_medications || ''} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" rows={2} placeholder="Ej. Losartán 50mg..."></textarea>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">{t("emergency")}</label>
-                  <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" placeholder="Nombre y teléfono" />
+                  <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-brand/30" placeholder="Nombre y teléfono" />
                 </div>
 
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-semantic-success-bg text-semantic-success-text font-medium py-2 rounded-lg transition-colors">
+                <button type="submit" className="w-full bg-semantic-success-bg hover:bg-semantic-success-bg text-semantic-success-text font-medium py-2 rounded-lg transition-colors">
                   Guardar Historial
                 </button>
               </form>
@@ -1378,7 +1378,7 @@ ${text}`], {type: 'text/plain'});
               {/* TRIAGE HISTORY UI */}
               <div className="mt-6 border-t border-slate-200 pt-6">
                 <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-rose-500" />
+                  <Activity className="w-4 h-4 text-semantic-danger-text" />
                   Mi Historial de Triajes
                 </h3>
                 {patientProfile.triages && patientProfile.triages.length > 0 ? (
@@ -1388,9 +1388,9 @@ ${text}`], {type: 'text/plain'});
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleString()}</span>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full uppercase font-bold border ${
-                              t.status === 'closed_red' ? 'bg-rose-100 text-rose-500 border-rose-200' :
+                              t.status === 'closed_red' ? 'bg-semantic-danger-bg text-semantic-danger-text border-semantic-danger-text/20' :
                               t.status === 'closed_yellow' ? 'bg-amber-100 text-amber-600 border-amber-200' :
-                              'bg-emerald-100 text-emerald-600 border-emerald-200'
+                              'bg-semantic-success-bg text-semantic-success-text border-semantic-success-text/20'
                             }`}>
                             {t.status === 'closed_red' ? 'Urgencia' : t.status === 'closed_yellow' ? 'Atención' : 'Normal'}
                           </span>
@@ -1410,7 +1410,7 @@ ${text}`], {type: 'text/plain'});
                                 setShowHistory(false);
                                 setShowDoctors(true);
                               }}
-                              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
+                              className="text-xs bg-brand hover:bg-brand-hover text-white px-3 py-2 rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
                             >
                               Ver Directorio Médico
                             </button>
@@ -1438,7 +1438,7 @@ ${text}`], {type: 'text/plain'});
                 <Server className="w-5 h-5 text-brand" />
                 Motor de IA
               </h2>
-              <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-rose-400">
+              <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-semantic-danger-text">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1451,7 +1451,7 @@ ${text}`], {type: 'text/plain'});
                     type="text"
                     value={engineSettings.text_model}
                     onChange={(e) => setEngineSettings({...engineSettings, text_model: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-brand/30"
                   />
                 </div>
                 <div className="flex-1">
@@ -1460,12 +1460,12 @@ ${text}`], {type: 'text/plain'});
                     type="text"
                     value={engineSettings.vision_model}
                     onChange={(e) => setEngineSettings({...engineSettings, vision_model: e.target.value})}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:outline-none focus:border-brand/30"
                   />
                 </div>
               </div>
 
-              <button onClick={() => setShowSettings(false)} className="w-full mt-4 bg-cyan-600 hover:bg-semantic-info-bg text-semantic-info-text font-medium py-2 rounded-lg transition-colors">
+              <button onClick={() => setShowSettings(false)} className="w-full mt-4 bg-brand hover:bg-semantic-info-bg text-semantic-info-text font-medium py-2 rounded-lg transition-colors">
                 Guardar Configuración
               </button>
             </div>

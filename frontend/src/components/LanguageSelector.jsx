@@ -35,7 +35,7 @@ export default function LanguageSelector({ variant = 'default' }) {
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium"
         title="Cambiar idioma"
       >
-        <Globe className="w-4 h-4 text-cyan-600" />
+        <Globe className="w-4 h-4 text-brand" />
         <span className="uppercase">{language}</span>
         <ChevronDown className={"w-3 h-3 text-slate-400 transition-transform " + (isOpen ? 'rotate-180' : '')} />
       </button>
@@ -46,7 +46,7 @@ export default function LanguageSelector({ variant = 'default' }) {
             <button
               key={lang.code}
               onClick={() => { changeLanguage(lang.code); setIsOpen(false); }}
-              className={"w-full text-left px-4 py-2 text-sm transition-colors " + (language === lang.code ? 'bg-cyan-50 text-cyan-700 font-bold' : 'text-slate-600 hover:bg-slate-50')}
+              className={"w-full text-left px-4 py-2 text-sm transition-colors " + (language === lang.code ? 'bg-semantic-info-bg text-brand font-bold' : 'text-slate-600 hover:bg-slate-50')}
             >
               {lang.label}
             </button>
