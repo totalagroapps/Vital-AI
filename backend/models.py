@@ -40,6 +40,7 @@ class TriageSession(Base):
     questions_asked = Column(Integer, default=0)
     status = Column(String, default="in_progress") # in_progress, closed_green, closed_yellow, closed_red
     final_report = Column(String, nullable=True)
+    recommended_specialty = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
