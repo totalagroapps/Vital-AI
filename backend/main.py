@@ -279,7 +279,7 @@ async def upload_document(
                 }
             ]
             
-            ollama_host = os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com")
+            ollama_host = os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com")
             client = ollama.AsyncClient(host=ollama_host, timeout=30.0)
             
             logger.info(f"Enviando imagen a minicpm-v en {ollama_host} para OCR/Clasificación...")
@@ -344,7 +344,7 @@ Tus REGLAS ESTRICTAS son:
 
 @app.post("/api/triage/chat")
 async def triage_chat(request: TriageRequest):
-    ollama_host = os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com")
+    ollama_host = os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com")
     # Timeout generoso de 60s para latencia de red/túnel en streaming
     client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
     
@@ -559,7 +559,7 @@ async def send_triage_message(
     messages_payload = [{"role": "system", "content": TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction}] + sanitized_messages
 
 
-    ollama_host = os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com")
+    ollama_host = os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com")
     client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
 
     async def generate_triage_response():
@@ -803,7 +803,7 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
     
     try:
         def stream_generator():
-            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com"))
+            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com"))
             response = client.chat(
                 model=request.text_model,
                 messages=[
@@ -818,7 +818,7 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
 
         # Let's do it simply using the async generator
         async def generate():
-            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com"))
+            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com"))
             async for chunk in await client.chat(
                 model=request.text_model,
                 messages=[
@@ -885,7 +885,7 @@ async def upload_document(
                 raw_text += page_text + "\n"
         
         if raw_text.strip():
-            ollama_host = os.getenv("OLLAMA_HOST", "https://right-turbo-bacteria-separated.trycloudflare.com")
+            ollama_host = os.getenv("OLLAMA_HOST", "https://wanting-tomato-palm-hence.trycloudflare.com")
             client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
             
             prompt = f"""Eres un asistente médico experto. A continuación tienes el texto extraído de un documento clínico de un paciente.
