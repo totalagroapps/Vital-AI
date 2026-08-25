@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Loader2, ExternalLink, BookOpen, AlertCircle, X } from 'lucide-react';
 
 export default function MedicalSearchModal({ isOpen, onClose, userProfile, token, apiUrl }) {
@@ -16,7 +16,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': Bearer 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           query: searchQuery,
