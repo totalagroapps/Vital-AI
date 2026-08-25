@@ -1396,6 +1396,26 @@ ${text}`], {type: 'text/plain'});
                           </span>
                         </div>
                         <div className="text-sm text-slate-700 whitespace-pre-wrap">{t.final_report}</div>
+                        {t.recommended_specialty && (
+                          <div className="mt-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                              <p className="text-xs text-indigo-500 font-bold uppercase tracking-wider mb-0.5 flex items-center gap-1.5">
+                                <Activity className="w-3.5 h-3.5" />
+                                Derivación Inteligente
+                              </p>
+                              <p className="text-sm font-semibold text-indigo-900">Especialidad Recomendada: {t.recommended_specialty}</p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                setShowHistory(false);
+                                setShowDoctors(true);
+                              }}
+                              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
+                            >
+                              Ver Directorio Médico
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -81,6 +81,8 @@ async def startup_event():
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS preferred_language VARCHAR DEFAULT 'es';"))
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS height VARCHAR;"))
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS weight VARCHAR;"))
+            await conn.execute(text("ALTER TABLE triage_sessions ADD COLUMN IF NOT EXISTS recommended_specialty VARCHAR;"))
+
             await conn.execute(text("RESET statement_timeout;"))
         except Exception as e:
             logger.error(f"Failed to alter tables: {e}")
@@ -654,6 +656,7 @@ async def get_patient_profile(db: AsyncSession = Depends(get_db), user_id: str =
                 "category": t.category,
                 "status": t.status,
                 "final_report": t.final_report,
+                "recommended_specialty": t.recommended_specialty,
                 "created_at": t.created_at.isoformat() if t.created_at else None
             })
 
@@ -743,6 +746,7 @@ async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db)
                 "category": t.category,
                 "status": t.status,
                 "final_report": t.final_report,
+                "recommended_specialty": t.recommended_specialty,
                 "created_at": t.created_at.isoformat() if t.created_at else None
             } for t in triages
         ]
