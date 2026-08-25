@@ -62,7 +62,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-fuchsia-600 to-purple-500 flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-md">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -84,7 +84,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             </div>
             <input
               type="text"
-              className="block w-full pl-12 pr-32 py-3 bg-white border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-fuchsia-500 focus:ring-4 focus:ring-fuchsia-500/10 transition-all shadow-sm text-sm md:text-base"
+              className="block w-full pl-12 pr-32 py-3 bg-white border-2 border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base"
               placeholder="Buscar estudios específicos..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -116,9 +116,9 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               
               <div className="grid gap-4">
                 {results.map((doc, idx) => (
-                  <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-fuchsia-200">
+                  <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-brand/30">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="bg-brand text-brand text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
+                      <span className="bg-semantic-info-bg text-semantic-info-text text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
                         {doc.source_type}
                       </span>
                       {doc.publication_date && (
@@ -156,7 +156,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           
           {loading && (
             <div className="text-center text-slate-500 py-16 flex flex-col items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-brand flex items-center justify-center animate-pulse">
+              <div className="w-12 h-12 rounded-full bg-semantic-info-bg flex items-center justify-center animate-pulse">
                 <Loader2 className="animate-spin text-brand" size={24} />
               </div>
               <p className="text-sm font-medium animate-pulse">Buscando las últimas investigaciones para ti...</p>
