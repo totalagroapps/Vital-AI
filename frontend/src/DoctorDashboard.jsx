@@ -191,7 +191,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 {/* Documents Attached */}
                 <div className="mt-6 mb-6">
                   <h3 className="text-sm font-bold text-slate-600 mb-3 uppercase tracking-wider flex items-center gap-2">
-                    <FolderOpen className="w-4 h-4 text-cyan-500" />
+                    <FolderOpen className="w-4 h-4 text-content-primary0" />
                     Documentos Adjuntos
                   </h3>
                   <div className="space-y-3">

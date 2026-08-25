@@ -79,7 +79,7 @@ export default function App() {
       return (
         <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
           <div className="flex items-center gap-1.5 font-bold text-slate-700 mb-1">
-            <Sparkles className="w-4 h-4 text-cyan-500" /> Resumen IA
+            <Sparkles className="w-4 h-4 text-content-primary0" /> Resumen IA
           </div>
           <p className="whitespace-pre-wrap">{extracted_text}</p>
         </div>
@@ -97,7 +97,7 @@ export default function App() {
       <div className="mt-3 p-3 bg-cyan-50/50 border border-cyan-100 rounded-lg text-xs text-slate-600 space-y-2 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-bold text-cyan-800">
-            <Sparkles className="w-4 h-4 text-cyan-500" /> Resumen Clínico
+            <Sparkles className="w-4 h-4 text-content-primary0" /> Resumen Clínico
           </div>
           {data.severidad && (
             <span className={`px-2 py-0.5 rounded-full border text-[10px] uppercase font-bold tracking-wider ${badgeColor}`}>
@@ -609,7 +609,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   return (
-    <div className="flex h-[100dvh] bg-slate-50 text-slate-900 overflow-hidden">
+    <div className="flex h-[100dvh] bg-base text-content-primary overflow-hidden">
       
       {/* SIDEBAR DE HISTORIAL */}
       {/* Mobile overlay */}
@@ -624,7 +624,7 @@ ${text}`], {type: 'text/plain'});
         {/* Sidebar Header */}
         <div className="p-4 border-b border-slate-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center shadow-lg shadow-sm">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -642,7 +642,7 @@ ${text}`], {type: 'text/plain'});
         <div className="p-3">
           <button
             onClick={startNewSession}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-sky-500 hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" />
             <span>{t("new_consult")}</span>
@@ -701,7 +701,7 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => loadSession(session.id)}
                   className={`w-full text-left p-3 rounded-xl transition-all flex items-start justify-between group border ${
                     isActive 
-                      ? 'bg-cyan-950/40 border-cyan-500/40 text-cyan-200' 
+                      ? 'bg-surface border-r border-border-subtle/40 border-cyan-500/40 text-cyan-200' 
                       : 'hover:bg-white/60 border-transparent text-slate-700'
                   }`}
                 >
@@ -713,7 +713,7 @@ ${text}`], {type: 'text/plain'});
                       {session.title}
                     </div>
                   </div>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'text-cyan-400 translate-x-0.5' : 'text-slate-600 opacity-0 group-hover:opacity-100'}`} />
+                  <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'text-brand translate-x-0.5' : 'text-slate-600 opacity-0 group-hover:opacity-100'}`} />
                 </button>
               );
             })
@@ -724,7 +724,7 @@ ${text}`], {type: 'text/plain'});
         <div className="p-3 border-t border-slate-200 shadow-sm/80 bg-slate-50/60 text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-slate-600 flex items-center gap-1.5">
-              <Brain className="w-3.5 h-3.5 text-cyan-400" /> Motor Ollama
+              <Brain className="w-3.5 h-3.5 text-brand" /> Motor Ollama
             </span>
             <div className="flex items-center gap-1.5 font-medium">
               {healthStatus.ollama_running ? (
@@ -740,10 +740,10 @@ ${text}`], {type: 'text/plain'});
           </div>
           <div className="flex items-center justify-between border-t border-slate-200 shadow-sm/50 pt-2 mt-1">
             <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-              <User className="w-3.5 h-3.5 text-cyan-500" /> {username || 'Médico'}
+              <User className="w-3.5 h-3.5 text-content-primary0" /> {username || 'Médico'}
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowSettings(true)} className="text-slate-600 hover:text-cyan-400 transition-colors" title="Ajustes de Motor">
+              <button onClick={() => setShowSettings(true)} className="text-slate-600 hover:text-brand transition-colors" title="Ajustes de Motor">
                 <Settings className="w-4 h-4" />
               </button>
               <button onClick={handleLogout} className="text-slate-600 hover:text-rose-400 transition-colors" title="Cerrar sesión">
@@ -765,13 +765,13 @@ ${text}`], {type: 'text/plain'});
         <header className="h-16 border-b border-slate-200 shadow-sm/80 px-4 md:px-6 flex items-center justify-between glass-panel z-10 shrink-0">
           <div className="flex items-center gap-3 shrink-0">
             <button 
-              className="md:hidden p-1.5 -ml-2 text-slate-600 hover:text-cyan-400 rounded-lg hover:bg-slate-100"
+              className="md:hidden p-1.5 -ml-2 text-slate-600 hover:text-brand rounded-lg hover:bg-slate-100"
               onClick={() => setIsSidebarOpen(true)}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
             <div className="w-8 h-8 rounded-lg bg-white border border-slate-300 flex items-center justify-center shrink-0">
-              <User className="w-4 h-4 text-cyan-400" />
+              <User className="w-4 h-4 text-brand" />
             </div>
             <div>
               <div className="text-xs text-slate-600 font-medium">Nombre del Paciente</div>
@@ -855,7 +855,7 @@ ${text}`], {type: 'text/plain'});
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center space-y-6 my-auto">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 border border-cyan-500/30 flex items-center justify-center shadow-xl shadow-cyan-500/10">
-                <Sparkles className="w-8 h-8 text-cyan-400" />
+                <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Bienvenido a MedIA Hub</h2>
@@ -876,9 +876,9 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => {
                     imageInputRef.current?.click();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-brand/40 text-left transition-all hover:scale-[1.02] group"
                 >
-                  <ImageIcon className="w-5 h-5 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
+                  <ImageIcon className="w-5 h-5 text-brand mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Análisis Radiológico</div>
                   <div className="text-[11px] text-slate-600 mt-1">Sube una radiografía para evaluación por visión artificial.</div>
                 </button>
@@ -887,9 +887,9 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => {
                     pdfInputRef.current?.click();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-brand/40 text-left transition-all hover:scale-[1.02] group"
                 >
-                  <FileText className="w-5 h-5 text-indigo-400 mb-2 group-hover:scale-110 transition-transform" />
+                  <FileText className="w-5 h-5 text-semantic-info-text mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Procesar PDF</div>
                   <div className="text-[11px] text-slate-600 mt-1">Adjunta exámenes de laboratorio o historias clínicas.</div>
                 </button>
@@ -898,9 +898,9 @@ ${text}`], {type: 'text/plain'});
                   onClick={() => {
                     startTriageSession();
                   }}
-                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                  className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-brand/40 text-left transition-all hover:scale-[1.02] group"
                 >
-                  <Stethoscope className="w-5 h-5 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
+                  <Stethoscope className="w-5 h-5 text-semantic-success-text mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Iniciar Triaje Clínico</div>
                   <div className="text-[11px] text-slate-600 mt-1">Evaluación de síntomas paso a paso por IA.</div>
                 </button>
@@ -908,9 +908,9 @@ ${text}`], {type: 'text/plain'});
                 onClick={() => {
                   setShowMedicalSearch(true);
                 }}
-                className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-cyan-500/40 text-left transition-all hover:scale-[1.02] group"
+                className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-brand/40 text-left transition-all hover:scale-[1.02] group"
               >
-                <BookOpen className="w-5 h-5 text-fuchsia-400 mb-2 group-hover:scale-110 transition-transform" />
+                <BookOpen className="w-5 h-5 text-content-secondary mb-2 group-hover:scale-110 transition-transform" />
                 <div className="font-semibold text-xs text-slate-800">Consulta Artículos Médicos</div>
                 <div className="text-[11px] text-slate-600 mt-1">Consulta nuestra base de conocimientos (RAG).</div>
               </button>
@@ -928,7 +928,7 @@ ${text}`], {type: 'text/plain'});
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                     isUser 
                       ? 'bg-gradient-to-tr from-cyan-600 to-sky-500 text-white' 
-                      : 'bg-white border border-slate-300 text-cyan-400 shadow-md'
+                      : 'bg-white border border-slate-300 text-brand shadow-md'
                   }`}>
                     {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
                   </div>
@@ -937,7 +937,7 @@ ${text}`], {type: 'text/plain'});
                   <div className={`flex flex-col space-y-2 max-w-xl ${isUser ? 'items-end' : 'items-start'}`}>
                     <div className={`rounded-2xl p-4 text-sm leading-relaxed ${
                       isUser
-                        ? 'bg-cyan-600 text-white rounded-tr-none shadow-lg shadow-cyan-600/10'
+                        ? 'bg-base border border-border-subtle text-content-primary rounded-tr-none shadow-lg shadow-cyan-600/10'
                         : 'glass-card text-slate-800 rounded-tl-none border border-slate-200 shadow-sm shadow-lg'
                     }`}>
                       
@@ -1016,7 +1016,7 @@ ${text}`], {type: 'text/plain'});
           {/* Loading Indicator */}
           {isLoading && (
             <div className="flex gap-4 max-w-3xl">
-              <div className="w-9 h-9 rounded-xl bg-white border border-slate-300 text-cyan-400 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-white border border-slate-300 text-brand flex items-center justify-center shrink-0">
                 <Bot className="w-5 h-5 animate-pulse" />
               </div>
               <div className="glass-card text-slate-700 p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-sm flex items-center gap-3">
@@ -1078,7 +1078,7 @@ ${text}`], {type: 'text/plain'});
               type="button"
               onClick={() => setIsSidebarOpen(true)}
               title="Abrir Menú"
-              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-white shadow-sm text-slate-600 hover:text-cyan-400 hover:border-slate-300 transition-all"
+              className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-white shadow-sm text-slate-600 hover:text-brand hover:border-slate-300 transition-all"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -1090,7 +1090,7 @@ ${text}`], {type: 'text/plain'});
               className={`p-2.5 rounded-xl border transition-all ${
                 selectedImage 
                   ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300' 
-                  : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-cyan-400 hover:border-slate-300'
+                  : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-brand hover:border-slate-300'
               }`}
             >
               <ImageIcon className="w-5 h-5" />
@@ -1129,7 +1129,7 @@ ${text}`], {type: 'text/plain'});
               <button
                 type="submit"
                 disabled={isLoading || (!inputMessage.trim() && !selectedImage && !selectedPdf) || isTriageClosed}
-                className="absolute right-2 top-2 p-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="absolute right-2 top-2 p-1.5 rounded-lg bg-cyan-600 hover:bg-semantic-info-bg text-semantic-info-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -1150,7 +1150,7 @@ ${text}`], {type: 'text/plain'});
               
               <div className="flex items-center justify-between mb-6 pb-3 border-b border-slate-200 shadow-sm">
                 <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                  <FolderOpen className="w-6 h-6 text-cyan-500" />
+                  <FolderOpen className="w-6 h-6 text-content-primary0" />
                   Mis Documentos Médicos
                 </h2>
                 <button onClick={() => setShowDocuments(false)} className="text-slate-600 hover:text-rose-400 bg-slate-100 p-1.5 rounded-lg transition-colors">
@@ -1162,7 +1162,7 @@ ${text}`], {type: 'text/plain'});
                 {/* UPLOAD FORM */}
                 <div className="md:col-span-1 bg-slate-50 p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
                   <h3 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
-                    <Upload className="w-4 h-4 text-cyan-500"/> Subir Nuevo
+                    <Upload className="w-4 h-4 text-content-primary0"/> Subir Nuevo
                   </h3>
                   <form onSubmit={uploadDocument} className="space-y-4">
                     
@@ -1354,7 +1354,7 @@ ${text}`], {type: 'text/plain'});
                   <input type="text" value={patientProfile.emergency_contact || ''} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-sm text-slate-800 focus:border-cyan-500" placeholder="Nombre y teléfono" />
                 </div>
 
-                <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition-colors">
+                <button type="submit" className="w-full bg-emerald-600 hover:bg-semantic-success-bg text-semantic-success-text font-medium py-2 rounded-lg transition-colors">
                   Guardar Historial
                 </button>
               </form>
@@ -1435,7 +1435,7 @@ ${text}`], {type: 'text/plain'});
           <div className="bg-white border border-slate-300 p-6 rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in-95">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Server className="w-5 h-5 text-cyan-400" />
+                <Server className="w-5 h-5 text-brand" />
                 Motor de IA
               </h2>
               <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-rose-400">
@@ -1465,7 +1465,7 @@ ${text}`], {type: 'text/plain'});
                 </div>
               </div>
 
-              <button onClick={() => setShowSettings(false)} className="w-full mt-4 bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 rounded-lg transition-colors">
+              <button onClick={() => setShowSettings(false)} className="w-full mt-4 bg-cyan-600 hover:bg-semantic-info-bg text-semantic-info-text font-medium py-2 rounded-lg transition-colors">
                 Guardar Configuración
               </button>
             </div>
