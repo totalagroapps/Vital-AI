@@ -1472,6 +1472,13 @@ ${text}`], {type: 'text/plain'});
           </div>
         </div>
       )}
+      <MedicalSearchModal 
+        isOpen={showMedicalSearch} 
+        onClose={() => setShowMedicalSearch(false)} 
+        token={token} 
+        apiUrl={API_URL} 
+        userProfile={patientProfile} 
+      />
     </div>
   );
 }
