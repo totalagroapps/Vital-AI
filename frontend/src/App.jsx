@@ -624,11 +624,11 @@ ${text}`], {type: 'text/plain'});
         {/* Sidebar Header */}
         <div className="p-4 border-b border-slate-200 shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr bg-surface border border-border-subtle flex items-center justify-center shadow-lg shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-sm">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg leading-none gradient-text">MedIA Hub</h1>
+              <h1 className="font-bold text-lg leading-none text-brand">MedIA Hub</h1>
               <span className="text-[11px] text-slate-600 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
@@ -642,7 +642,7 @@ ${text}`], {type: 'text/plain'});
         <div className="p-3">
           <button
             onClick={startNewSession}
-            className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r bg-surface border border-border-subtle hover:from-cyan-500 hover:to-sky-400 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full py-2.5 px-4 rounded-xl bg-brand hover:bg-brand-hover text-white font-semibold flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Plus className="w-5 h-5" />
             <span>{t("new_consult")}</span>
@@ -854,7 +854,7 @@ ${text}`], {type: 'text/plain'});
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center space-y-6 my-auto">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-sky-500/20 border border-brand/30/30 flex items-center justify-center shadow-xl shadow-sm">
+              <div className="w-16 h-16 rounded-2xl bg-semantic-info-bg border border-border-subtle flex items-center justify-center shadow-sm">
                 <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
