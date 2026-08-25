@@ -663,7 +663,7 @@ ${text}`], {type: 'text/plain'});
         {/* Historial Medico Button */}
         <div className="px-3 pb-3">
           <button
-            onClick={() => setShowMedicalHistory(true)}
+            onClick={() => { fetchPatientProfile(); setShowMedicalHistory(true); }}
             className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:border-cyan-500/50 text-slate-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-100"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
