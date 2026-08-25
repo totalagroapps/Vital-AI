@@ -424,7 +424,7 @@ ${text}`], {type: 'text/plain'});
 
   const startTriageSession = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/triage/start`, { method: 'POST' });
+      const res = await fetch(`${API_URL}/api/triage/start`, { method: 'POST', headers: authHeaders });
       if (res.ok) {
         const data = await res.json();
         setTriageSessionId(data.session_id);
