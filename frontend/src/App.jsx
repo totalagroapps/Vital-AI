@@ -1202,7 +1202,7 @@ ${text}`], {type: 'text/plain'});
                         type="file"
                         accept="application/pdf"
                         onChange={(e) => setDocFile(e.target.files[0])}
-                        className="w-full text-xs text-slate-600 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand file:text-brand hover:file:bg-brand file:cursor-pointer file:transition-colors bg-white border border-slate-300 rounded-lg shadow-sm"
+                        className="w-full text-xs text-slate-600 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand file:text-white hover:file:bg-brand-hover file:cursor-pointer file:transition-colors bg-white border border-slate-300 rounded-lg shadow-sm"
                         required
                       />
                     </div>
