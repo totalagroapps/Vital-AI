@@ -505,7 +505,8 @@ ${text}`], {type: 'text/plain'});
         
         const formData = new FormData();
         // El input base64 lo volvemos blob para enviarlo como archivo
-        const byteString = atob(selectedImage || selectedPdf);
+        const base64Data = (selectedImage || selectedPdf).includes(",") ? (selectedImage || selectedPdf).split(",")[1] : (selectedImage || selectedPdf);
+          const byteString = atob(base64Data);
         const ab = new ArrayBuffer(byteString.length);
         const ia = new Uint8Array(ab);
         for (let i = 0; i < byteString.length; i++) {
