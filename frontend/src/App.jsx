@@ -504,15 +504,10 @@ ${text}`], {type: 'text/plain'});
         setMessages((prev) => [...prev, { id: Date.now() + 2, type: 'ai', text: 'Analizando documento adjunto con OCR...', phiScrubbed: false }]);
         
         const formData = new FormData();
-        // El input base64 lo volvemos blob para enviarlo como archivo
-        const base64Data = (selectedImage || selectedPdf).includes(",") ? (selectedImage || selectedPdf).split(",")[1] : (selectedImage || selectedPdf);
-          const byteString = atob(base64Data);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        const blob = new Blob([ab], { type: selectedImage ? 'image/jpeg' : 'application/pdf' });
+        // Use fetch to safely convert base64 to blob without blocking the main thread or hitting atob limits
+        const dataUri = selectedImage ? selectedImage : `data:application/pdf;base64,${selectedPdf}`;
+        const fetchRes = await fetch(dataUri);
+        const blob = await fetchRes.blob();
         formData.append('file', blob, selectedImage ? 'imagen.jpg' : 'documento.pdf');
 
         const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
