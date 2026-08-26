@@ -513,16 +513,26 @@ ${text}`], {type: 'text/plain'});
             formData.append('file', selectedPdfFile);
         }
 
-        const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
-          method: 'POST',
-          body: formData
-        });
+        try {
+          const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
+            method: 'POST',
+            body: formData
+          });
 
-        if (uploadRes.ok) {
+          if (!uploadRes.ok) {
+            // Attempt to parse JSON error, fallback if CORS blocked it
+            let errText = "Error desconocido procesando el documento en el servidor.";
+            try {
+                const errData = await uploadRes.json();
+                errText = errData.detail || errText;
+            } catch (e) {}
+            throw new Error(`Fallo al analizar el documento: ${errText}`);
+          }
+
           const uploadData = await uploadRes.json();
-          documentContext = `
-
-[Contexto del Documento Adjunto: ${uploadData.extracted_text}]`;
+          documentContext = `\n\n[Contexto del Documento Adjunto: ${uploadData.extracted_text}]`;
+        } catch (uploadErr) {
+          throw new Error(`Error de subida: ${uploadErr.message}`);
         }
       }
 
@@ -606,7 +616,7 @@ ${text}`], {type: 'text/plain'});
         {
           id: Date.now() + 1,
           type: 'ai',
-          text: `⚠️ **Error de conexión:** No se pudo comunicar con el backend de VitalIA (${API_URL}). Verifica que Uvicorn u Ollama estén activos.`,
+          text: `⚠️ **Error:** No se pudo completar la solicitud. \nDetalle: ${err.message}`,
           error: true
         }
       ]);
