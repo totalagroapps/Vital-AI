@@ -507,11 +507,11 @@ ${text}`], {type: 'text/plain'});
         setMessages((prev) => [...prev, { id: Date.now() + 2, type: 'ai', text: 'Analizando documento adjunto con OCR...', phiScrubbed: false }]);
         
         const formData = new FormData();
-        // Use fetch to safely convert base64 to blob without blocking the main thread or hitting atob limits
-        const dataUri = selectedImage ? `data:image/jpeg;base64,${selectedImage}` : `data:application/pdf;base64,${selectedPdf}`;
-        const fetchRes = await fetch(dataUri);
-        const blob = await fetchRes.blob();
-        formData.append('file', blob, selectedImage ? 'imagen.jpg' : 'documento.pdf');
+        if (selectedImageFile) {
+            formData.append('file', selectedImageFile);
+        } else if (selectedPdfFile) {
+            formData.append('file', selectedPdfFile);
+        }
 
         const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
           method: 'POST',
