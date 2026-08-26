@@ -246,8 +246,12 @@ async def get_chat_session(session_id: str, db: AsyncSession = Depends(get_db), 
         "messages": [{"role": m.role, "content": m.content} for m in messages]
     }
 
+class StandardChatMessage(BaseModel):
+    role: str
+    content: str
+
 class StandardChatRequest(BaseModel):
-    messages: List[ChatMessage]
+    messages: List[StandardChatMessage]
     language: Optional[str] = "es"
 
 @app.post("/api/chat/{session_id}/message")
