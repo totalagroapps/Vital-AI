@@ -876,12 +876,12 @@ ${text}`], {type: 'text/plain'});
               <div>
                 <h2 className="text-2xl font-bold text-slate-900">Bienvenido a VitalIA</h2>
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
-                  Asistente clínico multimodal impulsado por inteligencia artificial local para análisis de radiografías, informes médicos en PDF y soporte de diagnóstico.
+                  Tu asistente médico de confianza. Te ayudamos a entender tus estudios médicos, radiografías y síntomas de forma clara, rápida y segura.
                 </p>
                 <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-semantic-success-bg/10 border border-semantic-success-text/20/30 rounded-lg text-semantic-success-text text-xs text-left max-w-sm mx-auto shadow-lg shadow-sm">
                   <ShieldCheck className="w-6 h-6 shrink-0" />
                   <span>
-                    <strong>100% Privado y Seguro:</strong> Cumplimiento estricto de normativas HIPAA y RGPD. El procesamiento es estrictamente local (Edge AI). Ningún dato clínico sale de esta computadora.
+                    <strong>100% Privado y Seguro:</strong> Cumplimiento estricto de normas de privacidad (HIPAA y RGPD). Tu información médica es totalmente confidencial y nunca sale de tu dispositivo personal.
                   </span>
                 </div>
               </div>
