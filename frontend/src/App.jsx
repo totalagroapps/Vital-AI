@@ -467,12 +467,12 @@ ${text}`], {type: 'text/plain'});
     e?.preventDefault();
     if ((!inputMessage.trim() && !selectedImage && !selectedPdf) || isLoading) return;
 
-    const userText = inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'He adjuntado el reporte de mis hallazgos médicos. Por favor, explícamelo.' : 'He adjuntado mi documento clínico. Por favor, explícamelo.');
+    const userText = inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:' : 'Por favor, explícame el siguiente documento clínico:');
     
     const tempUserMsg = {
       id: Date.now(),
       type: 'user',
-      text: userText,
+      text: inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'Por favor, explícame esta radiografía.' : 'Por favor, explícame este documento.'),
       image: selectedImagePreview,
       pdf: !!selectedPdf,
       phiScrubbed: false
@@ -530,7 +530,7 @@ ${text}`], {type: 'text/plain'});
           }
 
           const uploadData = await uploadRes.json();
-          documentContext = `\n\n[Contexto del Documento Adjunto: ${uploadData.extracted_text}]`;
+          documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
         } catch (uploadErr) {
           throw new Error(`Error de subida: ${uploadErr.message}`);
         }
