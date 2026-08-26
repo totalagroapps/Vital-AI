@@ -896,7 +896,7 @@ ${text}`], {type: 'text/plain'});
                 >
                   <ImageIcon className="w-5 h-5 text-brand mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Análisis Radiológico</div>
-                  <div className="text-[11px] text-slate-600 mt-1">Sube una radiografía o imagen médica para obtener una evaluación.</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Sube una radiografía o imagen médica para obtener una evaluación por IA.</div>
                 </button>
 
                 <button
@@ -907,7 +907,7 @@ ${text}`], {type: 'text/plain'});
                 >
                   <FileText className="w-5 h-5 text-semantic-info-text mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Análisis de Exámenes</div>
-                  <div className="text-[11px] text-slate-600 mt-1">Adjunta resultados de laboratorio o documentos clínicos para su revisión.</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Adjunta resultados de laboratorio o documentos clínicos para su revisión por IA.</div>
                 </button>
 
                 <button
@@ -918,7 +918,7 @@ ${text}`], {type: 'text/plain'});
                 >
                   <Stethoscope className="w-5 h-5 text-semantic-success-text mb-2 group-hover:scale-110 transition-transform" />
                   <div className="font-semibold text-xs text-slate-800">Evaluación de Síntomas</div>
-                  <div className="text-[11px] text-slate-600 mt-1">Responde un breve cuestionario para orientarte sobre tus malestares.</div>
+                  <div className="text-[11px] text-slate-600 mt-1">Triaje clinico asistido por IA.</div>
                 </button>
               <button
                 onClick={() => {
@@ -928,7 +928,7 @@ ${text}`], {type: 'text/plain'});
               >
                 <BookOpen className="w-5 h-5 text-content-secondary mb-2 group-hover:scale-110 transition-transform" />
                 <div className="font-semibold text-xs text-slate-800">Biblioteca Médica</div>
-                <div className="text-[11px] text-slate-600 mt-1">Busca información en nuestra base de estudios y literatura científica.</div>
+                <div className="text-[11px] text-slate-600 mt-1">Busca información personalizada en nuestra base de estudios y literatura científica asistido por IA.</div>
               </button>
               </div>
             </div>
