@@ -373,7 +373,7 @@ async def upload_document(
             
             logger.info(f"Enviando imagen a minicpm-v en {ollama_host} para OCR/Clasificación...")
             resp = await client.chat(
-                model="llama3.2-vision:latest",
+                model="minicpm-v",
                 messages=messages,
                 options={"temperature": 0.1, "num_predict": 1024, "num_ctx": 4096}
             )
