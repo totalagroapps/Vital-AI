@@ -93,7 +93,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="absolute inset-y-1.5 right-1.5 bg-brand hover:bg-brand disabled:bg-slate-300 text-white font-medium rounded-lg px-4 md:px-6 transition-colors shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
+              className="absolute inset-y-1.5 right-1.5 bg-brand hover:bg-brand disabled:bg-slate-100 disabled:text-slate-400 text-white font-medium rounded-lg px-4 md:px-6 transition-colors shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : 'Buscar'}
             </button>
@@ -117,7 +117,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               
               <div className="grid gap-4">
                 {results.map((doc, idx) => (
-                  <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-brand/30">
+                  <div key={idx} className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm transition-all hover:shadow-md hover:border-brand/30 w-full overflow-hidden">
                     <div className="flex items-center justify-between mb-2">
                       <span className="bg-semantic-info-bg text-semantic-info-text text-[10px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
                         {doc.source_type}
@@ -126,8 +126,8 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                         <span className="text-xs text-slate-400 font-medium">{doc.publication_date}</span>
                       )}
                     </div>
-                    <h4 className="text-base font-bold text-slate-800 mb-2 leading-snug">{doc.title}</h4>
-                    <p className="text-slate-600 text-sm mb-4 line-clamp-3 leading-relaxed">{doc.abstract}</p>
+                    <h4 className="text-base font-bold text-slate-800 mb-2 leading-snug break-words whitespace-normal">{doc.title}</h4>
+                    <p className="text-slate-600 text-sm mb-4 leading-relaxed break-words whitespace-normal overflow-hidden display-webkit-box webkit-box-orient-vertical webkit-line-clamp-3">{doc.abstract}</p>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                       <p className="text-xs text-slate-500 truncate max-w-[70%] font-medium">
                         {doc.authors && doc.authors.length > 0 ? doc.authors.join(', ') : 'Autores no especificados'}
@@ -136,7 +136,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                         href={doc.url} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="flex items-center gap-1.5 text-brand hover:text-brand text-xs font-bold transition-colors"
+                        className="flex items-center gap-1.5 text-brand hover:text-brand text-xs font-bold transition-colors shrink-0"
                       >
                         Ver original <ExternalLink size={12} />
                       </a>
