@@ -1290,6 +1290,7 @@ ${text}`], {type: 'text/plain'});
                     </div>
                   )}
                 </div>
+              </div>
 
             </div>
           </div>
@@ -1389,6 +1390,7 @@ ${text}`], {type: 'text/plain'});
                   </div>
                 )}
               </div>
+            </div> {/* Close flex-row here! */}
 
               {/* TRIAGE HISTORY UI */}
               <div className="mt-6 border-t border-slate-200 pt-6">
@@ -1439,7 +1441,6 @@ ${text}`], {type: 'text/plain'});
                 )}
               </div>
 
-            </div>
           </div>
         </div>
       )}
