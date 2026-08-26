@@ -371,9 +371,9 @@ async def upload_document(
             ollama_host = os.getenv("OLLAMA_HOST", "https://desktops-days-wav-happened.trycloudflare.com")
             client = ollama.AsyncClient(host=ollama_host, timeout=30.0)
             
-            logger.info(f"Enviando imagen a minicpm-v en {ollama_host} para OCR/Clasificación...")
+            logger.info(f"Enviando imagen a llama3.2-vision:latest en {ollama_host} para OCR/Clasificación...")
             resp = await client.chat(
-                model="minicpm-v",
+                model="llama3.2-vision:latest",
                 messages=messages,
                 options={"temperature": 0.1, "num_predict": 1024, "num_ctx": 4096}
             )
