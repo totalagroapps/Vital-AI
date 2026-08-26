@@ -87,3 +87,18 @@ class PatientProfile(Base):
     preferred_language = Column(String, default="es")
     medical_documents = relationship("MedicalDocument", back_populates="patient")
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, index=True)
+    title = Column(String, default="Nueva Consulta")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String, ForeignKey("chat_sessions.id"))
+    role = Column(String)
+    content = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
