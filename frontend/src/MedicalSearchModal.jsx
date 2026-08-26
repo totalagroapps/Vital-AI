@@ -86,6 +86,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               type="text"
               className="block w-full pl-12 pr-32 py-3 bg-white border-2 border-slate-200 rounded-xl text-black placeholder-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base"
               placeholder="Buscar estudios específicos..."
+                style={{ color: "#0f172a" }}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
