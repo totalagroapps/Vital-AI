@@ -371,9 +371,9 @@ async def upload_document(
             ollama_host = os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev")
             client = ollama.AsyncClient(host=ollama_host, timeout=30.0)
             
-            logger.info(f"Enviando imagen a llama3.2-vision:latest en {ollama_host} para OCR/Clasificación...")
+            logger.info(f"Enviando imagen a minicpm-v:latest en {ollama_host} para OCR/Clasificación...")
             resp = await client.chat(
-                model="llama3.2-vision:latest",
+                model="minicpm-v:latest",
                 messages=messages,
                 options={"temperature": 0.1, "num_predict": 1024, "num_ctx": 4096}
             )
