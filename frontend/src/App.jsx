@@ -537,9 +537,29 @@ ${text}`], {type: 'text/plain'});
         content: userText + documentContext
       });
 
-      const endpoint = triageSessionId 
-        ? `${API_URL}/api/triage/${triageSessionId}/message`
-        : `${API_URL}/api/triage/chat`;
+      let endpoint;
+      let finalSessionId = currentSessionId;
+      
+      if (!currentSessionId && (documentContext !== "" || selectedImage || selectedPdf)) {
+          const startRes = await fetch(`${API_URL}/api/chat/start`, {
+              method: 'POST',
+              headers: authHeaders
+          });
+          if (startRes.ok) {
+              const startData = await startRes.json();
+              finalSessionId = startData.session_id;
+              setCurrentSessionId(finalSessionId);
+              loadSessions();
+          }
+      }
+
+      if (finalSessionId) {
+          endpoint = `${API_URL}/api/chat/${finalSessionId}/message`;
+      } else {
+          endpoint = triageSessionId 
+            ? `${API_URL}/api/triage/${triageSessionId}/message`
+            : `${API_URL}/api/triage/chat`;
+      }
 
       const res = await fetch(endpoint, {
         method: 'POST',
