@@ -467,7 +467,7 @@ ${text}`], {type: 'text/plain'});
     e?.preventDefault();
     if ((!inputMessage.trim() && !selectedImage && !selectedPdf) || isLoading) return;
 
-    const userText = inputMessage.trim() || (selectedImage ? 'Analiza esta imagen médica adjunta.' : 'Procesa este documento PDF.');
+    const userText = inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'He adjuntado el reporte de mis hallazgos médicos. Por favor, explícamelo.' : 'He adjuntado mi documento clínico. Por favor, explícamelo.');
     
     const tempUserMsg = {
       id: Date.now(),
