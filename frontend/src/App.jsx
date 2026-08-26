@@ -558,7 +558,7 @@ ${text}`], {type: 'text/plain'});
               const startData = await startRes.json();
               finalSessionId = startData.session_id;
               setCurrentSessionId(finalSessionId);
-              loadSessions();
+              fetchSessions();
           }
       }
 
