@@ -607,7 +607,7 @@ ${text}`], {type: 'text/plain'});
         {
           id: Date.now() + 1,
           type: 'ai',
-          text: `⚠️ **Error de conexión:** No se pudo comunicar con el backend de MedIA Hub (${API_URL}). Verifica que Uvicorn u Ollama estén activos.`,
+          text: `⚠️ **Error de conexión:** No se pudo comunicar con el backend de VitalIA (${API_URL}). Verifica que Uvicorn u Ollama estén activos.`,
           error: true
         }
       ]);
@@ -648,7 +648,7 @@ ${text}`], {type: 'text/plain'});
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg leading-none text-brand">MedIA Hub</h1>
+              <h1 className="font-bold text-lg leading-none text-brand">VitalIA</h1>
               <span className="text-[11px] text-slate-600 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
@@ -878,7 +878,7 @@ ${text}`], {type: 'text/plain'});
                 <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a MedIA Hub</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a VitalIA</h2>
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
                   Asistente clínico multimodal impulsado por inteligencia artificial local para análisis de radiografías, informes médicos en PDF y soporte de diagnóstico.
                 </p>
@@ -1045,7 +1045,7 @@ ${text}`], {type: 'text/plain'});
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-xs font-medium text-slate-600">MedIA Hub está conectando...</span>
+                <span className="text-xs font-medium text-slate-600">VitalIA está conectando...</span>
               </div>
             </div>
           )}

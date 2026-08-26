@@ -60,7 +60,7 @@ if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID:
         region_name="auto"
     )
 
-app = FastAPI(title="MedIA Hub V2 - Team API", version="2.0")
+app = FastAPI(title="VitalIA V2 - Team API", version="2.0")
 
 @app.get("/")
 def healthcheck():

@@ -90,7 +90,7 @@ export default function Auth({ onLogin, apiUrl }) {
 
         <div className="w-full max-w-4xl relative z-10 flex flex-col items-center">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 tracking-tight">MedIA Hub</h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-700 to-slate-900 tracking-tight">VitalIA</h1>
             <p className="text-slate-600 mt-3 font-medium text-lg">Selecciona tu portal de acceso</p>
           </div>
 
