@@ -1290,7 +1290,6 @@ ${text}`], {type: 'text/plain'});
                     </div>
                   )}
                 </div>
-              </div>
 
             </div>
           </div>
