@@ -505,7 +505,7 @@ ${text}`], {type: 'text/plain'});
         
         const formData = new FormData();
         // Use fetch to safely convert base64 to blob without blocking the main thread or hitting atob limits
-        const dataUri = selectedImage ? selectedImage : `data:application/pdf;base64,${selectedPdf}`;
+        const dataUri = selectedImage ? `data:image/jpeg;base64,${selectedImage}` : `data:application/pdf;base64,${selectedPdf}`;
         const fetchRes = await fetch(dataUri);
         const blob = await fetchRes.blob();
         formData.append('file', blob, selectedImage ? 'imagen.jpg' : 'documento.pdf');
