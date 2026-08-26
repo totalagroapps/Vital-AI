@@ -230,8 +230,10 @@ export default function App() {
   // File attachments
   const [selectedImage, setSelectedImage] = useState(null); // base64
   const [selectedImagePreview, setSelectedImagePreview] = useState(null);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [selectedPdf, setSelectedPdf] = useState(null); // base64
   const [selectedPdfName, setSelectedPdfName] = useState(null);
+  const [selectedPdfFile, setSelectedPdfFile] = useState(null);
   
   // UI states
   const [selectedEngine, setSelectedEngine] = useState('Local (Ollama)');
@@ -417,8 +419,10 @@ ${text}`], {type: 'text/plain'});
     setInputMessage('');
     setSelectedImage(null);
     setSelectedImagePreview(null);
+    setSelectedImageFile(null);
     setSelectedPdf(null);
     setSelectedPdfName(null);
+    setSelectedPdfFile(null);
     setPhiAlert(false);
   };
 
@@ -440,10 +444,11 @@ ${text}`], {type: 'text/plain'});
     const file = e.target.files[0];
     if (!file) return;
 
+    setSelectedImageFile(file);
+    setSelectedImage(true); // Keeping this flag for logic checks
+    
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64String = event.target.result.split(',')[1];
-      setSelectedImage(base64String);
       setSelectedImagePreview(event.target.result);
     };
     reader.readAsDataURL(file);
@@ -453,13 +458,9 @@ ${text}`], {type: 'text/plain'});
     const file = e.target.files[0];
     if (!file) return;
 
+    setSelectedPdfFile(file);
+    setSelectedPdf(true); // Keeping this flag for logic checks
     setSelectedPdfName(file.name);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target.result.split(',')[1];
-      setSelectedPdf(base64String);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleSend = async (e) => {
@@ -492,8 +493,10 @@ ${text}`], {type: 'text/plain'});
 
     setSelectedImage(null);
     setSelectedImagePreview(null);
+    setSelectedImageFile(null);
     setSelectedPdf(null);
     setSelectedPdfName(null);
+    setSelectedPdfFile(null);
 
     try {
       let documentContext = "";
@@ -1059,7 +1062,8 @@ ${text}`], {type: 'text/plain'});
                 <div className="relative group">
                   <img src={selectedImagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-lg border border-brand/30/40" />
                   <button
-                    onClick={() => { setSelectedImage(null); setSelectedImagePreview(null); }}
+                    onClick={() => { setSelectedImage(null); setSelectedImagePreview(null);
+    setSelectedImageFile(null); }}
                     className="absolute -top-1.5 -right-1.5 bg-semantic-danger-bg text-white rounded-full p-0.5 shadow-md hover:scale-110 transition-transform"
                   >
                     <X className="w-3 h-3" />
@@ -1072,7 +1076,8 @@ ${text}`], {type: 'text/plain'});
                   <FileText className="w-4 h-4 text-indigo-400" />
                   <span className="max-w-xs truncate">{selectedPdfName}</span>
                   <button
-                    onClick={() => { setSelectedPdf(null); setSelectedPdfName(null); }}
+                    onClick={() => { setSelectedPdf(null); setSelectedPdfName(null);
+    setSelectedPdfFile(null); }}
                     className="text-slate-600 hover:text-semantic-danger-text ml-1"
                   >
                     <X className="w-3.5 h-3.5" />
