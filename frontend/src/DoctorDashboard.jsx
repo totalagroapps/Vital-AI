@@ -49,6 +49,66 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     setIsLoadingPatients(false);
   };
 
+  const handleExportPDF = () => {
+    if (!patientDetail) return;
+    
+    // Create a temporary window to print
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    let triagesHtml = patientDetail.triages.map(t => 
+      <div style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
+        <strong>Fecha:</strong> <br/>
+        <strong>Categoría:</strong> <br/>
+        <strong>Reporte Final:</strong><br/>
+        <div style="white-space: pre-wrap;"></div>
+      </div>
+    ).join('');
+
+    const html = 
+      <html>
+        <head>
+          <title>Historia Clínica - </title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
+            h1 { color: #0f172a; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; }
+            h2 { color: #0f172a; margin-top: 30px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+            .label { color: #64748b; font-size: 0.85em; text-transform: uppercase; }
+            .value { font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h1>VitalIA - Informe Médico Oficial</h1>
+          
+          <h2>Ficha del Paciente</h2>
+          <div class="grid">
+            <div><div class="label">Nombre</div><div class="value"></div></div>
+            <div><div class="label">Nacimiento</div><div class="value"></div></div>
+            <div><div class="label">Género</div><div class="value"></div></div>
+            <div><div class="label">Tipo de Sangre</div><div class="value"></div></div>
+            <div><div class="label">Alergias</div><div class="value"></div></div>
+            <div><div class="label">Condiciones Crónicas</div><div class="value"></div></div>
+            <div><div class="label">Medicamentos</div><div class="value"></div></div>
+          </div>
+          
+          <h2>Historial de Triajes Clínicos</h2>
+          
+          
+          <div style="margin-top: 50px; text-align: center; font-size: 0.8em; color: #94a3b8;">
+            Generado automáticamente por VitalIA System el 
+          </div>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    ;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const fetchPatientDetail = async (userId) => {
     setIsLoadingDetail(true);
     try {
@@ -180,10 +240,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
                   <User className="w-32 h-32" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-400" />
-                  Ficha Clínica
-                </h3>
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-indigo-400" />
+                      Ficha Clínica
+                    </h3>
+                    <button 
+                      onClick={handleExportPDF}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors shadow-sm"
+                      title="Generar y descargar informe en formato PDF"
+                    >
+                      <FileText className="w-4 h-4" /> Exportar PDF
+                    </button>
+                  </div>
                 <div className="grid grid-cols-2 gap-4 text-sm relative z-10">
                   <div><span className="text-slate-600 block text-xs">Nombre</span><span className="font-medium">{patientDetail.profile.full_name}</span></div>
                   <div><span className="text-slate-600 block text-xs">Nacimiento</span><span className="font-medium">{patientDetail.profile.date_of_birth}</span></div>
