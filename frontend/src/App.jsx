@@ -753,7 +753,7 @@ ${text}`], {type: 'text/plain'});
         <div className="p-3 border-t border-slate-200 shadow-sm/80 bg-slate-50/60 text-xs flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <span className="text-slate-600 flex items-center gap-1.5">
-              <Brain className="w-3.5 h-3.5 text-brand" /> Motor Ollama
+              <Brain className="w-3.5 h-3.5 text-brand" /> Motor OpenAI (Cloud)
             </span>
             <div className="flex items-center gap-1.5 font-medium">
               {healthStatus.ollama_running ? (
@@ -1467,7 +1467,7 @@ ${text}`], {type: 'text/plain'});
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Server className="w-5 h-5 text-brand" />
-                Motor de IA
+                Acerca de VitalIA
               </h2>
               <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-semantic-danger-text">
                 <X className="w-5 h-5" />
