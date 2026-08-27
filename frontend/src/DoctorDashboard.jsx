@@ -143,7 +143,15 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 }`}
               >
                 <div>
-                  <div className="font-medium text-sm">{p.full_name}</div>
+                  <div className="font-medium text-sm flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                      p.triage_category === 'Rojo' ? 'bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]' :
+                      p.triage_category === 'Amarillo' ? 'bg-yellow-500' :
+                      p.triage_category === 'Verde' ? 'bg-green-500' :
+                      'bg-slate-300'
+                    }`} title={`Triaje: ${p.triage_category || 'Ninguno'}`}></span>
+                    <span className="truncate">{p.full_name}</span>
+                  </div>
                   <div className="text-xs text-slate-600">{p.gender} • {p.date_of_birth}</div>
                 </div>
                 <ChevronRight className={`w-4 h-4 ${selectedPatient?.user_id === p.user_id ? 'text-indigo-400' : 'text-slate-600'}`} />

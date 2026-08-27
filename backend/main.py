@@ -804,7 +804,44 @@ async def get_all_patients(db: AsyncSession = Depends(get_db), current_user_id: 
     from sqlalchemy.future import select
     result = await db.execute(select(models.PatientProfile))
     patients = result.scalars().all()
-    return [{"user_id": p.user_id, "full_name": p.full_name, "date_of_birth": p.date_of_birth, "gender": p.gender} for p in patients]
+    
+    response = []
+    for p in patients:
+        triage_res = await db.execute(select(models.TriageSession).where(models.TriageSession.user_id == p.user_id).order_by(models.TriageSession.created_at.desc()))
+        latest_triage = triage_res.scalars().first()
+        
+        # Mapping numerical or text categories to simple colors
+        category = "Ninguno"
+        if latest_triage and latest_triage.category:
+            cat = latest_triage.category.lower()
+            if "rojo" in cat or "emergencia" in cat or "resucitacion" in cat or "1" in cat or "2" in cat:
+                category = "Rojo"
+            elif "amarillo" in cat or "urgencia" in cat or "3" in cat:
+                category = "Amarillo"
+            elif "verde" in cat or "azul" in cat or "4" in cat or "5" in cat:
+                category = "Verde"
+            else:
+                category = "Amarillo" # Default unknown to moderate
+                
+        response.append({
+            "user_id": p.user_id, 
+            "full_name": p.full_name, 
+            "date_of_birth": p.date_of_birth, 
+            "gender": p.gender,
+            "triage_category": category,
+            "triage_status": latest_triage.status if latest_triage else "Ninguno"
+        })
+        
+    # Sort by urgency: Rojo > Amarillo > Verde > Ninguno
+    def sort_key(p):
+        cat = p["triage_category"]
+        if cat == "Rojo": return 0
+        if cat == "Amarillo": return 1
+        if cat == "Verde": return 2
+        return 3
+        
+    response.sort(key=sort_key)
+    return response
 
 @app.get("/api/doctor/patients/{patient_id}")
 async def get_patient_detail(patient_id: str, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
