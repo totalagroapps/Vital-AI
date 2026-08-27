@@ -471,14 +471,8 @@ async def triage_chat(request: TriageRequest):
                     yield chunk.choices[0].delta.content
         except Exception as e:
             logger.error(f"OpenAI stream failed: {str(e)}")
-            yield "
-
-[Error de conexión: El asistente no está disponible en este momento, intenta más tarde.]"
-
+            yield "\n\n[Error de conexión: El asistente no está disponible en este momento, intenta más tarde.]"
     return StreamingResponse(generate_chat(), media_type="text/plain")
-# ==========================================
-# ðŸš€ EXTENSIÃ“N: MODO TRIAJE ESTRUCTURADO 
-# ==========================================
 # Pega este cÃ³digo al final de tu archivo main.py
 # Nota: Ya he inyectado la clase TriageSession directamente en tu models.py.
 
