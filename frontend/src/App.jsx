@@ -823,45 +823,10 @@ ${text}`], {type: 'text/plain'});
             </div>
 
             {/* Visual Engine Dropdown para la Demo */}
-            <button
-              onClick={() => setShowEngineDropdown(!showEngineDropdown)}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-semantic-info-bg hover:bg-semantic-info-bg text-semantic-info-text font-medium text-sm transition-colors shadow-md"
-            >
-              Motor: {selectedEngine.includes('Local') ? 'Local' : 'API'} <span className="text-xs">▼</span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {showEngineDropdown && (
-              <>
-                {/* Overlay invisible para cerrar al hacer clic afuera */}
-                <div 
-                  className="fixed inset-0 z-40"
-                  onClick={() => setShowEngineDropdown(false)}
-                />
-                
-                <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-teal-600/30 overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
-                  <div className="p-1.5 flex flex-col">
-                    {[
-                      { id: 'ollama', name: 'Local (Ollama)', icon: '●' },
-                      { id: 'vllm', name: 'Local (vLLM)', icon: '●' },
-                      { id: 'dr7', name: 'API Dr7.ai', icon: '○' },
-                      { id: 'key', name: 'API propia (key)', icon: '○' }
-                    ].map((engine) => (
-                      <button
-                        key={engine.id}
-                        onClick={() => {
-                          setSelectedEngine(engine.name);
-                          setShowEngineDropdown(false);
-                        }}
-                        className="text-left px-4 py-2.5 text-sm font-medium text-semantic-info-text hover:bg-teal-50 rounded transition-colors flex items-center gap-2"
-                      >
-                        <span className={`text-semantic-info-text text-[10px] ${engine.icon === '●' ? 'animate-pulse' : ''}`}>{engine.icon}</span>
-                        {engine.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-semantic-info-bg text-semantic-info-text font-medium text-sm transition-colors shadow-md border border-brand/20">
+              <Server className="w-4 h-4 text-brand" />
+              <span>Motor: GPT-4o-mini</span>
+            </div>
             )}
           </div>
         </header>
