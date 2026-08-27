@@ -19,6 +19,7 @@ import re
 import traceback
 from typing import Optional, List
 import asyncio
+from openai import AsyncOpenAI
 
 from PIL import Image
 import PyPDF2
@@ -281,20 +282,19 @@ async def send_standard_chat_message(session_id: str, request: StandardChatReque
     for msg in request.messages:
         messages_payload.append({"role": msg.role, "content": msg.content})
 
-    ollama_host = os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev")
-    client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
+    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     async def generate_chat():
         full_response = ""
         try:
-            response_stream = await client.chat(
-                model="llama3.1",
+            response_stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=messages_payload,
                 stream=True
             )
             async for chunk in response_stream:
-                if "message" in chunk and "content" in chunk["message"]:
-                    token = chunk["message"]["content"]
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    token = chunk.choices[0].delta.content
                     full_response += token
                     yield token
                     
@@ -374,17 +374,28 @@ async def upload_document(
                 }
             ]
             
-            ollama_host = os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev")
-            client = ollama.AsyncClient(host=ollama_host, timeout=30.0)
+            logger.info("Enviando imagen a GPT-4o-mini para OCR/Clasificación...")
+            openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
             
-            logger.info(f"Enviando imagen a llava:latest en {ollama_host} para OCR/Clasificación...")
-            resp = await client.chat(
-                model="llava:latest",
-                messages=messages,
-                options={"temperature": 0.1, "num_predict": 1024, "num_ctx": 4096}
+            # Formatear mensajes para OpenAI Vision
+            openai_messages = [
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Analiza esta imagen y extrae el texto o hallazgos clínicos importantes."},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64_optimized}"}}
+                    ]
+                }
+            ]
+            
+            resp = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=openai_messages,
+                max_tokens=1024,
+                temperature=0.1
             )
-            
-            raw_text = resp.get("message", {}).get("content", "")
+            raw_text = resp.choices[0].message.content
             scrubbed_text, phi_detected = scrub_phi(raw_text)
             
             response_data["extracted_text"] = scrubbed_text
@@ -447,29 +458,22 @@ async def triage_chat(request: TriageRequest):
     for msg in request.messages:
         messages_payload.append({"role": msg.role, "content": msg.content})
 
+    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     async def generate_chat():
-        retries = 1
-        for attempt in range(retries + 1):
-            try:
-                # Usar el modelo llama3.1 de texto designado
-                response_stream = await client.chat(
-                    model="llama3.1",
-                    messages=messages_payload,
-                    stream=True
-                )
-                async for chunk in response_stream:
-                    if "message" in chunk and "content" in chunk["message"]:
-                        yield chunk["message"]["content"]
-                return # Salir exitosamente al terminar el stream
-            except Exception as e:
-                if attempt < retries:
-                    logger.warning(f"Ollama stream dropped. Retrying... ({str(e)})")
-                    await asyncio.sleep(2)
-                    continue
-                else:
-                    logger.error(f"Ollama stream failed after retries: {str(e)}")
-                    yield "\n\n[Error de conexión: El asistente no está disponible en este momento, intenta más tarde.]"
-                    return
+        try:
+            response_stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages_payload,
+                stream=True
+            )
+            async for chunk in response_stream:
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+        except Exception as e:
+            logger.error(f"OpenAI stream failed: {str(e)}")
+            yield "
+
+[Error de conexión: El asistente no está disponible en este momento, intenta más tarde.]"
 
     return StreamingResponse(generate_chat(), media_type="text/plain")
 # ==========================================
@@ -980,9 +984,7 @@ async def upload_document(
                 raw_text += page_text + "\n"
         
         if raw_text.strip():
-            ollama_host = os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev")
-            client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
-            
+            openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
             prompt = f"""Eres un asistente médico experto. A continuación tienes el texto extraído de un documento clínico de un paciente.
 Tu tarea es analizar el documento y devolver el resultado ESTRICTAMENTE en formato JSON, usando esta estructura exacta:
 {{
@@ -1000,12 +1002,12 @@ Si el texto es ininteligible o no es médico, devuelve un JSON con severidad "am
 Texto:
 {raw_text[:4000]}
 """
-            resp = await client.chat(
-                model="llama3.1",
+            resp = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
-                format="json"
+                response_format={ "type": "json_object" }
             )
-            extracted_insights = resp.get("message", {}).get("content", "")
+            extracted_insights = resp.choices[0].message.content
     except Exception as e:
         print(f"Ollama OCR Error: {e}")
         extracted_insights = f"Error extrayendo datos con IA: {str(e)}"
