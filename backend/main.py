@@ -383,7 +383,7 @@ async def upload_document(
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Analiza esta imagen y extrae el texto o hallazgos clínicos importantes."},
+                        {"type": "text", "text": "Por favor, transcribe cualquier texto visible y describe objetivamente todas las estructuras que ves en esta imagen."},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64_optimized}"}}
                     ]
                 }
