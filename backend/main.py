@@ -374,7 +374,7 @@ async def upload_document(
                 }
             ]
             
-            logger.info("Enviando imagen a GPT-4o-mini para OCR/Clasificación...")
+            logger.info("Enviando imagen a GPT-4o para OCR/Clasificación visual precisa...")
             openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
             
             # Formatear mensajes para OpenAI Vision
@@ -383,14 +383,14 @@ async def upload_document(
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "Por favor, transcribe cualquier texto visible y describe objetivamente todas las estructuras que ves en esta imagen."},
+                        {"type": "text", "text": "Por favor, transcribe cualquier texto visible y describe objetivamente todas las estructuras óseas que ves en esta imagen. Presta especial atención a la continuidad de los huesos, roturas, desplazamientos o fracturas evidentes."},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64_optimized}"}}
                     ]
                 }
             ]
             
             resp = await openai_client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=openai_messages,
                 max_tokens=1024,
                 temperature=0.1
