@@ -56,19 +56,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    let triagesHtml = patientDetail.triages.map(t => 
+    let triagesHtml = patientDetail.triages.map(t => `
       <div style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
-        <strong>Fecha:</strong> <br/>
-        <strong>Categoría:</strong> <br/>
+        <strong>Fecha:</strong> ${new Date(t.created_at).toLocaleString()}<br/>
+        <strong>Categoría:</strong> ${t.category || 'N/A'}<br/>
         <strong>Reporte Final:</strong><br/>
-        <div style="white-space: pre-wrap;"></div>
+        <div style="white-space: pre-wrap;">${t.final_report || 'Sin reporte completo.'}</div>
       </div>
-    ).join('');
+    `).join('');
 
-    const html = 
+    const html = `
       <html>
         <head>
-          <title>Historia Clínica - </title>
+          <title>Historia Clínica - ${patientDetail.profile.full_name}</title>
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
             h1 { color: #0f172a; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; }
@@ -83,27 +83,27 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           
           <h2>Ficha del Paciente</h2>
           <div class="grid">
-            <div><div class="label">Nombre</div><div class="value"></div></div>
-            <div><div class="label">Nacimiento</div><div class="value"></div></div>
-            <div><div class="label">Género</div><div class="value"></div></div>
-            <div><div class="label">Tipo de Sangre</div><div class="value"></div></div>
-            <div><div class="label">Alergias</div><div class="value"></div></div>
-            <div><div class="label">Condiciones Crónicas</div><div class="value"></div></div>
-            <div><div class="label">Medicamentos</div><div class="value"></div></div>
+            <div><div class="label">Nombre</div><div class="value">${patientDetail.profile.full_name}</div></div>
+            <div><div class="label">Nacimiento</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
+            <div><div class="label">Género</div><div class="value">${patientDetail.profile.gender}</div></div>
+            <div><div class="label">Tipo de Sangre</div><div class="value">${patientDetail.profile.blood_type}</div></div>
+            <div><div class="label">Alergias</div><div class="value">${patientDetail.profile.allergies || 'Ninguna'}</div></div>
+            <div><div class="label">Condiciones Crónicas</div><div class="value">${patientDetail.profile.chronic_conditions || 'Ninguna'}</div></div>
+            <div><div class="label">Medicamentos</div><div class="value">${patientDetail.profile.current_medications || 'Ninguna'}</div></div>
           </div>
           
           <h2>Historial de Triajes Clínicos</h2>
-          
+          ${triagesHtml || '<p>No hay triajes registrados.</p>'}
           
           <div style="margin-top: 50px; text-align: center; font-size: 0.8em; color: #94a3b8;">
-            Generado automáticamente por VitalIA System el 
+            Generado automáticamente por VitalIA System el ${new Date().toLocaleString()}
           </div>
           <script>
             window.onload = function() { window.print(); window.close(); }
           </script>
         </body>
       </html>
-    ;
+    `;
     
     printWindow.document.write(html);
     printWindow.document.close();
