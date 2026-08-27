@@ -895,33 +895,20 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
 """
     
     try:
-        def stream_generator():
-            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev"))
-            response = client.chat(
-                model=request.text_model,
+        openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        
+        async def generate():
+            response_stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": request.query}
                 ],
                 stream=True
             )
-            # Ollama async generator requires async for inside an async generator, 
-            # but FastAPI StreamingResponse can consume an async generator directly.
-            pass # We need to define this as an async generator properly
-
-        # Let's do it simply using the async generator
-        async def generate():
-            client = ollama.AsyncClient(host=os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev"))
-            async for chunk in await client.chat(
-                model=request.text_model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": request.query}
-                ],
-                stream=True
-            ):
-                if 'message' in chunk and 'content' in chunk['message']:
-                    yield chunk['message']['content']
+            async for chunk in response_stream:
+                if chunk.choices and len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
 
         return StreamingResponse(generate(), media_type="text/plain")
 
