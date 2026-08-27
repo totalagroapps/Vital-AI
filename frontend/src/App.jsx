@@ -827,7 +827,6 @@ ${text}`], {type: 'text/plain'});
               <Server className="w-4 h-4 text-brand" />
               <span>Motor: GPT-4o-mini</span>
             </div>
-            )}
           </div>
         </header>
 
