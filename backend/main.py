@@ -651,22 +651,21 @@ async def send_triage_message(
     messages_payload = [{"role": "system", "content": TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction}] + sanitized_messages
 
 
-    ollama_host = os.getenv("OLLAMA_HOST", "https://molecular-playable-saga.ngrok-free.dev")
-    client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
+    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     async def generate_triage_response():
         full_response = ""
         try:
-            response_stream = await client.chat(
-                model="llama3.1",
+            response_stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
                 messages=messages_payload,
                 stream=True
             )
             
             # Emitir respuesta en streaming y guardarla en memoria
             async for chunk in response_stream:
-                if "message" in chunk and "content" in chunk["message"]:
-                    token = chunk["message"]["content"]
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    token = chunk.choices[0].delta.content
                     full_response += token
                     yield token
             
