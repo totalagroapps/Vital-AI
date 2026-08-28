@@ -17,7 +17,7 @@ export default function Auth({ onLogin, apiUrl }) {
     setError('');
     setIsLoading(true);
 
-    const endpoint = isRegistering ? '/api/register' : '/api/login';
+    const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
     const payload = { 
       username, 
       password, 
