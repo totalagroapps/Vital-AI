@@ -1,7 +1,7 @@
 import React from 'react';
-import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut } from 'lucide-react';
 
-const PatientHome = ({ onNavigate }) => {
+const PatientHome = ({ onNavigate, onLogout }) => {
   return (
     <div className="min-h-screen bg-base pb-24 font-sans relative overflow-x-hidden">
       
@@ -27,9 +27,14 @@ const PatientHome = ({ onNavigate }) => {
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900">VITAL <span className="text-brand-purple">IA</span></h1>
           </div>
-          <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
-            <ShieldCheck className="text-gray-600" size={20} />
-          </button>
+          <div className="flex gap-2">
+            <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
+              <ShieldCheck className="text-gray-600" size={20} />
+            </button>
+            <button onClick={onLogout} className="w-10 h-10 rounded-full border border-red-200 flex items-center justify-center bg-red-50 backdrop-blur" title="Cerrar sesión">
+              <LogOut className="text-red-500" size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Hero Section */}

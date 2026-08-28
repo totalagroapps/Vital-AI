@@ -645,10 +645,29 @@ ${text}`], {type: 'text/plain'});
   if (patientScreen === 'home') {
     return (
       <>
-        <PatientHome onNavigate={setPatientScreen} />
+        <PatientHome 
+          onNavigate={(screen) => {
+            if (screen === 'history') {
+              setPatientScreen('chat');
+              fetchPatientProfile();
+              setShowMedicalHistory(true);
+            } else if (screen === 'doctors') {
+              alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
+            } else {
+              setPatientScreen(screen);
+            }
+          }} 
+          onLogout={handleLogout}
+        />
         <BottomNav activeTab="home" onTabChange={(tab) => {
           if (tab === 'home') setPatientScreen('home');
           if (tab === 'ai') setPatientScreen('triage');
+          if (tab === 'patients') {
+            setPatientScreen('chat');
+            fetchPatientProfile();
+            setShowMedicalHistory(true);
+          }
+          if (tab === 'agenda') alert('Agenda en desarrollo...');
         }} />
       </>
     );
