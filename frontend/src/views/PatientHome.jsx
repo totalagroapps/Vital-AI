@@ -6,18 +6,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
     <div className="min-h-screen bg-base pb-24 font-sans relative overflow-x-hidden">
       
       {/* Background Graphic */}
-        <div className="absolute top-0 right-0 w-full md:w-[60%] lg:w-[45%] h-[500px] md:h-[800px] z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-full md:w-2/3 h-[500px] md:h-[700px] z-0 overflow-hidden pointer-events-none">
           <img 
-            src="/images/brain_robot_bg.jpg" 
+            src="/images/abstract_patient_bg.jpg" 
             alt="AI Hologram" 
-            className="absolute top-0 right-0 w-full h-full object-cover object-top md:object-right-top"
+            className="absolute top-0 right-0 w-full h-full object-cover opacity-90 mix-blend-multiply"
           />
-          {/* Fade the left edge of the image to perfectly blend into the white background */}
-          <div className="absolute inset-0 w-full bg-gradient-to-r from-base via-base/70 to-transparent" />
-          {/* Fade the bottom edge of the image to seamlessly disappear */}
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base via-base/80 to-transparent" />
-          {/* Cover any harsh lines on the far left */}
-          <div className="absolute top-0 left-0 w-16 h-full bg-gradient-to-r from-base to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-base" />
+          <div className="absolute inset-0 bg-gradient-to-r from-base to-transparent md:w-1/3" />
         </div>
 
       <div className="relative z-10 px-4 pt-3">
@@ -43,9 +39,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Hero Section */}
-        <div className="mt-2 mb-3 max-w-[90%] md:max-w-[60%]">
+        <div className="mt-2 mb-3 max-w-full md:max-w-[70%]">
           <h2 className="text-2xl md:text-3xl leading-tight font-bold text-content-primary mb-1">
-            Tu salud, mǭs fǭcil de <span className="text-brand-purple">entender</span> y <span className="text-brand-purple">gestionar.</span>
+            Tu salud, más fácil de <span className="text-brand-purple">entender</span> y <span className="text-brand-purple">gestionar.</span>
           </h2>
           <p className="text-content-secondary text-sm leading-relaxed mb-3 hidden sm:block">
             Vital IA utiliza inteligencia artificial avanzada para acompañarte en cada paso de tu salud.
@@ -79,8 +75,8 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="bg-brand-purple text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Entiende tus síntomas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
+            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Entiende tus síntomas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
               Cuéntanos qué te ocurre. Vital IA te hará preguntas y te orientará sobre los siguientes pasos.
             </p>
             <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-purple rounded-full flex items-center justify-center text-white">
@@ -97,8 +93,8 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="bg-brand-green text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Analiza tus pruebas médicas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
+            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Analiza tus pruebas médicas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
               Sube analíticas, informes, radiografías, TAC y más. Obtén explicaciones claras y comprensibles.
             </p>
             <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-green rounded-full flex items-center justify-center text-white">
@@ -115,8 +111,8 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="bg-brand-blue text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Organiza tu historial de salud</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
+            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Organiza tu historial de salud</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
               Guarda y organiza todos tus documentos, medicación, alergias, enfermedades y mucho más en un solo lugar.
             </p>
             <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-blue rounded-full flex items-center justify-center text-white">
@@ -133,8 +129,8 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="bg-brand-orange text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Conéctate con médicos especialistas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
+            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Conéctate con médicos especialistas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
               Encuentra al especialista adecuado, pide cita, realiza videollamadas y comparte tu información de forma segura.
             </p>
             <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-orange rounded-full flex items-center justify-center text-white">
