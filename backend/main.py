@@ -350,7 +350,7 @@ async def upload_document(
             response_data["extracted_text"] = scrubbed_text
             response_data["phi_detected"] = phi_detected
             
-        elif file.content_type in ["image/jpeg", "image/png", "image/jpg"] or file_extension in ["jpg", "jpeg", "png"]:
+        elif file.content_type.startswith("image/") or file_extension in ["jpg", "jpeg", "png", "webp", "heic", "bmp", "gif", "avif"]:
             # Procesamiento Imagen (OCR Clínico y Análisis)
             response_data["document_type"] = "medical_image"
             response_data["is_image"] = True
@@ -421,6 +421,8 @@ async def upload_document(
             response_data["id"] = None
             response_data["db_warning"] = "DB connection failed, but OCR succeeded."
 
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Error procesando documento: {repr(e)}")
         logger.error(traceback.format_exc())
