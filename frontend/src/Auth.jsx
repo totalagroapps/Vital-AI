@@ -17,25 +17,33 @@ export default function Auth({ onLogin, apiUrl }) {
     setError('');
     setIsLoading(true);
 
-    const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
-    const payload = { 
-      username, 
-      password, 
-      role: selectedRole === 'doctor' ? 'doctor' : 'patient' 
-    };
-
     try {
-      const res = await fetch(`${apiUrl}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      let res;
+      if (isRegistering) {
+        const payload = { username, password, role: selectedRole === 'doctor' ? 'doctor' : 'patient' };
+        res = await fetch(${apiUrl}/api/auth/register, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        const formData = new URLSearchParams();
+        formData.append('username', username);
+        formData.append('password', password);
+        res = await fetch(${apiUrl}/api/auth/login, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData
+        });
+      }
+      
       const data = await res.json();
 
       if (res.ok) {
-        onLogin(data.token, data.role);
+        onLogin(data.token ? data.token : data.access_token, data.role || (selectedRole === 'doctor' ? 'doctor' : 'patient'));
       } else {
-        setError(data.detail || 'Error de autenticación');
+        const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : 'Error de autenticación');
+        setError(errorMsg || 'Error de autenticación');
       }
     } catch (e) {
       setError('Error de conexión con el servidor');
