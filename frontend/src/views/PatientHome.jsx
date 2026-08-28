@@ -16,9 +16,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-base via-base/90 to-transparent" />
         </div>
 
-      <div className="relative z-10 px-5 pt-8">
+      <div className="relative z-10 px-4 pt-3">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             <div className="text-brand-purple">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -39,104 +39,104 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Hero Section */}
-        <div className="mt-6 mb-6 max-w-[85%] md:max-w-[60%]">
-          <h2 className="text-3xl leading-tight font-bold text-content-primary mb-3">
+        <div className="mt-2 mb-3 max-w-[90%] md:max-w-[60%]">
+          <h2 className="text-2xl md:text-3xl leading-tight font-bold text-content-primary mb-1">
             Tu salud, <br />
             más fácil de <br />
             <span className="text-brand-purple">entender</span> y <br />
             <span className="text-brand-purple">gestionar.</span>
           </h2>
-          <p className="text-content-secondary text-sm leading-relaxed mb-5">
+          <p className="text-content-secondary text-sm leading-relaxed mb-3 hidden sm:block">
             Vital IA utiliza inteligencia artificial avanzada para acompañarte en cada paso de tu salud.
           </p>
           
-          <div className="glass-card rounded-2xl p-4 flex gap-3 items-center w-full max-w-sm">
+          <div className="glass-card rounded-xl p-2.5 flex gap-2 items-center w-full max-w-sm">
             <div className="bg-brand-purple/10 p-2 rounded-xl text-brand-purple">
               <ShieldCheck size={20} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-content-primary">Tu información siempre está protegida</p>
-              <p className="text-[10px] text-content-secondary mt-0.5">Cumplimos con los más altos estándares de privacidad.</p>
+              <p className="text-[11px] font-semibold text-content-primary leading-tight">Tu información siempre está protegida</p>
+              <p className="text-[9px] text-content-secondary mt-0.5 leading-tight hidden sm:block">Cumplimos con los más altos estándares de privacidad.</p>
             </div>
           </div>
         </div>
 
         {/* Title */}
-        <div className="flex items-center justify-center gap-2 mb-4 mt-8">
-          <h3 className="text-xl font-bold text-center">¿Qué te gustaría hacer hoy?</h3>
+        <div className="flex items-center justify-center gap-2 mb-2 mt-3">
+          <h3 className="text-lg md:text-xl font-bold text-center">¿Qué te gustaría hacer hoy?</h3>
         </div>
 
         {/* Action Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-purple/5 rounded-full blur-2xl group-hover:bg-brand-purple/10 transition-colors" />
-            <div className="flex justify-between items-start mb-3 relative z-10">
-              <div className="bg-brand-purple/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-purple">
+            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
+              <div className="bg-brand-purple/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-purple">
                 <Stethoscope size={24} />
               </div>
-              <span className="bg-brand-purple text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
+              <span className="bg-brand-purple text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Entiende tus síntomas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
+            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Entiende tus síntomas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
               Cuéntanos qué te ocurre. Vital IA te hará preguntas y te orientará sobre los siguientes pasos.
             </p>
-            <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center text-white">
+            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-purple rounded-full flex items-center justify-center text-white">
               <ArrowRight size={16} />
             </div>
           </button>
 
           {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-colors" />
-            <div className="flex justify-between items-start mb-3 relative z-10">
-              <div className="bg-brand-green/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-green">
+            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
+              <div className="bg-brand-green/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-green">
                 <FileText size={24} />
               </div>
-              <span className="bg-brand-green text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
+              <span className="bg-brand-green text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Analiza tus pruebas médicas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
+            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Analiza tus pruebas médicas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
               Sube analíticas, informes, radiografías, TAC y más. Obtén explicaciones claras y comprensibles.
             </p>
-            <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-green rounded-full flex items-center justify-center text-white">
+            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-green rounded-full flex items-center justify-center text-white">
               <ArrowRight size={16} />
             </div>
           </button>
 
           {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl group-hover:bg-brand-blue/10 transition-colors" />
-            <div className="flex justify-between items-start mb-3 relative z-10">
-              <div className="bg-brand-blue/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-blue">
+            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
+              <div className="bg-brand-blue/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-blue">
                 <FolderHeart size={24} />
               </div>
-              <span className="bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
+              <span className="bg-brand-blue text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Organiza tu historial de salud</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
+            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Organiza tu historial de salud</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
               Guarda y organiza todos tus documentos, medicación, alergias, enfermedades y mucho más en un solo lugar.
             </p>
-            <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-white">
+            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-blue rounded-full flex items-center justify-center text-white">
               <ArrowRight size={16} />
             </div>
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-orange/5 rounded-full blur-2xl group-hover:bg-brand-orange/10 transition-colors" />
-            <div className="flex justify-between items-start mb-3 relative z-10">
-              <div className="bg-brand-orange/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-orange">
+            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
+              <div className="bg-brand-orange/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-orange">
                 <UserSquare2 size={24} />
               </div>
-              <span className="bg-brand-orange text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
+              <span className="bg-brand-orange text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Conéctate con médicos especialistas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
+            <h4 className="font-bold text-gray-900 text-xs md:text-base mb-1 relative z-10">Conéctate con médicos especialistas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10 hidden sm:block">
               Encuentra al especialista adecuado, pide cita, realiza videollamadas y comparte tu información de forma segura.
             </p>
-            <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-orange rounded-full flex items-center justify-center text-white">
+            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-orange rounded-full flex items-center justify-center text-white">
               <ArrowRight size={16} />
             </div>
           </button>
