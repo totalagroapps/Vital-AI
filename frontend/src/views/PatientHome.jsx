@@ -6,37 +6,20 @@ const PatientHome = ({ onNavigate, onLogout }) => {
     <div className="min-h-screen bg-base pb-24 font-sans relative overflow-x-hidden">
       
       {/* Background Graphic */}
-        <div className="absolute top-0 right-0 w-full md:w-2/3 h-[500px] md:h-[700px] z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-[650px] z-0 overflow-hidden pointer-events-none bg-base">
+          {/* We position the dark image on the right side */}
           <img 
-            src="/images/abstract_patient_bg.jpg" 
+            src="/images/dark_ai_patient_bg.jpg" 
             alt="AI Hologram" 
-            className="absolute top-0 right-0 w-full h-full object-cover opacity-90 mix-blend-multiply"
+            className="absolute top-0 right-0 w-[120%] md:w-2/3 h-full object-cover object-center md:object-right-top opacity-100 mix-blend-normal"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-base" />
-          <div className="absolute inset-0 bg-gradient-to-r from-base to-transparent md:w-1/3" />
+          {/* Horizontal fade to white (base) to cover the left side of the image */}
+          <div className="absolute inset-0 w-full md:w-3/4 bg-gradient-to-r from-base via-base/95 to-transparent" />
+          
+          {/* Vertical fade to white (base) to seamlessly blend the bottom edge into the page */}
+          <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-base via-base/90 to-transparent" />
         </div>
 
-      <div className="relative z-10 px-6 pt-12">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-2">
-            <div className="text-brand-purple">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">VITAL <span className="text-brand-purple">IA</span></h1>
-          </div>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
-              <ShieldCheck className="text-gray-600" size={20} />
-            </button>
-            <button onClick={onLogout} className="w-10 h-10 rounded-full border border-red-200 flex items-center justify-center bg-red-50 backdrop-blur" title="Cerrar sesión">
-              <LogOut className="text-red-500" size={18} />
-            </button>
-          </div>
-        </div>
 
         {/* Hero Section */}
         <div className="mt-8 mb-10 max-w-[70%]">
