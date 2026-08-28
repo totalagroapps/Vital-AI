@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import PatientHome from './views/PatientHome';
 import TriageWizard from './views/TriageWizard';
 import DocumentAnalyzer from './views/DocumentAnalyzer';
+import PatientChat from './views/PatientChat';
 import BottomNav from './components/BottomNav';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
@@ -645,6 +646,7 @@ ${text}`], {type: 'text/plain'});
   if (patientScreen === 'home') {
     return (
       <>
+        {renderModals()}
         <PatientHome 
           onNavigate={(screen) => {
             if (screen === 'history') {
@@ -675,21 +677,25 @@ ${text}`], {type: 'text/plain'});
 
   if (patientScreen === 'triage') {
     return (
-      <TriageWizard 
+      <>
+        {renderModals()}
+        <TriageWizard 
         onBack={() => setPatientScreen('home')} 
         onStartChat={(symptoms) => {
           setPatientScreen('chat');
           // In App.jsx, there's no setInputMessage out of the box because it's a controlled input 
           // However, we can just start the triage session. For simplicity, we'll just open the chat.
           startTriageSession();
-        }} 
-      />
+        }} />
+      </>
     );
   }
 
   if (patientScreen === 'documents') {
     return (
-      <DocumentAnalyzer 
+      <>
+        {renderModals()}
+        <DocumentAnalyzer 
         onBack={() => setPatientScreen('home')}
         isUploading={isLoading}
         onAskQuestion={() => setPatientScreen('chat')}
@@ -706,11 +712,38 @@ ${text}`], {type: 'text/plain'});
           }
           alert("Archivo seleccionado. Serás redirigido al chat para preguntar sobre él.");
           setPatientScreen('chat');
-        }}
-      />
+        }} />
+      </>
     );
   }
 
+  if (patientScreen === 'chat') {
+    return (
+      <>
+        {renderModals()}
+        <PatientChat 
+          messages={messages}
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          handleSend={handleSend}
+          isLoading={isLoading}
+          onBack={() => setPatientScreen('home')}
+          imageInputRef={imageInputRef}
+          pdfInputRef={pdfInputRef}
+          handleImageChange={handleImageChange}
+          handlePdfChange={handlePdfChange}
+          selectedImagePreview={selectedImagePreview}
+          selectedPdfName={selectedPdfName}
+          onClearAttachment={() => {
+            setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
+            setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
+          }}
+        />
+      </>
+    );
+  }
+
+  // Fallback to old UI
   return (
     <div className="flex h-[100dvh] bg-base text-content-primary overflow-hidden">
       {/* Botón flotante para regresar al Home si estamos en chat u otra vista vieja */}
