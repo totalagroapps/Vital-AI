@@ -21,7 +21,7 @@ export default function Auth({ onLogin, apiUrl }) {
       let res;
       if (isRegistering) {
         const payload = { username, password, role: selectedRole === 'doctor' ? 'doctor' : 'patient' };
-        res = await fetch(${apiUrl}/api/auth/register, {
+        res = await fetch(`${apiUrl}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -30,7 +30,7 @@ export default function Auth({ onLogin, apiUrl }) {
         const formData = new URLSearchParams();
         formData.append('username', username);
         formData.append('password', password);
-        res = await fetch(${apiUrl}/api/auth/login, {
+        res = await fetch(`${apiUrl}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: formData
