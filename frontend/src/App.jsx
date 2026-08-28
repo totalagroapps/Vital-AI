@@ -8,6 +8,7 @@ import PatientHome from './views/PatientHome';
 import TriageWizard from './views/TriageWizard';
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
+import MedicalHistory from './views/MedicalHistory';
 import BottomNav from './components/BottomNav';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
@@ -641,12 +642,22 @@ ${text}`], {type: 'text/plain'});
 
   if (viewMode === 'doctor') {
     return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {setToken(null); localStorage.removeItem('med_token'); localStorage.removeItem('med_role'); setViewMode('patient');}} />;
+  }if (patientScreen === 'history') {
+    return (
+      <MedicalHistory 
+        patientProfile={patientProfile}
+        setPatientProfile={setPatientProfile}
+        savePatientProfile={savePatientProfile}
+        sessions={sessions}
+        onBack={() => setPatientScreen('home')}
+      />
+    );
   }
 
   if (patientScreen === 'home') {
+
     return (
       <>
-        {renderModals()}
         <PatientHome 
           onNavigate={(screen) => {
             if (screen === 'history') {
@@ -665,9 +676,8 @@ ${text}`], {type: 'text/plain'});
           if (tab === 'home') setPatientScreen('home');
           if (tab === 'ai') setPatientScreen('triage');
           if (tab === 'patients') {
-            setPatientScreen('chat');
+            setPatientScreen('history');
             fetchPatientProfile();
-            setShowMedicalHistory(true);
           }
           if (tab === 'agenda') alert('Agenda en desarrollo...');
         }} />
@@ -678,7 +688,6 @@ ${text}`], {type: 'text/plain'});
   if (patientScreen === 'triage') {
     return (
       <>
-        {renderModals()}
         <TriageWizard 
         onBack={() => setPatientScreen('home')} 
         onStartChat={(symptoms) => {
@@ -694,7 +703,6 @@ ${text}`], {type: 'text/plain'});
   if (patientScreen === 'documents') {
     return (
       <>
-        {renderModals()}
         <DocumentAnalyzer 
         onBack={() => setPatientScreen('home')}
         isUploading={isLoading}
@@ -720,7 +728,6 @@ ${text}`], {type: 'text/plain'});
   if (patientScreen === 'chat') {
     return (
       <>
-        {renderModals()}
         <PatientChat 
           messages={messages}
           inputMessage={inputMessage}
