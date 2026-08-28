@@ -45,10 +45,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         {/* Hero Section */}
         <div className="mt-2 mb-3 max-w-[90%] md:max-w-[60%]">
           <h2 className="text-2xl md:text-3xl leading-tight font-bold text-content-primary mb-1">
-            Tu salud, <br />
-            más fácil de <br />
-            <span className="text-brand-purple">entender</span> y <br />
-            <span className="text-brand-purple">gestionar.</span>
+            Tu salud, mǭs fǭcil de <span className="text-brand-purple">entender</span> y <span className="text-brand-purple">gestionar.</span>
           </h2>
           <p className="text-content-secondary text-sm leading-relaxed mb-3 hidden sm:block">
             Vital IA utiliza inteligencia artificial avanzada para acompañarte en cada paso de tu salud.
@@ -67,7 +64,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
 
         {/* Title */}
         <div className="flex items-center justify-center gap-2 mb-2 mt-3">
-          <h3 className="text-lg md:text-xl font-bold text-center">¿Qué te gustaría hacer hoy?</h3>
+          <h3 className="text-lg md:text-xl font-bold text-center text-gray-900">¿Qué te gustaría hacer hoy?</h3>
         </div>
 
         {/* Action Grid */}
