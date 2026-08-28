@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import DoctorHome from './views/DoctorHome';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
-import { Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const { t, language } = useLanguage();
-  const [patients, setPatients] = useState([]);
+  const [doctorScreen, setDoctorScreen] = useState('home');
+    const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientDetail, setPatientDetail] = useState(null);
   const [patientDocuments, setPatientDocuments] = useState([]);
@@ -175,6 +177,11 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     setIsCopilotThinking(false);
   };
 
+
+  if (doctorScreen === 'home') {
+    return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} />;
+  }
+
   return (
     <div className="flex w-full h-[100dvh] bg-base text-content-primary overflow-hidden font-sans relative">
       {/* Fondo decorativo opcional */}
@@ -198,7 +205,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           </button>
         </div>
 
-        <button onClick={onLogout} className="w-12 h-12 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl flex items-center justify-center transition-all mt-auto" title="Cerrar Sesión">
+
+        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mt-auto mb-2" title="Volver al Inicio">
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <button onClick={onLogout}
+ className="w-12 h-12 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl flex items-center justify-center transition-all mt-auto" title="Cerrar Sesión">
           <LogOut className="w-6 h-6" />
         </button>
       </div>
