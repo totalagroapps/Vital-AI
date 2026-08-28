@@ -10,13 +10,15 @@ export default {
         base: '#F4F7FB',
         surface: '#FFFFFF',
         brand: {
-          purple: '#6B46C1', // Custom primary purple
+          DEFAULT: '#1A6B72', // Restored for backward compatibility with old UI
+          hover: '#134E53',   // Restored
+          purple: '#6B46C1', 
           purpleLight: '#8B5CF6',
           purpleDark: '#4C1D95',
-          green: '#10B981', // For medical tests
-          blue: '#3B82F6',  // For health history
-          orange: '#F97316', // For specialists
-          dark: '#0B1120',  // For AI cards and footer
+          green: '#10B981', 
+          blue: '#3B82F6',  
+          orange: '#F97316', 
+          dark: '#0B1120',  
           teal: '#14B8A6',
         },
         content: {

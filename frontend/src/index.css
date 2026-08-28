@@ -48,6 +48,12 @@
   -webkit-text-fill-color: transparent;
 }
 
+.gradient-text {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .ai-card-gradient {
   background: linear-gradient(145deg, #0B1120 0%, #1e1b4b 100%);
 }
