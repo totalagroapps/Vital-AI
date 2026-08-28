@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight } from 'lucide-react';
+import React from 'react';
+import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 
 const PatientHome = ({ onNavigate }) => {
   return (
