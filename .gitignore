@@ -10,3 +10,11 @@ backend/venv/
 backend/__pycache__/
 backend/*.pyc
 backend/.env
+
+# Limpieza Produccion
+backend/*.db
+*.pdf
+*.docx
+*.xlsx
+dump.txt
+app_backup.jsx

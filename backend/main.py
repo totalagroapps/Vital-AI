@@ -90,7 +90,7 @@ async def startup_event():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -473,12 +473,9 @@ async def triage_chat(request: TriageRequest):
             logger.error(f"OpenAI stream failed: {str(e)}")
             yield "\n\n[Error de conexión: El asistente no está disponible en este momento, intenta más tarde.]"
     return StreamingResponse(generate_chat(), media_type="text/plain")
-# Pega este cÃ³digo al final de tu archivo main.py
-# Nota: Ya he inyectado la clase TriageSession directamente en tu models.py.
-
 from sqlalchemy.future import select
 
-# 1. Definir el System Prompt Definitivo (cargado desde tu diseÃ±o)
+# 1. Definir el System Prompt Definitivo (cargado desde tu diseño)
 TRIAGE_SYSTEM_PROMPT_V2 = """
 Actúas como un médico de familia experto en triaje clínico y diseñador de sistemas conversacionales. Tu objetivo NO es dar un diagnóstico definitivo, sino orientar al paciente sobre su síntoma, determinar el nivel de urgencia y derivar a la especialidad correcta.
 
@@ -572,13 +569,13 @@ Cuando se cumpla un Criterio de Cierre, tu respuesta DEBE tener este formato mar
 *(Aviso Legal: Este análisis es generado por inteligencia artificial y tiene fines puramente informativos de triaje. No reemplaza el diagnóstico de un médico calificado).*
 """
 
-# 2. Endpoint: Iniciar una SesiÃ³n de Triaje
+# 2. Endpoint: Iniciar una Sesión de Triaje
 @app.post("/api/triage/start")
 async def start_triage_session(db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
     """
-    Crea una nueva sesiÃ³n de triaje en la base de datos asociada al usuario.
+    Crea una nueva sesión de triaje en la base de datos asociada al usuario.
     """
-    # mock user ID (asumiendo que auth real se agregarÃ¡ despuÃ©s)
+    # mock user ID (asumiendo que auth real se agregará después)
     # user_id is injected via Depends 
     
     new_session = models.TriageSession(
@@ -591,16 +588,16 @@ async def start_triage_session(db: AsyncSession = Depends(get_db), current_user_
     
     return {"session_id": new_session.id, "status": new_session.status}
 
-# 3. Endpoint: Recuperar Estado de la SesiÃ³n
+# 3. Endpoint: Recuperar Estado de la Sesión
 @app.get("/api/triage/{session_id}")
 async def get_triage_session(session_id: int, db: AsyncSession = Depends(get_db)):
     """
-    Recupera el estado actual de un triaje (ej: si el paciente recarga la pÃ¡gina).
+    Recupera el estado actual de un triaje (ej: si el paciente recarga la página).
     """
     result = await db.execute(select(models.TriageSession).where(models.TriageSession.id == session_id))
     session = result.scalars().first()
     if not session:
-        raise HTTPException(status_code=404, detail="SesiÃ³n no encontrada")
+        raise HTTPException(status_code=404, detail="Sesión no encontrada")
         
     return {
         "session_id": session.id,
@@ -609,7 +606,7 @@ async def get_triage_session(session_id: int, db: AsyncSession = Depends(get_db)
         "final_report": session.final_report
     }
 
-# 4. Endpoint: Enviar mensaje al Triaje (con SSE Streaming y DetecciÃ³n de Informe)
+# 4. Endpoint: Enviar mensaje al Triaje (con SSE Streaming y Detección de Informe)
 @app.post("/api/triage/{session_id}/message")
 async def send_triage_message(
     session_id: int, 
@@ -617,16 +614,16 @@ async def send_triage_message(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Aplica PHI scrubbing, interactÃºa con el modelo y monitorea si emite el informe final.
+    Aplica PHI scrubbing, interactúa con el modelo y monitorea si emite el informe final.
     """
-    # Verificar que la sesiÃ³n exista
+    # Verificar que la sesión exista
     result = await db.execute(select(models.TriageSession).where(models.TriageSession.id == session_id))
     t_session = result.scalars().first()
     if not t_session:
-        raise HTTPException(status_code=404, detail="SesiÃ³n no encontrada")
+        raise HTTPException(status_code=404, detail="Sesión no encontrada")
         
     if t_session.status != "in_progress":
-        raise HTTPException(status_code=400, detail="Esta sesiÃ³n de triaje ya estÃ¡ cerrada.")
+        raise HTTPException(status_code=400, detail="Esta sesión de triaje ya está cerrada.")
 
     # Anonimizar todos los mensajes del usuario antes de enviarlos al LLM
     sanitized_messages = []
@@ -671,7 +668,7 @@ async def send_triage_message(
                     full_response += token
                     yield token
             
-            # Una vez termina el stream, evaluamos si el modelo decidiÃ³ cerrar el triaje
+            # Una vez termina el stream, evaluamos si el modelo decidió cerrar el triaje
             if "Informe de Prediagn" in full_response or "Informe de Emergencia" in full_response or "Nivel de Urgencia:" in full_response or "Especialidad M" in full_response:
                 # Detectamos qué semáforo emitió
                 if "🔴 Urgencia (Rojo)" in full_response or "Urgencia Inmediata" in full_response or "🔴" in full_response:
@@ -694,7 +691,7 @@ async def send_triage_message(
             
         except Exception as e:
             logger.error(f"Error en Triaje Stream: {str(e)}")
-            yield f"\n\n[Error de conexiÃ³n en Triaje: {str(e)}]"
+            yield f"\n\n[Error de conexión en Triaje: {str(e)}]"
             return
 
     return StreamingResponse(generate_triage_response(), media_type="text/plain")
