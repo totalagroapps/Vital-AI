@@ -39,7 +39,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Hero Section */}
-        <div className="mt-2 mb-3 max-w-full md:max-w-[70%]">
+        <div className="mt-2 mb-3 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0">
           <h2 className="text-2xl md:text-3xl leading-tight font-bold text-content-primary mb-1">
             Tu salud, más fácil de <span className="text-brand-purple">entender</span> y <span className="text-brand-purple">gestionar.</span>
           </h2>
@@ -59,7 +59,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Title */}
-        <div className="flex items-center justify-center gap-2 mb-2 mt-3">
+        <div className="flex items-center justify-center gap-2 mb-2 mt-3 animate-fade-in-up opacity-0" style={{ animationDelay: "100ms" }}>
           <h3 className="text-lg md:text-xl font-bold text-center text-gray-900">¿Qué te gustaría hacer hoy?</h3>
         </div>
 
@@ -67,7 +67,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "150ms" }}>
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-purple/5 rounded-full blur-2xl group-hover:bg-brand-purple/10 transition-colors" />
             <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
               <div className="bg-brand-purple/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-purple">
@@ -85,7 +85,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "250ms" }}>
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-colors" />
             <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
               <div className="bg-brand-green/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-green">
@@ -103,7 +103,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "350ms" }}>
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl group-hover:bg-brand-blue/10 transition-colors" />
             <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
               <div className="bg-brand-blue/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-blue">
@@ -121,7 +121,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "450ms" }}>
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-orange/5 rounded-full blur-2xl group-hover:bg-brand-orange/10 transition-colors" />
             <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
               <div className="bg-brand-orange/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-orange">
@@ -140,7 +140,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* AI Banner Footer */}
-        <div className="ai-card-gradient rounded-3xl p-5 flex items-center gap-4 text-white cursor-pointer relative overflow-hidden shadow-lg mb-4" onClick={() => onNavigate('triage')}>
+        <div className="ai-card-gradient rounded-3xl p-5 flex items-center gap-4 text-white cursor-pointer relative overflow-hidden shadow-lg mb-4 animate-fade-in-up opacity-0 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ease-out" style={{ animationDelay: "550ms" }} onClick={() => onNavigate('triage')}>
           <div className="absolute -right-10 -top-10 w-32 h-32 bg-brand-purple/30 rounded-full blur-3xl" />
           <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm z-10">
             <Sparkles className="text-white" size={24} />
