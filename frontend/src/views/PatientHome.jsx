@@ -22,14 +22,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
 
 
         {/* Hero Section */}
-        <div className="mt-8 mb-10 max-w-[70%]">
-          <h2 className="text-[32px] leading-tight font-bold text-content-primary mb-4">
+        <div className="mt-6 mb-6 max-w-[85%] md:max-w-[60%]">
+          <h2 className="text-3xl leading-tight font-bold text-content-primary mb-3">
             Tu salud, <br />
             más fácil de <br />
             <span className="text-brand-purple">entender</span> y <br />
             <span className="text-brand-purple">gestionar.</span>
           </h2>
-          <p className="text-content-secondary text-sm leading-relaxed mb-6">
+          <p className="text-content-secondary text-sm leading-relaxed mb-5">
             Vital IA utiliza inteligencia artificial avanzada para acompañarte en cada paso de tu salud.
           </p>
           
@@ -45,24 +45,24 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Title */}
-        <div className="flex items-center justify-center gap-2 mb-6 mt-16">
+        <div className="flex items-center justify-center gap-2 mb-4 mt-8">
           <h3 className="text-xl font-bold text-center">¿Qué te gustaría hacer hoy?</h3>
         </div>
 
         {/* Action Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-3xl p-5 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-purple/5 rounded-full blur-2xl group-hover:bg-brand-purple/10 transition-colors" />
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex justify-between items-start mb-3 relative z-10">
               <div className="bg-brand-purple/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-purple">
                 <Stethoscope size={24} />
               </div>
               <span className="bg-brand-purple text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Entiende tus síntomas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
+            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Entiende tus síntomas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
               Cuéntanos qué te ocurre. Vital IA te hará preguntas y te orientará sobre los siguientes pasos.
             </p>
             <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center text-white">
@@ -71,16 +71,16 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-3xl p-5 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('documents')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-colors" />
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex justify-between items-start mb-3 relative z-10">
               <div className="bg-brand-green/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-green">
                 <FileText size={24} />
               </div>
               <span className="bg-brand-green text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Analiza tus pruebas médicas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
+            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Analiza tus pruebas médicas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
               Sube analíticas, informes, radiografías, TAC y más. Obtén explicaciones claras y comprensibles.
             </p>
             <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-green rounded-full flex items-center justify-center text-white">
@@ -89,16 +89,16 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-3xl p-5 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('history')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl group-hover:bg-brand-blue/10 transition-colors" />
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex justify-between items-start mb-3 relative z-10">
               <div className="bg-brand-blue/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-blue">
                 <FolderHeart size={24} />
               </div>
               <span className="bg-brand-blue text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Organiza tu historial de salud</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
+            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Organiza tu historial de salud</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
               Guarda y organiza todos tus documentos, medicación, alergias, enfermedades y mucho más en un solo lugar.
             </p>
             <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-blue rounded-full flex items-center justify-center text-white">
@@ -107,16 +107,16 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-3xl p-5 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
+          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group">
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-orange/5 rounded-full blur-2xl group-hover:bg-brand-orange/10 transition-colors" />
-            <div className="flex justify-between items-start mb-4 relative z-10">
+            <div className="flex justify-between items-start mb-3 relative z-10">
               <div className="bg-brand-orange/10 w-12 h-12 rounded-full flex items-center justify-center text-brand-orange">
                 <UserSquare2 size={24} />
               </div>
               <span className="bg-brand-orange text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Conéctate con médicos especialistas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
+            <h4 className="font-bold text-gray-900 mb-1 relative z-10">Conéctate con médicos especialistas</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed mb-6 relative z-10">
               Encuentra al especialista adecuado, pide cita, realiza videollamadas y comparte tu información de forma segura.
             </p>
             <div className="absolute bottom-4 right-4 w-8 h-8 bg-brand-orange rounded-full flex items-center justify-center text-white">
