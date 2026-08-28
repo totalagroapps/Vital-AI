@@ -10,9 +10,10 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <img 
           src="/images/ai_patient_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover opacity-80 mix-blend-screen"
+          className="absolute top-0 right-0 w-full h-full object-cover opacity-100"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/80 to-base" />
+          <div className="absolute inset-0 bg-gradient-to-r from-base via-base/80 to-transparent" />
       </div>
 
       <div className="relative z-10 px-6 pt-12">

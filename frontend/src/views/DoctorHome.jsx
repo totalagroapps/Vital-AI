@@ -35,7 +35,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
         </p>
         
         {/* Background Image decoration */}
-        <div className="absolute top-[-40px] right-[-80px] w-[300px] h-[300px] z-[-1] opacity-60 mix-blend-multiply pointer-events-none">
+        <div className="absolute top-[-40px] right-[-80px] w-[300px] h-[300px] z-[-1] opacity-100 pointer-events-none">
            {/* We use the generated doctor image but styled as a background element with gradient fade */}
            <div className="w-full h-full bg-gradient-to-l from-transparent to-base absolute inset-0 z-10"></div>
            <div className="w-full h-full bg-gradient-to-t from-base to-transparent absolute inset-0 z-10"></div>
