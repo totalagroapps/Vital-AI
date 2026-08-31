@@ -53,14 +53,18 @@ export default function App() {
   const { t, language } = useLanguage();
   const [token, setToken] = useState(localStorage.getItem('med_token') || null);
   const [username, setUsername] = useState(null);
-  const [patientScreen, setPatientScreen] = useState('home');
+  const [patientScreen, setPatientScreen] = useState(() => {
+    const path = window.location.pathname.replace('/', '');
+    return path || 'home';
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // History API integration for native back button
   useEffect(() => {
     // Push the initial state if it's the first time
     if (!window.history.state) {
-      window.history.replaceState({ screen: 'home' }, '', '');
+      const initialScreen = window.location.pathname.replace('/', '') || 'home';
+      window.history.replaceState({ screen: initialScreen }, '', window.location.pathname);
     }
 
     const handlePopState = (event) => {
@@ -78,7 +82,8 @@ export default function App() {
   // Helper to change screen and update history
   const navigateToScreen = (screen) => {
     if (screen !== patientScreen) {
-      window.history.pushState({ screen }, '', '');
+      const url = screen === 'home' ? '/' : '/' + screen;
+      window.history.pushState({ screen }, '', url);
       setPatientScreen(screen);
     }
   };
