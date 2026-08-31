@@ -10,6 +10,7 @@ import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
 import MedicalHistory from './views/MedicalHistory';
 import BottomNav from './components/BottomNav';
+import DoctorOnboarding from './views/DoctorOnboarding';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
 import { 
@@ -764,8 +765,16 @@ ${text}`], {type: 'text/plain'});
     (s.patient_name && s.patient_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  if (showDoctorOnboarding) {
+    return <DoctorOnboarding onNavigateLogin={() => setShowDoctorOnboarding(false)} />;
+  }
+
   if (!token) {
-    return <Auth onLogin={(jwt, role) => { setToken(jwt); localStorage.setItem('med_token', jwt); if(role) { setViewMode(role); localStorage.setItem('med_role', role); } }} apiUrl={API_URL} />;
+    return <Auth 
+      onLogin={(jwt, role) => { setToken(jwt); localStorage.setItem('med_token', jwt); if(role) { setViewMode(role); localStorage.setItem('med_role', role); } }} 
+      apiUrl={API_URL} 
+      onNavigateDoctorRegister={() => setShowDoctorOnboarding(true)}
+    />;
   }
 
   if (viewMode === 'doctor') {

@@ -3,7 +3,7 @@ import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import { Stethoscope, Lock, User, ArrowRight, HeartPulse, ChevronLeft, Sparkles, Activity } from 'lucide-react';
 
-export default function Auth({ onLogin, apiUrl }) {
+export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
   const { t } = useLanguage();
   const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
   const [username, setUsername] = useState('');
