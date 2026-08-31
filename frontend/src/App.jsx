@@ -59,6 +59,13 @@ export default function App() {
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+
+  const handleNavigate = (screen) => {
+    setPatientScreen(screen);
+    const path = screen === 'home' ? '/' : `/${screen}`;
+    window.history.pushState({ screen }, '', path);
+  };
+
   // History API integration for native back button
   useEffect(() => {
     // Push the initial state if it's the first time
@@ -491,9 +498,13 @@ ${text}`], {type: 'text/plain'});
         setTriageSessionId(data.session_id);
         setIsTriageClosed(false);
         setMessages([{ id: Date.now(), type: 'ai', text: 'Hola. Soy tu Asistente de Triaje Médico. Por favor, descríbeme tus síntomas actuales para comenzar la evaluación clínica.', phiScrubbed: false }]);
+      } else {
+        throw new Error("Fallo en el servidor");
       }
     } catch (err) {
       console.error("Error iniciando sesión de triaje:", err);
+      alert("Error al iniciar la sesión de triaje. Verifica tu conexión o intenta de nuevo.");
+      handleNavigate('home');
     }
   };
 
@@ -777,15 +788,14 @@ ${text}`], {type: 'text/plain'});
       <>
         <PatientHome 
           onNavigate={(screen) => {
-            if (screen === 'history') {
-              setPatientScreen('chat');
-              fetchPatientProfile();
-      fetchHistory();
-              setShowMedicalHistory(true);
-            } else if (screen === 'doctors') {
+            if (screen === 'doctors') {
               alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
             } else {
-              setPatientScreen(screen);
+              if (screen === 'history') {
+                fetchPatientProfile();
+                fetchHistory();
+              }
+              handleNavigate(screen);
             }
           }} 
           onLogout={handleLogout}
@@ -853,14 +863,7 @@ ${text}`], {type: 'text/plain'});
         setInputMessage={setInputMessage}
         handleSend={handleSendGeneral}
         isLoading={isLoading}
-        onBack={() => setPatientScreen('home')}
-        imageInputRef={imageInputRef}
-        pdfInputRef={pdfInputRef}
-        handleImageChange={handleImageChange}
-        handlePdfChange={handlePdfChange}
-        selectedImagePreview={selectedImagePreview}
-        selectedPdfName={selectedPdfName}
-        onClearAttachment={clearAttachments}
+        onBack={() => handleNavigate('home')}
       />
     );
   }
