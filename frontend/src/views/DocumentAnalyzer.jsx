@@ -1,5 +1,5 @@
 ﻿import React, { useRef } from 'react';
-import { ArrowLeft, MoreHorizontal, ShieldCheck, CloudUpload, FileText, Image as ImageIcon, Activity, Beaker, FileSearch, Sparkles, MessageSquareText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MoreHorizontal, ShieldCheck, CloudUpload, FileText, Image as ImageIcon, Activity, Beaker, FileSearch, Sparkles, MessageSquareText } from 'lucide-react';
 
 const DocumentAnalyzer = ({ onBack, onUpload, isUploading, onAskQuestion }) => {
   const fileInputRef = useRef(null);
