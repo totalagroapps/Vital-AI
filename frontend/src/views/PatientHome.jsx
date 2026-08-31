@@ -1,165 +1,157 @@
 import React from 'react';
-import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut } from 'lucide-react';
+import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
   return (
-    <div className="min-h-screen bg-base pb-24 font-sans relative overflow-x-hidden">
+    <div className="flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
       
       {/* Background Graphic */}
-        <div className="absolute top-0 right-0 w-full md:w-2/3 h-[500px] md:h-[700px] z-0 overflow-hidden pointer-events-none">
-          <img 
-            src="/images/abstract_patient_bg.jpg" 
-            alt="AI Hologram" 
-            className="absolute top-0 right-0 w-full h-full object-cover opacity-90 mix-blend-multiply"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-base" />
-          <div className="absolute inset-0 bg-gradient-to-r from-base to-transparent md:w-1/3" />
-        </div>
+      <div className="absolute top-0 right-0 w-full md:w-[60%] lg:w-[45%] h-[500px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
+        <img 
+          src="/images/brain_robot_bg.jpg" 
+          alt="AI Hologram" 
+          className="absolute top-0 right-0 w-full h-full object-cover object-top md:object-right-top"
+        />
+        <div className="absolute inset-0 w-full bg-gradient-to-r from-base via-base/70 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base via-base/80 to-transparent" />
+        <div className="absolute top-0 left-0 w-16 h-full bg-gradient-to-r from-base to-transparent" />
+      </div>
 
-      <div className="relative z-10 px-4 pt-3">
+      <div className="relative z-10 px-5 pt-4">
         {/* Header */}
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-2">
-            <div className="text-brand-purple">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                <path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27" />
-              </svg>
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <div className="text-brand-purple">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2" />
+                  <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
+                </svg>
+              </div>
+              <span className="font-bold text-2xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">IA</span></span>
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">VITAL <span className="text-brand-purple">IA</span></h1>
+            <span className="text-[11px] text-gray-500 font-medium ml-9 -mt-1 tracking-wide">Tu salud, entendida por IA</span>
           </div>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
-              <ShieldCheck className="text-gray-600" size={20} />
-            </button>
-            <button onClick={onLogout} className="w-10 h-10 rounded-full border border-red-200 flex items-center justify-center bg-red-50 backdrop-blur" title="Cerrar sesión">
-              <LogOut className="text-red-500" size={18} />
+          
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <button className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-brand-purple shadow-sm hover:shadow-md transition-shadow">
+                <Bell size={18} />
+              </button>
+              <div className="absolute top-0 right-0 w-3 h-3 bg-brand-purple rounded-full border-2 border-white"></div>
+            </div>
+            <button onClick={onLogout} className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-full h-full object-cover" />
             </button>
           </div>
         </div>
 
         {/* Hero Section */}
-        <div className="mt-2 mb-3 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0">
-          <h2 className="text-2xl md:text-3xl leading-tight font-bold text-content-primary mb-1">
-            Tu salud, más fácil de <span className="text-brand-purple">entender</span> y <span className="text-brand-purple">gestionar.</span>
+        <div className="mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
+          <h2 className="text-3xl leading-tight font-bold text-content-primary mb-3">
+            Bienvenido,<br/>
+            <span className="text-brand-purple">estamos aqu&#237; para<br/>
+            cuidar de tu salud.</span>
           </h2>
-          <p className="text-content-secondary text-sm leading-relaxed mb-3 hidden sm:block">
-            Vital IA utiliza inteligencia artificial avanzada para acompañarte en cada paso de tu salud.
+          <p className="text-content-secondary text-sm leading-relaxed max-w-[85%] md:max-w-full font-medium">
+            Accede a todas las herramientas de Vital IA para entender, gestionar y mejorar tu bienestar.
           </p>
-          
-          <div className="glass-card rounded-xl p-2.5 flex gap-2 items-center w-full max-w-sm">
-            <div className="bg-brand-purple/10 p-2 rounded-xl text-brand-purple">
-              <ShieldCheck size={20} />
-            </div>
-            <div>
-              <p className="text-[11px] font-semibold text-content-primary leading-tight">Tu información siempre está protegida</p>
-              <p className="text-[9px] text-content-secondary mt-0.5 leading-tight hidden sm:block">Cumplimos con los más altos estándares de privacidad.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="flex items-center justify-center gap-2 mb-2 mt-3 animate-fade-in-up opacity-0" style={{ animationDelay: "100ms" }}>
-          <h3 className="text-lg md:text-xl font-bold text-center text-gray-900">¿Qué te gustaría hacer hoy?</h3>
         </div>
 
         {/* Action Grid */}
-        <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-6">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "150ms" }}>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-purple/5 rounded-full blur-2xl group-hover:bg-brand-purple/10 transition-colors" />
-            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
-              <div className="bg-brand-purple/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-purple">
-                <Stethoscope size={24} />
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "150ms" }}>
+            <div className="mb-3">
+              <div className="w-10 h-10 rounded-full border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-3 bg-brand-purple/5">
+                <Stethoscope size={20} />
               </div>
-              <span className="bg-brand-purple text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Entiende tus síntomas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
-              Cuéntanos qué te ocurre. Vital IA te hará preguntas y te orientará sobre los siguientes pasos.
+            <h4 className="font-bold text-gray-900 text-[13px] md:text-base leading-snug mb-2 pr-2">Entiende tus s&#237;ntomas</h4>
+            <p className="text-[10px] md:text-[11px] text-gray-500 leading-relaxed mb-6 flex-1 pr-1">
+              Describe lo que sientes y obt&#233;n posibles causas, explicaciones y consejos.
             </p>
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-purple rounded-full flex items-center justify-center text-white">
-              <ArrowRight size={16} />
+            <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-purple rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
+              <ArrowRight size={14} />
             </div>
           </button>
 
           {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "250ms" }}>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl group-hover:bg-brand-green/10 transition-colors" />
-            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
-              <div className="bg-brand-green/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-green">
-                <FileText size={24} />
+          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "250ms" }}>
+            <div className="mb-3">
+              <div className="w-10 h-10 rounded-full border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-3 bg-brand-blue/5">
+                <FileText size={20} />
               </div>
-              <span className="bg-brand-green text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Analiza tus pruebas médicas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
-              Sube analíticas, informes, radiografías, TAC y más. Obtén explicaciones claras y comprensibles.
+            <h4 className="font-bold text-gray-900 text-[13px] md:text-base leading-snug mb-2 pr-2">Analiza tus pruebas m&#233;dicas</h4>
+            <p className="text-[10px] md:text-[11px] text-gray-500 leading-relaxed mb-6 flex-1 pr-1">
+              Sube tus informes, radiograf&#237;as y anal&#237;ticas. La IA los analiza por ti.
             </p>
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-green rounded-full flex items-center justify-center text-white">
-              <ArrowRight size={16} />
+            <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-blue rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
+              <ArrowRight size={14} />
             </div>
           </button>
 
           {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "350ms" }}>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-blue/5 rounded-full blur-2xl group-hover:bg-brand-blue/10 transition-colors" />
-            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
-              <div className="bg-brand-blue/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-blue">
-                <FolderHeart size={24} />
+          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "350ms" }}>
+            <div className="mb-3">
+              <div className="w-10 h-10 rounded-full border border-brand-green/20 flex items-center justify-center text-brand-green mb-3 bg-brand-green/5">
+                <FolderHeart size={20} />
               </div>
-              <span className="bg-brand-blue text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Organiza tu historial de salud</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
-              Guarda y organiza todos tus documentos, medicación, alergias, enfermedades y mucho más en un solo lugar.
+            <h4 className="font-bold text-gray-900 text-[13px] md:text-base leading-snug mb-2 pr-2">Organiza tu historial de salud</h4>
+            <p className="text-[10px] md:text-[11px] text-gray-500 leading-relaxed mb-6 flex-1 pr-1">
+              Centraliza tu informaci&#243;n m&#233;dica y ten todo siempre a mano.
             </p>
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-blue rounded-full flex items-center justify-center text-white">
-              <ArrowRight size={16} />
+            <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-green rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
+              <ArrowRight size={14} />
             </div>
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0" style={{ animationDelay: "450ms" }}>
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-brand-orange/5 rounded-full blur-2xl group-hover:bg-brand-orange/10 transition-colors" />
-            <div className="flex justify-between items-start mb-1 md:mb-3 relative z-10">
-              <div className="bg-brand-orange/10 w-6 h-6 md:w-8 md:h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-brand-orange">
-                <UserSquare2 size={24} />
+          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "450ms" }}>
+            <div className="mb-3">
+              <div className="w-10 h-10 rounded-full border border-brand-orange/20 flex items-center justify-center text-brand-orange mb-3 bg-brand-orange/5">
+                <UserSquare2 size={20} />
               </div>
-              <span className="bg-brand-orange text-white text-[8px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-md">IA</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2 relative z-10">Conéctate con médicos especialistas</h4>
-            <p className="text-[11px] text-gray-500 leading-relaxed mb-8 relative z-10">
-              Encuentra al especialista adecuado, pide cita, realiza videollamadas y comparte tu información de forma segura.
+            <h4 className="font-bold text-gray-900 text-[13px] md:text-base leading-snug mb-2 pr-2">Con&#233;ctate con m&#233;dicos especialistas</h4>
+            <p className="text-[10px] md:text-[11px] text-gray-500 leading-relaxed mb-6 flex-1 pr-1">
+              Encuentra al especialista adecuado y realiza videoconsultas seguras.
             </p>
-            <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-6 h-6 md:w-8 md:h-8 bg-brand-orange rounded-full flex items-center justify-center text-white">
-              <ArrowRight size={16} />
+            <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-orange rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
+              <ArrowRight size={14} />
             </div>
           </button>
         </div>
 
         {/* AI Banner Footer */}
-        <div className="ai-card-gradient rounded-3xl p-5 flex items-center gap-4 text-white cursor-pointer relative overflow-hidden shadow-lg mb-4 animate-fade-in-up opacity-0 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 ease-out" style={{ animationDelay: "550ms" }} onClick={() => onNavigate('triage')}>
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-brand-purple/30 rounded-full blur-3xl" />
-          <div className="bg-white/10 p-3 rounded-xl backdrop-blur-sm z-10">
-            <Sparkles className="text-white" size={24} />
+        <div className="bg-white/80 backdrop-blur-xl border border-brand-purple/10 rounded-3xl p-4 md:p-5 shadow-sm mb-4 animate-fade-in-up opacity-0 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: "550ms" }}>
+          <div className="flex items-start gap-3 mb-4">
+            <div className="bg-brand-purple/5 p-2 rounded-full text-brand-purple">
+              <Sparkles size={20} />
+            </div>
+            <div className="flex-1">
+              <h5 className="font-bold text-brand-dark text-[15px] mb-1">Pregunta a Vital IA</h5>
+              <p className="text-[11px] text-gray-500 leading-relaxed pr-2">
+                Consulta sobre tu salud o descubre los <span className="text-brand-purple font-medium">&#250;ltimos avances m&#233;dicos y cient&#237;ficos</span> sobre cualquier enfermedad.
+              </p>
+            </div>
           </div>
-          <div className="flex-1 z-10">
-            <h5 className="font-bold text-sm mb-1">Y siempre puedes preguntar a Vital IA</h5>
-            <p className="text-xs text-white/70">Tu asistente inteligente de salud, disponible 24/7.</p>
+          
+          <div className="relative cursor-text" onClick={() => onNavigate('triage')}>
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Search size={16} />
+            </div>
+            <div className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-9 pr-12 text-[12px] text-gray-400 font-medium shadow-inner">
+              Ej.: &#191;por qu&#233; tengo dolor de cabeza?
+            </div>
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-105 transition-transform">
+              <Mic size={14} />
+            </div>
           </div>
-          <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center bg-white/5 z-10">
-            <MessageSquareText size={20} className="text-brand-purpleLight" />
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="bg-white rounded-2xl p-4 flex gap-3 items-center border border-gray-100 mb-8">
-          <div className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center flex-shrink-0 text-gray-400 text-xs font-bold">i</div>
-          <p className="text-[10px] text-gray-500 leading-relaxed">
-            Vital IA ofrece información y apoyo basado en inteligencia artificial y no sustituye la evaluación o diagnóstico de un profesional de la salud.
-          </p>
         </div>
 
       </div>
