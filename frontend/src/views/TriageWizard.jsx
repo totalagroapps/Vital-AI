@@ -151,17 +151,24 @@ const TriageWizard = ({ onBack, onStartChat }) => {
                   <div key={i} className="w-1 bg-current rounded-full" style={{ height: h * 4 + 'px' }} />
                 ))}
               </div>
-              <button className="w-16 h-16 rounded-full bg-brand-purple/10 text-brand-purple flex items-center justify-center shadow-inner mx-4">
-                <Mic size={28} />
-              </button>
-              <div className="flex items-center gap-1">
-                {[2, 1, 3, 2, 4, 2, 1, 3, 1, 2, 1].map((h, i) => (
-                  <div key={i} className="w-1 bg-current rounded-full" style={{ height: h * 4 + 'px' }} />
-                ))}
+              <button 
+                  onClick={toggleListening}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-inner mx-4 transition-all duration-300 ${isListening ? 'bg-brand-purple text-white shadow-glow animate-pulse scale-110' : 'bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 hover:scale-105'}`}
+                >
+                  <Mic size={28} />
+                </button>
+                <div className="flex items-center gap-1">
+                  {[2, 1, 3, 2, 4, 2, 1, 3, 1, 2, 1].map((h, i) => (
+                    <div key={i} className={`w-1 bg-current rounded-full transition-all duration-300 ${isListening ? 'animate-pulse' : ''}`} style={{ height: (isListening ? h * 6 : h * 4) + 'px' }} />
+                  ))}
+                </div>
               </div>
-            </div>
-            <p className="font-bold text-gray-900 text-sm">Pulsa el micrófono para hablar</p>
-            <p className="text-xs text-gray-400 mt-1">Te escucho...</p>
+              <p className="font-bold text-gray-900 text-sm">
+                {isListening ? 'Escuchando atentamente...' : 'Pulsa el micrófono para hablar'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                {isListening ? 'Habla ahora, estoy procesando tu voz' : 'Te escucho...'}
+              </p>
           </div>
         </div>
 
