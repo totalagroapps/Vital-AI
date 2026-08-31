@@ -8,7 +8,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-full md:w-[60%] lg:w-[45%] h-[500px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
         <img 
-          src="/images/brain_robot_bg.jpg" 
+          src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
           className="absolute top-0 right-0 w-full h-full object-cover object-top md:object-right-top"
         />
