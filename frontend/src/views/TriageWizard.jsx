@@ -3,6 +3,42 @@ import { ArrowLeft, MoreHorizontal, Info, Mic, Lock, ArrowRight } from 'lucide-r
 
 const TriageWizard = ({ onBack, onStartChat }) => {
   const [symptoms, setSymptoms] = useState('');
+  const [isListening, setIsListening] = useState(false);
+
+  React.useEffect(() => {
+    const shouldAutoStart = localStorage.getItem('autoStartMic') === 'true';
+    if (shouldAutoStart) {
+      localStorage.removeItem('autoStartMic');
+      setTimeout(() => {
+        toggleListening();
+      }, 500);
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSymptoms(prev => prev + (prev ? ' ' : '') + transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    try { recognition.start(); } catch (e) { setIsListening(false); }
+  };
 
   return (
     <div className="min-h-screen bg-base font-sans relative overflow-x-hidden">
@@ -10,9 +46,9 @@ const TriageWizard = ({ onBack, onStartChat }) => {
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-full h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 
-          src="/images/ai_patient_bg.jpg" 
+          src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover opacity-90 mix-blend-screen"
+          className="absolute top-0 right-0 w-[85%] md:w-[60%] lg:w-[50%] h-[400px] md:h-full object-cover opacity-90" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 40%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 40%)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
       </div>

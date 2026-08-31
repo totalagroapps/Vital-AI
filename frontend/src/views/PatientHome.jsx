@@ -147,7 +147,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
             <div className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-8 pr-10 text-[10px] text-content-secondary/70 font-medium shadow-inner">
               Ej.: &#191;por qu&#233; tengo dolor de cabeza?
             </div>
-            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-105 transition-transform">
+            <div 
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-105 transition-transform"
+              onClick={(e) => {
+                e.stopPropagation();
+                localStorage.setItem('autoStartMic', 'true');
+                onNavigate('triage');
+              }}
+            >
               <Mic size={12} />
             </div>
           </div>

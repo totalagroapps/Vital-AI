@@ -16,9 +16,9 @@ const DocumentAnalyzer = ({ onBack, onUpload, isUploading, onAskQuestion }) => {
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-full h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 
-          src="/images/ai_patient_bg.jpg" 
+          src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover opacity-90 mix-blend-screen"
+          className="absolute top-0 right-0 w-[85%] md:w-[60%] lg:w-[50%] h-[400px] md:h-full object-cover opacity-90" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 40%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 40%)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
       </div>
