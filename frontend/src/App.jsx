@@ -497,6 +497,15 @@ ${text}`], {type: 'text/plain'});
     }
   };
 
+
+  const clearAttachments = () => {
+    setSelectedImage(null);
+    setSelectedImagePreview(null);
+    setSelectedImageFile(null);
+    setSelectedPdf(null);
+    setSelectedPdfName("");
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
