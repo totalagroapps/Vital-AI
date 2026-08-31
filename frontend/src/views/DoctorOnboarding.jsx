@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, HeadphonesIcon, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
+import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, Headphones, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
 
 const steps = [
   { id: 1, title: 'Datos personales' },
@@ -108,7 +108,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
               </div>
               
               <div className="mt-auto pt-10 flex gap-3 items-center">
-                 <HeadphonesIcon className="text-gray-400" size={24}/>
+                 <Headphones className="text-gray-400" size={24}/>
                  <div>
                    <h4 className="font-bold text-xs text-brand-dark">¿Necesitas ayuda?</h4>
                    <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-brand-blue">soporte@vitalia.com</a></p>
