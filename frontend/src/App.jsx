@@ -56,6 +56,33 @@ export default function App() {
   const [patientScreen, setPatientScreen] = useState('home');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // History API integration for native back button
+  useEffect(() => {
+    // Push the initial state if it's the first time
+    if (!window.history.state) {
+      window.history.replaceState({ screen: 'home' }, '', '');
+    }
+
+    const handlePopState = (event) => {
+      if (event.state && event.state.screen) {
+        setPatientScreen(event.state.screen);
+      } else {
+        setPatientScreen('home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Helper to change screen and update history
+  const navigateToScreen = (screen) => {
+    if (screen !== patientScreen) {
+      window.history.pushState({ screen }, '', '');
+      setPatientScreen(screen);
+    }
+  };
+
   const [sessions, setSessions] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
   const [triageSessionId, setTriageSessionId] = useState(null);
