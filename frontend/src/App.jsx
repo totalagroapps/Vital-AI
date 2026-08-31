@@ -844,6 +844,27 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
+
+  if (patientScreen === 'general_chat') {
+    return (
+      <PatientChat 
+        messages={messages}
+        inputMessage={inputMessage}
+        setInputMessage={setInputMessage}
+        handleSend={handleSendGeneral}
+        isLoading={isLoading}
+        onBack={() => setPatientScreen('home')}
+        imageInputRef={imageInputRef}
+        pdfInputRef={pdfInputRef}
+        handleImageChange={handleImageChange}
+        handlePdfChange={handlePdfChange}
+        selectedImagePreview={selectedImagePreview}
+        selectedPdfName={selectedPdfName}
+        onClearAttachment={clearAttachments}
+      />
+    );
+  }
+
   if (patientScreen === 'chat') {
     return (
       <>

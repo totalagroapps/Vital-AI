@@ -62,7 +62,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <div className="grid grid-cols-2 gap-2 mb-3">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('general_chat')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-1.5">
               <div className="w-6 h-6 rounded-full border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-3 bg-brand-purple/5">
                 <Stethoscope size={12} />
