@@ -684,8 +684,35 @@ async def send_triage_message(
                 # Si no es informe final, incrementamos el contador de preguntas hechas
                 t_session.questions_asked += 1
             
-            # Guardar el estado actualizado en la Base de Datos
-            db.add(t_session)
+
+                # NEW CODE: Save HealthEvent if closed
+                if t_session.status.startswith("closed_"):
+                    try:
+                        import json
+                        payload_data = {
+                            "title": "Sesin de Triaje",
+                            "severity": t_session.status.replace("closed_", "").upper(),
+                            "report": t_session.final_report,
+                            "questions_asked": t_session.questions_asked
+                        }
+                        # We need the patient profile ID
+                        p_stmt = select(models.PatientProfile).where(models.PatientProfile.user_id == t_session.user_id)
+                        p_res = await db.execute(p_stmt)
+                        profile = p_res.scalars().first()
+                        if profile:
+                            new_event = models.HealthEvent(
+                                patient_id=profile.id,
+                                type=models.HealthEventType.triage,
+                                payload=payload_data,
+                                source_ref_id=str(t_session.id)
+                            )
+                            db.add(new_event)
+                    except Exception as he_err:
+                        logger.error(f"Error creating HealthEvent for triage: {he_err}")
+                
+                # Guardar el estado actualizado en la Base de Datos
+                db.add(t_session)
+
             await db.commit()
             
             return
@@ -1217,3 +1244,116 @@ async def get_patient_history(
         })
         
     return response
+
+@app.get("/api/documents/{document_id}/summary")
+async def get_document_summary(
+    document_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    stmt = select(models.MedicalDocument).where(
+        models.MedicalDocument.id == document_id, 
+        models.MedicalDocument.is_deleted == False
+    )
+    result = await db.execute(stmt)
+    doc = result.scalar_one_or_none()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found.")
+        
+    import json
+    payload_data = {}
+    if doc.extracted_text:
+        try:
+            payload_data = json.loads(doc.extracted_text)
+        except:
+            payload_data = {"resumen": doc.extracted_text}
+            
+    return {
+        "id": doc.id,
+        "type": doc.document_type.value if doc.document_type else "otro",
+        "filename": doc.original_filename,
+        "date": doc.uploaded_at.isoformat() if doc.uploaded_at else None,
+        "summary": payload_data
+    }
+
+# 5. Endpoint: Chat General (Buscador)
+@app.post("/api/chat/general")
+async def general_chat(
+    request: TriageRequest, 
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Chat general libre de contexto mdico histrico. 
+    Ideal para consultas rpidas de nutricin, fitness, dudas generales de salud.
+    """
+    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    
+    # 1. Intent Classification (Simple Rule/Regex or Mini-Prompt)
+    last_msg = request.messages[-1].content.lower() if request.messages else ""
+    symptom_keywords = ["me duele", "siento", "tengo fiebre", "urgencia", "sangre", "mareo", "vomito", "dolor"]
+    
+    # Si detecta sntomas, inyecta un disclaimer fuerte al inicio
+    is_symptom = any(k in last_msg for k in symptom_keywords)
+    
+    SYSTEM_PROMPT = """Eres Vital IA, un asistente general de salud y bienestar. 
+Responde de forma concisa, educada y profesional.
+REGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. 
+Si el usuario pregunta por sus sntomas, dile educadamente que para hacer un pre-diagnstico preciso debe usar el mdulo 'Entiende tus sntomas' (Triaje)."""
+
+    if is_symptom:
+        SYSTEM_PROMPT += "\n\nATENCION: El usuario parece estar describiendo un sntoma activo. Sugiere amablemente usar la seccin de Triaje para un anlisis formal."
+        
+    messages_payload = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for msg in request.messages:
+        messages_payload.append({"role": msg.role, "content": msg.content})
+
+    async def generate_chat():
+        try:
+            response_stream = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages_payload,
+                stream=True
+            )
+            async for chunk in response_stream:
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+        except Exception as e:
+            logger.error(f"Error en General Chat Stream: {str(e)}")
+            yield f"\n\n[Error de conexin: {str(e)}]"
+
+    return StreamingResponse(generate_chat(), media_type="text/plain")
+
+# 6. Endpoint: Directorio de Especialistas
+@app.get("/api/specialists")
+async def get_specialists(
+    specialty: str = None,
+    city: str = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Recupera la lista de especialistas mdicos, opcionalmente filtrando por especialidad o ciudad.
+    """
+    stmt = select(models.SpecialistProfile)
+    
+    if specialty:
+        stmt = stmt.where(models.SpecialistProfile.specialty.ilike(f"%{specialty}%"))
+    if city:
+        stmt = stmt.where(models.SpecialistProfile.city.ilike(f"%{city}%"))
+        
+    result = await db.execute(stmt)
+    specialists = result.scalars().all()
+    
+    return [
+        {
+            "id": s.id,
+            "user_id": s.user_id,
+            "full_name": s.full_name,
+            "specialty": s.specialty,
+            "city": s.city,
+            "verified": s.verified,
+            "photo_url": s.photo_url,
+            "availability_schedule": s.availability_schedule or {}
+        }
+        for s in specialists
+    ]
