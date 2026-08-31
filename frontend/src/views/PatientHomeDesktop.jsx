@@ -73,38 +73,38 @@ const PatientHomeDesktop = ({ onNavigate }) => {
             {/* 5 Cards Row */}
             <div className="grid grid-cols-5 gap-3 lg:gap-5 mb-8">
               
-              <div onClick={() => onNavigate('general_chat')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+              <div onClick={() => onNavigate('general_chat')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-brand-purple text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Brain size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-xs text-brand-purple mb-1.5">Pregunta a Vital IA</h4>
-                <p className="text-[10px] lg:text-[11px] text-gray-500 mb-4 flex-1">Resuelve tus dudas sobre salud de forma clara y confiable.</p>
+                <h4 className="font-bold text-[11px] lg:text-sm text-brand-purple mb-1.5">Pregunta a Vital IA</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Resuelve tus dudas sobre salud de forma clara y confiable.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-brand-purple text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
-              <div onClick={() => onNavigate('documents')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+              <div onClick={() => onNavigate('documents')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-brand-green text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><FileText size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-xs text-brand-green mb-1.5">Analiza tus pruebas e informes</h4>
-                <p className="text-[10px] lg:text-[11px] text-gray-500 mb-4 flex-1">Sube analíticas, radiografías, TAC, informes y recibe una explicación sencilla.</p>
+                <h4 className="font-bold text-[11px] lg:text-sm text-brand-green mb-1.5">Analiza tus pruebas e informes</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Sube analíticas, radiografías, TAC, informes y recibe una explicación sencilla.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-brand-green text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
-              <div onClick={() => {}} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+              <div onClick={() => {}} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Activity size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-xs text-blue-500 mb-1.5">Sigue tu salud</h4>
-                <p className="text-[10px] lg:text-[11px] text-gray-500 mb-4 flex-1">Health Score, evolución de tus valores y recomendaciones personalizadas.</p>
+                <h4 className="font-bold text-[11px] lg:text-sm text-blue-500 mb-1.5">Sigue tu salud</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Health Score, evolución de tus valores y recomendaciones personalizadas.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-blue-500 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
-              <div onClick={() => onNavigate('history')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+              <div onClick={() => onNavigate('history')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-brand-orange text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Folder size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-xs text-brand-orange mb-1.5">Todo tu historial en un solo lugar</h4>
-                <p className="text-[10px] lg:text-[11px] text-gray-500 mb-4 flex-1">Medicamentos, alergias, enfermedades, consultas y más.</p>
+                <h4 className="font-bold text-[11px] lg:text-sm text-brand-orange mb-1.5">Todo tu historial en un solo lugar</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Medicamentos, alergias, enfermedades, consultas y más.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-brand-orange text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
-              <div onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+              <div onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-purple-600 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><User size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-xs text-purple-600 mb-1.5">Encuentra y consulta a un médico</h4>
-                <p className="text-[10px] lg:text-[11px] text-gray-500 mb-4 flex-1">Videoconsulta, citas presenciales y comparte tu información.</p>
+                <h4 className="font-bold text-[11px] lg:text-sm text-purple-600 mb-1.5">Encuentra y consulta a un médico</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Videoconsulta, citas presenciales y comparte tu información.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-purple-600 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
@@ -112,9 +112,7 @@ const PatientHomeDesktop = ({ onNavigate }) => {
 
             {/* Comenzar Button & Footer */}
             <div className="flex flex-col items-center">
-               <button onClick={() => onNavigate('triage')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg px-20 py-3 rounded-full shadow-lg hover:shadow-purple-500/30 transition-all flex items-center gap-3 mb-4 hover:scale-105">
-                 Comenzar <ArrowRight size={20}/>
-               </button>
+
                <div className="flex items-center gap-4 mb-3">
                    <p className="flex items-center gap-1.5 text-blue-600 font-semibold text-xs"><Lock size={14}/> Tu información siempre protegida</p>
                    <span className="text-gray-300">|</span>
