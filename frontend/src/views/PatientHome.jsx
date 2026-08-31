@@ -62,14 +62,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <div className="grid grid-cols-2 gap-3 mb-6">
           
           {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "150ms" }}>
+          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-3">
               <div className="w-10 h-10 rounded-full border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-3 bg-brand-purple/5">
                 <Stethoscope size={20} />
               </div>
             </div>
-            <h4 className="font-bold text-content-primary text-[13px] md:text-base leading-snug mb-2 pr-2">Entiende tus s&#237;ntomas</h4>
-            <p className="text-[10px] md:text-[11px] text-content-secondary leading-relaxed mb-6 flex-1 pr-1">
+            <h4 className="font-bold text-[13px] md:text-base leading-snug mb-2 pr-2" style={{ color: "#1E293B" }}>Entiende tus s&#237;ntomas</h4>
+            <p className="text-[10px] md:text-[11px] leading-relaxed mb-6 flex-1 pr-1" style={{ color: "#64748B" }}>
               Describe lo que sientes y obt&#233;n posibles causas, explicaciones y consejos.
             </p>
             <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-purple rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
@@ -78,14 +78,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "250ms" }}>
+          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-3">
               <div className="w-10 h-10 rounded-full border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-3 bg-brand-blue/5">
                 <FileText size={20} />
               </div>
             </div>
-            <h4 className="font-bold text-content-primary text-[13px] md:text-base leading-snug mb-2 pr-2">Analiza tus pruebas m&#233;dicas</h4>
-            <p className="text-[10px] md:text-[11px] text-content-secondary leading-relaxed mb-6 flex-1 pr-1">
+            <h4 className="font-bold text-[13px] md:text-base leading-snug mb-2 pr-2" style={{ color: "#1E293B" }}>Analiza tus pruebas m&#233;dicas</h4>
+            <p className="text-[10px] md:text-[11px] leading-relaxed mb-6 flex-1 pr-1" style={{ color: "#64748B" }}>
               Sube tus informes, radiograf&#237;as y anal&#237;ticas. La IA los analiza por ti.
             </p>
             <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-blue rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
@@ -94,14 +94,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "350ms" }}>
+          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-3">
               <div className="w-10 h-10 rounded-full border border-brand-green/20 flex items-center justify-center text-brand-green mb-3 bg-brand-green/5">
                 <FolderHeart size={20} />
               </div>
             </div>
-            <h4 className="font-bold text-content-primary text-[13px] md:text-base leading-snug mb-2 pr-2">Organiza tu historial de salud</h4>
-            <p className="text-[10px] md:text-[11px] text-content-secondary leading-relaxed mb-6 flex-1 pr-1">
+            <h4 className="font-bold text-[13px] md:text-base leading-snug mb-2 pr-2" style={{ color: "#1E293B" }}>Organiza tu historial de salud</h4>
+            <p className="text-[10px] md:text-[11px] leading-relaxed mb-6 flex-1 pr-1" style={{ color: "#64748B" }}>
               Centraliza tu informaci&#243;n m&#233;dica y ten todo siempre a mano.
             </p>
             <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-green rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
@@ -110,14 +110,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out animate-fade-in-up opacity-0 flex flex-col h-full" style={{ animationDelay: "450ms" }}>
+          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-3">
               <div className="w-10 h-10 rounded-full border border-brand-orange/20 flex items-center justify-center text-brand-orange mb-3 bg-brand-orange/5">
                 <UserSquare2 size={20} />
               </div>
             </div>
-            <h4 className="font-bold text-content-primary text-[13px] md:text-base leading-snug mb-2 pr-2">Con&#233;ctate con m&#233;dicos especialistas</h4>
-            <p className="text-[10px] md:text-[11px] text-content-secondary leading-relaxed mb-6 flex-1 pr-1">
+            <h4 className="font-bold text-[13px] md:text-base leading-snug mb-2 pr-2" style={{ color: "#1E293B" }}>Con&#233;ctate con m&#233;dicos especialistas</h4>
+            <p className="text-[10px] md:text-[11px] leading-relaxed mb-6 flex-1 pr-1" style={{ color: "#64748B" }}>
               Encuentra al especialista adecuado y realiza videoconsultas seguras.
             </p>
             <div className="absolute bottom-3 right-3 w-7 h-7 bg-brand-orange rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
@@ -127,7 +127,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* AI Banner Footer */}
-        <div className="bg-white/80 backdrop-blur-xl border border-brand-purple/10 rounded-3xl p-4 md:p-5 shadow-sm mb-4 animate-fade-in-up opacity-0 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: "550ms" }}>
+        <div className="bg-white/80 backdrop-blur-xl border border-brand-purple/10 rounded-3xl p-4 md:p-5 shadow-sm mb-4 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: "550ms" }}>
           <div className="flex items-start gap-3 mb-4">
             <div className="bg-brand-purple/5 p-2 rounded-full text-brand-purple">
               <Sparkles size={20} />
