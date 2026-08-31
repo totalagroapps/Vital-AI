@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, HeadphonesIcon, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud } from 'lucide-react';
+import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, HeadphonesIcon, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
 
 const steps = [
   { id: 1, title: 'Datos personales' },
