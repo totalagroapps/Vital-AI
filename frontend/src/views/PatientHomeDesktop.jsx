@@ -1,0 +1,128 @@
+﻿import React from 'react';
+import { Stethoscope, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info } from 'lucide-react';
+
+const PatientHomeDesktop = ({ onNavigate }) => {
+  return (
+    <div className="min-h-screen bg-white relative overflow-x-hidden font-sans">
+      {/* Background image on the right */}
+      <div className="absolute top-0 right-0 w-[55%] h-[700px] z-0">
+         <img 
+            src="/images/abstract_woman_bg.jpg" 
+            alt="AI Hologram" 
+            className="w-full h-full object-cover opacity-90 object-center" 
+            style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 30%, black 80%, transparent 100%)' }} 
+         />
+         
+         {/* Floating Cards */}
+         <div className="absolute top-24 left-10 bg-white/95 backdrop-blur rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/60 animate-float w-max z-10 hover:-translate-y-1 transition-transform cursor-pointer" onClick={() => onNavigate('triage')}>
+             <div className="text-brand-purple bg-brand-purple/10 p-3 rounded-full"><Stethoscope size={24}/></div>
+             <span className="font-semibold text-sm text-gray-800 leading-tight">Analiza tus<br/>síntomas</span>
+         </div>
+         <div className="absolute top-64 left-5 bg-white/95 backdrop-blur rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/60 animate-float-delayed w-max z-10 hover:-translate-y-1 transition-transform cursor-pointer" onClick={() => onNavigate('documents')}>
+             <div className="text-brand-green bg-brand-green/10 p-3 rounded-full"><FileText size={24}/></div>
+             <span className="font-semibold text-sm text-gray-800 leading-tight">Entiende tus<br/>pruebas e informes</span>
+         </div>
+         <div className="absolute top-16 right-24 bg-white/95 backdrop-blur rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/60 animate-float w-max z-10 hover:-translate-y-1 transition-transform cursor-pointer" onClick={() => onNavigate('history')}>
+             <div className="text-brand-blue bg-brand-blue/10 p-3 rounded-full"><FolderHeart size={24}/></div>
+             <span className="font-semibold text-sm text-gray-800 leading-tight">Organiza todo<br/>tu historial</span>
+         </div>
+         <div className="absolute top-56 right-16 bg-white/95 backdrop-blur rounded-2xl p-4 flex items-center gap-4 shadow-xl border border-white/60 animate-float-delayed w-max z-10 hover:-translate-y-1 transition-transform cursor-pointer" onClick={() => onNavigate('doctors')}>
+             <div className="text-brand-orange bg-brand-orange/10 p-3 rounded-full"><UserSquare2 size={24}/></div>
+             <span className="font-semibold text-sm text-gray-800 leading-tight">Conéctate con<br/>los mejores médicos</span>
+         </div>
+         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur rounded-2xl px-8 py-4 shadow-xl border border-white/60 flex items-center justify-center text-center w-max z-10">
+            <span className="text-base text-gray-700 font-medium leading-relaxed">Inteligencia Artificial avanzada<br/>al servicio de <strong className="text-brand-purple font-bold">tu salud</strong></span>
+         </div>
+         <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-white to-transparent" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-12 pt-12 pb-20">
+        {/* Header Logo */}
+        <div className="flex items-center gap-2 mb-28">
+           <div className="text-brand-purple">
+             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+               <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2" />
+               <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
+             </svg>
+           </div>
+           <span className="font-bold text-2xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">IA</span></span>
+        </div>
+
+        {/* Hero text */}
+        <div className="max-w-[45%] mb-24 animate-fade-in-left">
+           <h2 className="text-xl font-bold tracking-widest text-gray-800 mb-2 uppercase">BIENVENIDO A</h2>
+           <h1 className="text-7xl font-black mb-8 bg-gradient-to-r from-blue-600 to-brand-purple bg-clip-text text-transparent">VITAL IA</h1>
+           
+           <h3 className="text-xl font-bold text-gray-900 mb-4">Tu salud, más fácil de entender y gestionar.</h3>
+           <p className="text-gray-600 mb-4 leading-relaxed text-sm">
+             Vital IA te ayuda a comprender tus síntomas, analizar tus pruebas e informes médicos, organizar tu historial de salud y seguir tu evolución con inteligencia artificial.
+           </p>
+           <p className="text-gray-600 leading-relaxed text-sm">
+             Toda tu información de salud en un mismo lugar, explicada de forma sencilla y disponible cuando la necesites.
+           </p>
+        </div>
+
+        {/* Section Title */}
+        <h3 className="text-center text-xl font-bold text-gray-900 mb-10">¿Qué puedes hacer con Vital IA?</h3>
+
+        {/* 5 Cards Row */}
+        <div className="grid grid-cols-5 gap-6 mb-16 px-4">
+          
+          <div onClick={() => onNavigate('general_chat')} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+            <div className="w-12 h-12 rounded-full bg-brand-purple text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Brain size={24}/></div>
+            <h4 className="font-bold text-sm text-brand-purple mb-2">Pregunta a Vital IA</h4>
+            <p className="text-xs text-gray-500 mb-6 flex-1">Resuelve tus dudas sobre salud de forma clara y confiable.</p>
+            <div className="w-8 h-8 rounded-full bg-brand-purple text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={16}/></div>
+          </div>
+
+          <div onClick={() => onNavigate('documents')} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+            <div className="w-12 h-12 rounded-full bg-brand-green text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><FileText size={24}/></div>
+            <h4 className="font-bold text-sm text-brand-green mb-2">Analiza tus pruebas e informes</h4>
+            <p className="text-xs text-gray-500 mb-6 flex-1">Sube analíticas, radiografías, TAC, informes y recibe una explicación sencilla.</p>
+            <div className="w-8 h-8 rounded-full bg-brand-green text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={16}/></div>
+          </div>
+
+          <div onClick={() => {}} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+            <div className="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Activity size={24}/></div>
+            <h4 className="font-bold text-sm text-blue-500 mb-2">Sigue tu salud</h4>
+            <p className="text-xs text-gray-500 mb-6 flex-1">Health Score, evolución de tus valores y recomendaciones personalizadas.</p>
+            <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={16}/></div>
+          </div>
+
+          <div onClick={() => onNavigate('history')} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+            <div className="w-12 h-12 rounded-full bg-brand-orange text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><Folder size={24}/></div>
+            <h4 className="font-bold text-sm text-brand-orange mb-2">Todo tu historial en un solo lugar</h4>
+            <p className="text-xs text-gray-500 mb-6 flex-1">Medicamentos, alergias, enfermedades, consultas y más.</p>
+            <div className="w-8 h-8 rounded-full bg-brand-orange text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={16}/></div>
+          </div>
+
+          <div onClick={() => onNavigate('doctors')} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+            <div className="w-12 h-12 rounded-full bg-purple-600 text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><User size={24}/></div>
+            <h4 className="font-bold text-sm text-purple-600 mb-2">Encuentra y consulta a un médico</h4>
+            <p className="text-xs text-gray-500 mb-6 flex-1">Videoconsulta, citas presenciales y comparte tu información de forma segura.</p>
+            <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={16}/></div>
+          </div>
+
+        </div>
+
+        {/* Comenzar Button & Footer */}
+        <div className="flex flex-col items-center">
+           <button onClick={() => onNavigate('triage')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-xl px-24 py-4 rounded-full shadow-lg hover:shadow-purple-500/30 transition-all flex items-center gap-3 mb-6 hover:scale-105">
+             Comenzar <ArrowRight size={24}/>
+           </button>
+           <p className="flex items-center gap-2 text-blue-600 font-semibold text-sm mb-1"><Lock size={16}/> Tu información siempre protegida</p>
+           <p className="text-xs text-gray-400 mb-8">Cumplimos con los más altos estándares de privacidad.</p>
+           
+           <div className="bg-[#f8f9fc] border border-blue-100 text-gray-500 text-xs px-6 py-3 rounded-xl flex items-center gap-3">
+             <div className="text-blue-500"><Info size={16}/></div>
+             Vital IA ofrece información y apoyo basado en inteligencia artificial, no sustituye la evaluación o diagnóstico de un profesional de la salud.
+           </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default PatientHomeDesktop;

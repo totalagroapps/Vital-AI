@@ -1,9 +1,11 @@
+import PatientHomeDesktop from './PatientHomeDesktop';
 import React from 'react';
 import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
   return (
-    <div className="flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
+    <>
+    <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
       
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-[85%] md:w-[60%] lg:w-[50%] h-[400px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
@@ -162,6 +164,11 @@ const PatientHome = ({ onNavigate, onLogout }) => {
 
       </div>
     </div>
+    
+    <div className="hidden lg:block">
+      <PatientHomeDesktop onNavigate={onNavigate} />
+    </div>
+    </>
   );
 };
 
