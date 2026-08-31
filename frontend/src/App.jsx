@@ -1,5 +1,7 @@
 import DoctorDashboard from './DoctorDashboard';
 import React, { useState, useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -323,9 +325,11 @@ ${text}`], {type: 'text/plain'});
     setToken(null);
     setUsername(null);
     localStorage.removeItem('med_token');
+    localStorage.removeItem('med_role');
     setSessions([]);
     setMessages([]);
     setCurrentSessionId(null);
+    navigate('/login');
   };
 
   // Text-to-speech
@@ -766,21 +770,54 @@ ${text}`], {type: 'text/plain'});
     (s.patient_name && s.patient_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  if (showDoctorOnboarding) {
-    return <DoctorOnboarding onNavigateLogin={() => setShowDoctorOnboarding(false)} />;
+  const path = location.pathname;
+
+  if (path === '/' || path === '') {
+    if (!token) return <Navigate to="/login" />;
+    return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
   }
 
-  if (!token) {
+  if (path === '/registro/medico') {
+    return <DoctorOnboarding onNavigateLogin={() => navigate('/login')} />;
+  }
+
+  if (!token && path !== '/login') {
+    return <Navigate to="/login" />;
+  }
+
+  if (path === '/login') {
+    if (token) return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
     return <Auth 
-      onLogin={(jwt, role) => { setToken(jwt); localStorage.setItem('med_token', jwt); if(role) { setViewMode(role); localStorage.setItem('med_role', role); } }} 
+      onLogin={(jwt, role) => { 
+        setToken(jwt); 
+        localStorage.setItem('med_token', jwt); 
+        if(role) { 
+          setViewMode(role); 
+          localStorage.setItem('med_role', role); 
+          navigate(role === 'doctor' ? '/medico' : '/paciente');
+        } else {
+          navigate('/paciente');
+        }
+      }} 
       apiUrl={API_URL} 
-      onNavigateDoctorRegister={() => setShowDoctorOnboarding(true)}
+      onNavigateDoctorRegister={() => navigate('/registro/medico')}
     />;
   }
 
-  if (viewMode === 'doctor') {
-    return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {setToken(null); localStorage.removeItem('med_token'); localStorage.removeItem('med_role'); setViewMode('patient');}} />;
-  }if (patientScreen === 'history') {
+  if (path.startsWith('/medico')) {
+    if (viewMode !== 'doctor') return <Navigate to="/paciente" />;
+    return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {
+      setToken(null); 
+      localStorage.removeItem('med_token'); 
+      localStorage.removeItem('med_role'); 
+      setViewMode('patient');
+      navigate('/login');
+    }} />;
+  }
+
+  // If we reach here, we are in a patient route
+  if (viewMode === 'doctor') return <Navigate to="/medico" />;
+if (path === '/paciente/historial') {
     return (
       <MedicalHistory 
         patientProfile={patientProfile}
@@ -792,7 +829,7 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
-  if (patientScreen === 'home') {
+  if (path === '/paciente') {
 
     return (
       <>
@@ -824,7 +861,7 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
-  if (patientScreen === 'triage') {
+  if (path === '/paciente/triaje') {
     return (
       <>
         <TriageWizard 
@@ -839,7 +876,7 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
-  if (patientScreen === 'documents') {
+  if (path === '/paciente/documentos') {
     return (
       <>
         <DocumentAnalyzer 
@@ -865,7 +902,7 @@ ${text}`], {type: 'text/plain'});
   }
 
 
-  if (patientScreen === 'general_chat') {
+  if (path === '/paciente/chat') {
     return (
       <PatientChat 
         messages={messages}
@@ -878,7 +915,7 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
-  if (patientScreen === 'chat') {
+  if (path === '/paciente/asistente') {
     return (
       <>
         <PatientChat 
