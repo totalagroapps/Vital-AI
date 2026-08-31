@@ -136,17 +136,17 @@ const MedicalHistory = ({
               {triageSessions.map(session => (
                 <div key={session.id} className="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100">
                   <div>
-                    <p className="font-semibold text-sm text-gray-900">{session.title}</p>
+                    <p className="font-semibold text-sm text-gray-900">{(session.payload?.title || session.title || 'Consulta de Triage')}</p>
                     <p className="text-[10px] text-gray-500 mt-1">{new Date(session.created_at).toLocaleDateString()}</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-1 rounded-md ${
-                    session.severity === "ROJO" ? "bg-red-100 text-red-700" :
-                    session.severity === "NARANJA" ? "bg-orange-100 text-orange-700" :
-                    session.severity === "AMARILLO" ? "bg-yellow-100 text-yellow-700" :
-                    session.severity === "VERDE" ? "bg-green-100 text-green-700" :
+                    (session.payload?.severity || session.severity) === "ROJO" ? "bg-red-100 text-red-700" :
+                    (session.payload?.severity || session.severity) === "NARANJA" ? "bg-orange-100 text-orange-700" :
+                    (session.payload?.severity || session.severity) === "AMARILLO" ? "bg-yellow-100 text-yellow-700" :
+                    (session.payload?.severity || session.severity) === "VERDE" ? "bg-green-100 text-green-700" :
                     "bg-blue-100 text-blue-700"
                   }`}>
-                    {session.severity || "INFO"}
+                    {(session.payload?.severity || session.severity) || "INFO"}
                   </span>
                 </div>
               ))}

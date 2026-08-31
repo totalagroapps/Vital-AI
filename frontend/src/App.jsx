@@ -352,6 +352,7 @@ ${text}`], {type: 'text/plain'});
       checkHealth();
       fetchSessions();
       fetchPatientProfile();
+      fetchHistory();
     }
   }, [token]);
 
@@ -360,6 +361,22 @@ ${text}`], {type: 'text/plain'});
   };
 
   
+
+  const fetchHistory = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/patients/me/history`, {
+        headers: authHeaders
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSessions(data);
+      }
+    } catch (e) {
+      console.error("Error fetching history:", e);
+    }
+  };
+
   const fetchPatientProfile = async () => {
     try {
       const res = await fetch(`${API_URL}/api/patient/profile`, { headers: authHeaders });
@@ -384,7 +401,8 @@ ${text}`], {type: 'text/plain'});
       });
       if (res.ok) {
         alert('Historial médico guardado con éxito');
-        fetchPatientProfile(); // reload to get new QR
+        fetchPatientProfile();
+      fetchHistory(); // reload to get new QR
       }
     } catch (e) {
       console.error('Error saving patient profile:', e);
@@ -695,6 +713,7 @@ ${text}`], {type: 'text/plain'});
             if (screen === 'history') {
               setPatientScreen('chat');
               fetchPatientProfile();
+      fetchHistory();
               setShowMedicalHistory(true);
             } else if (screen === 'doctors') {
               alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
@@ -710,6 +729,7 @@ ${text}`], {type: 'text/plain'});
           if (tab === 'patients') {
             setPatientScreen('history');
             fetchPatientProfile();
+      fetchHistory();
           }
           if (tab === 'agenda') alert('Agenda en desarrollo...');
         }} />
@@ -842,7 +862,8 @@ ${text}`], {type: 'text/plain'});
         {/* Historial Medico Button */}
         <div className="px-3 pb-3">
           <button
-            onClick={() => { fetchPatientProfile(); setShowMedicalHistory(true); }}
+            onClick={() => { fetchPatientProfile();
+      fetchHistory(); setShowMedicalHistory(true); }}
             className="w-full py-2 px-4 rounded-xl bg-white border border-slate-300 hover:border-brand/30/50 text-slate-700 font-medium flex items-center justify-center gap-2 transition-all hover:bg-slate-100"
           >
             <ShieldCheck className="w-4 h-4 text-semantic-success-text" />

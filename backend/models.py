@@ -4,6 +4,7 @@ import enum
 import uuid
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON
 
 class DocumentMetadata(Base):
     """
@@ -86,6 +87,7 @@ class PatientProfile(Base):
     weight = Column(String, nullable=True)
     preferred_language = Column(String, default="es")
     medical_documents = relationship("MedicalDocument", back_populates="patient")
+    health_events = relationship("HealthEvent", back_populates="patient", cascade="all, delete-orphan")
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 class ChatSession(Base):
@@ -102,3 +104,21 @@ class ChatMessage(Base):
     role = Column(String)
     content = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class HealthEventType(str, enum.Enum):
+    triage = "triage"
+    document = "document"
+    medication = "medication"
+    allergy = "allergy"
+    note = "note"
+
+class HealthEvent(Base):
+    __tablename__ = "health_events"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patient_profiles.id"), index=True)
+    type = Column(Enum(HealthEventType))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    payload = Column(JSON, nullable=True) # Usamos JSONB para almacenar datos estructurados variables
+    source_ref_id = Column(String, nullable=True) # ID de referencia (ej. el ID del triage o del documento)
+
+    patient = relationship("PatientProfile", back_populates="health_events")
