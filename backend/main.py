@@ -429,15 +429,63 @@ async def upload_document(
 
     try:
         if file.content_type == "application/pdf" or file_extension == "pdf":
-            # Procesamiento PDF
+            # Procesamiento PDF - two-pass: text first, vision fallback for scanned PDFs
             response_data["document_type"] = "pdf_report"
+            
+            # Pass 1: Try text extraction with PyPDF2 (works for digital PDFs)
             pdf_b64 = base64.b64encode(content).decode("utf-8")
             raw_text = extract_text_from_pdf(pdf_b64)
-            scrubbed_text, phi_detected = scrub_phi(raw_text)
             
+            # Pass 2: If empty (scanned PDF), render pages as images and use GPT-4o Vision
+            if not raw_text or len(raw_text.strip()) < 30:
+                logger.info("PDF text extraction returned empty/short. Trying vision OCR with PyMuPDF...")
+                try:
+                    import fitz  # PyMuPDF
+                    import io as io_module
+                    
+                    pdf_doc = fitz.open(stream=content, filetype="pdf")
+                    page_texts = []
+                    
+                    openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                    
+                    for page_num in range(min(len(pdf_doc), 5)):  # max 5 pages
+                        page = pdf_doc.load_page(page_num)
+                        mat = fitz.Matrix(2, 2)  # 2x zoom for better OCR quality
+                        pix = page.get_pixmap(matrix=mat)
+                        img_bytes = pix.tobytes("jpeg")
+                        img_b64 = base64.b64encode(img_bytes).decode("utf-8")
+                        
+                        vision_resp = await openai_client.chat.completions.create(
+                            model="gpt-4o",
+                            messages=[{
+                                "role": "user",
+                                "content": [
+                                    {"type": "text", "text": "Esta es la página de un documento médico (receta, informe, historial clínico). Transcribe TODO el texto que veas de forma precisa y fiel. Incluye nombres de medicamentos, dosis, diagnósticos, instrucciones y cualquier dato médico relevante. No omitas nada."},
+                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
+                                ]
+                            }],
+                            max_tokens=2000,
+                            temperature=0.0
+                        )
+                        page_text = vision_resp.choices[0].message.content
+                        page_texts.append(f"--- Página {page_num + 1} ---\n{page_text}")
+                        logger.info(f"Vision OCR page {page_num+1}: extracted {len(page_text)} chars")
+                    
+                    raw_text = "\n\n".join(page_texts)
+                    pdf_doc.close()
+                    
+                except ImportError:
+                    logger.warning("PyMuPDF not installed - cannot do vision OCR on scanned PDF")
+                    raw_text = "No se pudo extraer texto de este PDF (posiblemente escaneado y PyMuPDF no disponible)."
+                except Exception as vision_e:
+                    logger.error(f"Vision OCR on PDF failed: {vision_e}")
+                    raw_text = f"Error al procesar el PDF con visión: {str(vision_e)}"
+            
+            scrubbed_text, phi_detected = scrub_phi(raw_text)
             response_data["extracted_text"] = scrubbed_text
             response_data["phi_detected"] = phi_detected
             
+
         elif file.content_type.startswith("image/") or file_extension in ["jpg", "jpeg", "png", "webp", "heic", "bmp", "gif", "avif"]:
             # Procesamiento Imagen (OCR Clínico y Análisis)
             response_data["document_type"] = "medical_image"
