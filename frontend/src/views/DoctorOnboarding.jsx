@@ -67,7 +67,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
   const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   return (
-    <div className="min-h-screen bg-gray-50/30 flex flex-col font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-sans overflow-x-hidden">
       
       {/* Top Header */}
       <header className="bg-white border-b border-gray-100 py-4 px-8 flex items-center justify-between sticky top-0 z-50">
