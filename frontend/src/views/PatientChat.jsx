@@ -105,7 +105,7 @@ const PatientChat = ({
       </div>
 
       {/* Input Area */}
-      <div className="flex-none bg-white border-t border-gray-100 px-4 py-3 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
+      <div className="flex-none bg-white border-t border-gray-100 px-4 py-3 pb-24 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
         
         {/* Vista previa de adjuntos */}
         {(selectedImagePreview || selectedPdfName) && (

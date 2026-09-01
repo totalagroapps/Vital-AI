@@ -830,20 +830,47 @@ ${text}`], {type: 'text/plain'});
 
   // If we reach here, we are in a patient route
   if (viewMode === 'doctor') return <Navigate to="/medico" />;
+  // Global BottomNav handler for all patient routes
+  const activeTab = path === '/paciente' ? 'home'
+    : (path === '/paciente/historial') ? 'patients'
+    : (path === '/paciente/asistente' || path === '/paciente/triaje') ? 'ai'
+    : 'home';
+
+  const handleBottomNav = (tab) => {
+    if (tab === 'home') navigate('/paciente');
+    if (tab === 'ai') {
+      startTriageSession();
+      navigate('/paciente/asistente');
+    }
+    if (tab === 'patients') {
+      fetchPatientProfile();
+      fetchHistory();
+      navigate('/paciente/historial');
+    }
+    if (tab === 'agenda') alert('Agenda en desarrollo...');
+  };
+
+  // The GlobalBottomNav is fixed, so it always floats above all route content
+  const GlobalBottomNav = (
+    <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
+  );
+
 if (path === '/paciente/historial') {
     return (
-      <MedicalHistory 
-        patientProfile={patientProfile}
-        setPatientProfile={setPatientProfile}
-        savePatientProfile={savePatientProfile}
-        sessions={sessions}
-        onBack={() => navigate('/paciente')}
-      />
+      <>
+        <MedicalHistory 
+          patientProfile={patientProfile}
+          setPatientProfile={setPatientProfile}
+          savePatientProfile={savePatientProfile}
+          sessions={sessions}
+          onBack={() => navigate('/paciente')}
+        />
+        {GlobalBottomNav}
+      </>
     );
   }
 
   if (path === '/paciente') {
-
     return (
       <>
         <PatientHome 
@@ -860,19 +887,7 @@ if (path === '/paciente/historial') {
             }
           }} 
           />
-        <BottomNav activeTab="home" onTabChange={(tab) => {
-          if (tab === 'home') navigate('/paciente');
-          if (tab === 'ai') {
-            startTriageSession();
-            navigate('/paciente/asistente');
-          }
-          if (tab === 'patients') {
-            fetchPatientProfile();
-            fetchHistory();
-            navigate('/paciente/historial');
-          }
-          if (tab === 'agenda') alert('Agenda en desarrollo...');
-        }} />
+        {GlobalBottomNav}
       </>
     );
   }
@@ -888,6 +903,7 @@ if (path === '/paciente/historial') {
           startTriageSession();
 
         }} />
+        {GlobalBottomNav}
       </>
     );
   }
@@ -915,6 +931,7 @@ if (path === '/paciente/historial') {
           startTriageSession();
           navigate('/paciente/asistente');
         }} />
+        {GlobalBottomNav}
       </>
     );
   }
@@ -922,16 +939,19 @@ if (path === '/paciente/historial') {
 
   if (path === '/paciente/chat') {
     return (
-      <PatientChat 
-          patientProfile={patientProfile}
-          sessions={sessions}
-        messages={messages}
-        inputMessage={inputMessage}
-        setInputMessage={setInputMessage}
-        handleSend={handleSendGeneral}
-        isLoading={isLoading}
-        onBack={() => navigate('/paciente')}
-      />
+      <>
+        <PatientChat 
+            patientProfile={patientProfile}
+            sessions={sessions}
+          messages={messages}
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          handleSend={handleSendGeneral}
+          isLoading={isLoading}
+          onBack={() => navigate('/paciente')}
+        />
+        {GlobalBottomNav}
+      </>
     );
   }
 
@@ -958,6 +978,7 @@ if (path === '/paciente/historial') {
             setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
           }}
         />
+        {GlobalBottomNav}
       </>
     );
   }
