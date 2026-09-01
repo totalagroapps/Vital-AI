@@ -1,5 +1,5 @@
-﻿import React, { useRef, useEffect } from "react";
-import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X } from "lucide-react";
+import React, { useRef, useEffect } from "react";
+import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
