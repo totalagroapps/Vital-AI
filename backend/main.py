@@ -436,50 +436,62 @@ async def upload_document(
             pdf_b64 = base64.b64encode(content).decode("utf-8")
             raw_text = extract_text_from_pdf(pdf_b64)
             
-            # Pass 2: If empty (scanned PDF), render pages as images and use GPT-4o Vision
+            # Pass 2: If empty (scanned PDF), send PDF directly to GPT-4o which supports PDFs natively
             if not raw_text or len(raw_text.strip()) < 30:
-                logger.info("PDF text extraction returned empty/short. Trying vision OCR with PyMuPDF...")
+                logger.info("PDF text extraction returned empty/short. Sending PDF directly to GPT-4o...")
                 try:
-                    import fitz  # PyMuPDF
-                    import io as io_module
-                    
-                    pdf_doc = fitz.open(stream=content, filetype="pdf")
-                    page_texts = []
-                    
                     openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
                     
-                    for page_num in range(min(len(pdf_doc), 5)):  # max 5 pages
-                        page = pdf_doc.load_page(page_num)
-                        mat = fitz.Matrix(2, 2)  # 2x zoom for better OCR quality
-                        pix = page.get_pixmap(matrix=mat)
-                        img_bytes = pix.tobytes("jpeg")
-                        img_b64 = base64.b64encode(img_bytes).decode("utf-8")
-                        
-                        vision_resp = await openai_client.chat.completions.create(
-                            model="gpt-4o",
-                            messages=[{
-                                "role": "user",
-                                "content": [
-                                    {"type": "text", "text": "Esta es la página de un documento médico (receta, informe, historial clínico). Transcribe TODO el texto que veas de forma precisa y fiel. Incluye nombres de medicamentos, dosis, diagnósticos, instrucciones y cualquier dato médico relevante. No omitas nada."},
-                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
-                                ]
-                            }],
-                            max_tokens=2000,
-                            temperature=0.0
-                        )
-                        page_text = vision_resp.choices[0].message.content
-                        page_texts.append(f"--- Página {page_num + 1} ---\n{page_text}")
-                        logger.info(f"Vision OCR page {page_num+1}: extracted {len(page_text)} chars")
+                    vision_resp = await openai_client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[{
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Este es un documento médico (puede ser una receta, incapacidad, informe o historial clínico). Por favor transcribe TODO el texto que contiene de forma precisa y fiel. Incluye nombres de medicamentos, dosis, diagnósticos, fechas, instrucciones del médico y cualquier dato clínico relevante. No omitas nada."
+                                },
+                                {
+                                    "type": "file",
+                                    "file": {
+                                        "filename": file.filename or "documento.pdf",
+                                        "file_data": f"data:application/pdf;base64,{pdf_b64}"
+                                    }
+                                }
+                            ]
+                        }],
+                        max_tokens=3000,
+                        temperature=0.0
+                    )
+                    raw_text = vision_resp.choices[0].message.content
+                    logger.info(f"GPT-4o direct PDF OCR: extracted {len(raw_text)} chars")
                     
-                    raw_text = "\n\n".join(page_texts)
-                    pdf_doc.close()
-                    
-                except ImportError:
-                    logger.warning("PyMuPDF not installed - cannot do vision OCR on scanned PDF")
-                    raw_text = "No se pudo extraer texto de este PDF (posiblemente escaneado y PyMuPDF no disponible)."
                 except Exception as vision_e:
-                    logger.error(f"Vision OCR on PDF failed: {vision_e}")
-                    raw_text = f"Error al procesar el PDF con visión: {str(vision_e)}"
+                    logger.error(f"GPT-4o direct PDF OCR failed: {vision_e}")
+                    # Last resort: try PyMuPDF page-by-page
+                    try:
+                        import fitz
+                        pdf_doc = fitz.open(stream=content, filetype="pdf")
+                        page_texts = []
+                        openai_client2 = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                        for page_num in range(min(len(pdf_doc), 4)):
+                            page = pdf_doc.load_page(page_num)
+                            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                            img_b64 = base64.b64encode(pix.tobytes("jpeg")).decode("utf-8")
+                            vr = await openai_client2.chat.completions.create(
+                                model="gpt-4o",
+                                messages=[{"role": "user", "content": [
+                                    {"type": "text", "text": "Transcribe todo el texto de esta página de documento médico."},
+                                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
+                                ]}],
+                                max_tokens=2000, temperature=0.0
+                            )
+                            page_texts.append(vr.choices[0].message.content)
+                        raw_text = "\n\n".join(page_texts)
+                        pdf_doc.close()
+                    except Exception as e2:
+                        logger.error(f"PyMuPDF fallback also failed: {e2}")
+                        raw_text = "No se pudo extraer el contenido del PDF. Intenta subir una imagen (JPG/PNG) del documento."
             
             scrubbed_text, phi_detected = scrub_phi(raw_text)
             response_data["extracted_text"] = scrubbed_text
