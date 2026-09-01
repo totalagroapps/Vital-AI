@@ -35,7 +35,7 @@ const MedicalHistory = ({
     let status = "";
     let color = "";
     if (bmi < 18.5) { status = "Bajo peso"; color = "text-blue-500 bg-blue-50 border-blue-200"; }
-    else if (bmi >= 18.5 && bmi < 24.9) { status = "Saludable"; color = "text-green-600 bg-green-50 border-green-200"; }
+    else if (bmi >= 18.5 && bmi < 24.9) { status = "Saludable"; color = "text-brand-green bg-brand-green/10 border-brand-green/20"; }
     else if (bmi >= 25 && bmi < 29.9) { status = "Sobrepeso"; color = "text-amber-600 bg-amber-50 border-amber-200"; }
     else { status = "Obesidad"; color = "text-red-600 bg-red-50 border-red-200"; }
     
@@ -63,27 +63,50 @@ const MedicalHistory = ({
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 font-sans relative pb-24">
-      {/* Header */}
-      <div className="sticky top-0 bg-white/90 backdrop-blur-md border-b border-gray-100 px-4 py-4 flex items-center justify-between z-20 shadow-sm">
-        <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ArrowLeft className="text-gray-700" size={24} />
-        </button>
-        <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
-          Mi Perfil Médico
-        </h2>
-        <button 
-          onClick={() => setIsEditing(!isEditing)}
-          className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isEditing ? 'bg-red-50 text-red-500' : 'bg-brand-blue/10 text-brand-blue'}`}
-        >
-          {isEditing ? <X size={20} /> : <Edit3 size={20} />}
-        </button>
+    <div className="flex flex-col min-h-screen bg-base font-sans relative pb-28 overflow-x-hidden">
+      
+      {/* Background graphic (matches PatientHome and DocumentAnalyzer) */}
+      <div className="absolute top-0 right-0 w-[85%] md:w-[60%] h-[400px] z-0 overflow-hidden pointer-events-none">
+        <img 
+          src="/images/abstract_woman_bg.jpg" 
+          alt="" 
+          className="absolute top-0 right-0 w-full h-full object-cover opacity-80"
+          style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 40%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 40%)' }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
       </div>
 
-      <div className="p-5 space-y-6">
+      <div className="relative z-10 px-6 pt-12">
         
-        {/* QR Passport - Shows in both modes */}
-        <div className="bg-gradient-to-br from-brand-blue to-blue-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex items-center justify-between">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <button onClick={onBack} className="w-10 h-10 flex items-center justify-center">
+            <ArrowLeft className="text-gray-900" size={24} />
+          </button>
+          <h2 className="text-lg font-bold text-gray-900">
+            Perfil Médico
+          </h2>
+          <button 
+            onClick={() => setIsEditing(!isEditing)}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isEditing ? 'bg-red-50 text-red-500' : 'bg-brand-purple/10 text-brand-purple'}`}
+          >
+            {isEditing ? <X size={20} /> : <Edit3 size={20} />}
+          </button>
+        </div>
+
+        {/* Hero Title */}
+        <div className="mb-6">
+          <h2 className="text-[30px] leading-tight font-bold text-gray-900 mb-3 max-w-[80%]">
+            Tu información <br />
+            <span className="text-brand-purple">clínica centralizada</span>
+          </h2>
+          <p className="text-sm text-gray-500 max-w-[85%]">
+            Mantén tus datos actualizados para recibir recomendaciones médicas más precisas por parte de VitalAI.
+          </p>
+        </div>
+
+        {/* QR Passport - Refined Glass Card */}
+        <div className="bg-brand-purple text-white rounded-[28px] p-6 shadow-glow relative overflow-hidden flex items-center justify-between mb-6">
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative z-10">
@@ -91,15 +114,15 @@ const MedicalHistory = ({
               <ShieldCheck size={20} />
               Identidad Médica
             </h3>
-            <p className="text-xs text-white/80 mb-1">{patientProfile.full_name || 'Paciente'}</p>
-            <p className="text-[10px] text-white/60 mb-4">Escanea en caso de emergencia</p>
+            <p className="text-xs text-white/90 font-medium mb-1">{patientProfile.full_name || 'Paciente'}</p>
+            <p className="text-[10px] text-white/70 mb-4">Escanea en emergencias</p>
             
             <div className="flex gap-2">
-              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
-                <Droplet size={14} className="text-red-300" /> {patientProfile.blood_type || '--'}
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
+                <Droplet size={14} className="text-white" /> {patientProfile.blood_type || '--'}
               </div>
-              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
-                <Calendar size={14} className="text-blue-200" /> {age} años
+              <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
+                <Calendar size={14} className="text-white" /> {age} años
               </div>
             </div>
           </div>
@@ -107,11 +130,11 @@ const MedicalHistory = ({
           <div className="relative z-10">
             {patientProfile.qr_code_base64 ? (
               <div className="bg-white p-2 rounded-2xl shadow-inner">
-                <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-24 h-24 rounded-xl" />
+                <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-20 h-20 rounded-xl" />
               </div>
             ) : (
-              <div className="w-24 h-24 bg-black/20 rounded-2xl flex flex-col items-center justify-center text-white/50 border border-white/30 border-dashed p-4">
-                <QrCode size={24} className="mb-1" />
+              <div className="w-20 h-20 bg-black/20 rounded-2xl flex flex-col items-center justify-center text-white/50 border border-white/30 border-dashed p-3">
+                <QrCode size={20} className="mb-1" />
                 <span className="text-[9px] text-center">Faltan datos</span>
               </div>
             )}
@@ -124,26 +147,26 @@ const MedicalHistory = ({
             
             {/* Quick Vitals / Biometrics */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center text-center">
+              <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex flex-col items-center text-center">
                 <Scale size={20} className="text-purple-500 mb-2" />
-                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Peso</span>
-                <span className="text-lg font-bold text-gray-900">{patientProfile.weight || '--'} <span className="text-xs font-medium text-gray-500">kg</span></span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Peso</span>
+                <span className="text-lg font-bold text-gray-900 mt-1">{patientProfile.weight || '--'} <span className="text-xs font-medium text-gray-500">kg</span></span>
               </div>
-              <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center text-center">
+              <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex flex-col items-center text-center">
                 <Ruler size={20} className="text-teal-500 mb-2" />
-                <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Altura</span>
-                <span className="text-lg font-bold text-gray-900">{patientProfile.height || '--'} <span className="text-xs font-medium text-gray-500">cm</span></span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Altura</span>
+                <span className="text-lg font-bold text-gray-900 mt-1">{patientProfile.height || '--'} <span className="text-xs font-medium text-gray-500">cm</span></span>
               </div>
-              <div className={`rounded-2xl p-4 shadow-sm border flex flex-col items-center text-center ${bmiInfo ? bmiInfo.color : 'bg-white border-gray-100'}`}>
-                <Activity size={20} className="mb-2 opacity-75" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider opacity-75">IMC</span>
-                <span className="text-lg font-bold">{bmiInfo ? bmiInfo.value : '--'}</span>
+              <div className={`rounded-[24px] p-4 shadow-soft border flex flex-col items-center text-center ${bmiInfo ? bmiInfo.color : 'bg-white border-gray-100'}`}>
+                <Activity size={20} className="mb-2 opacity-80" />
+                <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">IMC</span>
+                <span className="text-lg font-bold mt-1">{bmiInfo ? bmiInfo.value : '--'}</span>
                 {bmiInfo && <span className="text-[9px] font-bold mt-0.5">{bmiInfo.status}</span>}
               </div>
             </div>
 
             {/* Clinical Data */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-[28px] shadow-soft border border-gray-100 overflow-hidden">
               <div className="p-5 border-b border-gray-50">
                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
                   <AlertTriangle size={16} className="text-orange-500" /> Alergias Conocidas
@@ -160,22 +183,22 @@ const MedicalHistory = ({
 
               <div className="p-5">
                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
-                  <Pill size={16} className="text-brand-blue" /> Medicación Actual
+                  <Pill size={16} className="text-brand-purple" /> Medicación Actual
                 </h3>
-                {renderTags(patientProfile.current_medications, <Pill size={12}/>, "No toma medicamentos actualmente", "bg-blue-50 text-blue-700 border border-blue-100")}
+                {renderTags(patientProfile.current_medications, <Pill size={12}/>, "No toma medicamentos actualmente", "bg-brand-purple/10 text-brand-purple border border-brand-purple/20")}
               </div>
             </div>
 
             {/* Emergency Contact */}
-            <div className="bg-indigo-50 rounded-2xl p-5 border border-indigo-100 flex items-center justify-between">
+            <div className="bg-blue-50 rounded-[24px] p-5 border border-blue-100 flex items-center justify-between">
               <div>
-                <h3 className="text-xs font-bold text-indigo-900 mb-1 flex items-center gap-1.5">
+                <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
                   <Phone size={14} /> Contacto de Emergencia
                 </h3>
-                <p className="text-sm font-medium text-indigo-700">{patientProfile.emergency_contact || 'No especificado'}</p>
+                <p className="text-sm font-bold text-blue-700">{patientProfile.emergency_contact || 'No especificado'}</p>
               </div>
               {patientProfile.emergency_contact && (
-                <a href={`tel:${patientProfile.emergency_contact.replace(/[^0-9+]/g, '')}`} className="w-10 h-10 bg-indigo-200 text-indigo-700 rounded-full flex items-center justify-center">
+                <a href={`tel:${patientProfile.emergency_contact.replace(/[^0-9+]/g, '')}`} className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center">
                   <Phone size={16} />
                 </a>
               )}
@@ -183,29 +206,29 @@ const MedicalHistory = ({
 
             {/* Triages Previos */}
             {triageSessions.length > 0 && (
-              <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 text-sm">
-                  <FileText size={18} className="text-brand-green" />
-                  Consultas Previas
-                </h3>
-                <div className="space-y-3">
-                  {triageSessions.slice(0, 5).map(session => (
-                    <div key={session.id} className="bg-gray-50 rounded-xl p-4 flex justify-between items-center border border-gray-100 hover:bg-gray-100 transition-colors">
-                      <div>
-                        <p className="font-semibold text-sm text-gray-900 truncate max-w-[200px]">
+              <div className="mb-4">
+                <h3 className="text-sm font-bold text-gray-900 mb-3 ml-1">Consultas Previas</h3>
+                <div className="bg-white rounded-[28px] border border-gray-100 shadow-soft overflow-hidden">
+                  {triageSessions.slice(0, 5).map((session, idx) => (
+                    <div key={session.id} className={`flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors ${idx < (triageSessions.length > 5 ? 4 : triageSessions.length - 1) ? 'border-b border-gray-50' : ''}`}>
+                      <div className="w-10 h-10 rounded-xl bg-brand-green/10 flex items-center justify-center flex-shrink-0">
+                        <FileText size={18} className="text-brand-green" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-gray-900 truncate">
                           {(session.payload?.title || session.title || 'Consulta de Triage')}
                         </p>
-                        <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-1">
+                        <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-0.5">
                           <Calendar size={10}/>
                           {new Date(session.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric'})}
                         </p>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${
-                        (session.payload?.severity || session.severity) === "ROJO" ? "bg-red-100 text-red-700" :
-                        (session.payload?.severity || session.severity) === "NARANJA" ? "bg-orange-100 text-orange-700" :
-                        (session.payload?.severity || session.severity) === "AMARILLO" ? "bg-yellow-100 text-yellow-700" :
-                        (session.payload?.severity || session.severity) === "VERDE" ? "bg-green-100 text-green-700" :
-                        "bg-blue-100 text-blue-700"
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                        (session.payload?.severity || session.severity) === "ROJO" ? "bg-red-50 text-red-600 border border-red-200" :
+                        (session.payload?.severity || session.severity) === "NARANJA" ? "bg-orange-50 text-orange-600 border border-orange-200" :
+                        (session.payload?.severity || session.severity) === "AMARILLO" ? "bg-amber-50 text-amber-600 border border-amber-200" :
+                        (session.payload?.severity || session.severity) === "VERDE" ? "bg-brand-green/10 text-brand-green border border-brand-green/20" :
+                        "bg-brand-purple/10 text-brand-purple border border-brand-purple/20"
                       }`}>
                         {(session.payload?.severity || session.severity) || "INFO"}
                       </span>
@@ -219,26 +242,26 @@ const MedicalHistory = ({
           /* ================= EDIT MODE ================= */
           <div className="bg-white rounded-[32px] p-6 shadow-soft border border-gray-100 animate-fade-in">
             <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2 text-sm">
-              <Edit3 size={18} className="text-brand-blue" />
+              <Edit3 size={18} className="text-brand-purple" />
               Editar Información
             </h3>
             
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Nombre Completo</label>
-                  <input type="text" required value={patientProfile.full_name || ""} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" />
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Nombre Completo</label>
+                  <input type="text" required value={patientProfile.full_name || ""} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">F. de Nacimiento</label>
-                  <input type="date" required value={patientProfile.date_of_birth || ""} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" />
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">F. de Nacimiento</label>
+                  <input type="date" required value={patientProfile.date_of_birth || ""} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Género</label>
-                  <select value={patientProfile.gender || ""} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue">
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Género</label>
+                  <select value={patientProfile.gender || ""} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50">
                     <option value="">Seleccione</option>
                     <option value="Masculino">Masculino</option>
                     <option value="Femenino">Femenino</option>
@@ -249,8 +272,8 @@ const MedicalHistory = ({
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Sangre</label>
-                  <select value={patientProfile.blood_type || ""} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue px-1">
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Sangre</label>
+                  <select value={patientProfile.blood_type || ""} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50 px-1">
                     <option value="">--</option>
                     <option value="A+">A+</option><option value="A-">A-</option>
                     <option value="B+">B+</option><option value="B-">B-</option>
@@ -259,33 +282,33 @@ const MedicalHistory = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Alt (cm)</label>
-                  <input type="number" value={patientProfile.height || ""} onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" placeholder="175" />
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Alt (cm)</label>
+                  <input type="number" value={patientProfile.height || ""} onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="175" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Peso (kg)</label>
-                  <input type="number" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" placeholder="70" />
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Peso (kg)</label>
+                  <input type="number" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="70" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Alergias Conocidas (separadas por coma)</label>
-                <textarea value={patientProfile.allergies || ""} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" rows={2} placeholder="Penicilina, polen..."></textarea>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">Alergias Conocidas (separadas por coma)</label>
+                <textarea value={patientProfile.allergies || ""} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Penicilina, polen..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Enfermedades Crónicas (separadas por coma)</label>
-                <textarea value={patientProfile.chronic_conditions || ""} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" rows={2} placeholder="Hipertensión, asma..."></textarea>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">Enfermedades Crónicas (separadas por coma)</label>
+                <textarea value={patientProfile.chronic_conditions || ""} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Hipertensión, asma..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Medicamentos Actuales (separados por coma)</label>
-                <textarea value={patientProfile.current_medications || ""} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" rows={2} placeholder="Losartán 50mg, Ibuprofeno..."></textarea>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">Medicamentos Actuales (separados por coma)</label>
+                <textarea value={patientProfile.current_medications || ""} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Losartán 50mg, Ibuprofeno..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Contacto de Emergencia</label>
-                <input type="text" value={patientProfile.emergency_contact || ""} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-900 focus:ring-1 focus:ring-brand-blue" placeholder="Nombre y teléfono" />
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">Contacto de Emergencia</label>
+                <input type="text" value={patientProfile.emergency_contact || ""} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="Nombre y teléfono" />
               </div>
 
-              <button type="submit" className="w-full bg-brand-blue hover:bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-glow transition-transform active:scale-95 mt-4 flex items-center justify-center gap-2">
+              <button type="submit" className="w-full bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-4 rounded-2xl shadow-glow transition-transform active:scale-95 mt-4 flex items-center justify-center gap-2">
                 <Save size={18} /> Guardar Perfil
               </button>
             </form>
@@ -298,4 +321,5 @@ const MedicalHistory = ({
 };
 
 export default MedicalHistory;
+
 
