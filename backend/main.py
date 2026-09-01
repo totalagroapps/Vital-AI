@@ -597,6 +597,7 @@ Texto: {response_data['extracted_text']}
         # Guardar en base de datos PostgreSQL de forma asíncrona
         try:
             new_doc = models.DocumentMetadata(
+                user_id=current_user_id,
                 filename=response_data["filename"],
                 extracted_text=response_data["extracted_text"],
                 document_type=response_data["document_type"]
@@ -1394,6 +1395,27 @@ async def get_document_summary(
     }
 
 # 5. Endpoint: Chat General (Buscador)
+@app.get("/api/me/documents")
+async def get_my_documents(
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    """Returns all documents uploaded by the current authenticated user."""
+    stmt = select(models.DocumentMetadata).where(
+        models.DocumentMetadata.user_id == current_user_id
+    ).order_by(models.DocumentMetadata.created_at.desc())
+    result = await db.execute(stmt)
+    docs = result.scalars().all()
+    return [
+        {
+            "id": doc.id,
+            "filename": doc.filename,
+            "document_type": doc.document_type,
+            "created_at": doc.created_at.isoformat() if doc.created_at else None,
+        }
+        for doc in docs
+    ]
+
 @app.post("/api/chat/general")
 async def general_chat(
     request: TriageRequest, 

@@ -914,7 +914,12 @@ if (path === '/paciente/historial') {
         <DocumentAnalyzer 
         onBack={() => navigate('/paciente')}
         isUploading={isLoading}
-        onAskQuestion={() => setPatientScreen('chat')}
+        apiUrl={API_URL}
+        authHeaders={authHeaders}
+        onNavigateToChat={() => {
+          startTriageSession();
+          navigate('/paciente/asistente');
+        }}
         onUpload={(file) => {
           if (file.type.startsWith('image/')) {
             setSelectedImageFile(file);

@@ -14,6 +14,7 @@ class DocumentMetadata(Base):
     __tablename__ = "document_metadata"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, nullable=True, index=True)  # links doc to authenticated user
     filename = Column(String, index=True)
     extracted_text = Column(String)
     document_type = Column(String) # e.g. 'radiografia', 'analitica'
