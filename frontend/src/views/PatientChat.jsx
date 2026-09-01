@@ -34,7 +34,7 @@ const PatientChat = ({
         </button>
         <div className="flex flex-col items-center">
           <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1">
-            VITAL <span className="text-brand-purple">IA</span>
+            VITAL <span className="text-brand-purple">AI</span>
           </h2>
           <span className="text-[10px] text-brand-green font-medium flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>

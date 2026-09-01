@@ -80,7 +80,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                  <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
                </svg>
              </div>
-             <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">IA</span></span>
+             <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
           </div>
           <span className="text-[10px] text-brand-blue font-bold tracking-widest uppercase ml-7">MÉDICOS</span>
         </div>
@@ -161,7 +161,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                  <Headphones className="text-gray-400" size={24}/>
                  <div>
                    <h4 className="font-bold text-xs text-brand-dark">¿Necesitas ayuda?</h4>
-                   <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-brand-blue">soporte@vitalia.com</a></p>
+                   <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-brand-blue">soporte@vitalai.com</a></p>
                  </div>
               </div>
             </div>

@@ -30,7 +30,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
                   <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
                 </svg>
               </div>
-              <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">IA</span></span>
+              <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
             </div>
             <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 text-[9px] tracking-wide">Tu salud, entendida por IA</span>
           </div>

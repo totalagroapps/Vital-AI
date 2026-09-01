@@ -70,7 +70,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               </div>
             </div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark tracking-tight flex items-center gap-2">
-              <span className="text-brand-blue">VITAL</span> IA
+              <span className="text-brand-blue">VITAL</span> AI
             </h1>
             <p className="text-gray-500 mt-3 font-medium text-lg">Selecciona tu portal de acceso</p>
           </div>

@@ -9,7 +9,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
       <div className="px-5 py-4 flex justify-between items-center bg-transparent relative z-20">
         <div className="flex flex-col">
           <h1 className="text-xl font-extrabold text-brand-dark tracking-tight flex items-center gap-1">
-            <span className="text-brand-blue">VITAL</span> IA
+            <span className="text-brand-blue">VITAL</span> AI
           </h1>
           <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">MÉDICOS</span>
         </div>
