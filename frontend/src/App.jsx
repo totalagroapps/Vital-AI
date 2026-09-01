@@ -875,10 +875,10 @@ if (path === '/paciente/historial') {
         <TriageWizard 
         onBack={() => navigate('/paciente')} 
         onStartChat={(symptoms) => {
-          setPatientScreen('chat');
-          // In App.jsx, there's no setInputMessage out of the box because it's a controlled input 
-          // However, we can just start the triage session. For simplicity, we'll just open the chat.
+          navigate('/paciente/asistente');
+          setInputMessage(symptoms);
           startTriageSession();
+
         }} />
       </>
     );
