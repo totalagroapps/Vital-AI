@@ -66,9 +66,15 @@ export default function App() {
 
 
   const handleNavigate = (screen) => {
-    setPatientScreen(screen);
-    const path = screen === 'home' ? '/' : `/${screen}`;
-    window.history.pushState({ screen }, '', path);
+    const screenMap = {
+      'home': '/paciente',
+      'general_chat': '/paciente/chat',
+      'documents': '/paciente/documentos',
+      'history': '/paciente/historial',
+      'triage': '/paciente/triaje',
+      'doctors': '/paciente/doctors'
+    };
+    navigate(screenMap[screen] || '/paciente');
   };
 
   // History API integration for native back button
@@ -850,12 +856,12 @@ if (path === '/paciente/historial') {
           }} 
           />
         <BottomNav activeTab="home" onTabChange={(tab) => {
-          if (tab === 'home') setPatientScreen('home');
-          if (tab === 'ai') setPatientScreen('triage');
+          if (tab === 'home') navigate('/paciente');
+          if (tab === 'ai') navigate('/paciente/triaje');
           if (tab === 'patients') {
-            setPatientScreen('history');
             fetchPatientProfile();
-      fetchHistory();
+            fetchHistory();
+            navigate('/paciente/historial');
           }
           if (tab === 'agenda') alert('Agenda en desarrollo...');
         }} />
