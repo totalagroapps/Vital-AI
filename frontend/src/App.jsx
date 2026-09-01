@@ -665,9 +665,10 @@ ${text}`], {type: 'text/plain'});
 
         try {
           const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
-            method: 'POST',
-            body: formData
-          });
+              method: 'POST',
+              headers: authHeaders,
+              body: formData
+            });
 
           if (!uploadRes.ok) {
             // Attempt to parse JSON error, fallback if CORS blocked it
@@ -680,7 +681,10 @@ ${text}`], {type: 'text/plain'});
           }
 
           const uploadData = await uploadRes.json();
-          documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
+            documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
+            
+            // Refrescar el perfil del paciente porque el backend acaba de auto-perfilarlo con los datos del documento
+            await fetchPatientProfile();
         } catch (uploadErr) {
           throw new Error(`Error de subida: ${uploadErr.message}`);
         }

@@ -409,7 +409,8 @@ from database import get_db
 @app.post("/api/documents/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
 ):
     """
     Recibe un documento clínico (PDF, JPG, PNG), extrae sus datos mediante
@@ -491,6 +492,49 @@ async def upload_document(
         else:
             raise HTTPException(status_code=400, detail="Formato de archivo no soportado. Usa PDF, JPG o PNG.")
             
+                # Auto-profiling
+        if response_data["extracted_text"]:
+            import json
+            import os
+            from openai import AsyncOpenAI
+            
+            try:
+                openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                prompt = f"""Extrae los siguientes datos médicos del siguiente reporte y devuelve un JSON estricto:
+{{
+  "allergies": "lista separada por comas, o vacío si no hay",
+  "chronic_conditions": "lista separada por comas, o vacío si no hay",
+  "current_medications": "lista separada por comas, o vacío si no hay"
+}}
+Si no encuentras nada para un campo, déjalo vacío. Sólo devuelve el JSON.
+Texto: {response_data['extracted_text']}
+"""
+                resp = await openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"}
+                )
+                
+                try:
+                    extracted_json = json.loads(resp.choices[0].message.content)
+                    # Update DB
+                    from sqlalchemy import select
+                    result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == current_user_id))
+                    profile = result.scalars().first()
+                    if profile:
+                        if extracted_json.get("allergies"):
+                            profile.allergies = f"{profile.allergies}, {extracted_json['allergies']}" if profile.allergies and profile.allergies != "Ninguna registrada" else extracted_json['allergies']
+                        if extracted_json.get("chronic_conditions"):
+                            profile.chronic_conditions = f"{profile.chronic_conditions}, {extracted_json['chronic_conditions']}" if profile.chronic_conditions and profile.chronic_conditions != "Ninguna registrada" else extracted_json['chronic_conditions']
+                        if extracted_json.get("current_medications"):
+                            profile.current_medications = f"{profile.current_medications}, {extracted_json['current_medications']}" if profile.current_medications and profile.current_medications != "Ninguna registrada" else extracted_json['current_medications']
+                        await db.commit()
+                except Exception as json_e:
+                    logger.error(f"Error parsing auto-profiling JSON: {json_e}")
+                    
+            except Exception as e:
+                logger.error(f"Error in auto-profiling: {e}")
+                
         # Guardar en base de datos PostgreSQL de forma asíncrona
         try:
             new_doc = models.DocumentMetadata(
