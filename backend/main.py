@@ -1448,6 +1448,7 @@ async def get_my_documents(
             "id": doc.id,
             "filename": doc.filename,
             "document_type": doc.document_type,
+            "extracted_text": doc.extracted_text,
             "created_at": doc.created_at.isoformat() if doc.created_at else None,
         }
         for doc in docs

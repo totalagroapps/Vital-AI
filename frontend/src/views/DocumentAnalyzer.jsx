@@ -213,7 +213,11 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
                     <p className="text-xs text-gray-400">Sube tu primer documento arriba.</p>
                   </div>
                 ) : documents.map((doc, idx) => (
-                  <div key={doc.id} className={`flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors ${idx < documents.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                  <div 
+                    key={doc.id} 
+                    onClick={() => onAskFollowUp(doc.extracted_text, doc.filename)}
+                    className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${idx < documents.length - 1 ? 'border-b border-gray-50' : ''}`}
+                  >
                     <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
                       {docTypeIcon(doc.document_type)}
                     </div>
