@@ -8,12 +8,12 @@ const PatientHome = ({ onNavigate, onLogout }) => {
     <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
       
       {/* Background Graphic */}
-      <div className="absolute top-0 right-0 w-[85%] md:w-[60%] lg:w-[50%] h-[400px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
+      <div className="absolute top-0 right-0 w-[80%] md:w-[60%] lg:w-[50%] h-[400px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
         <img 
           src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover object-top md:object-right-top opacity-90"
-          style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 40%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 40%)' }}
+          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-90 mix-blend-multiply"
+          style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 70%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 70%)' }}
         />
         <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-base to-transparent" />
       </div>
@@ -32,7 +32,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
             </div>
-            <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 text-[9px] tracking-wide">Tu salud, entendida por IA</span>
+            <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 tracking-wide">Tu salud, entendida por IA</span>
           </div>
           
           <div className="flex items-center gap-3">
@@ -49,13 +49,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         </div>
 
         {/* Hero Section */}
-        <div className="mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
-          <h2 className="text-[22px] leading-tight font-bold text-content-primary mb-1.5">
+        <div className="relative mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
+          <div className="absolute -inset-4 bg-gradient-to-r from-base via-base/80 to-transparent blur-md z-[-1] pointer-events-none"></div>
+          <h2 className="relative z-10 text-[22px] leading-tight font-bold text-content-primary mb-1.5">
             Bienvenido,<br/>
-            <span className="text-brand-purple">estamos aqu&#237; para<br/>
+            <span className="text-brand-purple drop-shadow-sm">estamos aqu&#237; para<br/>
             cuidar de tu salud.</span>
           </h2>
-          <p className="text-content-secondary text-[11px] leading-snug max-w-[90%] font-medium">
+          <p className="relative z-10 text-content-secondary text-[11px] leading-snug max-w-[90%] font-medium">
             Accede a todas las herramientas de VitalAI para entender, gestionar y mejorar tu bienestar.
           </p>
         </div>
