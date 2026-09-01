@@ -178,7 +178,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
             <Lock size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 text-sm">Vital IA te escucha y te entiende</h4>
+            <h4 className="font-bold text-gray-900 text-sm">VitalAI te escucha y te entiende</h4>
             <p className="text-[11px] text-gray-500 mt-0.5">Nuestra IA avanzada hará las preguntas adecuadas para comprender mejor tu caso.</p>
           </div>
         </div>

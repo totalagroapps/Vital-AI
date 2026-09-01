@@ -81,7 +81,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           </style>
         </head>
         <body>
-          <h1>VitalIA - Informe Médico Oficial</h1>
+          <h1>VitalAI - Informe Médico Oficial</h1>
           
           <h2>Ficha del Paciente</h2>
           <div class="grid">
@@ -98,7 +98,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           ${triagesHtml || '<p>No hay triajes registrados.</p>'}
           
           <div style="margin-top: 50px; text-align: center; font-size: 0.8em; color: #94a3b8;">
-            Generado automáticamente por VitalIA System el ${new Date().toLocaleString()}
+            Generado automáticamente por VitalAI System el ${new Date().toLocaleString()}
           </div>
           <script>
             window.onload = function() { window.print(); window.close(); }

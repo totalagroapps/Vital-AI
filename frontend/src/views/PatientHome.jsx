@@ -56,7 +56,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
             cuidar de tu salud.</span>
           </h2>
           <p className="text-content-secondary text-[11px] leading-snug max-w-[90%] font-medium">
-            Accede a todas las herramientas de Vital IA para entender, gestionar y mejorar tu bienestar.
+            Accede a todas las herramientas de VitalAI para entender, gestionar y mejorar tu bienestar.
           </p>
         </div>
 
@@ -135,7 +135,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               <Sparkles size={12} />
             </div>
             <div className="flex-1">
-              <h5 className="font-bold text-brand-dark text-[12px] mb-0.5">Pregunta a Vital IA</h5>
+              <h5 className="font-bold text-brand-dark text-[12px] mb-0.5">Pregunta a VitalAI</h5>
               <p className="text-[11px] text-content-secondary leading-relaxed pr-2">
                 Consulta sobre tu salud o descubre los <span className="text-brand-purple font-medium">&#250;ltimos avances m&#233;dicos y cient&#237;ficos</span> sobre cualquier enfermedad.
               </p>

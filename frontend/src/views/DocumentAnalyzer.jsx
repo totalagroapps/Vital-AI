@@ -207,7 +207,7 @@ const DocumentAnalyzer = ({ onBack, onUpload, isUploading, onAskQuestion }) => {
             </div>
             <div>
               <h4 className="font-bold text-gray-900 text-sm">¿Tienes dudas sobre tus pruebas?</h4>
-              <p className="text-[10px] text-gray-500">Pregúntale a Vital IA y recibe respuestas claras.</p>
+              <p className="text-[10px] text-gray-500">Pregúntale a VitalAI y recibe respuestas claras.</p>
             </div>
           </div>
           <button 

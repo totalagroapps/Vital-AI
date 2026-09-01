@@ -129,7 +129,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
             <Sparkles size={16} className="text-brand-purpleLight" />
             ¿Qué necesitas hacer?
           </h3>
-          <p className="text-xs text-gray-400 mb-4 relative z-10">Busca un paciente o pregunta a Vital IA...</p>
+          <p className="text-xs text-gray-400 mb-4 relative z-10">Busca un paciente o pregunta a VitalAI...</p>
           
           <div className="relative z-10 flex items-center bg-brand-dark border border-white/10 rounded-2xl p-1 shadow-inner">
             <div className="pl-3 pr-2 text-gray-400">

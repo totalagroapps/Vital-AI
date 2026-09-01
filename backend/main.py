@@ -61,7 +61,7 @@ if R2_ACCOUNT_ID and R2_ACCESS_KEY_ID:
         region_name="auto"
     )
 
-app = FastAPI(title="VitalIA V2 - Team API", version="2.0")
+app = FastAPI(title="VitalAI V2 - Team API", version="2.0")
 
 @app.get("/")
 def healthcheck():
@@ -566,7 +566,7 @@ from sqlalchemy.future import select
 
 # 1. Definir el System Prompt Definitivo (cargado desde tu diseño)
 TRIAGE_SYSTEM_PROMPT_V2 = """
-Actúas como un médico de familia empático y experto en triaje clínico de la clínica MedAI (Vital IA).
+Actúas como un médico de familia empático y experto en triaje clínico de la clínica MedAI (VitalAI).
 Tu objetivo es orientar al paciente sobre su síntoma, determinar el nivel de urgencia y derivarlo adecuadamente, pero haciéndolo a través de una conversación natural, fluida y distendida.
 
 REGLAS DE INTERACCIÓN:
@@ -1309,7 +1309,7 @@ async def general_chat(
     # Si detecta sntomas, inyecta un disclaimer fuerte al inicio
     is_symptom = any(k in last_msg for k in symptom_keywords)
     
-    SYSTEM_PROMPT = """Eres Vital IA, un asistente general de salud y bienestar. 
+    SYSTEM_PROMPT = """Eres VitalAI, un asistente general de salud y bienestar. 
 Responde de forma concisa, educada y profesional.
 REGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. 
 Si el usuario pregunta por sus sntomas, dile educadamente que para hacer un pre-diagnstico preciso debe usar el mdulo 'Entiende tus sntomas' (Triaje)."""

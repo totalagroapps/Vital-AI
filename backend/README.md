@@ -1,4 +1,4 @@
-# VitalIA V2 - API Backend (Arquitectura Híbrida)
+# VitalAI V2 - API Backend (Arquitectura Híbrida)
 
 Este backend de FastAPI está configurado para un **Despliegue Híbrido**, diseñado para ejecutarse en la nube (Railway) y conectarse a un modelo de Inteligencia Artificial de Visión de forma local (Edge AI).
 

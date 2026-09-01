@@ -71,11 +71,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
             {/* Hero text */}
             <div className="max-w-[45%] mb-8 animate-fade-in-left">
                <h2 className="text-sm font-bold tracking-widest text-gray-800 mb-1 uppercase">BIENVENIDO A</h2>
-               <h1 className="text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-blue-600 to-brand-purple bg-clip-text text-transparent">VITAL IA</h1>
+               <h1 className="text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-blue-600 to-brand-purple bg-clip-text text-transparent">VITALAI</h1>
                
                <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-3">Tu salud, más fácil de entender y gestionar.</h3>
                <p className="text-gray-600 mb-2 leading-relaxed text-xs lg:text-sm">
-                 Vital IA te ayuda a comprender tus síntomas, analizar tus pruebas e informes médicos, organizar tu historial de salud y seguir tu evolución con inteligencia artificial.
+                 VitalAI te ayuda a comprender tus síntomas, analizar tus pruebas e informes médicos, organizar tu historial de salud y seguir tu evolución con inteligencia artificial.
                </p>
                <p className="text-gray-600 leading-relaxed text-xs lg:text-sm">
                  Toda tu información de salud en un mismo lugar, explicada de forma sencilla y disponible cuando la necesites.
@@ -85,14 +85,14 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
 
         <div>
             {/* Section Title */}
-            <h3 className="text-center text-lg lg:text-xl font-bold text-gray-900 mb-6">¿Qué puedes hacer con Vital IA?</h3>
+            <h3 className="text-center text-lg lg:text-xl font-bold text-gray-900 mb-6">¿Qué puedes hacer con VitalAI?</h3>
 
             {/* 5 Cards Row */}
             <div className="grid grid-cols-5 gap-3 lg:gap-5 mb-8">
               
               <div onClick={() => onNavigate('general_chat')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-brand-purple text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Brain size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-sm text-brand-purple mb-1.5">Pregunta a Vital IA</h4>
+                <h4 className="font-bold text-[11px] lg:text-sm text-brand-purple mb-1.5">Pregunta a VitalAI</h4>
                 <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Resuelve tus dudas sobre salud de forma clara y confiable.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-brand-purple text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
@@ -138,7 +138,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
                
                <div className="bg-[#f8f9fc] border border-blue-100 text-gray-500 text-[10px] px-4 py-2 rounded-xl flex items-center gap-2 max-w-2xl text-center">
                  <div className="text-blue-500 flex-shrink-0"><Info size={14}/></div>
-                 <span>Vital IA ofrece información y apoyo basado en inteligencia artificial, no sustituye la evaluación o diagnóstico de un profesional de la salud.</span>
+                 <span>VitalAI ofrece información y apoyo basado en inteligencia artificial, no sustituye la evaluación o diagnóstico de un profesional de la salud.</span>
                </div>
             </div>
         </div>

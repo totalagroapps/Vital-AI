@@ -917,6 +917,8 @@ if (path === '/paciente/historial') {
   if (path === '/paciente/chat') {
     return (
       <PatientChat 
+          patientProfile={patientProfile}
+          sessions={sessions}
         messages={messages}
         inputMessage={inputMessage}
         setInputMessage={setInputMessage}
@@ -931,6 +933,8 @@ if (path === '/paciente/historial') {
     return (
       <>
         <PatientChat 
+          patientProfile={patientProfile}
+          sessions={sessions}
           messages={messages}
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
@@ -977,7 +981,7 @@ if (path === '/paciente/historial') {
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg leading-none text-brand">VitalIA</h1>
+              <h1 className="font-bold text-lg leading-none text-brand">VitalAI</h1>
               <span className="text-[11px] text-slate-600 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
@@ -1172,7 +1176,7 @@ if (path === '/paciente/historial') {
                 <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a VitalIA</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a VitalAI</h2>
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
                   Tu asistente médico de confianza. Te ayudamos a entender tus estudios médicos, radiografías y síntomas de forma clara, rápida y segura.
                 </p>
@@ -1339,7 +1343,7 @@ if (path === '/paciente/historial') {
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-xs font-medium text-slate-600">VitalIA está conectando...</span>
+                <span className="text-xs font-medium text-slate-600">VitalAI está conectando...</span>
               </div>
             </div>
           )}
@@ -1752,7 +1756,7 @@ if (path === '/paciente/historial') {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Server className="w-5 h-5 text-brand" />
-                Acerca de VitalIA
+                Acerca de VitalAI
               </h2>
               <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-semantic-danger-text">
                 <X className="w-5 h-5" />

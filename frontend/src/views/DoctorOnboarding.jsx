@@ -128,7 +128,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
             {/* Left Col - Benefits */}
             <div className="hidden lg:flex lg:col-span-3 flex-col pt-12">
-              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">Únete a<br/><span className="text-brand-purple">Vital IA</span></h2>
+              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">Únete a<br/><span className="text-brand-purple">VitalAI</span></h2>
               <p className="text-sm text-gray-500 mb-10 pr-4 leading-relaxed">
                 La plataforma de IA médica hecha para profesionales como tú.
               </p>
