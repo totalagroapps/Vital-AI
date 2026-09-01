@@ -53,6 +53,8 @@ import {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { t, language } = useLanguage();
   const [token, setToken] = useState(localStorage.getItem('med_token') || null);
   const [username, setUsername] = useState(null);
