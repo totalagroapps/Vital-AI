@@ -905,6 +905,7 @@ if (path === '/paciente/historial') {
           } else {
             setSelectedPdfFile(file);
             setSelectedPdf(true);
+            setSelectedPdfName(file.name);
           }
           alert("Archivo seleccionado. Serás redirigido al chat para preguntar sobre él.");
           startTriageSession();
