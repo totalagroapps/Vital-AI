@@ -84,6 +84,7 @@ async def startup_event():
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS weight VARCHAR;"))
             await conn.execute(text("ALTER TABLE triage_sessions ADD COLUMN IF NOT EXISTS recommended_specialty VARCHAR;"))
             await conn.execute(text("ALTER TABLE document_metadata ADD COLUMN IF NOT EXISTS user_id VARCHAR;"))
+            await conn.execute(text("ALTER TABLE document_metadata ADD COLUMN IF NOT EXISTS analysis_result TEXT;"))
 
             await conn.execute(text("RESET statement_timeout;"))
         except Exception as e:
@@ -593,37 +594,20 @@ Texto: {response_data['extracted_text']}
             except Exception as e:
                 logger.error(f"Error in auto-profiling: {e}")
                 
-        # Guardar en base de datos PostgreSQL de forma asíncrona
-        try:
-            new_doc = models.DocumentMetadata(
-                user_id=current_user_id,
-                filename=response_data["filename"],
-                extracted_text=response_data["extracted_text"],
-                document_type=response_data["document_type"]
-            )
-            db.add(new_doc)
-            await db.commit()
-            await db.refresh(new_doc)
-            response_data["id"] = new_doc.id
-        except Exception as db_err:
-            logger.warning(f"No se pudo guardar en la BD (¿Postgres apagado?): {str(db_err)}")
-            await db.rollback()
-            response_data["id"] = None
-            response_data["db_warning"] = "DB connection failed, but OCR succeeded."
-
-        # Generate patient-friendly AI summary
+        # Generate patient-friendly AI summary FIRST so we can save it
+        summary_data_json = None
         if response_data.get("extracted_text") and len(response_data["extracted_text"].strip()) > 20:
             try:
                 import json as _json
                 summary_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-                summary_prompt = f"""Eres VitalAI, un asistente médico. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+                summary_prompt = f"""Eres VitalAI, un asistente médico experto. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
 {{
-  "resumen": "Explicación breve (2-3 oraciones) en lenguaje simple para el paciente. Qué dice el documento.",
-  "hallazgos": ["hallazgo 1", "hallazgo 2", "hallazgo 3"],
-  "medicamentos": ["medicamento 1 con dosis si aplica"],
-  "diagnosticos": ["diagnóstico 1"],
+  "resumen": "Resumen MUY DETALLADO y completo del documento en lenguaje claro para el paciente.",
+  "hallazgos": ["hallazgo detallado 1", "hallazgo detallado 2"],
+  "medicamentos": ["medicamento con dosis e instrucciones si aplica"],
+  "diagnosticos": ["diagnóstico médico explicado claramente"],
   "severidad": "verde",
-  "recomendacion": "Una recomendación concreta para el paciente."
+  "recomendacion": "Recomendaciones paso a paso."
 }}
 Donde severidad es: "verde" (normal/rutina), "amarillo" (requiere atención médica pronto), "rojo" (urgente).
 Si el campo no aplica, usa lista vacía [].
@@ -635,10 +619,12 @@ TEXTO DEL DOCUMENTO:
                     model="gpt-4o-mini",
                     messages=[{"role": "user", "content": summary_prompt}],
                     response_format={"type": "json_object"},
-                    max_tokens=600,
+                    max_tokens=800,
                     temperature=0.1
                 )
                 summary_data = _json.loads(summary_resp.choices[0].message.content)
+                summary_data_json = _json.dumps(summary_data)
+                
                 response_data["summary"] = summary_data.get("resumen", "")
                 response_data["hallazgos"] = summary_data.get("hallazgos", [])
                 response_data["medicamentos"] = summary_data.get("medicamentos", [])
@@ -653,6 +639,25 @@ TEXTO DEL DOCUMENTO:
                 response_data["medicamentos"] = []
                 response_data["diagnosticos"] = []
                 response_data["recomendacion"] = ""
+
+        # Guardar en base de datos PostgreSQL de forma asíncrona (ahora incluye analysis_result)
+        try:
+            new_doc = models.DocumentMetadata(
+                user_id=current_user_id,
+                filename=response_data["filename"],
+                extracted_text=response_data["extracted_text"],
+                document_type=response_data["document_type"],
+                analysis_result=summary_data_json
+            )
+            db.add(new_doc)
+            await db.commit()
+            await db.refresh(new_doc)
+            response_data["id"] = new_doc.id
+        except Exception as db_err:
+            logger.warning(f"No se pudo guardar en la BD (¿Postgres apagado?): {str(db_err)}")
+            await db.rollback()
+            response_data["id"] = None
+            response_data["db_warning"] = "DB connection failed, but OCR succeeded."
 
     except HTTPException as he:
         raise he
@@ -1449,6 +1454,7 @@ async def get_my_documents(
             "filename": doc.filename,
             "document_type": doc.document_type,
             "extracted_text": doc.extracted_text,
+            "analysis_result": doc.analysis_result,
             "created_at": doc.created_at.isoformat() if doc.created_at else None,
         }
         for doc in docs

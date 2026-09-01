@@ -100,6 +100,30 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
   const onDragLeave = useCallback((e) => { e.preventDefault(); setIsDragging(false); }, []);
   const onDrop = useCallback((e) => { e.preventDefault(); setIsDragging(false); uploadAndAnalyze(e.dataTransfer.files[0]); }, []);
 
+  const handleHistoryClick = (doc) => {
+    if (doc.analysis_result) {
+      try {
+        const parsed = JSON.parse(doc.analysis_result);
+        setAnalysisResult({
+          ...doc,
+          summary: parsed.resumen || parsed.summary,
+          hallazgos: parsed.hallazgos || [],
+          medicamentos: parsed.medicamentos || [],
+          diagnosticos: parsed.diagnosticos || [],
+          severidad: parsed.severidad || 'verde',
+          recomendacion: parsed.recomendacion || '',
+          is_image: doc.document_type === 'medical_image'
+        });
+        setStep('results');
+        return;
+      } catch (e) {
+        console.error("Failed to parse analysis_result", e);
+      }
+    }
+    // Fallback if no detailed report exists for old docs
+    onAskFollowUp(doc.extracted_text, doc.filename);
+  };
+
   const docTypeIcon = (type) => type === 'medical_image'
     ? <ImageIcon size={18} className="text-blue-500" />
     : <FileText size={18} className="text-brand-green" />;
@@ -215,7 +239,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
                 ) : documents.map((doc, idx) => (
                   <div 
                     key={doc.id} 
-                    onClick={() => onAskFollowUp(doc.extracted_text, doc.filename)}
+                    onClick={() => handleHistoryClick(doc)}
                     className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${idx < documents.length - 1 ? 'border-b border-gray-50' : ''}`}
                   >
                     <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">

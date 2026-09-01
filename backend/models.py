@@ -18,6 +18,7 @@ class DocumentMetadata(Base):
     filename = Column(String, index=True)
     extracted_text = Column(String)
     document_type = Column(String) # e.g. 'radiografia', 'analitica'
+    analysis_result = Column(String, nullable=True) # JSON stored as string for the AI report
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class User(Base):
