@@ -575,7 +575,7 @@ ${text}`], {type: 'text/plain'});
     try {
       const response = await fetch(`${API_URL}/api/chat/general`, {
         method: "POST",
-        headers: authHeaders,
+        headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: newMessages.map(m => ({
             role: m.type === "user" ? "user" : "assistant",
