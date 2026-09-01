@@ -554,8 +554,6 @@ async def upload_document(
             
                 # Auto-profiling
         if response_data["extracted_text"]:
-            import json
-            import os
             
             try:
                 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -1173,11 +1171,6 @@ async def upload_document(
     # --- OCR and Data Extraction via Ollama ---
     extracted_insights = ""
     try:
-        import io
-        import PyPDF2
-        import ollama
-        import os
-        
         pdf_file = io.BytesIO(file_bytes)
         reader = PyPDF2.PdfReader(pdf_file)
         raw_text = ""
