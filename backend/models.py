@@ -125,7 +125,7 @@ class HealthEvent(Base):
 
 class SpecialistProfile(Base):
     """
-    Perfil pblico y profesional del mdico especialista.
+    Perfil público y profesional del médico especialista.
     """
     __tablename__ = "specialist_profiles"
 
@@ -133,25 +133,17 @@ class SpecialistProfile(Base):
     user_id = Column(String, unique=True, index=True) # refers to users.id
     full_name = Column(String)
     specialty = Column(String, index=True)
+    license_number = Column(String, nullable=True)
+    experience_years = Column(Integer, default=0)
     city = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    languages = Column(String, nullable=True)
+    bio = Column(Text, nullable=True)
     verified = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
     availability_schedule = Column(JSON, nullable=True)
     photo_url = Column(String, nullable=True)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-class SpecialistProfile(Base):
-    __tablename__ = "specialist_profiles"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, unique=True, index=True)
-    full_name = Column(String)
-    specialty = Column(String)
-    license_number = Column(String)
-    experience_years = Column(Integer, default=0)
-    location = Column(String)
-    languages = Column(String)
-    bio = Column(Text, nullable=True)
     diploma_url = Column(String, nullable=True)
     profile_pic_url = Column(String, nullable=True)
-    is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
