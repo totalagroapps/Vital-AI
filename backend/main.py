@@ -556,7 +556,6 @@ async def upload_document(
         if response_data["extracted_text"]:
             import json
             import os
-            from openai import AsyncOpenAI
             
             try:
                 openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
