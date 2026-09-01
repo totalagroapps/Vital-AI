@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, Headphones, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
 
 const steps = [
@@ -10,10 +11,59 @@ const steps = [
 ];
 
 const DoctorOnboarding = ({ onNavigateLogin }) => {
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
 
-  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, 5));
+  const handleNext = async () => {
+    if (currentStep < 4) {
+      setCurrentStep(prev => prev + 1);
+      return;
+    }
+    
+    // Final Step Submission
+    setIsSubmitting(true);
+    setSubmitError('');
+    
+    try {
+      const form = new FormData();
+      form.append('username', formData.email);
+      form.append('password', formData.password);
+      form.append('full_name', formData.fullName);
+      form.append('specialty', formData.specialty);
+      form.append('license_number', formData.license);
+      form.append('experience_years', formData.experience);
+      form.append('location', formData.location);
+      form.append('languages', formData.languages);
+      form.append('bio', formData.bio);
+      
+      if (formData.diplomaFile) form.append('diploma_file', formData.diplomaFile);
+      if (formData.profilePicFile) form.append('profile_pic_file', formData.profilePicFile);
+
+      const res = await fetch(`${API_URL}/api/auth/register-doctor`, {
+        method: 'POST',
+        body: form
+      });
+      
+      const data = await res.json();
+      
+      if (res.ok) {
+        // Success! Set token and go to success step
+        localStorage.setItem('med_token', data.access_token);
+        localStorage.setItem('med_role', data.role);
+        setCurrentStep(5);
+      } else {
+        setSubmitError(data.detail || 'Error al registrar el médico');
+      }
+    } catch (e) {
+      setSubmitError('Error de conexión con el servidor');
+    }
+    
+    setIsSubmitting(false);
+  };
   const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   return (

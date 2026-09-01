@@ -138,3 +138,20 @@ class SpecialistProfile(Base):
     availability_schedule = Column(JSON, nullable=True)
     photo_url = Column(String, nullable=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class SpecialistProfile(Base):
+    __tablename__ = "specialist_profiles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, unique=True, index=True)
+    full_name = Column(String)
+    specialty = Column(String)
+    license_number = Column(String)
+    experience_years = Column(Integer, default=0)
+    location = Column(String)
+    languages = Column(String)
+    bio = Column(Text, nullable=True)
+    diploma_url = Column(String, nullable=True)
+    profile_pic_url = Column(String, nullable=True)
+    is_verified = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
