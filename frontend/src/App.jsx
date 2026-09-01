@@ -834,6 +834,7 @@ if (path === '/paciente/historial') {
     return (
       <>
         <PatientHome 
+          onLogout={handleLogout}
           onNavigate={(screen) => {
             if (screen === 'doctors') {
               alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');

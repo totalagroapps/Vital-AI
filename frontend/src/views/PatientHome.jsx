@@ -166,7 +166,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
     </div>
     
     <div className="hidden lg:block">
-      <PatientHomeDesktop onNavigate={onNavigate} />
+      <PatientHomeDesktop onNavigate={onNavigate} onLogout={onLogout} />
     </div>
     </>
   );
