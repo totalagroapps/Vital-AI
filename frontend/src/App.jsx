@@ -71,9 +71,10 @@ export default function App() {
       'general_chat': '/paciente/chat',
       'documents': '/paciente/documentos',
       'history': '/paciente/historial',
-      'triage': '/paciente/triaje',
+      'triage': '/paciente/asistente',
       'doctors': '/paciente/doctors'
     };
+    if (screen === 'triage') startTriageSession();
     navigate(screenMap[screen] || '/paciente');
   };
 
@@ -857,7 +858,10 @@ if (path === '/paciente/historial') {
           />
         <BottomNav activeTab="home" onTabChange={(tab) => {
           if (tab === 'home') navigate('/paciente');
-          if (tab === 'ai') navigate('/paciente/triaje');
+          if (tab === 'ai') {
+            startTriageSession();
+            navigate('/paciente/asistente');
+          }
           if (tab === 'patients') {
             fetchPatientProfile();
             fetchHistory();
