@@ -846,8 +846,7 @@ if (path === '/paciente/historial') {
               handleNavigate(screen);
             }
           }} 
-          onLogout={handleLogout}
-        />
+          />
         <BottomNav activeTab="home" onTabChange={(tab) => {
           if (tab === 'home') setPatientScreen('home');
           if (tab === 'ai') setPatientScreen('triage');
