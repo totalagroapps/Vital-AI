@@ -217,8 +217,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             <button 
               type="button"
               onClick={() => {
-                setIsRegistering(!isRegistering);
-                setError('');
+                if (isDoc && !isRegistering) { onNavigateDoctorRegister(); } else { setIsRegistering(!isRegistering); setError(''); }
               }}
               className={`text-sm font-semibold transition-colors ${isDoc ? 'text-brand-blue hover:text-blue-700' : 'text-brand-purple hover:text-purple-700'}`}
             >
