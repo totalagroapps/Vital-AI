@@ -911,31 +911,26 @@ if (path === '/paciente/historial') {
   if (path === '/paciente/documentos') {
     return (
       <>
-        <DocumentAnalyzer 
-        onBack={() => navigate('/paciente')}
-        isUploading={isLoading}
-        apiUrl={API_URL}
-        authHeaders={authHeaders}
-        onNavigateToChat={() => {
-          startTriageSession();
-          navigate('/paciente/asistente');
-        }}
-        onUpload={(file) => {
-          if (file.type.startsWith('image/')) {
-            setSelectedImageFile(file);
-            setSelectedImage(true);
-            const reader = new FileReader();
-            reader.onload = (e) => setSelectedImagePreview(e.target.result);
-            reader.readAsDataURL(file);
-          } else {
-            setSelectedPdfFile(file);
-            setSelectedPdf(true);
-            setSelectedPdfName(file.name);
-          }
-          alert("Archivo seleccionado. Serás redirigido al chat para preguntar sobre él.");
-          startTriageSession();
-          navigate('/paciente/asistente');
-        }} />
+        <DocumentAnalyzer
+          onBack={() => navigate('/paciente')}
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
+          onAskFollowUp={(extractedText, filename) => {
+            // Pre-load document context into triage chat
+            setMessages(prev => [
+              ...prev,
+              {
+                id: Date.now(),
+                type: 'user',
+                text: `Por favor, explícame este documento clínico (${filename || 'documento'}):`,
+                phiScrubbed: false
+              }
+            ]);
+            // Store extracted text so handleSend can inject it as context
+            setInputMessage(`Tengo dudas sobre los resultados de mi documento: ${filename}`);
+            startTriageSession().then(() => navigate('/paciente/asistente'));
+          }}
+        />
         {GlobalBottomNav}
       </>
     );

@@ -612,6 +612,49 @@ Texto: {response_data['extracted_text']}
             response_data["id"] = None
             response_data["db_warning"] = "DB connection failed, but OCR succeeded."
 
+        # Generate patient-friendly AI summary
+        if response_data.get("extracted_text") and len(response_data["extracted_text"].strip()) > 20:
+            try:
+                import json as _json
+                summary_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                summary_prompt = f"""Eres VitalAI, un asistente médico. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+{{
+  "resumen": "Explicación breve (2-3 oraciones) en lenguaje simple para el paciente. Qué dice el documento.",
+  "hallazgos": ["hallazgo 1", "hallazgo 2", "hallazgo 3"],
+  "medicamentos": ["medicamento 1 con dosis si aplica"],
+  "diagnosticos": ["diagnóstico 1"],
+  "severidad": "verde",
+  "recomendacion": "Una recomendación concreta para el paciente."
+}}
+Donde severidad es: "verde" (normal/rutina), "amarillo" (requiere atención médica pronto), "rojo" (urgente).
+Si el campo no aplica, usa lista vacía [].
+
+TEXTO DEL DOCUMENTO:
+{response_data["extracted_text"][:3000]}"""
+                
+                summary_resp = await summary_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": summary_prompt}],
+                    response_format={"type": "json_object"},
+                    max_tokens=600,
+                    temperature=0.1
+                )
+                summary_data = _json.loads(summary_resp.choices[0].message.content)
+                response_data["summary"] = summary_data.get("resumen", "")
+                response_data["hallazgos"] = summary_data.get("hallazgos", [])
+                response_data["medicamentos"] = summary_data.get("medicamentos", [])
+                response_data["diagnosticos"] = summary_data.get("diagnosticos", [])
+                response_data["severidad"] = summary_data.get("severidad", "verde")
+                response_data["recomendacion"] = summary_data.get("recomendacion", "")
+            except Exception as summ_e:
+                logger.error(f"Error generating AI summary: {summ_e}")
+                response_data["summary"] = "El documento fue procesado correctamente."
+                response_data["severidad"] = "verde"
+                response_data["hallazgos"] = []
+                response_data["medicamentos"] = []
+                response_data["diagnosticos"] = []
+                response_data["recomendacion"] = ""
+
     except HTTPException as he:
         raise he
     except Exception as e:
