@@ -907,7 +907,8 @@ if (path === '/paciente/historial') {
             setSelectedPdf(true);
           }
           alert("Archivo seleccionado. Serás redirigido al chat para preguntar sobre él.");
-          setPatientScreen('chat');
+          startTriageSession();
+          navigate('/paciente/asistente');
         }} />
       </>
     );
