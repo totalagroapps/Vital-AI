@@ -89,7 +89,7 @@ export default function App() {
       if (event.state && event.state.screen) {
         setPatientScreen(event.state.screen);
       } else {
-        setPatientScreen('home');
+        navigate('/paciente');
       }
     };
 
@@ -518,7 +518,7 @@ ${text}`], {type: 'text/plain'});
     } catch (err) {
       console.error("Error iniciando sesión de triaje:", err);
       alert("Error al iniciar la sesión de triaje. Verifica tu conexión o intenta de nuevo.");
-      handleNavigate('home');
+      navigate('/paciente');
     }
   };
 
@@ -832,7 +832,7 @@ if (path === '/paciente/historial') {
         setPatientProfile={setPatientProfile}
         savePatientProfile={savePatientProfile}
         sessions={sessions}
-        onBack={() => setPatientScreen('home')}
+        onBack={() => navigate('/paciente')}
       />
     );
   }
@@ -873,7 +873,7 @@ if (path === '/paciente/historial') {
     return (
       <>
         <TriageWizard 
-        onBack={() => setPatientScreen('home')} 
+        onBack={() => navigate('/paciente')} 
         onStartChat={(symptoms) => {
           setPatientScreen('chat');
           // In App.jsx, there's no setInputMessage out of the box because it's a controlled input 
@@ -888,7 +888,7 @@ if (path === '/paciente/historial') {
     return (
       <>
         <DocumentAnalyzer 
-        onBack={() => setPatientScreen('home')}
+        onBack={() => navigate('/paciente')}
         isUploading={isLoading}
         onAskQuestion={() => setPatientScreen('chat')}
         onUpload={(file) => {
@@ -918,7 +918,7 @@ if (path === '/paciente/historial') {
         setInputMessage={setInputMessage}
         handleSend={handleSendGeneral}
         isLoading={isLoading}
-        onBack={() => handleNavigate('home')}
+        onBack={() => navigate('/paciente')}
       />
     );
   }
@@ -932,7 +932,7 @@ if (path === '/paciente/historial') {
           setInputMessage={setInputMessage}
           handleSend={handleSend}
           isLoading={isLoading}
-          onBack={() => setPatientScreen('home')}
+          onBack={() => navigate('/paciente')}
           imageInputRef={imageInputRef}
           pdfInputRef={pdfInputRef}
           handleImageChange={handleImageChange}
@@ -953,7 +953,7 @@ if (path === '/paciente/historial') {
     <div className="flex h-[100dvh] bg-base text-content-primary overflow-hidden">
       {/* Botón flotante para regresar al Home si estamos en chat u otra vista vieja */}
       <div className="absolute top-4 right-4 z-50">
-        <button onClick={() => setPatientScreen('home')} className="bg-brand-purple text-white px-4 py-2 rounded-full shadow-lg font-bold text-xs">Cerrar Chat</button>
+        <button onClick={() => navigate('/paciente')} className="bg-brand-purple text-white px-4 py-2 rounded-full shadow-lg font-bold text-xs">Cerrar Chat</button>
       </div>
       
       {/* SIDEBAR DE HISTORIAL */}
