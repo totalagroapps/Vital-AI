@@ -83,6 +83,7 @@ async def startup_event():
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS height VARCHAR;"))
             await conn.execute(text("ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS weight VARCHAR;"))
             await conn.execute(text("ALTER TABLE triage_sessions ADD COLUMN IF NOT EXISTS recommended_specialty VARCHAR;"))
+            await conn.execute(text("ALTER TABLE document_metadata ADD COLUMN IF NOT EXISTS user_id VARCHAR;"))
 
             await conn.execute(text("RESET statement_timeout;"))
         except Exception as e:
