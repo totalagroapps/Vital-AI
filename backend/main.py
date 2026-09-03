@@ -695,8 +695,7 @@ Si no hay medicamentos, devuelve la lista vacía."""
             doc = fitz.open(stream=content_bytes, filetype="pdf")
             extracted_text = ""
             for page in doc:
-                extracted_text += page.get_text("text") + "
-"
+                extracted_text += page.get_text("text") + "\n"
                 
             resp = await openai_client.chat.completions.create(
                 model="gpt-4o",
