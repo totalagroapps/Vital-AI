@@ -38,8 +38,6 @@ aiosqlite
 qrcode[pil]
 boto3
 python-multipart
-bcrypt
-PyJWT
 xmltodict==0.13.0
 openai==1.59.3
 PyMuPDF

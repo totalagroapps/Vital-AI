@@ -40,7 +40,6 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 import uuid
-import os
 from sqlalchemy import select, update
 from fastapi import Form
 
@@ -236,7 +235,7 @@ async def register_doctor(
             )
             diploma_url = diploma_key
         except ClientError as e:
-            print(f"S3 Upload Error: {e}")
+            logging.error(f"S3 Upload Error: {e}")
             raise HTTPException(status_code=500, detail="Error subiendo el diploma.")
 
     if profile_pic_file and s3_client:
@@ -251,7 +250,7 @@ async def register_doctor(
             )
             profile_pic_url = pic_key
         except ClientError as e:
-            print(f"S3 Upload Error: {e}")
+            logging.error(f"S3 Upload Error: {e}")
             raise HTTPException(status_code=500, detail="Error subiendo la foto de perfil.")
 
     # 3. Create User
@@ -1211,7 +1210,7 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
         return StreamingResponse(generate(), media_type="text/plain")
 
     except Exception as e:
-        print(f"Ollama Doctor API Error: {e}")
+        logging.error(f"Ollama Doctor API Error: {e}")
         return StreamingResponse(iter([f"Error: No se pudo procesar la respuesta del modelo de IA. {str(e)}"]), media_type="text/plain")
 
 
@@ -1283,7 +1282,7 @@ Texto:
             )
             extracted_insights = resp.choices[0].message.content
     except Exception as e:
-        print(f"Ollama OCR Error: {e}")
+        logging.error(f"Ollama OCR Error: {e}")
         extracted_insights = f"Error extrayendo datos con IA: {str(e)}"
     
     # 3. Upload to R2
@@ -1300,7 +1299,7 @@ Texto:
             ContentType="application/pdf"
         )
     except ClientError as e:
-        print(f"S3 Upload Error: {e}")
+        logging.error(f"S3 Upload Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload document to storage.")
 
     # 4. Create Database Record
@@ -1335,7 +1334,7 @@ Texto:
         db.add(new_event)
         await db.commit()
     except Exception as e:
-        print(f"Error creating HealthEvent: {e}")
+        logging.error(f"Error creating HealthEvent: {e}")
 
     return {
         "id": new_doc.id,
@@ -1434,7 +1433,7 @@ async def medical_search(
             return {"results": result}
         return result
     except Exception as e:
-        print(f"Error en búsqueda médica: {e}")
+        logging.error(f"Error en búsqueda médica: {e}")
         raise HTTPException(
             status_code=500,
             detail="No fue posible realizar la búsqueda médica."
