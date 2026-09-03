@@ -7,6 +7,9 @@ import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import PatientHome from './views/PatientHome';
+import PatientTreatments from './views/PatientTreatments';
+import PatientMore from './views/PatientMore';
+
 import TriageWizard from './views/TriageWizard';
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
@@ -72,7 +75,8 @@ export default function App() {
       'documents': '/paciente/documentos',
       'history': '/paciente/historial',
       'triage': '/paciente/asistente',
-      'doctors': '/paciente/doctors'
+      'doctors': '/paciente/doctors',
+      'more': '/paciente/mas'
     };
     if (screen === 'triage') startTriageSession();
     navigate(screenMap[screen] || '/paciente');
@@ -838,7 +842,7 @@ ${text}`], {type: 'text/plain'});
 
   const handleBottomNav = (tab) => {
     if (tab === 'home') navigate('/paciente');
-    if (tab === 'ai') {
+    if (tab === 'ai' || tab === 'triage') {
       startTriageSession();
       navigate('/paciente/asistente');
     }
@@ -847,7 +851,15 @@ ${text}`], {type: 'text/plain'});
       fetchHistory();
       navigate('/paciente/historial');
     }
+    if (tab === 'history') {
+      fetchPatientProfile();
+      navigate('/paciente/historial');
+    }
+    if (tab === 'treatments') {
+      navigate('/paciente/tratamientos');
+    }
     if (tab === 'agenda') alert('Agenda en desarrollo...');
+    if (tab === 'more') navigate('/paciente/mas');
   };
 
   // The GlobalBottomNav is fixed, so it always floats above all route content
@@ -855,7 +867,29 @@ ${text}`], {type: 'text/plain'});
     <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
   );
 
-if (path === '/paciente/historial') {
+
+  
+  if (path === '/paciente/mas') {
+    return (
+      <PatientMore 
+        onNavigate={handleBottomNav} 
+        onLogout={handleLogout} 
+      />
+    );
+  }
+  if (path === '/paciente/tratamientos') {
+    return (
+      <>
+        <PatientTreatments 
+          apiUrl={API_URL} 
+          authHeaders={authHeaders} 
+          onNavigate={handleBottomNav} 
+        />
+      </>
+    );
+  }
+
+  if (path === '/paciente/historial') {
     return (
       <>
         <MedicalHistory 

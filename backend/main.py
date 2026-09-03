@@ -1539,3 +1539,103 @@ async def get_specialists(
         }
         for s in specialists
     ]
+
+
+# --- MEDICATION ROUTES ---
+from pydantic import BaseModel
+from sqlalchemy.future import select
+from datetime import datetime
+
+class MedicationReminderCreate(BaseModel):
+    medication_name: str
+    dosage: str = None
+    frequency: str = None
+    time_of_day: str = None
+
+@app.get("/api/medications")
+async def get_medications(date: str = None, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    from models import MedicationReminder, MedicationLog
+    if not date:
+        date = datetime.now().strftime("%Y-%m-%d")
+        
+    # Get active reminders
+    q = await db.execute(select(MedicationReminder).where(MedicationReminder.user_id == current_user_id, MedicationReminder.is_active == True))
+    reminders = q.scalars().all()
+    
+    # Get logs for today
+    q_logs = await db.execute(select(MedicationLog).where(MedicationLog.user_id == current_user_id, MedicationLog.taken_date == date))
+    logs = q_logs.scalars().all()
+    logged_med_ids = [log.medication_id for log in logs]
+    
+    return {
+        "reminders": [
+            {
+                "id": r.id,
+                "medication_name": r.medication_name,
+                "dosage": r.dosage,
+                "frequency": r.frequency,
+                "time_of_day": r.time_of_day,
+                "taken_today": r.id in logged_med_ids
+            }
+            for r in reminders
+        ],
+        "date": date
+    }
+
+@app.post("/api/medications")
+async def create_medication(req: MedicationReminderCreate, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    from models import MedicationReminder
+    new_med = MedicationReminder(
+        user_id=current_user_id,
+        medication_name=req.medication_name,
+        dosage=req.dosage,
+        frequency=req.frequency,
+        time_of_day=req.time_of_day
+    )
+    db.add(new_med)
+    await db.commit()
+    await db.refresh(new_med)
+    return {"status": "ok", "id": new_med.id}
+
+@app.post("/api/medications/{med_id}/log")
+async def log_medication(med_id: int, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    from models import MedicationLog
+    date = datetime.now().strftime("%Y-%m-%d")
+    time_str = datetime.now().strftime("%H:%M")
+    
+    # Check if already logged
+    q = await db.execute(select(MedicationLog).where(MedicationLog.medication_id == med_id, MedicationLog.taken_date == date))
+    existing = q.scalars().first()
+    if existing:
+        return {"status": "already_logged"}
+        
+    log = MedicationLog(
+        user_id=current_user_id,
+        medication_id=med_id,
+        taken_date=date,
+        taken_time=time_str
+    )
+    db.add(log)
+    await db.commit()
+    return {"status": "ok"}
+
+@app.delete("/api/medications/{med_id}/log")
+async def unlog_medication(med_id: int, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    from models import MedicationLog
+    date = datetime.now().strftime("%Y-%m-%d")
+    q = await db.execute(select(MedicationLog).where(MedicationLog.medication_id == med_id, MedicationLog.taken_date == date))
+    existing = q.scalars().first()
+    if existing:
+        await db.delete(existing)
+        await db.commit()
+    return {"status": "ok"}
+
+@app.delete("/api/medications/{med_id}")
+async def delete_medication(med_id: int, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    from models import MedicationReminder
+    q = await db.execute(select(MedicationReminder).where(MedicationReminder.id == med_id, MedicationReminder.user_id == current_user_id))
+    med = q.scalars().first()
+    if med:
+        med.is_active = False
+        await db.commit()
+    return {"status": "ok"}

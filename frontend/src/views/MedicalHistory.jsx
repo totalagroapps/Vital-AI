@@ -42,6 +42,89 @@ const MedicalHistory = ({
     return { value: bmi, status, color };
   }, [patientProfile.weight, patientProfile.height]);
 
+  
+  const handleExportPDF = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const html = `
+      <html>
+        <head>
+          <title>Pasaporte Médico - ${patientProfile.full_name}</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
+            .header { text-align: center; border-bottom: 2px solid #8250DF; padding-bottom: 20px; margin-bottom: 30px; }
+            .header h1 { color: #8250DF; margin: 0; font-size: 28px; }
+            .header p { color: #64748b; margin: 5px 0 0 0; }
+            h2 { color: #0f172a; margin-top: 30px; font-size: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+            .label { color: #64748b; font-size: 0.85em; text-transform: uppercase; font-weight: 600; }
+            .value { font-weight: 700; font-size: 16px; color: #1e293b; }
+            .badge { display: inline-block; padding: 4px 10px; background-color: #f1f5f9; border-radius: 12px; font-size: 14px; margin-right: 5px; margin-bottom: 5px; font-weight: 500; }
+            .alert-badge { background-color: #fee2e2; color: #b91c1c; }
+            .med-badge { background-color: #e0e7ff; color: #4338ca; }
+            .footer { margin-top: 50px; text-align: center; font-size: 0.8em; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>VitalAI - Pasaporte Médico</h1>
+            <p>Documento de Información Vital para Emergencias</p>
+          </div>
+          
+          <div class="grid">
+            <div><div class="label">Nombre del Paciente</div><div class="value">${patientProfile.full_name || 'No especificado'}</div></div>
+            <div><div class="label">Contacto de Emergencia</div><div class="value">${patientProfile.emergency_contact || 'No especificado'}</div></div>
+          </div>
+
+          <h2>Datos Biométricos y Signos Vitales</h2>
+          <div class="grid">
+            <div><div class="label">Fecha de Nacimiento</div><div class="value">${patientProfile.date_of_birth || 'No especificada'} (${age} años)</div></div>
+            <div><div class="label">Género</div><div class="value">${patientProfile.gender || 'No especificado'}</div></div>
+            <div><div class="label">Tipo de Sangre</div><div class="value" style="color: #e11d48; font-size: 20px;">${patientProfile.blood_type || 'No especificado'}</div></div>
+            <div>
+              <div class="label">Índice de Masa Corporal (IMC)</div>
+              <div class="value">
+                ${bmiInfo ? `\${bmiInfo.value} (\${bmiInfo.status})` : 'Datos insuficientes'}
+              </div>
+            </div>
+          </div>
+          
+          <h2>Antecedentes Clínicos</h2>
+          <div style="margin-bottom: 20px;">
+            <div class="label" style="margin-bottom: 8px;">Alergias Conocidas</div>
+            <div>
+              ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+            </div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div class="label" style="margin-bottom: 8px;">Enfermedades Crónicas</div>
+            <div>
+              ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+            </div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div class="label" style="margin-bottom: 8px;">Medicamentos Actuales</div>
+            <div>
+              ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+            </div>
+          </div>
+          
+          <div class="footer">
+            Generado automáticamente por el paciente a través de VitalAI el ${new Date().toLocaleString()}<br/>
+            Este documento es un resumen informativo y debe ser validado por un profesional de la salud.
+          </div>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          </script>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     await savePatientProfile(e);
@@ -124,6 +207,12 @@ const MedicalHistory = ({
               <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
                 <Calendar size={14} className="text-white" /> {age} años
               </div>
+            </div>
+            
+            <div className="flex gap-2 mt-4">
+              <button onClick={handleExportPDF} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-brand-purple hover:bg-gray-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                <FileText size={16} /> Exportar Pasaporte (PDF)
+              </button>
             </div>
           </div>
 

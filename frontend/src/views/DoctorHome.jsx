@@ -175,6 +175,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
         if (tab === 'home') onNavigate('home');
         if (tab === 'patients') onNavigate('patients');
         if (tab === 'ai') onNavigate('copilot');
+        if (tab === 'more') onNavigate('more');
       }} isDoctor={true} />
     </div>
   );

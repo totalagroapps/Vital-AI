@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DoctorHome from './views/DoctorHome';
+import DoctorMore from './views/DoctorMore';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -178,6 +179,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   };
 
 
+
+  if (doctorScreen === 'more') {
+    return <DoctorMore onNavigate={setDoctorScreen} onLogout={onLogout} />;
+  }
   if (doctorScreen === 'home') {
     return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} />;
   }

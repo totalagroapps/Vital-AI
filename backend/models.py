@@ -149,3 +149,24 @@ class SpecialistProfile(Base):
     profile_pic_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class MedicationReminder(Base):
+    __tablename__ = "medication_reminders"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    medication_name = Column(String)
+    dosage = Column(String, nullable=True)
+    frequency = Column(String, nullable=True)
+    time_of_day = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    is_active = Column(Boolean, default=True)
+
+class MedicationLog(Base):
+    __tablename__ = "medication_logs"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    medication_id = Column(Integer, ForeignKey("medication_reminders.id"))
+    taken_date = Column(String, index=True) # YYYY-MM-DD
+    taken_time = Column(String) # HH:MM
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

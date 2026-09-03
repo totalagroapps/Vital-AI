@@ -40,7 +40,8 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
       const data = await res.json();
 
       if (res.ok) {
-        onLogin(data.token ? data.token : data.access_token, data.role || (selectedRole === 'doctor' ? 'doctor' : 'patient'));
+        const finalRole = (selectedRole === 'doctor' || selectedRole === 'patient') ? selectedRole : (data.role || 'patient');
+        onLogin(data.token ? data.token : data.access_token, finalRole);
       } else {
         const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : 'Error de autenticación');
         setError(errorMsg || 'Error de autenticación');

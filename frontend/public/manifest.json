@@ -1,0 +1,21 @@
+{
+  "name": "VitalAI",
+  "short_name": "VitalAI",
+  "description": "Tu asistente médico personal con Inteligencia Artificial.",
+  "start_url": "/paciente",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#8250DF",
+  "icons": [
+    {
+      "src": "/images/ai_doctor_bg.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/ai_doctor_bg.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

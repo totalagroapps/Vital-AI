@@ -19,30 +19,50 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           <span className="text-[10px] font-medium">Inicio</span>
         </button>
 
-        <button 
-          onClick={() => onTabChange('patients')}
-          className={`flex flex-col items-center gap-1 ${activeTab === 'patients' ? activeColor : 'text-gray-400'}`}
-        >
-          <Users size={24} className={activeTab === 'patients' ? activeFill : ''} />
-          <span className="text-[10px] font-medium">Pacientes</span>
-        </button>
+        {isDoctor ? (
+          <button 
+            onClick={() => onTabChange('patients')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'patients' ? activeColor : 'text-gray-400'}`}
+          >
+            <Users size={24} className={activeTab === 'patients' ? activeFill : ''} />
+            <span className="text-[10px] font-medium">Pacientes</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => onTabChange('treatments')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'treatments' ? activeColor : 'text-gray-400'}`}
+          >
+            <Users size={24} className={activeTab === 'treatments' ? activeFill : ''} />
+            <span className="text-[10px] font-medium">Pastillas</span>
+          </button>
+        )}
 
         <div className="relative -top-6 flex justify-center w-16">
           <button 
-            onClick={() => onTabChange('ai')}
+            onClick={() => onTabChange(isDoctor ? 'ai' : 'triage')}
             className={`absolute bg-gradient-to-tr ${gradient} text-white rounded-full p-4 shadow-lg ${glowShadow} flex items-center justify-center transform transition active:scale-95`}
           >
             <Sparkles size={28} className="fill-white/20" />
           </button>
         </div>
 
-        <button 
-          onClick={() => onTabChange('agenda')}
-          className={`flex flex-col items-center gap-1 ${activeTab === 'agenda' ? activeColor : 'text-gray-400'}`}
-        >
-          <Calendar size={24} className={activeTab === 'agenda' ? activeFill : ''} />
-          <span className="text-[10px] font-medium">Agenda</span>
-        </button>
+        {isDoctor ? (
+          <button 
+            onClick={() => onTabChange('agenda')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'agenda' ? activeColor : 'text-gray-400'}`}
+          >
+            <Calendar size={24} className={activeTab === 'agenda' ? activeFill : ''} />
+            <span className="text-[10px] font-medium">Agenda</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => onTabChange('history')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? activeColor : 'text-gray-400'}`}
+          >
+            <Calendar size={24} className={activeTab === 'history' ? activeFill : ''} />
+            <span className="text-[10px] font-medium">Historial</span>
+          </button>
+        )}
 
         <button 
           onClick={() => onTabChange('more')}
