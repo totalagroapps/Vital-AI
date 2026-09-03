@@ -25,8 +25,14 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem('media_hub_lang', lang);
   };
 
-  const t = (key) => {
-    return translations[language]?.[key] || translations['es']?.[key] || key;
+  const t = (key, params) => {
+    let str = translations[language]?.[key] || translations['es']?.[key] || key;
+    if (params && typeof str === 'string') {
+      Object.keys(params).forEach(k => {
+        str = str.replace(new RegExp(`{${k}}`, 'g'), params[k]);
+      });
+    }
+    return str;
   };
 
   return (

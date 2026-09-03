@@ -675,13 +675,37 @@ async def extract_medication(file: UploadFile = File(...), user_id: str = Depend
         content_bytes = await file.read()
         file_ext = file.filename.split('.')[-1].lower()
         
-        extracted_text = ""
-        
+        system_prompt = """Extrae los medicamentos recetados o listados en la imagen/documento proporcionado y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+{
+  "medications": [
+    {
+      "medication_name": "Nombre del medicamento",
+      "dosage": "Dosis (ej. 500mg), vacío si no se especifica",
+      "frequency": "Frecuencia (ej. cada 8 horas, BID, TID, QD, etc), vacío si no se especifica",
+      "time_of_day": "Momento del día (ej. mañana y noche), vacío si no se especifica"
+    }
+  ]
+}
+Si no hay medicamentos, devuelve la lista vacía."""
+
+        openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
         if file_ext == "pdf":
             import fitz
             doc = fitz.open(stream=content_bytes, filetype="pdf")
+            extracted_text = ""
             for page in doc:
-                extracted_text += page.get_text("text") + "\n"
+                extracted_text += page.get_text("text") + "
+"
+                
+            resp = await openai_client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": extracted_text}
+                ],
+                response_format={"type": "json_object"}
+            )
         elif file_ext in ["jpg", "jpeg", "png", "webp"]:
             import base64
             from PIL import Image
@@ -694,48 +718,20 @@ async def extract_medication(file: UploadFile = File(...), user_id: str = Depend
             img.save(buffered, format="JPEG", quality=85)
             img_b64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
             
-            openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
             resp = await openai_client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": [
-                        {"type": "text", "text": "Extrae todo el texto de esta receta o documento médico."},
                         {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{img_b64}"}}
                     ]}
                 ],
+                response_format={"type": "json_object"},
                 max_tokens=1000
             )
-            extracted_text = resp.choices[0].message.content
         else:
             raise HTTPException(status_code=400, detail="Formato no soportado.")
             
-        if not extracted_text:
-            return {"medications": []}
-            
-        prompt = f"""
-Extrae los medicamentos recetados del siguiente texto médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
-{{
-  "medications": [
-    {{
-      "medication_name": "Nombre del medicamento",
-      "dosage": "Dosis (ej. 500mg), vacío si no se especifica",
-      "frequency": "Frecuencia (ej. cada 8 horas), vacío si no se especifica",
-      "time_of_day": "Momento del día (ej. mañana y noche), vacío si no se especifica"
-    }}
-  ]
-}}
-Si no hay medicamentos, devuelve la lista vacía.
-
-Texto: {extracted_text}
-"""
-        
-        openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        resp = await openai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            response_format={"type": "json_object"}
-        )
-        
         import json
         extracted_data = json.loads(resp.choices[0].message.content)
         return extracted_data
@@ -743,6 +739,7 @@ Texto: {extracted_text}
     except Exception as e:
         logger.error(f"Error extrayendo medicación: {e}")
         raise HTTPException(status_code=500, detail="Error interno analizando receta.")
+
 
 # --- TRIAGE & CHAT ENDPOINTS ---
 
