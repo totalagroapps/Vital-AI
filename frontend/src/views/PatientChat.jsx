@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,6 +18,31 @@ const PatientChat = ({
   selectedPdfName,
   onClearAttachment
 , patientProfile, sessions}) => {
+    const [isListening, setIsListening] = useState(false);
+
+  const toggleListening = () => {
+    if (isListening) return;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInputMessage((prev) => (prev ? prev + ' ' : '') + transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    
+    try { recognition.start(); } catch (e) { setIsListening(false); }
+  };
+
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -131,11 +156,13 @@ const PatientChat = ({
         <form onSubmit={handleSend} className="flex items-end gap-2">
           
           <div className="flex items-center gap-1 mb-1">
-            <button type="button" onClick={() => imageInputRef.current?.click()} className="p-2 text-gray-400 hover:text-brand-purple transition-colors rounded-full hover:bg-brand-purple/10">
-              <ImageIcon size={22} />
+            <button type="button" onClick={() => imageInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm">
+              <ImageIcon size={18} />
+              <span className="hidden sm:inline">Subir Imagen</span>
             </button>
-            <button type="button" onClick={() => pdfInputRef.current?.click()} className="p-2 text-gray-400 hover:text-brand-green transition-colors rounded-full hover:bg-brand-green/10">
-              <FileText size={22} />
+            <button type="button" onClick={() => pdfInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm">
+              <FileText size={18} />
+              <span className="hidden sm:inline">Subir PDF</span>
             </button>
           </div>
 
