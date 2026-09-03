@@ -113,15 +113,15 @@ const PatientHome = ({ onNavigate, onLogout }) => {
           </button>
 
           {/* Card 4 */}
-          <button onClick={() => onNavigate('doctors')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
+          <button onClick={() => onNavigate('search')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
             <div className="mb-1.5">
               <div className="w-6 h-6 rounded-full border border-brand-orange/20 flex items-center justify-center text-brand-orange mb-3 bg-brand-orange/5">
-                <UserSquare2 size={12} />
+                <BookOpen size={12} />
               </div>
             </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Con&#233;ctate con m&#233;dicos especialistas</h4>
+            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Biblioteca Médica (RAG)</h4>
             <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              Encuentra al especialista adecuado y realiza videoconsultas seguras.
+              Busca en estudios clínicos y literatura científica con IA.
             </p>
             <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-orange rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
               <ArrowRight size={12} />

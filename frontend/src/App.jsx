@@ -76,7 +76,8 @@ export default function App() {
       'history': '/paciente/historial',
       'triage': '/paciente/asistente',
       'doctors': '/paciente/doctors',
-      'more': '/paciente/mas'
+      'more': '/paciente/mas',
+      'search': '/paciente/biblioteca'
     };
     if (screen === 'triage') startTriageSession();
     navigate(screenMap[screen] || '/paciente');
@@ -942,6 +943,29 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
+  
+  if (path === '/paciente/biblioteca') {
+    return (
+      <>
+        <PatientHome 
+          onLogout={handleLogout}
+          onNavigate={(screen) => {
+            if (screen === 'doctors') {
+              alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
+            } else {
+              if (screen === 'history') {
+                fetchPatientProfile();
+                fetchHistory();
+              }
+              handleNavigate(screen);
+            }
+          }} 
+          />
+        <MedicalSearchModal isOpen={true} onClose={() => navigate('/paciente')} token={token} apiUrl={API_URL} userProfile={patientProfile} />
+        {GlobalBottomNav}
+      </>
+    );
+  }
   if (path === '/paciente/documentos') {
     return (
       <>
