@@ -11,6 +11,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
   const [isAdding, setIsAdding] = useState(false);
   const [newMed, setNewMed] = useState({ medication_name: '', dosage: '', frequency: '', time_of_day: '' });
   const [isExtracting, setIsExtracting] = useState(false);
+  const [medQueue, setMedQueue] = useState([]);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
     const file = e.target.files[0];
     if (!file) return;
     setIsExtracting(true);
+    setMedQueue([]);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -56,7 +58,8 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
             time_of_day: med.time_of_day || ''
           });
           if (data.medications.length > 1) {
-            alert(t("multiple_medications_extracted"));
+            setMedQueue(data.medications.slice(1));
+            alert(t("multiple_medications_extracted", { count: data.medications.length }));
           }
         } else {
           alert(t("no_medications_found"));
@@ -99,9 +102,20 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
         body: JSON.stringify(newMed)
       });
       if (res.ok) {
-        setNewMed({ medication_name: '', dosage: '', frequency: '', time_of_day: '' });
-        setIsAdding(false);
         fetchMedications();
+        if (medQueue.length > 0) {
+          const nextMed = medQueue[0];
+          setNewMed({
+            medication_name: nextMed.medication_name || '',
+            dosage: nextMed.dosage || '',
+            frequency: nextMed.frequency || '',
+            time_of_day: nextMed.time_of_day || ''
+          });
+          setMedQueue(prev => prev.slice(1));
+        } else {
+          setNewMed({ medication_name: '', dosage: '', frequency: '', time_of_day: '' });
+          setIsAdding(false);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -221,7 +235,10 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
         {/* Add Form */}
         {isAdding && (
           <form onSubmit={handleAddMedication} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
-            <h3 className="font-bold text-gray-900 mb-4">{t("new_medication")}</h3>
+            <h3 className="font-bold text-gray-900 mb-4">
+              {t("new_medication")}
+              {medQueue.length > 0 && <span className="ml-2 text-xs font-normal text-brand-purple bg-brand-purple/10 px-2 py-1 rounded-lg">+{medQueue.length} pendientes</span>}
+            </h3>
             
             <div className="mb-6 bg-brand-blue/5 border border-brand-blue/20 rounded-2xl p-4 text-center">
               <p className="text-xs text-brand-blue mb-3 font-medium">{t("have_prescription")}</p>
@@ -259,7 +276,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
             </div>
             
             <div className="flex gap-3 mt-6">
-              <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold">{t("cancel")}</button>
+              <button type="button" onClick={() => { setIsAdding(false); setMedQueue([]); setNewMed({ medication_name: '', dosage: '', frequency: '', time_of_day: '' }); }} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold">{t("cancel")}</button>
               <button type="submit" className="flex-1 py-3 bg-brand-purple text-white rounded-xl text-sm font-bold shadow-glow">{t("save")}</button>
             </div>
           </form>
