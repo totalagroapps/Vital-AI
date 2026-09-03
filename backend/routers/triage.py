@@ -1,4 +1,5 @@
 
+from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
 from main import s3_client, R2_BUCKET_NAME, logger
 
 
@@ -146,7 +147,6 @@ import database
 import models
 import security
 from database import get_db
-from security import authenticate_token
 
 router = APIRouter()
 
