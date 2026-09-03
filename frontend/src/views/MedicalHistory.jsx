@@ -401,10 +401,54 @@ const MedicalHistory = ({
                 <input type="text" value={patientProfile.emergency_contact || ""} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="Nombre y teléfono" />
               </div>
 
-              <button type="submit" className="w-full bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-4 rounded-2xl shadow-glow transition-transform active:scale-95 mt-4 flex items-center justify-center gap-2">
-                <Save size={18} /> {t("save_profile")}
-              </button>
+              <div className="flex gap-4">
+                <button onClick={() => setViewMode('view')} className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-2xl shadow-sm">{t("cancel")}</button>
+                <button onClick={saveProfile} className="flex-1 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-3 rounded-2xl shadow-glow transition-transform active:scale-95 flex items-center justify-center gap-2">
+                  <Save size={18} /> {t("save_profile")}
+                </button>
+              </div>
             </form>
+          </div>
+        )}
+
+        {viewMode === 'view' && (
+          <div className="relative z-10 px-6 mt-8">
+            <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-brand-purple" />
+              {t("my_triage_history")}
+            </h3>
+            {patientProfile.triages && patientProfile.triages.length > 0 ? (
+              <div className="space-y-4">
+                {patientProfile.triages.map(t_item => (
+                  <div key={t_item.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-5">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-xs text-gray-500 font-medium">{new Date(t_item.created_at).toLocaleString()}</span>
+                      <span className={`text-[10px] px-2.5 py-1 rounded-full uppercase font-bold tracking-wider ${
+                          t_item.status === 'closed_red' ? 'bg-red-50 text-red-600 border border-red-200' :
+                          t_item.status === 'closed_yellow' ? 'bg-orange-50 text-orange-600 border border-orange-200' :
+                          'bg-green-50 text-green-600 border border-green-200'
+                        }`}>
+                        {t_item.status === 'closed_red' ? t("urgency") : t_item.status === 'closed_yellow' ? t("attention") : t("normal")}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{t_item.final_report}</div>
+                    {t_item.recommended_specialty && (
+                      <div className="mt-4 p-4 bg-brand-purple/5 border border-brand-purple/10 rounded-xl">
+                        <p className="text-[11px] text-brand-purple font-bold uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                          <Activity className="w-4 h-4" />
+                          {t("smart_referral")}
+                        </p>
+                        <p className="text-sm font-bold text-gray-900">{t("recommended_specialty")}: {t_item.recommended_specialty}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-6 text-center">
+                <p className="text-sm text-gray-500">{t("no_previous_triages")}</p>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,5 +1,13 @@
 export const translations = {
   es: {
+    my_triage_history: "Mi Historial de Triajes",
+    urgency: "Urgencia",
+    attention: "Atención",
+    normal: "Normal",
+    smart_referral: "Derivación Inteligente",
+    recommended_specialty: "Especialidad Recomendada",
+    view_medical_directory: "Ver Directorio Médico",
+    no_previous_triages: "No hay consultas previas de triaje.",
     conn_error: "Error de conexión.",
     explain_xray: "Por favor, explícame esta radiografía.",
     explain_doc: "Por favor, explícame este documento.",
@@ -361,6 +369,14 @@ export const translations = {
     ask_copilot: "Pregunte a la IA sobre este paciente..."
   },
   en: {
+    my_triage_history: "My Triage History",
+    urgency: "Urgency",
+    attention: "Attention",
+    normal: "Normal",
+    smart_referral: "Smart Referral",
+    recommended_specialty: "Recommended Specialty",
+    view_medical_directory: "View Medical Directory",
+    no_previous_triages: "No previous triage consultations.",
     conn_error: "Connection error.",
     explain_xray: "Please explain this x-ray.",
     explain_doc: "Please explain this document.",
@@ -722,6 +738,14 @@ export const translations = {
     ask_copilot: "Ask the AI about this patient..."
   },
   fr: {
+    my_triage_history: "Mon Historique de Triage",
+    urgency: "Urgence",
+    attention: "Attention",
+    normal: "Normal",
+    smart_referral: "Référence Intelligente",
+    recommended_specialty: "Spécialité Recommandée",
+    view_medical_directory: "Voir le Répertoire Médical",
+    no_previous_triages: "Aucune consultation de triage précédente.",
     conn_error: "Erreur de connexion.",
     explain_xray: "Veuillez m'expliquer cette radiographie.",
     explain_doc: "Veuillez m'expliquer ce document.",
@@ -1083,6 +1107,14 @@ export const translations = {
     ask_copilot: "Posez une question à l'IA sur ce patient..."
   },
   ar: {
+    my_triage_history: "تاريخ الفرز الخاص بي",
+    urgency: "استعجال",
+    attention: "انتباه",
+    normal: "عادي",
+    smart_referral: "إحالة ذكية",
+    recommended_specialty: "التخصص الموصى به",
+    view_medical_directory: "عرض الدليل الطبي",
+    no_previous_triages: "لا توجد استشارات فرز سابقة.",
     conn_error: "خطأ في الاتصال.",
     explain_xray: "يرجى شرح هذه الأشعة السينية.",
     explain_doc: "يرجى شرح هذا المستند.",
