@@ -1,5 +1,5 @@
 export const es = {
-    in_progress: "En curso",
+  in_progress: "En curso",
     no_complete_report: "Sin reporte completo.",
     blood_type_label: "Tipo de Sangre",
     none_female: "Ninguna",
