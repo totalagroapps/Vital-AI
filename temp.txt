@@ -1,0 +1,7 @@
+import os
+
+file_path = 'frontend/src/components/BottomNav.jsx'
+with open(file_path, 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# I will just write it directly using node to be 100% immune to powershell quirks

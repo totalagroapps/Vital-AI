@@ -171,9 +171,10 @@ const MedicalHistory = ({
           </h2>
           <button 
             onClick={() => setIsEditing(!isEditing)}
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isEditing ? 'bg-red-50 text-red-500' : 'bg-brand-purple/10 text-brand-purple'}`}
+            className={`px-4 py-2 flex items-center gap-2 font-semibold text-sm rounded-xl transition-all shadow-sm ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-brand-purple text-white hover:bg-brand-purple/90'}`}
           >
-            {isEditing ? <X size={20} /> : <Edit3 size={20} />}
+            {isEditing ? <X size={16} /> : <Edit3 size={16} />}
+            {isEditing ? 'Cancelar' : 'Editar información'}
           </button>
         </div>
 

@@ -196,14 +196,21 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
                 <CloudUpload size={28} />
               </div>
               <h3 className="font-bold text-gray-900 mb-1">
-                {isDragging ? '¡Suelta aquí!' : 'Arrastra tu archivo aquí'}
+                {isDragging ? '¡Suelta aquí!' : 'Sube tu documento o imagen'}
               </h3>
-              <p className="text-sm text-gray-400 mb-4">O selecciona desde tu dispositivo</p>
+              <p className="text-sm text-gray-400 mb-4">Puedes subir una foto (.jpg, .png) o un PDF</p>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept={ACCEPTED_TYPES} />
-              <button onClick={() => fileInputRef.current.click()}
-                className="bg-brand-green hover:bg-brand-green/90 text-white font-bold py-3 px-8 rounded-full w-full mb-3 transition-colors">
-                Seleccionar archivo
-              </button>
+              
+              <div className="flex gap-3 w-full mb-3">
+                <button onClick={() => fileInputRef.current.click()}
+                  className="flex-1 bg-brand-green/10 hover:bg-brand-green/20 text-brand-green font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 border border-brand-green/20">
+                  <ImageIcon size={18} /> Subir Imagen
+                </button>
+                <button onClick={() => fileInputRef.current.click()}
+                  className="flex-1 bg-brand-green hover:bg-brand-green/90 text-white font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-glow">
+                  <FileText size={18} /> Subir PDF
+                </button>
+              </div>
               <p className="text-[11px] text-gray-400">PDF, JPG, PNG, WEBP, HEIC · Máx. 50 MB</p>
             </div>
 

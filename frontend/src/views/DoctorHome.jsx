@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 
@@ -18,7 +18,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
             <Bell size={20} />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></span>
           </button>
-          <button onClick={onLogout} className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
+          <button onClick={onLogout} className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
             {/* Avatar genérico o foto del doctor */}
             <img src="/images/ai_doctor_bg.jpg" alt="Doctor Profile" className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
           </button>
@@ -140,7 +140,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
               placeholder="Ej.: 'Buscar paciente Mohamed Amrani'" 
               className="flex-1 bg-transparent border-none text-xs text-white placeholder-gray-500 focus:ring-0 py-3"
             />
-            <button className="w-10 h-10 rounded-xl bg-brand-purple flex items-center justify-center text-white shadow-glow">
+            <button onClick={() => alert("El asistente de voz para médicos está en desarrollo. ¡Próximamente!")} className="w-10 h-10 rounded-full bg-brand-purple text-white flex items-center justify-center shadow-glow transition-transform hover:scale-105">
               <Mic size={18} />
             </button>
           </div>

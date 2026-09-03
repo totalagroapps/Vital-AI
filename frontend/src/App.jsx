@@ -113,10 +113,31 @@ export default function App() {
   };
 
   const [sessions, setSessions] = useState([]);
-  const [currentSessionId, setCurrentSessionId] = useState(null);
-  const [triageSessionId, setTriageSessionId] = useState(null);
-  const [isTriageClosed, setIsTriageClosed] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
+  const [triageSessionId, setTriageSessionId] = useState(() => localStorage.getItem('triageSessionId') || null);
+  const [isTriageClosed, setIsTriageClosed] = useState(() => localStorage.getItem('isTriageClosed') === 'true');
+  const [messages, setMessages] = useState(() => {
+    const saved = localStorage.getItem('chatMessages');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    if (currentSessionId) localStorage.setItem('currentSessionId', currentSessionId);
+    else localStorage.removeItem('currentSessionId');
+  }, [currentSessionId]);
+
+  useEffect(() => {
+    if (triageSessionId) localStorage.setItem('triageSessionId', triageSessionId);
+    else localStorage.removeItem('triageSessionId');
+  }, [triageSessionId]);
+
+  useEffect(() => {
+    localStorage.setItem('isTriageClosed', isTriageClosed);
+  }, [isTriageClosed]);
+
+  useEffect(() => {
+    localStorage.setItem('chatMessages', JSON.stringify(messages));
+  }, [messages]);
   const [inputMessage, setInputMessage] = useState('');
   
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Plus, Check, Clock, Trash2, ArrowLeft } from 'lucide-react';
+import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
+import { useRef } from 'react';
 import BottomNav from '../components/BottomNav';
 
 export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
@@ -7,6 +8,8 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newMed, setNewMed] = useState({ medication_name: '', dosage: '', frequency: '', time_of_day: '' });
+  const [isExtracting, setIsExtracting] = useState(false);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchMedications();
@@ -23,6 +26,48 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
       console.error(e);
     }
     setIsLoading(false);
+  };
+
+  
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setIsExtracting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${apiUrl}/api/documents/extract_medication`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeaders.Authorization
+        },
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.medications && data.medications.length > 0) {
+          const med = data.medications[0];
+          setNewMed({
+            medication_name: med.medication_name || '',
+            dosage: med.dosage || '',
+            frequency: med.frequency || '',
+            time_of_day: med.time_of_day || ''
+          });
+          if (data.medications.length > 1) {
+            alert(`Se extrajeron ${data.medications.length} medicamentos. Se ha auto-completado el primero. Guarda este y repite para los demás.`);
+          }
+        } else {
+          alert('No se encontraron medicamentos en el documento.');
+        }
+      } else {
+        alert('Error al analizar el documento.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión.');
+    }
+    setIsExtracting(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleToggleLog = async (med) => {
@@ -176,24 +221,38 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
           <form onSubmit={handleAddMedication} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
             <h3 className="font-bold text-gray-900 mb-4">Nuevo Medicamento</h3>
             
+            <div className="mb-6 bg-brand-blue/5 border border-brand-blue/20 rounded-2xl p-4 text-center">
+              <p className="text-xs text-brand-blue mb-3 font-medium">¿Tienes una receta médica?</p>
+              <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+              <button 
+                type="button" 
+                onClick={() => fileInputRef.current.click()} 
+                disabled={isExtracting}
+                className="w-full bg-brand-blue text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+                {isExtracting ? 'Analizando con IA...' : 'Extraer desde Receta (PDF/Foto)'}
+              </button>
+            </div>
+            
             <div className="space-y-4">
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre</label>
-                <input required type="text" value={newMed.medication_name} onChange={e => setNewMed({...newMed, medication_name: e.target.value})} placeholder="Ej: Paracetamol" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <input required type="text" value={newMed.medication_name} onChange={e => setNewMed({...newMed, medication_name: e.target.value})} placeholder="Ej: Paracetamol" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Dosis</label>
-                  <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder="Ej: 500mg" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder="Ej: 500mg" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Horario</label>
-                  <input type="text" value={newMed.time_of_day} onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} placeholder="Ej: 08:00 y 20:00" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <input type="text" value={newMed.time_of_day} onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} placeholder="Ej: 08:00 y 20:00" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
                 </div>
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Frecuencia</label>
-                <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder="Ej: Cada 12 horas" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder="Ej: Cada 12 horas" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
               </div>
             </div>
             

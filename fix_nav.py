@@ -1,0 +1,67 @@
+﻿import os
+
+code = """import React from 'react';
+import { Home, Users, Calendar, MoreHorizontal, Sparkles } from 'lucide-react';
+
+const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
+  const activeColor = isDoctor ? 'text-brand-blue' : 'text-brand-purple';
+  const activeFill = isDoctor ? 'fill-brand-blue/20' : 'fill-brand-purple/20';
+  const glowShadow = isDoctor ? 'shadow-blue-500/50' : 'shadow-glow';
+  const gradient = isDoctor ? 'from-brand-blue to-blue-500' : 'from-brand-purple to-brand-purpleLight';
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2 pb-6 z-50">
+      <div className="max-w-md mx-auto flex justify-between items-center relative">
+        
+        <button 
+          onClick={() => onTabChange('home')}
+          className={`flex flex-col items-center gap-1 ${activeTab === 'home' ? activeColor : 'text-gray-400'}`}
+        >
+          <Home size={24} className={activeTab === 'home' ? activeFill : ''} />
+          <span className="text-[10px] font-medium">Inicio</span>
+        </button>
+
+        <button 
+          onClick={() => onTabChange('patients')}
+          className={`flex flex-col items-center gap-1 ${activeTab === 'patients' ? activeColor : 'text-gray-400'}`}
+        >
+          <Users size={24} className={activeTab === 'patients' ? activeFill : ''} />
+          <span className="text-[10px] font-medium">Pacientes</span>
+        </button>
+
+        <div className="relative -top-6 flex justify-center w-16">
+          <button 
+            onClick={() => onTabChange('ai')}
+            className={`absolute bg-gradient-to-tr ${gradient} text-white rounded-full p-4 shadow-lg ${glowShadow} flex items-center justify-center transform transition active:scale-95`}
+          >
+            <Sparkles size={28} className="fill-white/20" />
+          </button>
+        </div>
+
+        <button 
+          onClick={() => onTabChange('agenda')}
+          className={`flex flex-col items-center gap-1 ${activeTab === 'agenda' ? activeColor : 'text-gray-400'}`}
+        >
+          <Calendar size={24} className={activeTab === 'agenda' ? activeFill : ''} />
+          <span className="text-[10px] font-medium">Agenda</span>
+        </button>
+
+        <button 
+          onClick={() => onTabChange('more')}
+          className={`flex flex-col items-center gap-1 ${activeTab === 'more' ? activeColor : 'text-gray-400'}`}
+        >
+          <MoreHorizontal size={24} />
+          <span className="text-[10px] font-medium">Más</span>
+        </button>
+
+      </div>
+    </div>
+  );
+};
+
+export default BottomNav;"""
+
+with open('frontend/src/components/BottomNav.jsx', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print("Fixed!")
