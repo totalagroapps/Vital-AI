@@ -59,7 +59,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    let triagesHtml = patientDetail.triages.map(t => `
+    let triagesHtml = (patientDetail.triages || []).map(t => `
       <div style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
         <strong>Fecha:</strong> ${new Date(t.created_at).toLocaleString()}<br/>
         <strong>Categoría:</strong> ${t.category || 'N/A'}<br/>
@@ -260,7 +260,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="overflow-hidden flex-1">
                   <div className="font-semibold text-sm truncate">{p.full_name}</div>
                   <div className={`text-[11px] truncate ` + (selectedPatient?.user_id === p.user_id ? 'text-teal-100' : 'text-gray-400')}>
-                    ID: {p.user_id.split('-')[0]}
+                    ID: {(p.user_id || '').split('-')[0]}
                   </div>
                 </div>
               </button>
@@ -358,12 +358,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     Historial de Triajes Asistidos
                   </h3>
                   <div className="space-y-4">
-                    {patientDetail.triages.length === 0 ? (
+                    {(patientDetail.triages || []).length === 0 ? (
                       <div className="bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
                         No hay triajes registrados para este paciente.
                       </div>
                     ) : (
-                      patientDetail.triages.map(t => (
+                      (patientDetail.triages || []).map(t => (
                         <div key={t.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5">
                           <div className="flex justify-between items-start mb-3 border-b border-gray-50 pb-3">
                             <span className="text-xs font-semibold text-gray-500">{new Date(t.created_at).toLocaleString()}</span>
@@ -373,7 +373,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               t.status === 'closed_green' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-600'
                             }`}>
-                              {t.status.replace('closed_', '') || 'En curso'}
+                              {(t.status || '').replace('closed_', '') || 'En curso'}
                             </span>
                           </div>
                           <div className="prose prose-sm max-w-none prose-p:leading-relaxed text-gray-700 prose-strong:text-gray-900">
@@ -392,12 +392,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     Documentos y Estudios Adjuntos
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {patientDocuments.length === 0 ? (
+                    {(patientDocuments || []).length === 0 ? (
                       <div className="col-span-full bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
                         No hay documentos ni estudios adjuntos.
                       </div>
                     ) : (
-                      patientDocuments.map(doc => (
+                      (patientDocuments || []).map(doc => (
                         <div key={doc.id} className="flex justify-between items-center bg-white border border-gray-100 shadow-sm hover:shadow hover:border-brand-teal/30 rounded-2xl p-4 transition-all group">
                           <div className="min-w-0 flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-teal-50 text-brand-teal flex items-center justify-center shrink-0">
@@ -406,7 +406,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                             <div className="overflow-hidden">
                               <h4 className="text-sm font-bold text-gray-900 truncate" title={doc.original_filename}>{doc.original_filename}</h4>
                               <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
-                                <span className="uppercase tracking-wider font-semibold text-brand-teal">{doc.document_type.replace('_', ' ')}</span>
+                                <span className="uppercase tracking-wider font-semibold text-brand-teal">{(doc.document_type || '').replace('_', ' ')}</span>
                                 <span>&bull;</span>
                                 <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
                               </div>
