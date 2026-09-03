@@ -36,13 +36,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
           {t("save_time_make_better_decisions")}
         </p>
         
-        {/* Background Image decoration */}
-        <div className="absolute top-[-40px] right-[-80px] w-[300px] h-[300px] z-[-1] opacity-100 pointer-events-none">
-           {/* We use the generated doctor image but styled as a background element with gradient fade */}
-           <div className="w-full h-full bg-gradient-to-l from-transparent to-base absolute inset-0 z-10"></div>
-           <div className="w-full h-full bg-gradient-to-t from-base to-transparent absolute inset-0 z-10"></div>
-           <img src="/images/ai_doctor_bg.jpg" alt={t("ai_doctor")} className="w-full h-full object-cover rounded-full blur-[1px]" onError={(e) => e.target.style.display = 'none'} />
-        </div>
+
       </div>
 
       {/* MAIN GRID */}
