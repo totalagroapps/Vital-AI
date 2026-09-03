@@ -155,7 +155,10 @@ router = APIRouter()
 async def triage_chat(request: TriageRequest):
     ollama_host = os.getenv('OLLAMA_HOST', 'https://molecular-playable-saga.ngrok-free.dev')
     client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
-    messages_payload = [{'role': 'system', 'content': TRIAGE_SYSTEM_PROMPT}]
+    lang_map = {'es': 'Spanish', 'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
+    target_lang = lang_map.get(request.language, 'Spanish')
+    lang_instruction = f'\n\nCRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your responses to {target_lang}.'
+    messages_payload = [{'role': 'system', 'content': TRIAGE_SYSTEM_PROMPT + lang_instruction}]
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))

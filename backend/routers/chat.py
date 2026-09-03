@@ -239,6 +239,13 @@ async def general_chat(request: TriageRequest, db: AsyncSession=Depends(get_db))
     SYSTEM_PROMPT = "Eres VitalAI, un asistente general de salud y bienestar. \nResponde de forma concisa, educada y profesional.\nREGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. \nSi el usuario pregunta por sus sntomas, dile educadamente que para hacer un pre-diagnstico preciso debe usar el mdulo 'Entiende tus sntomas' (Triaje)."
     if is_symptom:
         SYSTEM_PROMPT += '\n\nATENCION: El usuario parece estar describiendo un sntoma activo. Sugiere amablemente usar la seccin de Triaje para un anlisis formal.'
+    
+    lang_map = {'es': 'Spanish', 'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
+    target_lang = lang_map.get(request.language, 'Spanish')
+    lang_instruction = f'\n\nCRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your responses to {target_lang}. Do NOT use Spanish unless {target_lang} is Spanish.'
+    
+    SYSTEM_PROMPT += lang_instruction
+
     messages_payload = [{'role': 'system', 'content': SYSTEM_PROMPT}]
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})

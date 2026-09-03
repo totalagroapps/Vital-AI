@@ -20,7 +20,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
             <Bell size={20} />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></span>
           </button>
-          <button onClick={onLogout} className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
+          <button onClick={onLogout} className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
             {/* Avatar genérico o foto del doctor */}
             <img src="/images/ai_doctor_bg.jpg" alt={t("doctor_profile")} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
           </button>
