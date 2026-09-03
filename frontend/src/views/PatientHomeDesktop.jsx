@@ -104,10 +104,10 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-brand-green text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
-              <div onClick={() => {}} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Activity size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-sm text-blue-500 mb-1.5">Sigue tu salud</h4>
-                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Health Score, evolución de tus valores y recomendaciones personalizadas.</p>
+              <div onClick={() => onNavigate('search')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><BookOpen size={20}/></div>
+                <h4 className="font-bold text-[11px] lg:text-sm text-blue-500 mb-1.5">Biblioteca Médica RAG</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">Busca en literatura científica y estudios clínicos asisitido con IA.</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-blue-500 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
