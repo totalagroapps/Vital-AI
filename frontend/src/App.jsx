@@ -681,7 +681,7 @@ ${text}`], {type: 'text/plain'});
       // Si hay archivo, subimos a /api/documents/upload
       if (selectedImage || selectedPdf) {
         setIsLoading(true);
-        setMessages((prev) => [...prev, { id: Date.now() + 2, type: 'ai', text: 'Analizando documento adjunto con OCR...', phiScrubbed: false }]);
+        setMessages((prev) => [...prev, { id: Date.now() + 2, type: 'ai', text: t('analyzing_ocr'), phiScrubbed: false }]);
         
         const formData = new FormData();
         if (selectedImageFile) {
@@ -699,7 +699,7 @@ ${text}`], {type: 'text/plain'});
 
           if (!uploadRes.ok) {
             // Attempt to parse JSON error, fallback if CORS blocked it
-            let errText = "Error desconocido procesando el documento en el servidor.";
+            let errText = t('error_unknown');
             try {
                 const errData = await uploadRes.json();
                 errText = errData.detail || errText;

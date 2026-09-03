@@ -43,11 +43,11 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
         const finalRole = (selectedRole === 'doctor' || selectedRole === 'patient') ? selectedRole : (data.role || 'patient');
         onLogin(data.token ? data.token : data.access_token, finalRole);
       } else {
-        const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : 'Error de autenticación');
-        setError(errorMsg || 'Error de autenticación');
+        const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : t("auth_error"));
+        setError(errorMsg || t("auth_error"));
       }
     } catch (e) {
-      setError('Error de conexión con el servidor');
+      setError(t("server_connection_error"));
     }
     setIsLoading(false);
   };
@@ -121,7 +121,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
     shadow: isDoc ? 'shadow-blue-500/30' : 'shadow-glow',
     focusRing: isDoc ? 'focus:border-brand-blue focus:ring-brand-blue/20' : 'focus:border-brand-purple focus:ring-brand-purple/20',
     buttonClass: isDoc ? 'bg-brand-blue hover:bg-blue-600 text-white' : 'bg-brand-purple hover:bg-purple-600 text-white',
-    title: isDoc ? t("doctor_login_title") : 'Portal Paciente',
+    title: isDoc ? t("doctor_login_title") : t("patient_portal_title"),
     Icon: isDoc ? Stethoscope : HeartPulse
   };
 
@@ -151,9 +151,9 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             {theme.title}
           </h1>
           {isRegistering ? (
-            <p className="text-gray-500 mt-2 font-medium">Crea tu cuenta nueva</p>
+            <p className="text-gray-500 mt-2 font-medium">{t("create_new_account")}</p>
           ) : (
-            <p className="text-gray-500 mt-2 font-medium">Bienvenido de nuevo</p>
+            <p className="text-gray-500 mt-2 font-medium">{t("welcome_back")}</p>
           )}
         </div>
 
@@ -169,7 +169,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
 
           <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
             <div>
-              <label className="block text-[11px] font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wider">Usuario / Email</label>
+              <label className="block text-[11px] font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wider">{t("username_email")}</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input 
@@ -178,13 +178,13 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className={`w-full bg-white/80 border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-brand-dark font-medium focus:outline-none focus:ring-2 focus:bg-white transition-all placeholder:text-gray-400 placeholder:font-normal shadow-inner ${theme.focusRing}`}
-                  placeholder={isDoc ? "ej. dr_perez" : "ej. paciente@mail.com"}
+                  placeholder={isDoc ? t("doctor_placeholder") : t("patient_placeholder")}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wider">Contraseña</label>
+              <label className="block text-[11px] font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wider">{t("password")}</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input 
@@ -207,7 +207,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  {isRegistering ? 'Crear Cuenta' : 'Iniciar Sesión'}
+                  {isRegistering ? t("create_account") : t("login")}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -223,8 +223,8 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               className={`text-sm font-semibold transition-colors ${isDoc ? 'text-brand-blue hover:text-blue-700' : 'text-brand-purple hover:text-purple-700'}`}
             >
               {isRegistering 
-                ? '¿Ya tienes cuenta? Inicia Sesión' 
-                : '¿No tienes cuenta? Regístrate aquí'}
+                ? t("already_have_account")
+                : t("no_account_register")}
             </button>
           </div>
         </div>
