@@ -22,7 +22,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
           </button>
           <button onClick={onLogout} className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
             {/* Avatar genérico o foto del doctor */}
-            <img src="/images/ai_doctor_bg.jpg" alt={t("doctor_profile")}" className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
+            <img src="/images/ai_doctor_bg.jpg" alt={t("doctor_profile")} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
           </button>
         </div>
       </div>
@@ -41,7 +41,7 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
            {/* We use the generated doctor image but styled as a background element with gradient fade */}
            <div className="w-full h-full bg-gradient-to-l from-transparent to-base absolute inset-0 z-10"></div>
            <div className="w-full h-full bg-gradient-to-t from-base to-transparent absolute inset-0 z-10"></div>
-           <img src="/images/ai_doctor_bg.jpg" alt={t("ai_doctor")}" className="w-full h-full object-cover rounded-full blur-[1px]" onError={(e) => e.target.style.display = 'none'} />
+           <img src="/images/ai_doctor_bg.jpg" alt={t("ai_doctor")} className="w-full h-full object-cover rounded-full blur-[1px]" onError={(e) => e.target.style.display = 'none'} />
         </div>
       </div>
 
