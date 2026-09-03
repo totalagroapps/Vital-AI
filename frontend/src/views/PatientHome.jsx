@@ -1,6 +1,6 @@
 import PatientHomeDesktop from './PatientHomeDesktop';
 import React from 'react';
-import { Stethoscope, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
+import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
   return (

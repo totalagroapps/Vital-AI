@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Stethoscope, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell } from 'lucide-react';
+import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell } from 'lucide-react';
 
 const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
   return (
