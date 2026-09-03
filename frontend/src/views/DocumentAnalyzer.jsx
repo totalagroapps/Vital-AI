@@ -29,7 +29,7 @@ const SeverityBadge = ({ sev }) => {
 };
 
 const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [step, setStep] = useState('upload'); // 'upload' | 'analyzing' | 'results'

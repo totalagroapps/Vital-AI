@@ -609,7 +609,7 @@ ${text}`], {type: 'text/plain'});
             role: m.type === "user" ? "user" : "assistant",
             content: m.text
           })),
-          language: navigator.language
+          language: language
         })
       });
 
