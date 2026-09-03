@@ -1,8 +1,10 @@
-import PatientHomeDesktop from './PatientHomeDesktop';
 import React from 'react';
+import PatientHomeDesktop from './PatientHomeDesktop';
 import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
+  const { t } = useLanguage();
   return (
     <>
     <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
@@ -32,7 +34,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               </div>
               <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
             </div>
-            <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 tracking-wide">Tu salud, entendida por IA</span>
+            <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 tracking-wide">{t("your_health_understood_by_ai")}</span>
           </div>
           
           <div className="flex items-center gap-3">
@@ -52,12 +54,11 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <div className="relative mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
           <div className="absolute -inset-4 bg-gradient-to-r from-base via-base/80 to-transparent blur-md z-[-1] pointer-events-none"></div>
           <h2 className="relative z-10 text-[22px] leading-tight font-bold text-content-primary mb-1.5">
-            Bienvenido,<br/>
-            <span className="text-brand-purple drop-shadow-sm">estamos aqu&#237; para<br/>
-            cuidar de tu salud.</span>
+            {t("welcome")},<br/>
+            <span className="text-brand-purple drop-shadow-sm">{t("we_are_here_to_care_for_your_health")}</span>
           </h2>
           <p className="relative z-10 text-content-secondary text-[11px] leading-snug max-w-[90%] font-medium">
-            Accede a todas las herramientas de VitalAI para entender, gestionar y mejorar tu bienestar.
+            {t("access_all_tools_of_vitalai_to_understand_manage_and_improve_your_wellbeing")}
           </p>
         </div>
 
@@ -71,9 +72,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
                 <Stethoscope size={12} />
               </div>
             </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Entiende tus s&#237;ntomas</h4>
+            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("understand_your_symptoms")}</h4>
             <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              Describe lo que sientes y obt&#233;n posibles causas, explicaciones y consejos.
+              {t("describe_what_you_feel_and_get_possible_causes_explanations_and_advice")}
             </p>
             <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-purple rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
               <ArrowRight size={12} />
@@ -87,9 +88,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
                 <FileText size={12} />
               </div>
             </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Analiza tus pruebas m&#233;dicas</h4>
+            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("analyze_your_medical_tests")}</h4>
             <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              Sube tus informes, radiograf&#237;as y anal&#237;ticas. La IA los analiza por ti.
+              {t("upload_your_reports_xrays_and_analytics_the_ai_analyzes_them_for_you")}
             </p>
             <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-blue rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
               <ArrowRight size={12} />
@@ -103,9 +104,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
                 <FolderHeart size={12} />
               </div>
             </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Organiza tu historial de salud</h4>
+            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("organize_your_health_history")}</h4>
             <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              Centraliza tu informaci&#243;n m&#233;dica y ten todo siempre a mano.
+              {t("centralize_your_medical_information_and_have_everything_at_hand")}
             </p>
             <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-green rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
               <ArrowRight size={12} />
@@ -119,9 +120,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
                 <BookOpen size={12} />
               </div>
             </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>Biblioteca Médica (RAG)</h4>
+            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("medical_library_rag")}</h4>
             <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              Busca en estudios clínicos y literatura científica con IA.
+              {t("search_in_clinical_studies_and_scientific_literature_with_ai")}
             </p>
             <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-orange rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
               <ArrowRight size={12} />
@@ -136,9 +137,9 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               <Sparkles size={12} />
             </div>
             <div className="flex-1">
-              <h5 className="font-bold text-brand-dark text-[12px] mb-0.5">Pregunta a VitalAI</h5>
+              <h5 className="font-bold text-brand-dark text-[12px] mb-0.5">{t("ask_vitalai")}</h5>
               <p className="text-[11px] text-content-secondary leading-relaxed pr-2">
-                Consulta sobre tu salud o descubre los <span className="text-brand-purple font-medium">&#250;ltimos avances m&#233;dicos y cient&#237;ficos</span> sobre cualquier enfermedad.
+                {t("ask_about_your_health_or_discover_the_latest_medical_and_scientific_advancements_on_any_disease")}
               </p>
             </div>
           </div>
@@ -148,7 +149,7 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               <Search size={12} />
             </div>
             <div className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-8 pr-10 text-[10px] text-content-secondary/70 font-medium shadow-inner">
-              Ej.: &#191;por qu&#233; tengo dolor de cabeza?
+              {t("example_why_do_i_have_a_headache")}
             </div>
             <div 
               className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-105 transition-transform"

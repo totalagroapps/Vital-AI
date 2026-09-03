@@ -4,35 +4,38 @@ import {
   Shield, Settings, Moon, Type, Download, LogOut, ChevronRight
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const PatientMore = ({ onNavigate, onLogout }) => {
+  const { t } = useLanguage();
+
   const handleFeature = (feature) => {
-    alert(`Módulo '${feature}' en desarrollo. ¡Próximamente en VitalAI!`);
+    alert(t('feature_in_development', { feature }));
   };
 
   const sections = [
     {
-      title: 'Mi Salud',
+      title: t('my_health'),
       items: [
-        { icon: <FileText size={20} />, title: 'Bóveda de Exámenes', desc: 'Sube tus resultados médicos', action: () => handleFeature('Bóveda de Exámenes'), color: 'text-blue-500', bg: 'bg-blue-50' },
-        { icon: <Activity size={20} />, title: 'Wearables y Relojes', desc: 'Conecta Apple Health o Google Fit', action: () => handleFeature('Wearables'), color: 'text-green-500', bg: 'bg-green-50' },
-        { icon: <Apple size={20} />, title: 'Nutrición IA', desc: 'Dietas y consejos personalizados', action: () => handleFeature('Nutrición IA'), color: 'text-orange-500', bg: 'bg-orange-50' }
+        { icon: <FileText size={20} />, title: t('exam_vault'), desc: t('upload_medical_results'), action: () => handleFeature(t('exam_vault')), color: 'text-blue-500', bg: 'bg-blue-50' },
+        { icon: <Activity size={20} />, title: t('wearables_and_watches'), desc: t('connect_health_apps'), action: () => handleFeature(t('wearables')), color: 'text-green-500', bg: 'bg-green-50' },
+        { icon: <Apple size={20} />, title: t('nutrition_ai'), desc: t('personalized_diets_advice'), action: () => handleFeature(t('nutrition_ai')), color: 'text-orange-500', bg: 'bg-orange-50' }
       ]
     },
     {
-      title: 'Seguridad y Familia',
+      title: t('security_and_family'),
       items: [
-        { icon: <AlertCircle size={20} />, title: 'Botón S.O.S', desc: 'Configura tus alertas de emergencia', action: () => handleFeature('Botón S.O.S'), color: 'text-red-500', bg: 'bg-red-50' },
-        { icon: <Users size={20} />, title: 'Red Familiar', desc: 'Añade cuidadores a tu cuenta', action: () => handleFeature('Red Familiar'), color: 'text-brand-purple', bg: 'bg-purple-50' },
-        { icon: <Shield size={20} />, title: 'Seguro Médico', desc: 'Gestiona tu póliza y cobertura', action: () => handleFeature('Seguro Médico'), color: 'text-indigo-500', bg: 'bg-indigo-50' }
+        { icon: <AlertCircle size={20} />, title: t('sos_button'), desc: t('configure_emergency_alerts'), action: () => handleFeature(t('sos_button')), color: 'text-red-500', bg: 'bg-red-50' },
+        { icon: <Users size={20} />, title: t('family_network'), desc: t('add_caregivers'), action: () => handleFeature(t('family_network')), color: 'text-brand-purple', bg: 'bg-purple-50' },
+        { icon: <Shield size={20} />, title: t('medical_insurance'), desc: t('manage_policy_coverage'), action: () => handleFeature(t('medical_insurance')), color: 'text-indigo-500', bg: 'bg-indigo-50' }
       ]
     },
     {
-      title: 'Preferencias',
+      title: t('preferences'),
       items: [
-        { icon: <Type size={20} />, title: 'Accesibilidad', desc: 'Tamaño de letra y contraste', action: () => handleFeature('Accesibilidad'), color: 'text-slate-600', bg: 'bg-slate-100' },
-        { icon: <Moon size={20} />, title: 'Modo Oscuro', desc: 'Cambia el tema visual', action: () => handleFeature('Tema Visual'), color: 'text-slate-600', bg: 'bg-slate-100' },
-        { icon: <Download size={20} />, title: 'Mis Datos', desc: 'Descarga o elimina tu información', action: () => handleFeature('Privacidad'), color: 'text-slate-600', bg: 'bg-slate-100' }
+        { icon: <Type size={20} />, title: t('accessibility'), desc: t('font_size_contrast'), action: () => handleFeature(t('accessibility')), color: 'text-slate-600', bg: 'bg-slate-100' },
+        { icon: <Moon size={20} />, title: t('dark_mode'), desc: t('change_visual_theme'), action: () => handleFeature(t('visual_theme')), color: 'text-slate-600', bg: 'bg-slate-100' },
+        { icon: <Download size={20} />, title: t('my_data'), desc: t('download_delete_info'), action: () => handleFeature(t('privacy')), color: 'text-slate-600', bg: 'bg-slate-100' }
       ]
     }
   ];
@@ -42,10 +45,10 @@ const PatientMore = ({ onNavigate, onLogout }) => {
       <div className="relative z-10 px-6 pt-12 flex-1">
         <div className="mb-6">
           <h2 className="text-[28px] leading-tight font-bold text-gray-900 mb-2">
-            Más <span className="text-brand-purple">Opciones</span>
+            {t('more_options')} <span className="text-brand-purple">{t('options')}</span>
           </h2>
           <p className="text-sm text-gray-500">
-            Configura y personaliza tu experiencia en VitalAI.
+            {t('configure_personalize_experience')}
           </p>
         </div>
 
@@ -61,7 +64,7 @@ const PatientMore = ({ onNavigate, onLogout }) => {
                     className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${i !== section.items.length - 1 ? 'border-b border-gray-50' : ''}`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${item.bg} ${item.color}`}>
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${item.bg} ${item.color}`}> 
                         {item.icon}
                       </div>
                       <div className="text-left">
@@ -83,7 +86,7 @@ const PatientMore = ({ onNavigate, onLogout }) => {
               className="w-full bg-white border border-red-100 rounded-3xl p-4 flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 transition-colors font-bold shadow-soft"
             >
               <LogOut size={20} />
-              Cerrar Sesión
+              {t('logout')}
             </button>
           </div>
         </div>

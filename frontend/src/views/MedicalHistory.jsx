@@ -4,6 +4,7 @@ import {
   Droplet, Heart, Scale, Ruler, Pill, AlertTriangle, 
   Calendar, Phone, Save, X, FileText
 } from "lucide-react";
+import { useLanguage } from '../contexts/LanguageContext';
 
 const MedicalHistory = ({
   patientProfile,
@@ -12,6 +13,7 @@ const MedicalHistory = ({
   onBack,
   sessions
 }) => {
+  const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const triageSessions = sessions?.filter(s => s.type === "triage") || [];
 
@@ -34,10 +36,10 @@ const MedicalHistory = ({
     
     let status = "";
     let color = "";
-    if (bmi < 18.5) { status = "Bajo peso"; color = "text-blue-500 bg-blue-50 border-blue-200"; }
-    else if (bmi >= 18.5 && bmi < 24.9) { status = "Saludable"; color = "text-brand-green bg-brand-green/10 border-brand-green/20"; }
-    else if (bmi >= 25 && bmi < 29.9) { status = "Sobrepeso"; color = "text-amber-600 bg-amber-50 border-amber-200"; }
-    else { status = "Obesidad"; color = "text-red-600 bg-red-50 border-red-200"; }
+    if (bmi < 18.5) { status = t("underweight"); color = "text-blue-500 bg-blue-50 border-blue-200"; }
+    else if (bmi >= 18.5 && bmi < 24.9) { status = t("healthy"); color = "text-brand-green bg-brand-green/10 border-brand-green/20"; }
+    else if (bmi >= 25 && bmi < 29.9) { status = t("overweight"); color = "text-amber-600 bg-amber-50 border-amber-200"; }
+    else { status = t("obesity"); color = "text-red-600 bg-red-50 border-red-200"; }
     
     return { value: bmi, status, color };
   }, [patientProfile.weight, patientProfile.height]);
@@ -50,7 +52,7 @@ const MedicalHistory = ({
     const html = `
       <html>
         <head>
-          <title>Pasaporte Médico - ${patientProfile.full_name}</title>
+          <title>${t("medical_passport")} - ${patientProfile.full_name}</title>
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
             .header { text-align: center; border-bottom: 2px solid #8250DF; padding-bottom: 20px; margin-bottom: 30px; }
@@ -68,51 +70,52 @@ const MedicalHistory = ({
         </head>
         <body>
           <div class="header">
-            <h1>VitalAI - Pasaporte Médico</h1>
-            <p>Documento de Información Vital para Emergencias</p>
+            <h1>VitalAI - ${t("medical_passport")}</h1>
+            <p>${t("emergency_info_document")}</p>
           </div>
           
           <div class="grid">
-            <div><div class="label">Nombre del Paciente</div><div class="value">${patientProfile.full_name || 'No especificado'}</div></div>
-            <div><div class="label">Contacto de Emergencia</div><div class="value">${patientProfile.emergency_contact || 'No especificado'}</div></div>
+            <div><div class="label">${t("patient_name")}</div><div class="value">${patientProfile.full_name || t("not_specified")}</div></div>
+            <div><div class="label">${t("emergency_contact")}</div><div class="value">${patientProfile.emergency_contact || t("not_specified")}</div></div>
           </div>
 
-          <h2>Datos Biométricos y Signos Vitales</h2>
+          <h2>${t("biometric_data_vital_signs")}</h2>
           <div class="grid">
-            <div><div class="label">Fecha de Nacimiento</div><div class="value">${patientProfile.date_of_birth || 'No especificada'} (${age} años)</div></div>
-            <div><div class="label">Género</div><div class="value">${patientProfile.gender || 'No especificado'}</div></div>
-            <div><div class="label">Tipo de Sangre</div><div class="value" style="color: #e11d48; font-size: 20px;">${patientProfile.blood_type || 'No especificado'}</div></div>
+            <div><div class="label">${t("date_of_birth")}</div><div class="value">${patientProfile.date_of_birth || t("not_specified")} (${age} ${t("years")})</div></div>
+            <div><div class="label">${t("gender")}</div><div class="value">${patientProfile.gender || t("not_specified")}</div></div>
+            <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 20px;">${patientProfile.blood_type || t("not_specified")}</div></div>
             <div>
-              <div class="label">Índice de Masa Corporal (IMC)</div>
+              <div class="label">${t("bmi_index")}</div>
               <div class="value">
-                ${bmiInfo ? `\${bmiInfo.value} (\${bmiInfo.status})` : 'Datos insuficientes'}
+                ${bmiInfo ? `
+                ${bmiInfo.value} (${bmiInfo.status})` : t("insufficient_data")}
               </div>
             </div>
           </div>
           
-          <h2>Antecedentes Clínicos</h2>
+          <h2>${t("clinical_history")}</h2>
           <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">Alergias Conocidas</div>
+            <div class="label" style="margin-bottom: 8px;">${t("known_allergies")}</div>
             <div>
-              ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+              ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">${a.trim()}</span>`).join('') : t("none_registered")}
             </div>
           </div>
           <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">Enfermedades Crónicas</div>
+            <div class="label" style="margin-bottom: 8px;">${t("chronic_diseases")}</div>
             <div>
-              ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+              ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">${a.trim()}</span>`).join('') : t("none_registered")}
             </div>
           </div>
           <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">Medicamentos Actuales</div>
+            <div class="label" style="margin-bottom: 8px;">${t("current_medications")}</div>
             <div>
-              ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">\${a.trim()}</span>`).join('') : 'Ninguna registrada'}
+              ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">${a.trim()}</span>`).join('') : t("none_registered")}
             </div>
           </div>
           
           <div class="footer">
-            Generado automáticamente por el paciente a través de VitalAI el ${new Date().toLocaleString()}<br/>
-            Este documento es un resumen informativo y debe ser validado por un profesional de la salud.
+            ${t("auto_generated_document")} ${new Date().toLocaleString()}<br/>
+            ${t("informative_summary")}
           </div>
           <script>
             window.onload = function() { window.print(); window.close(); }
@@ -167,25 +170,25 @@ const MedicalHistory = ({
             <ArrowLeft className="text-gray-900" size={24} />
           </button>
           <h2 className="text-lg font-bold text-gray-900">
-            Perfil Médico
+            {t("medical_profile")}
           </h2>
           <button 
             onClick={() => setIsEditing(!isEditing)}
             className={`px-4 py-2 flex items-center gap-2 font-semibold text-sm rounded-xl transition-all shadow-sm ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-brand-purple text-white hover:bg-brand-purple/90'}`}
           >
             {isEditing ? <X size={16} /> : <Edit3 size={16} />}
-            {isEditing ? 'Cancelar' : 'Editar información'}
+            {isEditing ? t("cancel") : t("edit_info")}
           </button>
         </div>
 
         {/* Hero Title */}
         <div className="mb-6">
           <h2 className="text-[30px] leading-tight font-bold text-gray-900 mb-3 max-w-[80%]">
-            Tu información <br />
-            <span className="text-brand-purple">clínica centralizada</span>
+            {t("your_info")} <br />
+            <span className="text-brand-purple">{t("centralized_clinical")}</span>
           </h2>
           <p className="text-sm text-gray-500 max-w-[85%]">
-            Mantén tus datos actualizados para recibir recomendaciones médicas más precisas por parte de VitalAI.
+            {t("keep_data_updated")}
           </p>
         </div>
 
@@ -196,23 +199,23 @@ const MedicalHistory = ({
           <div className="relative z-10">
             <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
               <ShieldCheck size={20} />
-              Identidad Médica
+              {t("medical_identity")}
             </h3>
-            <p className="text-xs text-white/90 font-medium mb-1">{patientProfile.full_name || 'Paciente'}</p>
-            <p className="text-[10px] text-white/70 mb-4">Escanea en emergencias</p>
+            <p className="text-xs text-white/90 font-medium mb-1">{patientProfile.full_name || t("patient")}</p>
+            <p className="text-[10px] text-white/70 mb-4">{t("scan_in_emergencies")}</p>
             
             <div className="flex gap-2">
               <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
                 <Droplet size={14} className="text-white" /> {patientProfile.blood_type || '--'}
               </div>
               <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
-                <Calendar size={14} className="text-white" /> {age} años
+                <Calendar size={14} className="text-white" /> {age} {t("years")}
               </div>
             </div>
             
             <div className="flex gap-2 mt-4">
               <button onClick={handleExportPDF} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-brand-purple hover:bg-gray-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm">
-                <FileText size={16} /> Exportar Pasaporte (PDF)
+                <FileText size={16} /> {t("export_passport_pdf")}
               </button>
             </div>
           </div>
@@ -225,7 +228,7 @@ const MedicalHistory = ({
             ) : (
               <div className="w-20 h-20 bg-black/20 rounded-2xl flex flex-col items-center justify-center text-white/50 border border-white/30 border-dashed p-3">
                 <QrCode size={20} className="mb-1" />
-                <span className="text-[9px] text-center">Faltan datos</span>
+                <span className="text-[9px] text-center">{t("missing_data")}</span>
               </div>
             )}
           </div>
@@ -239,17 +242,17 @@ const MedicalHistory = ({
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex flex-col items-center text-center">
                 <Scale size={20} className="text-purple-500 mb-2" />
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Peso</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t("weight")}</span>
                 <span className="text-lg font-bold text-gray-900 mt-1">{patientProfile.weight || '--'} <span className="text-xs font-medium text-gray-500">kg</span></span>
               </div>
               <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex flex-col items-center text-center">
                 <Ruler size={20} className="text-teal-500 mb-2" />
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Altura</span>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{t("height")}</span>
                 <span className="text-lg font-bold text-gray-900 mt-1">{patientProfile.height || '--'} <span className="text-xs font-medium text-gray-500">cm</span></span>
               </div>
               <div className={`rounded-[24px] p-4 shadow-soft border flex flex-col items-center text-center ${bmiInfo ? bmiInfo.color : 'bg-white border-gray-100'}`}>
                 <Activity size={20} className="mb-2 opacity-80" />
-                <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">IMC</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">{t("bmi")}</span>
                 <span className="text-lg font-bold mt-1">{bmiInfo ? bmiInfo.value : '--'}</span>
                 {bmiInfo && <span className="text-[9px] font-bold mt-0.5">{bmiInfo.status}</span>}
               </div>
@@ -259,23 +262,23 @@ const MedicalHistory = ({
             <div className="bg-white rounded-[28px] shadow-soft border border-gray-100 overflow-hidden">
               <div className="p-5 border-b border-gray-50">
                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
-                  <AlertTriangle size={16} className="text-orange-500" /> Alergias Conocidas
+                  <AlertTriangle size={16} className="text-orange-500" /> {t("known_allergies")}
                 </h3>
-                {renderTags(patientProfile.allergies, <AlertTriangle size={12}/>, "No registra alergias", "bg-orange-50 text-orange-700 border border-orange-100")}
+                {renderTags(patientProfile.allergies, <AlertTriangle size={12}/>, t("no_allergies"), "bg-orange-50 text-orange-700 border border-orange-100")}
               </div>
               
               <div className="p-5 border-b border-gray-50">
                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
-                  <Heart size={16} className="text-red-500" /> Enfermedades Crónicas
+                  <Heart size={16} className="text-red-500" /> {t("chronic_diseases")}
                 </h3>
-                {renderTags(patientProfile.chronic_conditions, <Activity size={12}/>, "No registra enfermedades crónicas", "bg-red-50 text-red-700 border border-red-100")}
+                {renderTags(patientProfile.chronic_conditions, <Activity size={12}/>, t("no_chronic_diseases"), "bg-red-50 text-red-700 border border-red-100")}
               </div>
 
               <div className="p-5">
                 <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
-                  <Pill size={16} className="text-brand-purple" /> Medicación Actual
+                  <Pill size={16} className="text-brand-purple" /> {t("current_medication")}
                 </h3>
-                {renderTags(patientProfile.current_medications, <Pill size={12}/>, "No toma medicamentos actualmente", "bg-brand-purple/10 text-brand-purple border border-brand-purple/20")}
+                {renderTags(patientProfile.current_medications, <Pill size={12}/>, t("no_medications"), "bg-brand-purple/10 text-brand-purple border border-brand-purple/20")}
               </div>
             </div>
 
@@ -283,9 +286,9 @@ const MedicalHistory = ({
             <div className="bg-blue-50 rounded-[24px] p-5 border border-blue-100 flex items-center justify-between">
               <div>
                 <h3 className="text-xs font-bold text-blue-900 mb-1 flex items-center gap-1.5">
-                  <Phone size={14} /> Contacto de Emergencia
+                  <Phone size={14} /> {t("emergency_contact")}
                 </h3>
-                <p className="text-sm font-bold text-blue-700">{patientProfile.emergency_contact || 'No especificado'}</p>
+                <p className="text-sm font-bold text-blue-700">{patientProfile.emergency_contact || t("not_specified")}</p>
               </div>
               {patientProfile.emergency_contact && (
                 <a href={`tel:${patientProfile.emergency_contact.replace(/[^0-9+]/g, '')}`} className="w-10 h-10 bg-blue-200 text-blue-700 rounded-full flex items-center justify-center">
@@ -297,7 +300,7 @@ const MedicalHistory = ({
             {/* Triages Previos */}
             {triageSessions.length > 0 && (
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-gray-900 mb-3 ml-1">Consultas Previas</h3>
+                <h3 className="text-sm font-bold text-gray-900 mb-3 ml-1">{t("previous_consultations")}</h3>
                 <div className="bg-white rounded-[28px] border border-gray-100 shadow-soft overflow-hidden">
                   {triageSessions.slice(0, 5).map((session, idx) => (
                     <div key={session.id} className={`flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors ${idx < (triageSessions.length > 5 ? 4 : triageSessions.length - 1) ? 'border-b border-gray-50' : ''}`}>
@@ -306,7 +309,7 @@ const MedicalHistory = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-gray-900 truncate">
-                          {(session.payload?.title || session.title || 'Consulta de Triage')}
+                          {(session.payload?.title || session.title || t("triage_consultation"))}
                         </p>
                         <p className="text-[10px] text-gray-400 flex items-center gap-1 mt-0.5">
                           <Calendar size={10}/>
@@ -333,36 +336,36 @@ const MedicalHistory = ({
           <div className="bg-white rounded-[32px] p-6 shadow-soft border border-gray-100 animate-fade-in">
             <h3 className="font-bold text-gray-900 mb-5 flex items-center gap-2 text-sm">
               <Edit3 size={18} className="text-brand-purple" />
-              Editar Información
+              {t("edit_information")}
             </h3>
             
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Nombre Completo</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("full_name")}</label>
                   <input type="text" required value={patientProfile.full_name || ""} onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">F. de Nacimiento</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("birth_date")}</label>
                   <input type="date" required value={patientProfile.date_of_birth || ""} onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Género</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("gender")}</label>
                   <select value={patientProfile.gender || ""} onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50">
-                    <option value="">Seleccione</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
+                    <option value="">{t("select")}</option>
+                    <option value="Masculino">{t("male")}</option>
+                    <option value="Femenino">{t("female")}</option>
+                    <option value="Otro">{t("other")}</option>
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Sangre</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("blood")}</label>
                   <select value={patientProfile.blood_type || ""} onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50 px-1">
                     <option value="">--</option>
                     <option value="A+">A+</option><option value="A-">A-</option>
@@ -372,34 +375,34 @@ const MedicalHistory = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Alt (cm)</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("height_cm")}</label>
                   <input type="number" value={patientProfile.height || ""} onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="175" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 mb-1">Peso (kg)</label>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("weight_kg")}</label>
                   <input type="number" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="70" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 mb-1">Alergias Conocidas (separadas por coma)</label>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("known_allergies_comma")}</label>
                 <textarea value={patientProfile.allergies || ""} onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Penicilina, polen..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 mb-1">Enfermedades Crónicas (separadas por coma)</label>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("chronic_diseases_comma")}</label>
                 <textarea value={patientProfile.chronic_conditions || ""} onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Hipertensión, asma..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 mb-1">Medicamentos Actuales (separados por coma)</label>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("current_medications_comma")}</label>
                 <textarea value={patientProfile.current_medications || ""} onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" rows={2} placeholder="Losartán 50mg, Ibuprofeno..."></textarea>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 mb-1">Contacto de Emergencia</label>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("emergency_contact")}</label>
                 <input type="text" value={patientProfile.emergency_contact || ""} onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="Nombre y teléfono" />
               </div>
 
               <button type="submit" className="w-full bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-4 rounded-2xl shadow-glow transition-transform active:scale-95 mt-4 flex items-center justify-center gap-2">
-                <Save size={18} /> Guardar Perfil
+                <Save size={18} /> {t("save_profile")}
               </button>
             </form>
           </div>
@@ -411,5 +414,3 @@ const MedicalHistory = ({
 };
 
 export default MedicalHistory;
-
-

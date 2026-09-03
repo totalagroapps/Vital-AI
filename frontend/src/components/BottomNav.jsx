@@ -1,7 +1,9 @@
 import React from 'react';
 import { Home, Users, Calendar, MoreHorizontal, Sparkles } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
+  const { t } = useLanguage();
   const activeColor = isDoctor ? 'text-brand-blue' : 'text-brand-purple';
   const activeFill = isDoctor ? 'fill-brand-blue/20' : 'fill-brand-purple/20';
   const glowShadow = isDoctor ? 'shadow-blue-500/50' : 'shadow-glow';
@@ -16,7 +18,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           className={`flex flex-col items-center gap-1 ${activeTab === 'home' ? activeColor : 'text-gray-400'}`}
         >
           <Home size={24} className={activeTab === 'home' ? activeFill : ''} />
-          <span className="text-[10px] font-medium">Inicio</span>
+          <span className="text-[10px] font-medium">{t("home")}</span>
         </button>
 
         {isDoctor ? (
@@ -25,7 +27,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={`flex flex-col items-center gap-1 ${activeTab === 'patients' ? activeColor : 'text-gray-400'}`}
           >
             <Users size={24} className={activeTab === 'patients' ? activeFill : ''} />
-            <span className="text-[10px] font-medium">Pacientes</span>
+            <span className="text-[10px] font-medium">{t("patients")}</span>
           </button>
         ) : (
           <button 
@@ -33,7 +35,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={`flex flex-col items-center gap-1 ${activeTab === 'treatments' ? activeColor : 'text-gray-400'}`}
           >
             <Users size={24} className={activeTab === 'treatments' ? activeFill : ''} />
-            <span className="text-[10px] font-medium">Pastillas</span>
+            <span className="text-[10px] font-medium">{t("treatments")}</span>
           </button>
         )}
 
@@ -52,7 +54,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={`flex flex-col items-center gap-1 ${activeTab === 'agenda' ? activeColor : 'text-gray-400'}`}
           >
             <Calendar size={24} className={activeTab === 'agenda' ? activeFill : ''} />
-            <span className="text-[10px] font-medium">Agenda</span>
+            <span className="text-[10px] font-medium">{t("agenda")}</span>
           </button>
         ) : (
           <button 
@@ -60,7 +62,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={`flex flex-col items-center gap-1 ${activeTab === 'history' ? activeColor : 'text-gray-400'}`}
           >
             <Calendar size={24} className={activeTab === 'history' ? activeFill : ''} />
-            <span className="text-[10px] font-medium">Historial</span>
+            <span className="text-[10px] font-medium">{t("history")}</span>
           </button>
         )}
 
@@ -69,7 +71,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           className={`flex flex-col items-center gap-1 ${activeTab === 'more' ? activeColor : 'text-gray-400'}`}
         >
           <MoreHorizontal size={24} />
-          <span className="text-[10px] font-medium">Más</span>
+          <span className="text-[10px] font-medium">{t("more")}</span>
         </button>
 
       </div>

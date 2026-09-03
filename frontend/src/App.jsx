@@ -539,7 +539,7 @@ ${text}`], {type: 'text/plain'});
         const data = await res.json();
         setTriageSessionId(data.session_id);
         setIsTriageClosed(false);
-        setMessages([{ id: Date.now(), type: 'ai', text: 'Hola. Soy tu Asistente de Triaje Médico. Por favor, descríbeme tus síntomas actuales para comenzar la evaluación clínica.', phiScrubbed: false }]);
+        setMessages([{ id: Date.now(), type: 'ai', text: t('triage_welcome'), phiScrubbed: false }]);
       } else {
         throw new Error("Fallo en el servidor");
       }

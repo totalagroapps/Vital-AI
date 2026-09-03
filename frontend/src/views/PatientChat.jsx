@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useLanguage } from '../contexts/LanguageContext';
 
 const PatientChat = ({
   messages,
@@ -19,12 +20,13 @@ const PatientChat = ({
   onClearAttachment
 , patientProfile, sessions}) => {
     const [isListening, setIsListening] = useState(false);
+    const { t } = useLanguage();
 
   const toggleListening = () => {
     if (isListening) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Tu navegador no soporta reconocimiento de voz.');
+      alert(t('browser_not_support_voice_recognition'));
       return;
     }
     const recognition = new SpeechRecognition();
@@ -63,7 +65,7 @@ const PatientChat = ({
           </h2>
           <span className="text-[10px] text-brand-green font-medium flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-            En línea
+            {t('online')}
           </span>
         </div>
         <div className="w-10 h-10 flex items-center justify-center">
@@ -78,7 +80,7 @@ const PatientChat = ({
             <div className="w-16 h-16 bg-brand-purple/10 rounded-full flex items-center justify-center mb-4">
               <Sparkles className="text-brand-purple" size={32} />
             </div>
-            <p className="text-sm font-medium text-gray-600">¿En qué te puedo ayudar hoy?</p>
+            <p className="text-sm font-medium text-gray-600">{t('how_can_i_help')}</p>
           </div>
         )}
 
@@ -93,13 +95,13 @@ const PatientChat = ({
               }`}>
                 {/* Imágen adjunta si existe */}
                 {msg.image && (
-                  <img src={msg.image} alt="Adjunto" className="w-full max-w-[200px] h-auto rounded-lg mb-2 object-cover border border-white/20" />
+                  <img src={msg.image} alt={t('attachment')} className="w-full max-w-[200px] h-auto rounded-lg mb-2 object-cover border border-white/20" />
                 )}
                 {/* PDF adjunto si existe */}
                 {msg.pdf && (
                   <div className="flex items-center gap-2 bg-black/10 p-2 rounded-lg mb-2">
                     <FileText size={16} />
-                    <span className="text-xs font-medium truncate">Documento adjunto</span>
+                    <span className="text-xs font-medium truncate">{t('attached_document')}</span>
                   </div>
                 )}
                 
@@ -122,7 +124,7 @@ const PatientChat = ({
           <div className="flex justify-start">
             <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm p-4 shadow-sm flex items-center gap-2 text-brand-purple">
               <Loader2 className="animate-spin" size={20} />
-              <span className="text-xs font-medium">Pensando...</span>
+              <span className="text-xs font-medium">{t('thinking')}</span>
             </div>
           </div>
         )}
@@ -136,7 +138,7 @@ const PatientChat = ({
         {(selectedImagePreview || selectedPdfName) && (
           <div className="mb-3 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
             {selectedImagePreview ? (
-              <img src={selectedImagePreview} alt="Preview" className="w-10 h-10 rounded object-cover" />
+              <img src={selectedImagePreview} alt={t('preview')} className="w-10 h-10 rounded object-cover" />
             ) : (
               <div className="w-10 h-10 rounded bg-brand-green/10 text-brand-green flex items-center justify-center">
                 <FileText size={20} />
@@ -144,7 +146,7 @@ const PatientChat = ({
             )}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-gray-700 truncate">
-                {selectedPdfName || "Imagen seleccionada"}
+                {selectedPdfName || t('selected_image')}
               </p>
             </div>
             <button onClick={onClearAttachment} className="p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200 transition-colors">
@@ -158,11 +160,11 @@ const PatientChat = ({
           <div className="flex items-center gap-1 mb-1">
             <button type="button" onClick={() => imageInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
               <ImageIcon size={18} />
-              <span>Subir Imagen</span>
+              <span>{t('upload_image')}</span>
             </button>
             <button type="button" onClick={() => pdfInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
               <FileText size={18} />
-              <span>Subir PDF</span>
+              <span>{t('upload_pdf')}</span>
             </button>
           </div>
 
@@ -171,7 +173,7 @@ const PatientChat = ({
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Escribe tu mensaje..."
+              placeholder={t('type_your_message')}
               className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 text-gray-800 placeholder-gray-400 w-full outline-none"
               disabled={isLoading}
             />
@@ -208,7 +210,7 @@ const PatientChat = ({
         <div className="hidden lg:flex lg:flex-col w-80 bg-white shadow-xl z-20 overflow-y-auto shrink-0">
            <div className="p-5 border-b border-gray-100 bg-slate-50/50">
              <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2 mb-4">
-               <Shield size={14} className="text-brand-purple" /> Contexto Clínico Activo
+               <Shield size={14} className="text-brand-purple" /> {t('active_clinical_context')}
              </h3>
              
              <div className="flex items-center gap-3 mb-4">
@@ -216,49 +218,49 @@ const PatientChat = ({
                  {patientProfile.full_name?.charAt(0) || 'P'}
                </div>
                <div>
-                 <p className="font-bold text-sm text-gray-900 truncate max-w-[180px]">{patientProfile.full_name || 'Paciente'}</p>
+                 <p className="font-bold text-sm text-gray-900 truncate max-w-[180px]">{patientProfile.full_name || t('patient')}</p>
                  <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> Identidad Verificada
+                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> {t('identity_verified')}
                  </p>
                </div>
              </div>
 
              <div className="grid grid-cols-2 gap-2 text-xs">
                <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                 <p className="text-gray-400 mb-0.5 text-[10px]">Tipo de Sangre</p>
+                 <p className="text-gray-400 mb-0.5 text-[10px]">{t('blood_type')}</p>
                  <p className="font-bold text-red-500">{patientProfile.blood_type || '--'}</p>
                </div>
                <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                 <p className="text-gray-400 mb-0.5 text-[10px]">Edad</p>
-                 <p className="font-bold text-gray-800">{patientProfile.date_of_birth ? new Date().getFullYear() - new Date(patientProfile.date_of_birth).getFullYear() : '--'} años</p>
+                 <p className="text-gray-400 mb-0.5 text-[10px]">{t('age')}</p>
+                 <p className="font-bold text-gray-800">{patientProfile.date_of_birth ? new Date().getFullYear() - new Date(patientProfile.date_of_birth).getFullYear() : '--'} {t('years')}</p>
                </div>
              </div>
            </div>
 
            <div className="p-5 flex-1 flex flex-col gap-4">
               <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><AlertCircle size={14} className="text-brand-orange"/> Alergias Registradas</h4>
-                <p className="text-xs text-gray-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100">{patientProfile.allergies || 'Ninguna registrada'}</p>
+                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><AlertCircle size={14} className="text-brand-orange"/> {t('registered_allergies')}</h4>
+                <p className="text-xs text-gray-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100">{patientProfile.allergies || t('none_registered')}</p>
               </div>
               
               <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Activity size={14} className="text-blue-500"/> Enf. Crónicas</h4>
-                <p className="text-xs text-gray-600 bg-blue-50 p-2.5 rounded-lg border border-blue-100">{patientProfile.chronic_conditions || 'Ninguna registrada'}</p>
+                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Activity size={14} className="text-blue-500"/> {t('chronic_conditions')}</h4>
+                <p className="text-xs text-gray-600 bg-blue-50 p-2.5 rounded-lg border border-blue-100">{patientProfile.chronic_conditions || t('none_registered')}</p>
               </div>
               
               <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Stethoscope size={14} className="text-brand-green"/> Medicación Actual</h4>
-                <p className="text-xs text-gray-600 bg-green-50 p-2.5 rounded-lg border border-green-100">{patientProfile.current_medications || 'Ninguna registrada'}</p>
+                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Stethoscope size={14} className="text-brand-green"/> {t('current_medication')}</h4>
+                <p className="text-xs text-gray-600 bg-green-50 p-2.5 rounded-lg border border-green-100">{patientProfile.current_medications || t('none_registered')}</p>
               </div>
            </div>
            
            {sessions && sessions.length > 0 && (
              <div className="p-5 border-t border-gray-100">
-               <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">Historial Reciente</h4>
+               <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">{t('recent_history')}</h4>
                <div className="space-y-2">
                  {sessions.slice(0, 2).map((s, i) => (
                    <div key={i} className="text-[10px] p-2 bg-slate-50 rounded border border-slate-100 text-slate-600 truncate">
-                     {new Date(s.created_at).toLocaleDateString()} - Triaje Médico
+                     {new Date(s.created_at).toLocaleDateString()} - {t('medical_triage')}
                    </div>
                  ))}
                </div>

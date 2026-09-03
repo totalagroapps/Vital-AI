@@ -1,9 +1,11 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft, MoreHorizontal, Info, Mic, Lock, ArrowRight } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const TriageWizard = ({ onBack, onStartChat }) => {
   const [symptoms, setSymptoms] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const { t } = useLanguage();
 
   React.useEffect(() => {
     const shouldAutoStart = localStorage.getItem('autoStartMic') === 'true';
@@ -20,7 +22,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Tu navegador no soporta reconocimiento de voz.');
+      alert(t('browser_voice_recognition_not_supported'));
       return;
     }
 
@@ -59,7 +61,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
           <button onClick={onBack} className="w-10 h-10 flex items-center justify-center">
             <ArrowLeft className="text-gray-900" size={24} />
           </button>
-          <h2 className="text-lg font-bold text-gray-900">Entiende tus síntomas</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('understand_your_symptoms')}</h2>
           <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
             <MoreHorizontal className="text-gray-600" size={20} />
           </button>
@@ -71,19 +73,19 @@ const TriageWizard = ({ onBack, onStartChat }) => {
           
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-brand-purple text-white flex items-center justify-center text-[10px] font-bold">1</div>
-            <span className="text-[10px] font-semibold text-brand-purple">Describe</span>
+            <span className="text-[10px] font-semibold text-brand-purple">{t('describe')}</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center text-[10px] font-bold">2</div>
-            <span className="text-[10px] text-gray-400">Preguntas</span>
+            <span className="text-[10px] text-gray-400">{t('questions')}</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center text-[10px] font-bold">3</div>
-            <span className="text-[10px] text-gray-400">Análisis IA</span>
+            <span className="text-[10px] text-gray-400">{t('ai_analysis')}</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center text-[10px] font-bold">4</div>
-            <span className="text-[10px] text-gray-400">Recomendaciones</span>
+            <span className="text-[10px] text-gray-400">{t('recommendations')}</span>
           </div>
         </div>
 
@@ -91,12 +93,12 @@ const TriageWizard = ({ onBack, onStartChat }) => {
         <div className="mb-6 relative">
           <div className="absolute right-0 top-0 bg-brand-purple text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</div>
           <h2 className="text-[32px] leading-tight font-bold text-gray-900 mb-4 max-w-[80%]">
-            Hola, estoy aquí <br />
-            para <span className="text-brand-purple">entender cómo</span> <br />
-            <span className="text-brand-purple">puedo ayudarte.</span>
+            {t('hello_im_here')} <br />
+            {t('to_understand_how')} <br />
+            {t('i_can_help_you')}
           </h2>
           <p className="text-sm text-gray-600 max-w-[70%]">
-            Cuéntame qué te ocurre con el mayor detalle posible. Puedes escribir o usar la voz.
+            {t('tell_me_what_happens')}
           </p>
         </div>
 
@@ -106,19 +108,19 @@ const TriageWizard = ({ onBack, onStartChat }) => {
             <Info size={16} />
           </div>
           <p className="text-[11px] text-gray-600 leading-relaxed">
-            Cuanta más información nos des, mejor será el análisis y las recomendaciones que pueda ofrecerte.
+            {t('more_info_better_analysis')}
           </p>
         </div>
 
         {/* Input Area */}
         <div className="bg-white rounded-[32px] p-6 shadow-soft border border-gray-100 mb-6 relative z-20">
-          <h3 className="font-bold text-gray-900 mb-4">Cuéntame qué síntomas tienes</h3>
+          <h3 className="font-bold text-gray-900 mb-4">{t('tell_me_your_symptoms')}</h3>
           
           <div className="relative mb-4">
             <textarea 
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
-              placeholder="Empieza a escribir aquí..."
+              placeholder={t('start_typing_here')}
               className="w-full h-32 resize-none outline-none text-sm text-gray-700 placeholder-gray-400"
             />
             <div className="absolute bottom-2 right-2 text-[10px] text-gray-400">
@@ -129,16 +131,16 @@ const TriageWizard = ({ onBack, onStartChat }) => {
           {/* Quick Tags */}
           <div className="flex flex-wrap gap-2 mb-8">
             <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
-              <CalendarIcon /> Desde cuándo
+              <CalendarIcon /> {t('since_when')}
             </button>
             <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
-              <ActivityIcon /> Intensidad
+              <ActivityIcon /> {t('intensity')}
             </button>
             <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
-              <MapPinIcon /> Dónde lo sientes
+              <MapPinIcon /> {t('where_do_you_feel_it')}
             </button>
             <button className="text-[11px] text-gray-500 font-medium bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
-              + Añadir más
+              + {t('add_more')}
             </button>
           </div>
 
@@ -164,10 +166,10 @@ const TriageWizard = ({ onBack, onStartChat }) => {
                 </div>
               </div>
               <p className="font-bold text-gray-900 text-sm">
-                {isListening ? 'Escuchando atentamente...' : 'Pulsa el micrófono para hablar'}
+                {isListening ? t('listening_closely') : t('press_mic_to_talk')}
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                {isListening ? 'Habla ahora, estoy procesando tu voz' : 'Te escucho...'}
+                {isListening ? t('speak_now_processing') : t('im_listening')}
               </p>
           </div>
         </div>
@@ -178,8 +180,8 @@ const TriageWizard = ({ onBack, onStartChat }) => {
             <Lock size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 text-sm">VitalAI te escucha y te entiende</h4>
-            <p className="text-[11px] text-gray-500 mt-0.5">Nuestra IA avanzada hará las preguntas adecuadas para comprender mejor tu caso.</p>
+            <h4 className="font-bold text-gray-900 text-sm">{t('vitalai_listens_understands')}</h4>
+            <p className="text-[11px] text-gray-500 mt-0.5">{t('our_ai_will_ask_questions')}</p>
           </div>
         </div>
       </div>
@@ -191,7 +193,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
           disabled={!symptoms.trim()}
           className="w-full bg-gradient-to-r from-brand-purple to-brand-purpleLight text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 disabled:shadow-none transition-all"
         >
-          Continuar <ArrowRight size={20} />
+          {t('continue')} <ArrowRight size={20} />
         </button>
       </div>
     </div>

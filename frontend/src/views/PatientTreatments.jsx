@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
 import { useRef } from 'react';
 import BottomNav from '../components/BottomNav';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
+  const { t } = useLanguage();
   const [medications, setMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
@@ -54,17 +56,17 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
             time_of_day: med.time_of_day || ''
           });
           if (data.medications.length > 1) {
-            alert(`Se extrajeron ${data.medications.length} medicamentos. Se ha auto-completado el primero. Guarda este y repite para los demás.`);
+            alert(t("multiple_medications_extracted"));
           }
         } else {
-          alert('No se encontraron medicamentos en el documento.');
+          alert(t("no_medications_found"));
         }
       } else {
-        alert('Error al analizar el documento.');
+        alert(t("document_analysis_error"));
       }
     } catch (err) {
       console.error(err);
-      alert('Error de conexión.');
+      alert(t("connection_error"));
     }
     setIsExtracting(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
@@ -107,7 +109,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Eliminar este tratamiento?")) return;
+    if (!window.confirm(t("confirm_delete_treatment"))) return;
     try {
       await fetch(`${apiUrl}/api/medications/${id}`, { method: 'DELETE', headers: authHeaders });
       fetchMedications();
@@ -137,17 +139,17 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
             <ArrowLeft className="text-gray-900" size={24} />
           </button>
           <h2 className="text-lg font-bold text-gray-900">
-            Tratamientos
+            {t("treatments")}
           </h2>
           <div className="w-10"></div>
         </div>
 
         <div className="mb-6">
           <h2 className="text-[28px] leading-tight font-bold text-gray-900 mb-2">
-            Mis <span className="text-brand-purple">Medicamentos</span>
+            {t("my_medications")} <span className="text-brand-purple">{t("medications")}</span>
           </h2>
           <p className="text-sm text-gray-500">
-            Marca los medicamentos que ya tomaste hoy.
+            {t("mark_medications_taken")}
           </p>
         </div>
 
@@ -156,8 +158,8 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-lg mb-1">Progreso Diario</h3>
-              <p className="text-xs text-white/80">Has tomado {medications.filter(m => m.taken_today).length} de {medications.length} hoy</p>
+              <h3 className="font-bold text-lg mb-1">{t("daily_progress")}</h3>
+              <p className="text-xs text-white/80">{t("taken_today", { taken: medications.filter(m => m.taken_today).length, total: medications.length })}</p>
             </div>
             <div className="w-14 h-14 rounded-full border-4 border-white/30 flex items-center justify-center">
               <span className="font-bold text-lg">
@@ -170,16 +172,16 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
         {/* List */}
         <div className="space-y-4 mb-8">
           {isLoading ? (
-            <p className="text-center text-gray-500 text-sm py-4">Cargando...</p>
+            <p className="text-center text-gray-500 text-sm py-4">{t("loading")}</p>
           ) : medications.length === 0 ? (
             <div className="bg-white rounded-3xl p-8 text-center shadow-soft border border-gray-100">
               <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Pill className="text-gray-400 w-8 h-8" />
               </div>
-              <h3 className="font-bold text-gray-900 mb-2">Sin tratamientos activos</h3>
-              <p className="text-xs text-gray-500 mb-6">Añade tu medicación para recibir recordatorios y llevar el control.</p>
+              <h3 className="font-bold text-gray-900 mb-2">{t("no_active_treatments")}</h3>
+              <p className="text-xs text-gray-500 mb-6">{t("add_medication_prompt")}</p>
               <button onClick={() => setIsAdding(true)} className="bg-brand-purple text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-glow flex items-center gap-2 mx-auto">
-                <Plus size={16} /> Añadir Medicamento
+                <Plus size={16} /> {t("add_medication")}
               </button>
             </div>
           ) : (
@@ -194,7 +196,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
                   </button>
                   <div className="flex-1 min-w-0">
                     <h4 className={`font-bold truncate text-lg ${med.taken_today ? 'text-gray-900 line-through opacity-70' : 'text-gray-900'}`}>{med.medication_name}</h4>
-                    <p className="text-[11px] text-gray-500 font-medium">{med.dosage || 'Dosis no especificada'}</p>
+                    <p className="text-[11px] text-gray-500 font-medium">{med.dosage || t("unspecified_dosage")}</p>
                     <div className="flex items-center gap-3 mt-1.5">
                       {med.frequency && <span className="text-[10px] bg-brand-purple/10 text-brand-purple px-2 py-0.5 rounded-lg font-bold uppercase">{med.frequency}</span>}
                       {med.time_of_day && <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium"><Clock size={10}/> {med.time_of_day}</span>}
@@ -209,7 +211,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
               {!isAdding && (
                 <button onClick={() => setIsAdding(true)} className="w-full bg-white border border-gray-200 border-dashed rounded-3xl py-4 flex flex-col items-center justify-center text-gray-400 hover:text-brand-purple hover:border-brand-purple transition-colors mt-6">
                   <Plus size={24} className="mb-2" />
-                  <span className="text-xs font-bold uppercase tracking-wider">Añadir Otro</span>
+                  <span className="text-xs font-bold uppercase tracking-wider">{t("add_another")}</span>
                 </button>
               )}
             </>
@@ -219,10 +221,10 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
         {/* Add Form */}
         {isAdding && (
           <form onSubmit={handleAddMedication} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
-            <h3 className="font-bold text-gray-900 mb-4">Nuevo Medicamento</h3>
+            <h3 className="font-bold text-gray-900 mb-4">{t("new_medication")}</h3>
             
             <div className="mb-6 bg-brand-blue/5 border border-brand-blue/20 rounded-2xl p-4 text-center">
-              <p className="text-xs text-brand-blue mb-3 font-medium">¿Tienes una receta médica?</p>
+              <p className="text-xs text-brand-blue mb-3 font-medium">{t("have_prescription")}</p>
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" />
               <button 
                 type="button" 
@@ -231,34 +233,34 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
                 className="w-full bg-brand-blue text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
-                {isExtracting ? 'Analizando con IA...' : 'Extraer desde Receta (PDF/Foto)'}
+                {isExtracting ? t("analyzing_with_ai") : t("extract_from_prescription")}
               </button>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Nombre</label>
-                <input required type="text" value={newMed.medication_name} onChange={e => setNewMed({...newMed, medication_name: e.target.value})} placeholder="Ej: Paracetamol" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("name")}</label>
+                <input required type="text" value={newMed.medication_name} onChange={e => setNewMed({...newMed, medication_name: e.target.value})} placeholder={t("example_name")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Dosis</label>
-                  <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder="Ej: 500mg" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("dosage")}</label>
+                  <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder={t("example_dosage")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Horario</label>
-                  <input type="text" value={newMed.time_of_day} onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} placeholder="Ej: 08:00 y 20:00" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("schedule")}</label>
+                  <input type="text" value={newMed.time_of_day} onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} placeholder={t("example_schedule")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Frecuencia</label>
-                <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder="Ej: Cada 12 horas" className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("frequency")}</label>
+                <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder={t("example_frequency")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
               </div>
             </div>
             
             <div className="flex gap-3 mt-6">
-              <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold">Cancelar</button>
-              <button type="submit" className="flex-1 py-3 bg-brand-purple text-white rounded-xl text-sm font-bold shadow-glow">Guardar</button>
+              <button type="button" onClick={() => setIsAdding(false)} className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl text-sm font-bold">{t("cancel")}</button>
+              <button type="submit" className="flex-1 py-3 bg-brand-purple text-white rounded-xl text-sm font-bold shadow-glow">{t("save")}</button>
             </div>
           </form>
         )}
