@@ -1,5 +1,8 @@
 export const translations = {
   es: {
+    portal_select: "Selecciona tu portal de acceso",
+    patient_desc: "Accede a tu historial clínico, resultados y triaje inteligente.",
+    doctor_desc: "Gestiona tus pacientes, revisa expedientes y consulta a la IA.",
     welcome_to: "Bienvenido a",
     medical_assistant: "Asistente Clínico IA",
     i_am_patient: "Soy Paciente",
@@ -49,6 +52,9 @@ export const translations = {
     ask_copilot: "Pregunte a la IA sobre este paciente..."
   },
   en: {
+    portal_select: "Select your access portal",
+    patient_desc: "Access your clinical history, results, and intelligent triage.",
+    doctor_desc: "Manage your patients, review records, and consult the AI.",
     welcome_to: "Welcome to",
     medical_assistant: "AI Clinical Assistant",
     i_am_patient: "I am a Patient",
@@ -98,6 +104,9 @@ export const translations = {
     ask_copilot: "Ask the AI about this patient..."
   },
   fr: {
+    portal_select: "Sélectionnez votre portail d'accès",
+    patient_desc: "Accédez à votre historique clinique, vos résultats et votre triage intelligent.",
+    doctor_desc: "Gérez vos patients, examinez les dossiers et consultez l'IA.",
     welcome_to: "Bienvenue à",
     medical_assistant: "Assistant Clinique IA",
     i_am_patient: "Je suis Patient",
@@ -147,6 +156,9 @@ export const translations = {
     ask_copilot: "Posez une question à l'IA sur ce patient..."
   },
   ar: {
+    portal_select: "حدد بوابة الوصول الخاصة بك",
+    patient_desc: "الوصول إلى السجل السريري الخاص بك، والنتائج، والفرز الذكي.",
+    doctor_desc: "إدارة مرضاك، مراجعة السجلات، واستشارة الذكاء الاصطناعي.",
     welcome_to: "مرحبًا بك في",
     medical_assistant: "المساعد السريري بالذكاء الاصطناعي",
     i_am_patient: "أنا مريض",

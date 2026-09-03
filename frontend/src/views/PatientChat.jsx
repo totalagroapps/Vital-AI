@@ -156,13 +156,13 @@ const PatientChat = ({
         <form onSubmit={handleSend} className="flex items-end gap-2">
           
           <div className="flex items-center gap-1 mb-1">
-            <button type="button" onClick={() => imageInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm">
+            <button type="button" onClick={() => imageInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
               <ImageIcon size={18} />
-              <span className="hidden sm:inline">Subir Imagen</span>
+              <span>Subir Imagen</span>
             </button>
-            <button type="button" onClick={() => pdfInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm">
+            <button type="button" onClick={() => pdfInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
               <FileText size={18} />
-              <span className="hidden sm:inline">Subir PDF</span>
+              <span>Subir PDF</span>
             </button>
           </div>
 
@@ -188,7 +188,8 @@ const PatientChat = ({
           ) : (
             <button 
               type="button" 
-              className="w-11 h-11 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 mb-0.5 transition-colors hover:bg-gray-200"
+              onClick={toggleListening}
+              className={`w-11 h-11 rounded-full flex items-center justify-center mb-0.5 transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
             >
               <Mic size={22} />
             </button>

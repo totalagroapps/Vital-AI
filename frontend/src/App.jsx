@@ -1521,7 +1521,7 @@ ${text}`], {type: 'text/plain'});
               }`}
             >
               <ImageIcon className="w-5 h-5" />
-              <span className="hidden sm:inline">Subir Imagen</span>
+              <span className="whitespace-nowrap">Subir Imagen</span>
             </button>
 
             <button
@@ -1535,7 +1535,7 @@ ${text}`], {type: 'text/plain'});
               }`}
             >
               <FileText className="w-5 h-5" />
-              <span className="hidden sm:inline">Subir PDF</span>
+              <span className="whitespace-nowrap">Subir PDF</span>
             </button>
 
             {/* Textarea */}

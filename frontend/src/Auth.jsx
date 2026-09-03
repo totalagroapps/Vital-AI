@@ -73,7 +73,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark tracking-tight flex items-center gap-2">
               <span className="text-brand-blue">VITAL</span> AI
             </h1>
-            <p className="text-gray-500 mt-3 font-medium text-lg">Selecciona tu portal de acceso</p>
+            <p className="text-gray-500 mt-3 font-medium text-lg">{t("portal_select")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl px-4">
@@ -88,7 +88,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               </div>
               <h2 className="text-2xl font-bold text-brand-dark mb-3">{t("i_am_patient")}</h2>
               <p className="text-gray-500 text-sm text-center max-w-[250px] leading-relaxed">
-                Accede a tu historial clínico, resultados y triaje inteligente.
+                {t("patient_desc")}
               </p>
             </button>
 
@@ -103,7 +103,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               </div>
               <h2 className="text-2xl font-bold text-brand-dark mb-3">{t("i_am_doctor")}</h2>
               <p className="text-gray-500 text-sm text-center max-w-[250px] leading-relaxed">
-                Gestiona tus pacientes, revisa expedientes y consulta a la IA.
+                {t("doctor_desc")}
               </p>
             </button>
           </div>
