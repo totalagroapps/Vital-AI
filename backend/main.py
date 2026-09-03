@@ -121,6 +121,11 @@ if (R2_ACCOUNT_ID and R2_ACCESS_KEY_ID):
 
 app = FastAPI(title='VitalAI V2 - Team API', version='2.0')
 
+@app.get('/health')
+def health_check():
+    return {'status': 'healthy'}
+
+
 
 app.add_middleware(CORSMiddleware, allow_origins=(os.getenv('ALLOWED_ORIGINS', '').split(',') if os.getenv('ALLOWED_ORIGINS') else ['*']), allow_credentials=False, allow_methods=['*'], allow_headers=['*'])
 
