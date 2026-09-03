@@ -1513,26 +1513,28 @@ ${text}`], {type: 'text/plain'});
               type="button"
               onClick={() => imageInputRef.current?.click()}
               title="Adjuntar Radiografía o Imagen Médica"
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`px-3 py-2.5 rounded-xl border flex items-center gap-2 text-sm font-semibold transition-all ${
                 selectedImage 
                   ? 'bg-brand/20 border-brand/30 text-brand' 
                   : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-brand hover:border-slate-300'
               }`}
             >
               <ImageIcon className="w-5 h-5" />
+              <span className="hidden sm:inline">Subir Imagen</span>
             </button>
 
             <button
               type="button"
               onClick={() => pdfInputRef.current?.click()}
               title="Adjuntar Informe o Examen PDF"
-              className={`p-2.5 rounded-xl border transition-all ${
+              className={`px-3 py-2.5 rounded-xl border flex items-center gap-2 text-sm font-semibold transition-all ${
                 selectedPdf 
                   ? 'bg-indigo-500/20 border-indigo-500 text-indigo-300' 
                   : 'bg-white border-slate-200 shadow-sm text-slate-600 hover:text-indigo-400 hover:border-slate-300'
               }`}
             >
               <FileText className="w-5 h-5" />
+              <span className="hidden sm:inline">Subir PDF</span>
             </button>
 
             {/* Textarea */}
