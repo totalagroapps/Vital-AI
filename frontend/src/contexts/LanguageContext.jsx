@@ -6,7 +6,7 @@ const LanguageContext = createContext();
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
     const savedLang = localStorage.getItem('media_hub_lang');
-    if (savedLang && (savedLang === 'es' || savedLang === 'en')) {
+    if (savedLang && ['es', 'en', 'fr', 'ar'].includes(savedLang)) {
       return savedLang;
     }
     const browserLang = navigator.language || navigator.userLanguage;

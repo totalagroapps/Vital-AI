@@ -62,6 +62,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('language', language);
 
       const res = await fetch(`${apiUrl}/api/documents/upload`, {
         method: 'POST',

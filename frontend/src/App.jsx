@@ -243,6 +243,7 @@ export default function App() {
     
     const formData = new FormData();
     formData.append('file', docFile);
+    formData.append('language', language);
     formData.append('document_type', docType);
     if (docNotes) formData.append('notes', docNotes);
 
