@@ -64,7 +64,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         <strong>Fecha:</strong> ${new Date(t.created_at).toLocaleString()}<br/>
         <strong>Categoría:</strong> ${t.category || 'N/A'}<br/>
         <strong>Reporte Final:</strong><br/>
-        <div style="white-space: pre-wrap;">${t.final_report || 'Sin reporte completo.'}</div>
+        <div style="white-space: pre-wrap;">${t.final_report || t('no_complete_report')}</div>
       </div>
     `).join('');
 
@@ -86,13 +86,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           
           <h2>Ficha del Paciente</h2>
           <div class="grid">
-            <div><div class="label">Nombre</div><div class="value">${patientDetail.profile.full_name}</div></div>
-            <div><div class="label">Nacimiento</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
-            <div><div class="label">Género</div><div class="value">${patientDetail.profile.gender}</div></div>
-            <div><div class="label">Tipo de Sangre</div><div class="value">${patientDetail.profile.blood_type}</div></div>
-            <div><div class="label">Alergias</div><div class="value">${patientDetail.profile.allergies || 'Ninguna'}</div></div>
-            <div><div class="label">Condiciones Crónicas</div><div class="value">${patientDetail.profile.chronic_conditions || 'Ninguna'}</div></div>
-            <div><div class="label">Medicamentos</div><div class="value">${patientDetail.profile.current_medications || 'Ninguna'}</div></div>
+            <div><div class="label">{t('name')}</div><div class="value">${patientDetail.profile.full_name}</div></div>
+            <div><div class="label">{t('date_of_birth')}</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
+            <div><div class="label">{t('gender')}</div><div class="value">${patientDetail.profile.gender}</div></div>
+            <div><div class="label">{t('blood_type_label')}</div><div class="value">${patientDetail.profile.blood_type}</div></div>
+            <div><div class="label">{t('allergies')}</div><div class="value">${patientDetail.profile.allergies || t('none_female')}</div></div>
+            <div><div class="label">{t('chronic_conditions_label')}</div><div class="value">${patientDetail.profile.chronic_conditions || t('none_female')}</div></div>
+            <div><div class="label">{t('medications')}</div><div class="value">${patientDetail.profile.current_medications || t('none_female')}</div></div>
           </div>
           
           <h2>Historial de Triajes Clínicos</h2>
@@ -211,7 +211,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
 
 
-        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mt-auto mb-2" title="Volver al Inicio">
+        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mt-auto mb-2" title={t('back_to_home')}>
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={onLogout}
@@ -284,9 +284,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{patientDetail.profile.full_name || selectedPatient.full_name}</h1>
                   <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail.profile.date_of_birth || 'Sin fecha de nac.'}</span>
+                    <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail.profile.date_of_birth || t('no_birth_date')}</span>
                     &bull;
-                    <span>{patientDetail.profile.gender || 'No especificado'}</span>
+                    <span>{patientDetail.profile.gender || t('not_specified')}</span>
                   </p>
                 </div>
                 <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
@@ -327,21 +327,21 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   </h3>
                   <div className="space-y-4 relative z-10">
                     <div>
-                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Alergias</p>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('allergies')}</p>
                       <p className="text-sm text-gray-800 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg inline-block font-medium">
-                        {patientDetail.profile.allergies || 'Ninguna registrada'}
+                        {patientDetail.profile.allergies || t('none_registered_female')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Enfermedades Crónicas</p>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t("chronic_conditions_label")}</p>
                       <p className="text-sm text-gray-800 bg-gray-50 px-3 py-1.5 rounded-lg inline-block border border-gray-100">
-                        {patientDetail.profile.chronic_conditions || 'Ninguna registrada'}
+                        {patientDetail.profile.chronic_conditions || t('none_registered_female')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Medicamentos Actuales</p>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t("medications")}</p>
                       <p className="text-sm text-gray-800 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg inline-block font-medium">
-                        {patientDetail.profile.current_medications || 'Ninguna registrada'}
+                        {patientDetail.profile.current_medications || t('none_registered_female')}
                       </p>
                     </div>
                   </div>
@@ -373,11 +373,11 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               t.status === 'closed_green' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-600'
                             }`}>
-                              {(t.status || '').replace('closed_', '') || 'En curso'}
+                              {(t.status || '').replace('closed_', '') || t('in_progress')}
                             </span>
                           </div>
                           <div className="prose prose-sm max-w-none prose-p:leading-relaxed text-gray-700 prose-strong:text-gray-900">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.final_report || 'Triaje incompleto.'}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.final_report || t('incomplete_triage')}</ReactMarkdown>
                           </div>
                         </div>
                       ))
@@ -435,7 +435,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               <User className="w-10 h-10 text-gray-300" />
             </div>
             <p className="text-lg font-medium text-gray-600">{t("select_patient")}</p>
-            <p className="text-sm mt-2">Seleccione un paciente de la lista para ver su expediente.</p>
+            <p className="text-sm mt-2">{t('select_patient_desc')}</p>
           </div>
         )}
       </div>
@@ -448,14 +448,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             <Sparkles className="w-4 h-4 text-brand-teal" />
             Copiloto Clínico IA
           </h2>
-          <p className="text-[10px] text-gray-400 mt-1 relative z-10">Análisis y soporte para el expediente activo</p>
+          <p className="text-[10px] text-gray-400 mt-1 relative z-10">{t('copilot_support_desc')}</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
           {!selectedPatient ? (
             <div className="h-full flex flex-col items-center justify-center opacity-50">
               <Bot className="w-12 h-12 text-gray-400 mb-4" />
-              <div className="text-center text-sm font-medium text-gray-600">Esperando expediente...</div>
+              <div className="text-center text-sm font-medium text-gray-600">{t('waiting_for_record')}</div>
             </div>
           ) : (
             copilotMessages.map((msg, i) => (
@@ -476,7 +476,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             <div className="flex justify-start">
               <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm p-4 shadow-sm flex items-center gap-2 text-brand-teal">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-xs font-medium">Analizando historial...</span>
+                <span className="text-xs font-medium">{t('analyzing_history')}</span>
               </div>
             </div>
           )}
@@ -489,7 +489,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
-              placeholder="Pregunte sobre el historial de este paciente..."
+              placeholder={t('ask_about_history')}
               className="w-full bg-gray-100 border-none rounded-2xl py-3 pl-4 pr-12 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-teal disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
               rows="1"
               onKeyDown={(e) => {
