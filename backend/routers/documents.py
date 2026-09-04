@@ -307,7 +307,30 @@ async def extract_medication(file: UploadFile=File(...), user_id: str=Depends(ge
             extracted_text = ''
             for page in doc:
                 extracted_text += (page.get_text('text') + '\n')
-            resp = (await openai_client.chat.completions.create(model='gpt-4o', messages=[{'role': 'system', 'content': system_prompt}, {'role': 'user', 'content': extracted_text}], response_format={'type': 'json_object'}))
+            if not extracted_text.strip() and len(doc) > 0:
+                # Scanned PDF without selectable text: render first page as image for GPT-4o Vision
+                import base64
+                pix = doc[0].get_pixmap(dpi=150)
+                img_bytes = pix.tobytes("png")
+                img_b64 = base64.b64encode(img_bytes).decode('utf-8')
+                resp = (await openai_client.chat.completions.create(
+                    model='gpt-4o',
+                    messages=[
+                        {'role': 'system', 'content': system_prompt},
+                        {'role': 'user', 'content': [{'type': 'image_url', 'image_url': {'url': f'data:image/png;base64,{img_b64}'}}]}
+                    ],
+                    response_format={'type': 'json_object'},
+                    max_tokens=1000
+                ))
+            else:
+                resp = (await openai_client.chat.completions.create(
+                    model='gpt-4o',
+                    messages=[
+                        {'role': 'system', 'content': system_prompt},
+                        {'role': 'user', 'content': extracted_text}
+                    ],
+                    response_format={'type': 'json_object'}
+                ))
         elif (file_ext in ['jpg', 'jpeg', 'png', 'webp']):
             import base64
             from PIL import Image

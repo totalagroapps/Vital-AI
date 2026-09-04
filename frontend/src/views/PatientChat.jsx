@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useLanguage } from '../contexts/LanguageContext';
@@ -18,24 +18,36 @@ const PatientChat = ({
   handlePdfChange,
   selectedImagePreview,
   selectedPdfName,
-  onClearAttachment
-, patientProfile, sessions}) => {
-    const [isListening, setIsListening] = useState(false);
-    const { t } = useLanguage();
-    const internalImageRef = useRef(null);
-    const internalPdfRef = useRef(null);
-    const actualImageRef = imageInputRef || internalImageRef;
-    const actualPdfRef = pdfInputRef || internalPdfRef;
+  onClearAttachment,
+  patientProfile,
+  sessions,
+  loadSession,
+  startNewSession,
+  currentSessionId
+}) => {
+  const [isListening, setIsListening] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const { t, language } = useLanguage();
+  const internalImageRef = useRef(null);
+  const internalPdfRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const actualImageRef = imageInputRef || internalImageRef;
+  const actualPdfRef = pdfInputRef || internalPdfRef;
 
   const toggleListening = () => {
-    if (isListening) return;
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert(t('browser_not_support_voice_recognition'));
+      alert(t('browser_not_support_voice_recognition') || 'Tu navegador no soporta reconocimiento de voz.');
       return;
     }
     const recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
+    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
+    recognition.lang = langCodeMap[language] || 'es-ES';
     recognition.continuous = false;
     recognition.interimResults = false;
     
@@ -44,9 +56,15 @@ const PatientChat = ({
       const transcript = event.results[0][0].transcript;
       setInputMessage((prev) => (prev ? prev + ' ' : '') + transcript);
     };
-    recognition.onerror = () => setIsListening(false);
+    recognition.onerror = (event) => {
+      setIsListening(false);
+      if (event.error === 'not-allowed') {
+        alert(t('microphone_permission_denied') || 'Permiso de micrófono denegado en tu navegador.');
+      }
+    };
     recognition.onend = () => setIsListening(false);
     
+    recognitionRef.current = recognition;
     try { recognition.start(); } catch (e) { setIsListening(false); }
   };
 
@@ -61,9 +79,32 @@ const PatientChat = ({
       <div className="flex-1 flex flex-col h-full relative border-r border-gray-200">
       {/* Header */}
       <div className="flex-none bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between z-20 shadow-sm">
-        <button onClick={onBack} className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-          <ArrowLeft className="text-gray-700" size={24} />
-        </button>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+            <ArrowLeft className="text-gray-700" size={22} />
+          </button>
+          <button 
+            type="button" 
+            onClick={startNewSession} 
+            className="px-2.5 py-1.5 rounded-xl bg-brand-purple/10 hover:bg-brand-purple/20 text-brand-purple font-bold text-xs flex items-center gap-1 transition-all active:scale-95 border border-brand-purple/20"
+            title={t('new_consultation') || 'Nueva Consulta'}
+          >
+            <Plus size={14} />
+            <span className="hidden sm:inline">{t('new_consultation') || 'Nueva'}</span>
+          </button>
+          {sessions && sessions.length > 0 && (
+            <button 
+              type="button" 
+              onClick={() => setShowHistoryModal(true)} 
+              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1 transition-all active:scale-95 border border-slate-200 lg:hidden"
+              title="Historial de consultas"
+            >
+              <History size={14} />
+              <span>{sessions.length}</span>
+            </button>
+          )}
+        </div>
+
         <div className="flex flex-col items-center">
           <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1">
             VITAL <span className="text-brand-purple">AI</span>
@@ -73,6 +114,7 @@ const PatientChat = ({
             {t('online')}
           </span>
         </div>
+
         <div className="flex items-center justify-end">
           <LanguageSelector />
         </div>
@@ -271,16 +313,84 @@ const PatientChat = ({
            
            {sessions && sessions.length > 0 && (
              <div className="p-5 border-t border-gray-100">
-               <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">{t('recent_history')}</h4>
-               <div className="space-y-2">
-                 {sessions.slice(0, 2).map((s, i) => (
-                   <div key={i} className="text-[10px] p-2 bg-slate-50 rounded border border-slate-100 text-slate-600 truncate">
-                     {new Date(s.created_at).toLocaleDateString()} - {t('medical_triage')}
-                   </div>
+               <div className="flex items-center justify-between mb-3">
+                 <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{t('recent_history') || 'Consultas Recientes'}</h4>
+                 <button 
+                   type="button" 
+                   onClick={startNewSession} 
+                   className="text-[10px] font-bold text-brand-purple hover:underline"
+                 >
+                   + {t('new_consultation') || 'Nueva'}
+                 </button>
+               </div>
+               <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                 {sessions.map((s) => (
+                   <button 
+                     key={s.id} 
+                     type="button"
+                     onClick={() => loadSession && loadSession(s.id)}
+                     className={`w-full text-left p-2.5 rounded-xl border transition-all truncate block ${
+                       s.id === currentSessionId 
+                         ? 'border-brand-purple bg-brand-purple/10 text-brand-purple font-bold shadow-xs' 
+                         : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                     }`}
+                     title={s.title || 'Consulta'}
+                   >
+                     <div className="text-xs font-semibold truncate">{s.title || 'Consulta'}</div>
+                     <div className="text-[9px] text-gray-400 mt-0.5">{new Date(s.created_at).toLocaleDateString()}</div>
+                   </button>
                  ))}
                </div>
              </div>
            )}
+        </div>
+      )}
+
+      {/* Mobile History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
+                <History size={16} className="text-brand-purple" />
+                <span>{t('recent_history') || 'Consultas Previas'}</span>
+              </h3>
+              <button onClick={() => setShowHistoryModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500">
+                <X size={18} />
+              </button>
+            </div>
+
+            <button 
+              type="button" 
+              onClick={() => { startNewSession && startNewSession(); setShowHistoryModal(false); }}
+              className="w-full py-2.5 px-4 mb-4 rounded-xl bg-brand-purple text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
+            >
+              <Plus size={16} />
+              <span>+ {t('new_consultation') || 'Nueva Consulta'}</span>
+            </button>
+
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+              {sessions && sessions.length > 0 ? (
+                sessions.map((s) => (
+                  <button 
+                    key={s.id} 
+                    type="button"
+                    onClick={() => { loadSession && loadSession(s.id); setShowHistoryModal(false); }}
+                    className={`w-full text-left p-3 rounded-xl border transition-all truncate block ${
+                      s.id === currentSessionId 
+                        ? 'border-brand-purple bg-brand-purple/10 text-brand-purple font-bold' 
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <div className="text-xs font-semibold truncate">{s.title || 'Consulta'}</div>
+                    <div className="text-[10px] text-gray-400 mt-1">{new Date(s.created_at).toLocaleString()}</div>
+                  </button>
+                ))
+              ) : (
+                <p className="text-xs text-center text-gray-400 py-6">{t('no_previous_consultations') || 'No hay consultas previas.'}</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

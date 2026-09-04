@@ -1,10 +1,56 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const DoctorHome = ({ onNavigate, onLogout }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  const toggleListening = () => {
+    if (isListening) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(t('browser_not_support_voice_recognition') || 'Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
+    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery((prev) => (prev ? prev + ' ' : '') + transcript);
+    };
+    recognition.onerror = (e) => {
+      setIsListening(false);
+      if (e.error === 'not-allowed') {
+        alert(t('microphone_permission_denied') || 'Permiso de micrófono denegado en tu navegador.');
+      }
+    };
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    try { recognition.start(); } catch (e) { setIsListening(false); }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      onNavigate('patients');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-base font-sans overflow-x-hidden relative pb-24">
       {/* HEADER */}
@@ -15,29 +61,50 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
           </h1>
           <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">{t("doctors")}</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-md flex items-center justify-center text-gray-700 shadow-sm border border-gray-100 relative">
-            <Bell size={20} />
+        <div className="flex items-center gap-2.5">
+          <LanguageSelector />
+          <button className="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md flex items-center justify-center text-gray-700 shadow-sm border border-gray-100 relative">
+            <Bell size={18} />
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></span>
           </button>
-          <button onClick={onLogout} className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm">
-            {/* Avatar genérico o foto del doctor */}
+          <button onClick={onLogout} className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-brand-blue/30 shadow-sm" title={t("logout") || "Cerrar Sesión"}>
             <img src="/images/ai_doctor_bg.jpg" alt={t("doctor_profile")} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
           </button>
         </div>
       </div>
 
       {/* HERO SECTION */}
-      <div className="px-5 pt-2 pb-6 relative z-10">
-        <h2 className="text-3xl font-extrabold text-brand-dark leading-tight mb-3">
-          {t("your_medical_practice")},<br/>{t("enhanced_by_ai")}<br/><span className="text-brand-blue">{t("artificial_intelligence")}</span>
-        </h2>
-        <p className="text-sm text-gray-600 max-w-[280px] leading-relaxed">
-          {t("save_time_make_better_decisions")}
-        </p>
-        
+      <div className="px-5 pt-2 pb-6 relative z-10 flex flex-col gap-4">
+        <div>
+          <h2 className="text-3xl font-extrabold text-brand-dark leading-tight mb-2">
+            {t("your_medical_practice")},<br/>{t("enhanced_by_ai")}<br/><span className="text-brand-blue">{t("artificial_intelligence")}</span>
+          </h2>
+          <p className="text-sm text-gray-600 max-w-[320px] leading-relaxed">
+            {t("save_time_make_better_decisions")}
+          </p>
+        </div>
 
+        {/* Prominent Doctor Profile Card */}
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 shadow-soft border border-gray-100 flex items-center gap-4">
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-md shrink-0 border-2 border-brand-blue/30 bg-slate-100">
+            <img 
+              src="/images/ai_doctor_bg.jpg" 
+              alt={t("doctor_profile")} 
+              className="w-full h-full object-cover" 
+              onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doctor&background=0D8ABC&color=fff'; }} 
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold mb-1 border border-emerald-200/50">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              {t("online") || "En Línea"}
+            </div>
+            <h3 className="font-extrabold text-gray-900 text-sm truncate">{t("doctor") || "Médico Especialista"}</h3>
+            <p className="text-[11px] text-gray-500 truncate">{t("verified_specialist") || "Especialista Clínico Verificado"}</p>
+          </div>
+        </div>
       </div>
+
 
       {/* MAIN GRID */}
       <div className="px-5 space-y-4 relative z-20">
@@ -127,19 +194,26 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
           </h3>
           <p className="text-xs text-gray-400 mb-4 relative z-10">{t("search_patient_or_ask_vitalai")}</p>
           
-          <div className="relative z-10 flex items-center bg-brand-dark border border-white/10 rounded-2xl p-1 shadow-inner">
-            <div className="pl-3 pr-2 text-gray-400">
+          <form onSubmit={handleSearchSubmit} className="relative z-10 flex items-center bg-brand-dark border border-white/10 rounded-2xl p-1 shadow-inner">
+            <button type="submit" className="pl-3 pr-2 text-gray-400 hover:text-white transition-colors" title="Buscar">
               <Search size={18} />
-            </div>
+            </button>
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("example_search_patient")}
               className="flex-1 bg-transparent border-none text-xs text-white placeholder-gray-500 focus:ring-0 py-3"
             />
-            <button onClick={() => alert(t("voice_assistant_in_development"))} className="w-10 h-10 rounded-full bg-brand-purple text-white flex items-center justify-center shadow-glow transition-transform hover:scale-105">
+            <button 
+              type="button" 
+              onClick={toggleListening} 
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-brand-purple text-white shadow-glow hover:scale-105'}`}
+              title={isListening ? "Detener grabación" : "Dictar búsqueda o consulta"}
+            >
               <Mic size={18} />
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Stats Row */}

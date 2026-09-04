@@ -173,11 +173,13 @@ const MedicalHistory = ({
             {t("medical_profile")}
           </h2>
           <button 
+            type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className={`px-4 py-2 flex items-center gap-2 font-semibold text-sm rounded-xl transition-all shadow-sm ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-brand-purple text-white hover:bg-brand-purple/90'}`}
+            className={`px-4 py-2.5 flex items-center gap-2 font-bold text-xs md:text-sm rounded-xl transition-all shadow-md active:scale-95 ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-brand-purple text-white hover:bg-brand-purple/90 border border-brand-purple'}`}
+            title={isEditing ? (t("cancel") || "Cancelar") : (t("edit_information") || "Editar Información")}
           >
             {isEditing ? <X size={16} /> : <Edit3 size={16} />}
-            {isEditing ? t("cancel") : t("edit_info")}
+            <span>{isEditing ? (t("cancel") || "Cancelar") : (t("edit_information") || "Editar Información")}</span>
           </button>
         </div>
 
@@ -257,6 +259,16 @@ const MedicalHistory = ({
                 {bmiInfo && <span className="text-[9px] font-bold mt-0.5">{bmiInfo.status}</span>}
               </div>
             </div>
+
+            {/* Direct Edit Button */}
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="w-full py-3.5 px-4 bg-brand-purple/10 hover:bg-brand-purple/20 active:scale-[0.99] text-brand-purple font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-brand-purple/30 transition-all shadow-sm"
+            >
+              <Edit3 size={16} className="text-brand-purple" />
+              <span>{t("edit_information") || "Editar Información"}</span>
+            </button>
 
             {/* Clinical Data */}
             <div className="bg-white rounded-[28px] shadow-soft border border-gray-100 overflow-hidden">

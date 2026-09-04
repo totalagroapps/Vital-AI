@@ -1,4 +1,4 @@
-﻿import os
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 import bcrypt
@@ -52,3 +52,14 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
         raise credentials_exception
     
     return user_id
+
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+async def get_optional_current_user_id(token: Optional[str] = Depends(oauth2_scheme_optional)) -> Optional[str]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload.get("sub")
+    except Exception:
+        return None

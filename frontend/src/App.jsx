@@ -609,11 +609,18 @@ ${text}`], {type: 'text/plain'});
             role: m.type === "user" ? "user" : "assistant",
             content: m.text
           })),
-          language: language
+          language: language,
+          session_id: currentSessionId
         })
       });
 
       if (!response.ok) throw new Error("Error en red");
+
+      const returnedSessionId = response.headers.get("X-Session-ID");
+      if (returnedSessionId && returnedSessionId !== currentSessionId) {
+        setCurrentSessionId(returnedSessionId);
+        fetchSessions();
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -632,9 +639,10 @@ ${text}`], {type: 'text/plain'});
           return updated;
         });
       }
+      fetchSessions();
     } catch (e) {
       console.error(e);
-      setMessages(prev => [...prev, { type: "ai", text: "Error de conexin." }]);
+      setMessages(prev => [...prev, { type: "ai", text: "Error de conexión." }]);
     } finally {
       setIsLoading(false);
     }
@@ -1045,6 +1053,9 @@ ${text}`], {type: 'text/plain'});
             setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
             setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
           }}
+          loadSession={loadSession}
+          startNewSession={startNewSession}
+          currentSessionId={currentSessionId}
         />
         {GlobalBottomNav}
       </>
@@ -1073,6 +1084,9 @@ ${text}`], {type: 'text/plain'});
             setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
             setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
           }}
+          loadSession={loadSession}
+          startNewSession={startNewSession}
+          currentSessionId={currentSessionId}
         />
         {GlobalBottomNav}
       </>

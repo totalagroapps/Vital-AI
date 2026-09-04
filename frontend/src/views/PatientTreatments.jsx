@@ -51,6 +51,7 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
         const data = await res.json();
         if (data.medications && data.medications.length > 0) {
           const med = data.medications[0];
+          setIsAdding(true);
           setNewMed({
             medication_name: med.medication_name || '',
             dosage: med.dosage || '',
@@ -183,6 +184,28 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
           </div>
         </div>
 
+        {/* Quick Prescription Upload Card */}
+        <div className="mb-8 bg-gradient-to-r from-brand-blue/10 to-brand-purple/10 border border-brand-blue/20 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-brand-blue/20 flex items-center justify-center text-brand-blue shrink-0">
+              <UploadCloud size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-900 text-sm">{t("have_prescription") || "¿Tienes una receta médica?"}</h4>
+              <p className="text-xs text-gray-500">{t("extract_from_prescription_desc") || "Sube tu receta en PDF o foto para cargar la medicación automáticamente."}</p>
+            </div>
+          </div>
+          <button 
+            type="button" 
+            onClick={() => fileInputRef.current?.click()} 
+            disabled={isExtracting}
+            className="w-full sm:w-auto px-5 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 shrink-0 disabled:opacity-50"
+          >
+            {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+            <span>{isExtracting ? (t("analyzing_with_ai") || "Analizando...") : (t("upload_prescription_pdf") || "Subir PDF / Imagen")}</span>
+          </button>
+        </div>
+
         {/* List */}
         <div className="space-y-4 mb-8">
           {isLoading ? (
@@ -245,9 +268,9 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" />
               <button 
                 type="button" 
-                onClick={() => fileInputRef.current.click()} 
+                onClick={() => fileInputRef.current?.click()} 
                 disabled={isExtracting}
-                className="w-full bg-brand-blue text-white py-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="w-full bg-brand-blue text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
                 {isExtracting ? t("analyzing_with_ai") : t("extract_from_prescription")}
@@ -257,21 +280,59 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
             <div className="space-y-4">
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("name")}</label>
-                <input required type="text" value={newMed.medication_name} onChange={e => setNewMed({...newMed, medication_name: e.target.value})} placeholder={t("example_name")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <input 
+                  required 
+                  type="text" 
+                  value={newMed.medication_name} 
+                  onChange={e => setNewMed({...newMed, medication_name: e.target.value})} 
+                  placeholder={t("example_name")} 
+                  style={{ color: '#0f172a', backgroundColor: '#f8fafc' }}
+                  className="w-full bg-slate-50 !text-slate-900 placeholder:text-slate-400 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple font-semibold" 
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("dosage")}</label>
-                  <input type="text" value={newMed.dosage} onChange={e => setNewMed({...newMed, dosage: e.target.value})} placeholder={t("example_dosage")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>{t("dosage")}</span>
+                    {!newMed.dosage && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                  </label>
+                  <input 
+                    type="text" 
+                    value={newMed.dosage} 
+                    onChange={e => setNewMed({...newMed, dosage: e.target.value})} 
+                    placeholder={t("example_dosage")} 
+                    style={{ color: '#0f172a', backgroundColor: '#f8fafc' }}
+                    className="w-full bg-slate-50 !text-slate-900 placeholder:text-slate-400 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple font-semibold" 
+                  />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("schedule")}</label>
-                  <input type="text" value={newMed.time_of_day} onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} placeholder={t("example_schedule")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>{t("schedule")}</span>
+                    {!newMed.time_of_day && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                  </label>
+                  <input 
+                    type="text" 
+                    value={newMed.time_of_day} 
+                    onChange={e => setNewMed({...newMed, time_of_day: e.target.value})} 
+                    placeholder={t("example_schedule")} 
+                    style={{ color: '#0f172a', backgroundColor: '#f8fafc' }}
+                    className="w-full bg-slate-50 !text-slate-900 placeholder:text-slate-400 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple font-semibold" 
+                  />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">{t("frequency")}</label>
-                <input type="text" value={newMed.frequency} onChange={e => setNewMed({...newMed, frequency: e.target.value})} placeholder={t("example_frequency")} className="w-full bg-gray-50 text-slate-900 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple" />
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>{t("frequency")}</span>
+                  {!newMed.frequency && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                </label>
+                <input 
+                  type="text" 
+                  value={newMed.frequency} 
+                  onChange={e => setNewMed({...newMed, frequency: e.target.value})} 
+                  placeholder={t("example_frequency")} 
+                  style={{ color: '#0f172a', backgroundColor: '#f8fafc' }}
+                  className="w-full bg-slate-50 !text-slate-900 placeholder:text-slate-400 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-purple/20 focus:border-brand-purple font-semibold" 
+                />
               </div>
             </div>
             

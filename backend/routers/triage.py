@@ -155,9 +155,14 @@ router = APIRouter()
 async def triage_chat(request: TriageRequest):
     ollama_host = os.getenv('OLLAMA_HOST', 'https://molecular-playable-saga.ngrok-free.dev')
     client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
-    lang_map = {'es': 'Spanish', 'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
-    target_lang = lang_map.get(request.language, 'Spanish')
-    lang_instruction = f'\n\nCRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your responses to {target_lang}.'
+    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
+    target_lang = lang_map.get(request.language, 'Spanish (Español)')
+    lang_instruction = f'''
+
+CRITICAL LANGUAGE DIRECTIVE:
+You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
+DO NOT respond in English or Spanish if {target_lang} is French or Arabic.
+Formulate all medical responses, questions, and guidance directly in {target_lang}.'''
     messages_payload = [{'role': 'system', 'content': TRIAGE_SYSTEM_PROMPT + lang_instruction}]
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})
@@ -218,7 +223,10 @@ async def send_triage_message(session_id: int, request: TriageRequest, db: Async
     target_lang = (lang_map.get(request.language, request.language) if request.language else 'Spanish (Español)')
     lang_instruction = f'''
 
-CRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your medical triage responses to {target_lang}. Do NOT use Spanish unless {target_lang} is Spanish.'''
+CRITICAL LANGUAGE DIRECTIVE:
+You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
+DO NOT respond in English or Spanish if {target_lang} is French or Arabic.
+Formulate all medical responses, questions, and guidance directly in {target_lang}.'''
     messages_payload = ([{'role': 'system', 'content': (TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction)}] + sanitized_messages)
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 

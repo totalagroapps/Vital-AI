@@ -9,20 +9,34 @@ export const LanguageProvider = ({ children }) => {
     if (savedLang && ['es', 'en', 'fr', 'ar'].includes(savedLang)) {
       return savedLang;
     }
-    const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-    if (browserLang.startsWith('en')) return 'en';
-    if (browserLang.startsWith('fr')) return 'fr';
-    if (browserLang.startsWith('ar')) return 'ar';
+    const navLangs = (navigator.languages && navigator.languages.length > 0)
+      ? navigator.languages
+      : [navigator.language || navigator.userLanguage || ''];
+    for (const l of navLangs) {
+      const code = (l || '').toLowerCase();
+      if (code.startsWith('en')) return 'en';
+      if (code.startsWith('fr')) return 'fr';
+      if (code.startsWith('ar')) return 'ar';
+      if (code.startsWith('es')) return 'es';
+    }
     return 'es';
   });
 
   useEffect(() => {
     localStorage.setItem('media_hub_lang', language);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = language;
+      document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    }
   }, [language]);
 
   const changeLanguage = (lang) => {
     setLanguage(lang);
     localStorage.setItem('media_hub_lang', lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    }
   };
 
   const t = (key, params) => {

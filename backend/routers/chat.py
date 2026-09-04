@@ -183,6 +183,29 @@ async def get_chat_session(session_id: str, db: AsyncSession=Depends(get_db), us
 
 
 
+@router.get('/api/sessions/{session_id}/messages')
+async def get_session_messages(session_id: str, db: AsyncSession=Depends(get_db), user_id: str=Depends(get_current_user_id)):
+    from sqlalchemy.future import select
+    result = (await db.execute(select(models.ChatSession).where((models.ChatSession.id == session_id), (models.ChatSession.user_id == user_id))))
+    session = result.scalars().first()
+    if not session:
+        raise HTTPException(status_code=404, detail='Sesión no encontrada')
+    msg_res = (await db.execute(select(models.ChatMessage).where((models.ChatMessage.session_id == session_id)).order_by(models.ChatMessage.created_at.asc())))
+    messages = msg_res.scalars().all()
+    return [
+        {
+            'id': str(m.id),
+            'type': 'user' if m.role == 'user' else 'ai',
+            'role': m.role,
+            'text': m.content,
+            'content': m.content,
+            'created_at': m.created_at.isoformat() if hasattr(m, 'created_at') and m.created_at else None
+        }
+        for m in messages
+    ]
+
+
+
 @router.post('/api/chat/{session_id}/message')
 async def send_standard_chat_message(session_id: str, request: StandardChatRequest, db: AsyncSession=Depends(get_db), user_id: str=Depends(get_current_user_id)):
     from sqlalchemy.future import select
@@ -194,11 +217,14 @@ async def send_standard_chat_message(session_id: str, request: StandardChatReque
     user_db_msg = models.ChatMessage(session_id=session_id, role='user', content=user_msg_content)
     db.add(user_db_msg)
     system_prompt = "Eres un simulador clínico experto y un analizador de datos médicos. IMPORTANTE: Si el usuario te pide analizar una imagen o radiografía, TEN EN CUENTA que la imagen YA FUE analizada por tu módulo de visión. Los hallazgos visuales exactos se encuentran al final del mensaje del usuario bajo la etiqueta '[Contexto del Documento Adjunto: ...]'. Tú DEBES leer esos hallazgos y responderle al usuario basándote estrictamente en ellos, asumiendo el rol de que TÚ mismo viste la imagen. NUNCA digas 'no puedo analizar imágenes', porque ya tienes la extracción en texto. Da tus observaciones médicas de forma directa y profesional."
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
+    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
     target_lang = lang_map.get(request.language, 'Spanish (Español)')
     lang_instruction = f'''
 
-CRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}.'''
+CRITICAL LANGUAGE DIRECTIVE:
+You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
+DO NOT speak or reply in English or Spanish unless {target_lang} is English or Spanish.
+Translate and compose all clinical findings, greetings, and advice directly in {target_lang}.'''
     messages_payload = [{'role': 'system', 'content': (system_prompt + lang_instruction)}]
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})
@@ -230,19 +256,30 @@ CRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {targ
 
 
 @router.post('/api/chat/general')
-async def general_chat(request: TriageRequest, db: AsyncSession=Depends(get_db)):
-    '\n    Chat general libre de contexto mdico histrico. \n    Ideal para consultas rpidas de nutricin, fitness, dudas generales de salud.\n    '
+async def general_chat(
+    request: TriageRequest, 
+    db: AsyncSession=Depends(get_db),
+    user_id: Optional[str]=Depends(security.get_optional_current_user_id)
+):
+    '''
+    Chat general con persistencia de historial y soporte multilingüe estricto.
+    '''
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     last_msg = (request.messages[(- 1)].content.lower() if request.messages else '')
     symptom_keywords = ['me duele', 'siento', 'tengo fiebre', 'urgencia', 'sangre', 'mareo', 'vomito', 'dolor']
     is_symptom = any(((k in last_msg) for k in symptom_keywords))
-    SYSTEM_PROMPT = "Eres VitalAI, un asistente general de salud y bienestar. \nResponde de forma concisa, educada y profesional.\nREGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. \nSi el usuario pregunta por sus sntomas, dile educadamente que para hacer un pre-diagnstico preciso debe usar el mdulo 'Entiende tus sntomas' (Triaje)."
+    SYSTEM_PROMPT = "Eres VitalAI, un asistente general de salud y bienestar. \nResponde de forma concisa, educada y profesional.\nREGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. \nSi el usuario pregunta por sus síntomas, dile educadamente que para hacer un pre-diagnóstico preciso debe usar el módulo 'Entiende tus síntomas' (Triaje)."
     if is_symptom:
-        SYSTEM_PROMPT += '\n\nATENCION: El usuario parece estar describiendo un sntoma activo. Sugiere amablemente usar la seccin de Triaje para un anlisis formal.'
+        SYSTEM_PROMPT += '\n\nATENCION: El usuario parece estar describiendo un síntoma activo. Sugiere amablemente usar la sección de Triaje para un análisis formal.'
     
-    lang_map = {'es': 'Spanish', 'en': 'English', 'fr': 'French', 'ar': 'Arabic'}
-    target_lang = lang_map.get(request.language, 'Spanish')
-    lang_instruction = f'\n\nCRITICAL INSTRUCTION: You MUST communicate with the patient EXCLUSIVELY in {target_lang}. Translate all your responses to {target_lang}. Do NOT use Spanish unless {target_lang} is Spanish.'
+    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
+    target_lang = lang_map.get(request.language, 'Spanish (Español)')
+    lang_instruction = f'''
+
+CRITICAL LANGUAGE DIRECTIVE:
+You MUST communicate with the user EXCLUSIVELY and ENTIRELY in {target_lang}.
+DO NOT speak or reply in English or Spanish if {target_lang} is French or Arabic.
+Translate and compose your entire response strictly into {target_lang}.'''
     
     SYSTEM_PROMPT += lang_instruction
 
@@ -250,16 +287,48 @@ async def general_chat(request: TriageRequest, db: AsyncSession=Depends(get_db))
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})
 
+    active_session_id = request.session_id
+    if user_id:
+        from sqlalchemy.future import select
+        db_session = None
+        if active_session_id:
+            res = await db.execute(select(models.ChatSession).where(models.ChatSession.id == active_session_id, models.ChatSession.user_id == user_id))
+            db_session = res.scalars().first()
+
+        if not db_session:
+            user_text_hint = request.messages[-1].content if request.messages else 'Consulta Médica'
+            new_title = (user_text_hint[:30] + '...') if len(user_text_hint) > 30 else user_text_hint
+            db_session = models.ChatSession(user_id=user_id, title=new_title)
+            db.add(db_session)
+            await db.commit()
+            await db.refresh(db_session)
+        
+        active_session_id = db_session.id
+        if request.messages and request.messages[-1].role == 'user':
+            user_db_msg = models.ChatMessage(session_id=active_session_id, role='user', content=request.messages[-1].content)
+            db.add(user_db_msg)
+            await db.commit()
+
     async def generate_chat():
+        full_response = ''
         try:
             response_stream = (await openai_client.chat.completions.create(model='gpt-4o-mini', messages=messages_payload, stream=True))
             async for chunk in response_stream:
                 if ((len(chunk.choices) > 0) and chunk.choices[0].delta.content):
-                    (yield chunk.choices[0].delta.content)
+                    token = chunk.choices[0].delta.content
+                    full_response += token
+                    (yield token)
+            if user_id and active_session_id and full_response:
+                ai_db_msg = models.ChatMessage(session_id=active_session_id, role='assistant', content=full_response)
+                db.add(ai_db_msg)
+                await db.commit()
         except Exception as e:
             logger.error(f'Error en General Chat Stream: {str(e)}')
             (yield f'''
 
-[Error de conexin: {str(e)}]''')
-    return StreamingResponse(generate_chat(), media_type='text/plain')
+[Error de conexión: {str(e)}]''')
+
+    response_headers = {"X-Session-ID": str(active_session_id)} if active_session_id else None
+    return StreamingResponse(generate_chat(), media_type='text/plain', headers=response_headers)
+
 

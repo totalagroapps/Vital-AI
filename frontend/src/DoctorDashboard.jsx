@@ -4,7 +4,8 @@ import DoctorMore from './views/DoctorMore';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
-import { ArrowLeft, Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, ShieldCheck, Sparkles } from 'lucide-react';
+import remarkGfm from 'remark-gfm';
+import { ArrowLeft, Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, ShieldCheck, Sparkles, Mic } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const { t, language } = useLanguage();
@@ -21,7 +22,43 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const [copilotMessages, setCopilotMessages] = useState([]);
   const [copilotInput, setCopilotInput] = useState('');
   const [isCopilotThinking, setIsCopilotThinking] = useState(false);
+  const [isCopilotListening, setIsCopilotListening] = useState(false);
   const copilotEndRef = useRef(null);
+  const copilotSpeechRef = useRef(null);
+
+  const toggleCopilotListening = () => {
+    if (isCopilotListening) {
+      if (copilotSpeechRef.current) copilotSpeechRef.current.stop();
+      setIsCopilotListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(t('browser_not_support_voice_recognition') || 'Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
+    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsCopilotListening(true);
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setCopilotInput((prev) => (prev ? prev + ' ' : '') + transcript);
+    };
+    recognition.onerror = (e) => {
+      setIsCopilotListening(false);
+      if (e.error === 'not-allowed') {
+        alert(t('microphone_permission_denied') || 'Permiso de micrófono denegado.');
+      }
+    };
+    recognition.onend = () => setIsCopilotListening(false);
+
+    copilotSpeechRef.current = recognition;
+    try { recognition.start(); } catch (e) { setIsCopilotListening(false); }
+  };
 
   useEffect(() => {
     fetchPatients();
@@ -86,13 +123,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           
           <h2>Ficha del Paciente</h2>
           <div class="grid">
-            <div><div class="label">{t('name')}</div><div class="value">${patientDetail.profile.full_name}</div></div>
-            <div><div class="label">{t('date_of_birth')}</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
-            <div><div class="label">{t('gender')}</div><div class="value">${patientDetail.profile.gender}</div></div>
-            <div><div class="label">{t('blood_type_label')}</div><div class="value">${patientDetail.profile.blood_type}</div></div>
-            <div><div class="label">{t('allergies')}</div><div class="value">${patientDetail.profile.allergies || t('none_female')}</div></div>
-            <div><div class="label">{t('chronic_conditions_label')}</div><div class="value">${patientDetail.profile.chronic_conditions || t('none_female')}</div></div>
-            <div><div class="label">{t('medications')}</div><div class="value">${patientDetail.profile.current_medications || t('none_female')}</div></div>
+            <div><div class="label">${t('name')}</div><div class="value">${patientDetail.profile.full_name}</div></div>
+            <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
+            <div><div class="label">${t('gender')}</div><div class="value">${patientDetail.profile.gender}</div></div>
+            <div><div class="label">${t('blood_type_label')}</div><div class="value">${patientDetail.profile.blood_type}</div></div>
+            <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail.profile.allergies || t('none_female')}</div></div>
+            <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail.profile.chronic_conditions || t('none_female')}</div></div>
+            <div><div class="label">${t('medications')}</div><div class="value">${patientDetail.profile.current_medications || t('none_female')}</div></div>
           </div>
           
           <h2>Historial de Triajes Clínicos</h2>
@@ -211,7 +248,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
 
 
-        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mt-auto mb-2" title={t('back_to_home')}>
+        <div className="mt-auto mb-3 flex flex-col items-center gap-2">
+          <LanguageSelector />
+        </div>
+        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mb-2" title={t('back_to_home')}>
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={onLogout}
@@ -490,7 +530,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               onChange={(e) => setCopilotInput(e.target.value)}
               disabled={!selectedPatient || isCopilotThinking}
               placeholder={t('ask_about_history')}
-              className="w-full bg-gray-100 border-none rounded-2xl py-3 pl-4 pr-12 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-teal disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
+              className="w-full bg-gray-100 border-none rounded-2xl py-3 pl-4 pr-20 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-teal disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
               rows="1"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -499,6 +539,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 }
               }}
             />
+            <button
+              type="button"
+              onClick={toggleCopilotListening}
+              className={`absolute right-11 bottom-2 w-8 h-8 flex items-center justify-center rounded-xl transition-all ${isCopilotListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+              title="Dictado por voz"
+            >
+              <Mic className="w-3.5 h-3.5" />
+            </button>
             <button
               type="submit"
               disabled={!copilotInput.trim() || !selectedPatient || isCopilotThinking}
