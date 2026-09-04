@@ -1,6 +1,6 @@
 
 from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger
+from main import s3_client, R2_BUCKET_NAME, logger, scrub_phi, TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
 
 
 from schemas_medical import MedicalSearchRequest, MedicalSearchResponse

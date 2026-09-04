@@ -1,6 +1,6 @@
 
 from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger
+from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extract_text_from_pdf, scrub_phi
 
 
 from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
@@ -461,8 +461,8 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession=De
     doc = result.scalar_one_or_none()
     if (not doc):
         raise HTTPException(status_code=404, detail='Document not found.')
-    p_actual_patient_id = (current_user_id if ((patient_id == 'me') or (patient_id == 'mock_user')) else patient_id)
-    stmt = select(models.PatientProfile).where(((models.PatientProfile.id == int(actual_patient_id)) if actual_patient_id.isdigit() else (models.PatientProfile.user_id == actual_patient_id)))
+    actual_patient_id = (current_user_id if ((patient_id == 'me') or (patient_id == 'mock_user')) else patient_id)
+    p_stmt = select(models.PatientProfile).where(((models.PatientProfile.id == int(actual_patient_id)) if actual_patient_id.isdigit() else (models.PatientProfile.user_id == actual_patient_id)))
     p_result = (await db.execute(p_stmt))
     patient = p_result.scalar_one_or_none()
     if ((not patient) or (doc.patient_id != patient.id)):
