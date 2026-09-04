@@ -210,11 +210,54 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
     from sqlalchemy.future import select
     profile_res = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == patient_id))))
     profile = profile_res.scalars().first()
-    if (not profile):
-        raise HTTPException(status_code=404, detail='Paciente no encontrado')
+    if not profile:
+        profile_res = (await db.execute(select(models.PatientProfile).where(
+            (models.PatientProfile.id == int(patient_id)) if patient_id.isdigit() else (models.PatientProfile.full_name == patient_id)
+        )))
+        profile = profile_res.scalars().first()
+
+    if not profile:
+        profile_dict = {
+            'full_name': patient_id,
+            'date_of_birth': '',
+            'gender': '',
+            'blood_type': 'N/A',
+            'allergies': '',
+            'chronic_conditions': '',
+            'current_medications': '',
+            'emergency_contact': '',
+            'height': '',
+            'weight': ''
+        }
+    else:
+        profile_dict = {
+            'full_name': profile.full_name or patient_id,
+            'date_of_birth': profile.date_of_birth,
+            'gender': profile.gender,
+            'blood_type': profile.blood_type,
+            'allergies': profile.allergies,
+            'chronic_conditions': profile.chronic_conditions,
+            'current_medications': profile.current_medications,
+            'emergency_contact': profile.emergency_contact,
+            'height': profile.height,
+            'weight': profile.weight
+        }
+
     triage_res = (await db.execute(select(models.TriageSession).where((models.TriageSession.user_id == patient_id)).order_by(models.TriageSession.created_at.desc())))
     triages = triage_res.scalars().all()
-    return {'profile': {'full_name': profile.full_name, 'date_of_birth': profile.date_of_birth, 'gender': profile.gender, 'blood_type': profile.blood_type, 'allergies': profile.allergies, 'chronic_conditions': profile.chronic_conditions, 'current_medications': profile.current_medications, 'emergency_contact': profile.emergency_contact, 'height': profile.height, 'weight': profile.weight}, 'triages': [{'id': t.id, 'category': t.category, 'status': t.status, 'final_report': t.final_report, 'recommended_specialty': t.recommended_specialty, 'created_at': (t.created_at.isoformat() if t.created_at else None)} for t in triages]}
+    return {
+        'profile': profile_dict,
+        'triages': [
+            {
+                'id': t.id,
+                'category': t.category,
+                'status': t.status,
+                'final_report': t.final_report,
+                'recommended_specialty': t.recommended_specialty,
+                'created_at': (t.created_at.isoformat() if t.created_at else None)
+            } for t in triages
+        ]
+    }
 
 
 

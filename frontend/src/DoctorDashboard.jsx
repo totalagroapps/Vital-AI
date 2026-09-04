@@ -96,19 +96,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    let triagesHtml = (patientDetail.triages || []).map(t => `
+    let triagesHtml = (patientDetail.triages || []).map(triageItem => `
       <div style="border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 15px;">
-        <strong>Fecha:</strong> ${new Date(t.created_at).toLocaleString()}<br/>
-        <strong>Categoría:</strong> ${t.category || 'N/A'}<br/>
+        <strong>Fecha:</strong> ${triageItem.created_at ? new Date(triageItem.created_at).toLocaleString() : '--'}<br/>
+        <strong>Categoría:</strong> ${triageItem.category || 'N/A'}<br/>
         <strong>Reporte Final:</strong><br/>
-        <div style="white-space: pre-wrap;">${t.final_report || t('no_complete_report')}</div>
+        <div style="white-space: pre-wrap;">${triageItem.final_report || t('no_complete_report')}</div>
       </div>
     `).join('');
 
     const html = `
       <html>
         <head>
-          <title>Historia Clínica - ${patientDetail.profile.full_name}</title>
+          <title>Historia Clínica - ${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</title>
           <style>
             body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
             h1 { color: #0f172a; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; }
@@ -123,13 +123,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           
           <h2>Ficha del Paciente</h2>
           <div class="grid">
-            <div><div class="label">${t('name')}</div><div class="value">${patientDetail.profile.full_name}</div></div>
-            <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail.profile.date_of_birth}</div></div>
-            <div><div class="label">${t('gender')}</div><div class="value">${patientDetail.profile.gender}</div></div>
-            <div><div class="label">${t('blood_type_label')}</div><div class="value">${patientDetail.profile.blood_type}</div></div>
-            <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail.profile.allergies || t('none_female')}</div></div>
-            <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail.profile.chronic_conditions || t('none_female')}</div></div>
-            <div><div class="label">${t('medications')}</div><div class="value">${patientDetail.profile.current_medications || t('none_female')}</div></div>
+            <div><div class="label">${t('name')}</div><div class="value">${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</div></div>
+            <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail?.profile?.date_of_birth || '--'}</div></div>
+            <div><div class="label">${t('gender')}</div><div class="value">${patientDetail?.profile?.gender || '--'}</div></div>
+            <div><div class="label">${t('blood_type_label')}</div><div class="value">${patientDetail?.profile?.blood_type || 'N/A'}</div></div>
+            <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail?.profile?.allergies || t('none_female')}</div></div>
+            <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail?.profile?.chronic_conditions || t('none_female')}</div></div>
+            <div><div class="label">${t('medications')}</div><div class="value">${patientDetail?.profile?.current_medications || t('none_female')}</div></div>
           </div>
           
           <h2>Historial de Triajes Clínicos</h2>
@@ -156,17 +156,46 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       if (res.ok) {
         const data = await res.json();
         setPatientDetail(data);
-        const docRes = await fetch(`${apiUrl}/api/patients/${userId}/documents`, { headers: authHeaders });
-        if (docRes.ok) {
-          const docData = await docRes.json();
-          setPatientDocuments(docData);
-        } else {
-          setPatientDocuments([]);
-        }
-
+      } else {
+        setPatientDetail({
+          profile: {
+            full_name: selectedPatient?.full_name || userId,
+            date_of_birth: selectedPatient?.date_of_birth || '',
+            gender: selectedPatient?.gender || '',
+            blood_type: 'N/A',
+            allergies: '',
+            chronic_conditions: '',
+            current_medications: '',
+            height: '',
+            weight: ''
+          },
+          triages: []
+        });
+      }
+      const docRes = await fetch(`${apiUrl}/api/patients/${userId}/documents`, { headers: authHeaders });
+      if (docRes.ok) {
+        const docData = await docRes.json();
+        setPatientDocuments(docData);
+      } else {
+        setPatientDocuments([]);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error fetching patient detail:", e);
+      setPatientDetail({
+        profile: {
+          full_name: selectedPatient?.full_name || userId,
+          date_of_birth: selectedPatient?.date_of_birth || '',
+          gender: selectedPatient?.gender || '',
+          blood_type: 'N/A',
+          allergies: '',
+          chronic_conditions: '',
+          current_medications: '',
+          height: '',
+          weight: ''
+        },
+        triages: []
+      });
+      setPatientDocuments([]);
     }
     setIsLoadingDetail(false);
   };
@@ -295,10 +324,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ` + 
                   (selectedPatient?.user_id === p.user_id ? 'bg-white/20 text-white' : 'bg-brand-teal/10 text-brand-teal')}>
-                  {p.full_name.charAt(0).toUpperCase()}
+                  {(p.full_name || 'P').charAt(0).toUpperCase()}
                 </div>
                 <div className="overflow-hidden flex-1">
-                  <div className="font-semibold text-sm truncate">{p.full_name}</div>
+                  <div className="font-semibold text-sm truncate">{p.full_name || 'Paciente'}</div>
                   <div className={`text-[11px] truncate ` + (selectedPatient?.user_id === p.user_id ? 'text-teal-100' : 'text-gray-400')}>
                     ID: {(p.user_id || '').split('-')[0]}
                   </div>
@@ -322,11 +351,11 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               
               <div className="flex justify-between items-start mb-8">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{patientDetail.profile.full_name || selectedPatient.full_name}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</h1>
                   <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail.profile.date_of_birth || t('no_birth_date')}</span>
+                    <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail?.profile?.date_of_birth || t('no_birth_date')}</span>
                     &bull;
-                    <span>{patientDetail.profile.gender || t('not_specified')}</span>
+                    <span>{patientDetail?.profile?.gender || t('not_specified')}</span>
                   </p>
                 </div>
                 <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
@@ -348,12 +377,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6 relative z-10">
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Grupo Sanguíneo</p>
-                      <p className="font-bold text-gray-800 text-lg">{patientDetail.profile.blood_type || 'N/A'}</p>
+                      <p className="font-bold text-gray-800 text-lg">{patientDetail?.profile?.blood_type || 'N/A'}</p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Altura / Peso</p>
                       <p className="font-bold text-gray-800 text-lg">
-                        {patientDetail.profile.height ? `${patientDetail.profile.height} cm` : '--'} / {patientDetail.profile.weight ? `${patientDetail.profile.weight} kg` : '--'}
+                        {patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--'} / {patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--'}
                       </p>
                     </div>
                   </div>
@@ -369,19 +398,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('allergies')}</p>
                       <p className="text-sm text-gray-800 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg inline-block font-medium">
-                        {patientDetail.profile.allergies || t('none_registered_female')}
+                        {patientDetail?.profile?.allergies || t('none_registered_female')}
                       </p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t("chronic_conditions_label")}</p>
                       <p className="text-sm text-gray-800 bg-gray-50 px-3 py-1.5 rounded-lg inline-block border border-gray-100">
-                        {patientDetail.profile.chronic_conditions || t('none_registered_female')}
+                        {patientDetail?.profile?.chronic_conditions || t('none_registered_female')}
                       </p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t("medications")}</p>
                       <p className="text-sm text-gray-800 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg inline-block font-medium">
-                        {patientDetail.profile.current_medications || t('none_registered_female')}
+                        {patientDetail?.profile?.current_medications || t('none_registered_female')}
                       </p>
                     </div>
                   </div>
@@ -403,21 +432,21 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                         No hay triajes registrados para este paciente.
                       </div>
                     ) : (
-                      (patientDetail.triages || []).map(t => (
-                        <div key={t.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5">
+                      (patientDetail.triages || []).map(triageItem => (
+                        <div key={triageItem.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-5">
                           <div className="flex justify-between items-start mb-3 border-b border-gray-50 pb-3">
-                            <span className="text-xs font-semibold text-gray-500">{new Date(t.created_at).toLocaleString()}</span>
+                            <span className="text-xs font-semibold text-gray-500">{triageItem.created_at ? new Date(triageItem.created_at).toLocaleString() : '--'}</span>
                             <span className={`text-[10px] px-3 py-1 rounded-full uppercase font-bold tracking-wide ${
-                              t.status === 'closed_red' ? 'bg-red-100 text-red-700' :
-                              t.status === 'closed_yellow' ? 'bg-orange-100 text-orange-700' :
-                              t.status === 'closed_green' ? 'bg-green-100 text-green-700' :
+                              triageItem.status === 'closed_red' ? 'bg-red-100 text-red-700' :
+                              triageItem.status === 'closed_yellow' ? 'bg-orange-100 text-orange-700' :
+                              triageItem.status === 'closed_green' ? 'bg-green-100 text-green-700' :
                               'bg-gray-100 text-gray-600'
                             }`}>
-                              {(t.status || '').replace('closed_', '') || t('in_progress')}
+                              {(triageItem.status || '').replace('closed_', '') || t('in_progress')}
                             </span>
                           </div>
                           <div className="prose prose-sm max-w-none prose-p:leading-relaxed text-gray-700 prose-strong:text-gray-900">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{t.final_report || t('incomplete_triage')}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{triageItem.final_report || t('incomplete_triage')}</ReactMarkdown>
                           </div>
                         </div>
                       ))
@@ -448,7 +477,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               <div className="flex items-center gap-2 text-[10px] text-gray-500 mt-0.5">
                                 <span className="uppercase tracking-wider font-semibold text-brand-teal">{(doc.document_type || '').replace('_', ' ')}</span>
                                 <span>&bull;</span>
-                                <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                                <span>{doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : '--'}</span>
                               </div>
                             </div>
                           </div>
