@@ -187,46 +187,154 @@ async def get_all_patients(db: AsyncSession=Depends(get_db), current_user_id: st
 
 
 
+class SmartReferralRequest(BaseModel):
+    diagnostics: Optional[List[str]] = []
+    anomalies: Optional[List[str]] = []
+    text_summary: Optional[str] = ""
+
+@router.post('/api/doctor/match-referral')
+async def match_referral(req: SmartReferralRequest, db: AsyncSession=Depends(get_db)):
+    """
+    Derivación Inteligente de Paciente a Especialista (Fila 24).
+    Matching algorítmico en tiempo real según anomalías, diagnósticos o texto clínico.
+    """
+    from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
+    matching = match_specialty_from_clinical_data(
+        diagnostics=req.diagnostics,
+        anomalies=req.anomalies,
+        summary_text=req.text_summary
+    )
+    specialists = []
+    if matching.get('specialty'):
+        specialists = await get_recommended_specialists(db=db, specialty=matching['specialty'], limit=4)
+    return {
+        "matched": matching.get("matched", False),
+        "recommended_specialty": matching.get("specialty", "Medicina General"),
+        "urgency": matching.get("urgency", "baja"),
+        "reason": matching.get("reason", ""),
+        "matched_keywords": matching.get("matched_keywords", []),
+        "available_specialists": specialists
+    }
+
 @router.post('/api/doctor/ask')
 async def ask_doctor_copilot(request: DoctorQueryRequest, db: AsyncSession=Depends(get_db)):
+    """
+    Copiloto Clínico IA para Doctores (Fila 23).
+    Responde preguntas sobre el paciente cruzando historial, triajes, medicamentos activos
+    y analíticas/documentos con sus valores alterados.
+    """
+    import json
     from sqlalchemy.future import select
+
+    effective_user_id = request.patient_id
     profile_res = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == request.patient_id))))
     profile = profile_res.scalars().first()
-    triage_res = (await db.execute(select(models.TriageSession).where((models.TriageSession.user_id == request.patient_id)).order_by(models.TriageSession.created_at.desc())))
-    triages = triage_res.scalars().all()
-    context_text = f'''[EXPEDIENTE CLÍNICO DE {(profile.full_name if profile else 'PACIENTE DESCONOCIDO')}]
-Perfil:
-- Nacimiento: {(profile.date_of_birth if profile else '')}
-- Género: {(profile.gender if profile else '')}
-- Sangre: {(profile.blood_type if profile else '')}
-- Alergias: {(profile.allergies if profile else '')}
-- Crónicas: {(profile.chronic_conditions if profile else '')}
-- Medicación: {(profile.current_medications if profile else '')}
+    if not profile:
+        profile_res = (await db.execute(select(models.PatientProfile).where(
+            (models.PatientProfile.id == int(request.patient_id)) if request.patient_id.isdigit() else (models.PatientProfile.full_name == request.patient_id)
+        )))
+        profile = profile_res.scalars().first()
 
-[HISTORIAL DE TRIAJES]
-'''
-    for t in triages:
-        context_text += f'''- Fecha: {t.created_at}, Estado: {t.status}, Categoría: {t.category}
-'''
-        if t.final_report:
-            context_text += f'''  Reporte Final: {t.final_report}
-'''
     if profile:
-        doc_stmt = select(models.MedicalDocument).where((models.MedicalDocument.patient_id == profile.id), (models.MedicalDocument.is_deleted == False)).order_by(models.MedicalDocument.uploaded_at.desc())
+        effective_user_id = profile.user_id
+
+    # 1. Triajes
+    triage_res = (await db.execute(
+        select(models.TriageSession)
+        .where((models.TriageSession.user_id == effective_user_id))
+        .order_by(models.TriageSession.created_at.desc())
+    ))
+    triages = triage_res.scalars().all()
+
+    # 2. Medicación activa estructurada (Fila 23)
+    med_res = (await db.execute(
+        select(models.MedicationReminder)
+        .where((models.MedicationReminder.user_id == effective_user_id))
+        .order_by(models.MedicationReminder.created_at.desc())
+    ))
+    medications = med_res.scalars().all()
+
+    context_text = f'''[EXPEDIENTE CLÍNICO DE {(profile.full_name if profile else 'PACIENTE DESCONOCIDO')}]
+Perfil Demográfico y Vitales:
+- Fecha de Nacimiento: {(profile.date_of_birth if profile else 'No especificada')}
+- Género: {(profile.gender if profile else 'No especificado')}
+- Grupo Sanguíneo: {(profile.blood_type if profile else 'N/A')}
+- Altura: {(profile.height if profile else '--')} cm | Peso: {(profile.weight if profile else '--')} kg
+- Alergias Registradas: {(profile.allergies if (profile and profile.allergies) else 'Ninguna alergia conocida')}
+- Condiciones Crónicas: {(profile.chronic_conditions if (profile and profile.chronic_conditions) else 'Ninguna patología crónica registrada')}
+- Medicación Textual en Ficha: {(profile.current_medications if (profile and profile.current_medications) else 'Sin medicación base')}
+'''
+
+    if medications:
+        context_text += '\n[TRATAMIENTO FARMACOLÓGICO ACTIVO REGISTRADO]\n'
+        for m in medications:
+            active_str = 'Activo' if getattr(m, 'is_active', True) else 'Pausado'
+            context_text += f'''- Fármaco: {m.medication_name} | Dosis: {m.dosage or 'No especificada'} | Frecuencia: {m.frequency or 'Según necesidad'} | Horarios de toma: {m.time_of_day or 'No programado'} | Estado: {active_str}
+'''
+    else:
+        context_text += '\n[TRATAMIENTO FARMACOLÓGICO ACTIVO]: No tiene recordatorios farmacológicos activos en la plataforma.\n'
+
+    context_text += '\n[HISTORIAL DE TRIAJES Y EVALUACIONES ASISTIDAS]\n'
+    if triages:
+        for t in triages:
+            context_text += f'''- Fecha: {t.created_at}, Estado: {t.status}, Categoría de urgencia: {t.category}
+'''
+            if t.recommended_specialty:
+                context_text += f'''  Especialidad sugerida en triaje: {t.recommended_specialty}
+'''
+            if t.final_report:
+                context_text += f'''  Informe Clínico: {t.final_report}
+'''
+    else:
+        context_text += '- Sin triajes previos registrados.\n'
+
+    # 3. Documentos, analíticas y estudios estructurados (Fila 23)
+    if profile:
+        doc_stmt = select(models.MedicalDocument).where(
+            (models.MedicalDocument.patient_id == profile.id),
+            (models.MedicalDocument.is_deleted == False)
+        ).order_by(models.MedicalDocument.uploaded_at.desc())
         doc_result = (await db.execute(doc_stmt))
         documents = doc_result.scalars().all()
         if documents:
-            context_text += '\n[DOCUMENTOS MEDICOS ADJUNTOS]\n'
+            context_text += '\n[ESTUDIOS, ANALÍTICAS Y DOCUMENTOS CLÍNICOS ADJUNTOS]\n'
             for d in documents:
-                context_text += f'''- Documento: {d.original_filename} ({d.document_type})
+                doc_type_val = d.document_type.value if hasattr(d.document_type, 'value') else str(d.document_type)
+                context_text += f'''\n* Estudio: {d.original_filename} (Tipo: {doc_type_val}, Fecha: {d.uploaded_at})
 '''
                 if d.extracted_text:
-                    context_text += f'''  Contenido/Resultados:
-{d.extracted_text}
+                    try:
+                        parsed = json.loads(d.extracted_text)
+                        if isinstance(parsed, dict):
+                            if parsed.get('severidad'):
+                                context_text += f'''  - Nivel de Severidad: {parsed['severidad'].upper()}
 '''
-    system_prompt = f'''Eres un Asistente Médico de IA diseñado exclusivamente para ayudar a DOCTORES a revisar expedientes de pacientes.
-El doctor te hará una pregunta sobre el paciente. Analiza la pregunta y responde utilizando ÚNICAMENTE la información del siguiente expediente.
-Si la información no está en el expediente, dilo claramente. Sé conciso, profesional y directo. No uses saludos largos.
+                            if parsed.get('diagnosticos'):
+                                context_text += f'''  - Diagnósticos Identificados: {', '.join(parsed['diagnosticos'])}
+'''
+                            anoms = parsed.get('anomalias') or parsed.get('hallazgos')
+                            if anoms and isinstance(anoms, list):
+                                context_text += f'''  - VALORES ALTERADOS / HALLAZGOS PATOLÓGICOS: {', '.join(anoms)}
+'''
+                            if parsed.get('medicamentos'):
+                                context_text += f'''  - Medicamentos en el documento: {', '.join(parsed['medicamentos'])}
+'''
+                            if parsed.get('resumen'):
+                                context_text += f'''  - Resumen clínico: {parsed['resumen']}
+'''
+                        else:
+                            context_text += f'''  - Contenido: {d.extracted_text[:1200]}
+'''
+                    except Exception:
+                        context_text += f'''  - Contenido: {d.extracted_text[:1200]}
+'''
+        else:
+            context_text += '\n[ESTUDIOS Y DOCUMENTOS]: No hay documentos adjuntos en el expediente.\n'
+
+    system_prompt = f'''Eres un Copiloto Clínico de Inteligencia Artificial de alto nivel, diseñado exclusivamente para asistir a MÉDICOS ESPECIALISTAS en la revisión del expediente de sus pacientes (Fila 23).
+El médico te formulará preguntas clínicas sobre el paciente (por ejemplo: valores alterados de laboratorio, medicación pautada, antecedentes, riesgo o sugerencias de derivación).
+Tu objetivo es responder con máxima precisión, rigor clínico, concisión y claridad basándote en la información del siguiente expediente.
+Si la información requerida no figura en el expediente, acláralo explícitamente sin inventar datos.
 
 {context_text}
 '''
@@ -250,8 +358,9 @@ Translate and compose your entire response strictly into {target_lang}.'''
                     (yield chunk.choices[0].delta.content)
         return StreamingResponse(generate(), media_type='text/plain')
     except Exception as e:
-        logging.error(f'Ollama Doctor API Error: {e}')
+        logging.error(f'Doctor Copilot OpenAI Error: {e}')
         return StreamingResponse(iter([f'Error: No se pudo procesar la respuesta del modelo de IA. {str(e)}']), media_type='text/plain')
+
 
 
 

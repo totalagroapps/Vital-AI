@@ -394,53 +394,85 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               </div>
             )}
 
-            {/* Urgent specialist CTA if severity is red */}
-            {analysisResult.severidad === 'rojo' && (
-              <div className="bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 rounded-2xl p-5 border border-red-200 shadow-sm flex flex-col gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <AlertCircle size={18} />
+            {/* Smart Clinical Referral Card (Fila 24) */}
+            {(() => {
+              const corpus = `${analysisResult.summary || ''} ${(analysisResult.diagnosticos || []).join(' ')} ${(analysisResult.hallazgos || []).join(' ')} ${(analysisResult.anomalias || []).join(' ')}`.toLowerCase();
+              let matchedSpec = 'Medicina General';
+              if (corpus.includes('fractur') || corpus.includes('rotura') || corpus.includes('luxaci') || corpus.includes('óseo') || corpus.includes('oseo') || corpus.includes('esguince') || corpus.includes('menisco')) {
+                matchedSpec = 'Traumatología';
+              } else if (corpus.includes('troponin') || corpus.includes('infarto') || corpus.includes('cardio') || corpus.includes('arritmia') || corpus.includes('electrocardiograma') || corpus.includes('ecg') || corpus.includes('colesterol')) {
+                matchedSpec = 'Cardiología';
+              } else if (corpus.includes('glucosa') || corpus.includes('hba1c') || corpus.includes('diabetes') || corpus.includes('tiroides') || corpus.includes('tsh') || corpus.includes('metabólic')) {
+                matchedSpec = 'Endocrinología';
+              } else if (corpus.includes('creatinina') || corpus.includes('renal') || corpus.includes('urea') || corpus.includes('tfg')) {
+                matchedSpec = 'Nefrología';
+              } else if (corpus.includes('transaminas') || corpus.includes('hepátic') || corpus.includes('hígado') || corpus.includes('bilirrubina') || corpus.includes('digestiv')) {
+                matchedSpec = 'Gastroenterología';
+              } else if (corpus.includes('hemoglobina') || corpus.includes('anemia') || corpus.includes('plaqueta') || corpus.includes('leucocit')) {
+                matchedSpec = 'Hematología';
+              } else if (corpus.includes('pulmonar') || corpus.includes('neumo') || corpus.includes('espirometr') || corpus.includes('asma') || corpus.includes('tórax')) {
+                matchedSpec = 'Neumología';
+              } else if (corpus.includes('piel') || corpus.includes('cutáne') || corpus.includes('dermat') || corpus.includes('melanoma') || corpus.includes('lunar')) {
+                matchedSpec = 'Dermatología';
+              }
+
+              const isUrgent = analysisResult.severidad === 'rojo';
+              const isAttention = analysisResult.severidad === 'amarillo' || matchedSpec !== 'Medicina General';
+
+              if (!isUrgent && !isAttention) return null;
+
+              return (
+                <div className={`rounded-2xl p-5 border shadow-sm flex flex-col gap-3 ${
+                  isUrgent 
+                    ? 'bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 border-red-200' 
+                    : 'bg-gradient-to-br from-teal-50 via-sky-50 to-emerald-50 border-teal-200'
+                }`}>
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-xl text-white flex items-center justify-center flex-shrink-0 shadow-sm ${
+                      isUrgent ? 'bg-red-600' : 'bg-brand-teal'
+                    }`}>
+                      {isUrgent ? <AlertCircle size={18} /> : <Stethoscope size={18} />}
+                    </div>
+                    <div>
+                      <h4 className={`text-xs font-bold uppercase tracking-wider ${isUrgent ? 'text-red-900' : 'text-teal-900'}`}>
+                        {isUrgent ? 'Atención Médica Urgente Requerida' : 'Derivación Inteligente Recomendada'}
+                      </h4>
+                      <p className={`text-xs font-medium ${isUrgent ? 'text-red-700' : 'text-teal-700'}`}>
+                        {isUrgent 
+                          ? `Los hallazgos requieren valoración inmediata por un especialista en ${matchedSpec}.` 
+                          : `Según los valores analizados, se recomienda consulta médica en ${matchedSpec}.`}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-red-900 uppercase tracking-wider">
-                      Atención Médica Urgente Requerida
-                    </h4>
-                    <p className="text-xs text-red-700 font-medium">
-                      Los hallazgos indican una lesión o anomalía que requiere valoración profesional inmediata.
-                    </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => onOpenDoctorDirectory?.(matchedSpec)}
+                      className={`w-full py-2.5 px-3.5 rounded-xl active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
+                        isUrgent ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-teal hover:bg-teal-700'
+                      }`}
+                    >
+                      <Stethoscope size={15} />
+                      <span>Ver Especialistas en {matchedSpec}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const diagText = analysisResult.diagnosticos?.join(', ') || analysisResult.summary || 'evaluación de estudio médico';
+                        const msg = encodeURIComponent(`Hola, acabo de subir un estudio a VitalAI con recomendación para ${matchedSpec}: ${diagText}. Me gustaría consultar disponibilidad.`);
+                        window.open(`https://wa.me/?text=${msg}`, '_blank');
+                      }}
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                    >
+                      <MessageSquare size={15} />
+                      <span>WhatsApp Especialista</span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const spec = (analysisResult.diagnosticos?.[0]?.toLowerCase().includes('fractur') || analysisResult.summary?.toLowerCase().includes('fractur'))
-                        ? 'Traumatología'
-                        : 'Medicina General';
-                      onOpenDoctorDirectory?.(spec);
-                    }}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-                  >
-                    <Stethoscope size={15} />
-                    <span>Ver Especialistas de Urgencia</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const diagText = analysisResult.diagnosticos?.join(', ') || analysisResult.summary || 'evaluación de urgencia';
-                      const msg = encodeURIComponent(`Hola, acabo de subir un estudio médico a VitalAI con resultado URGENTE: ${diagText}. Necesito consultar con un especialista de inmediato.`);
-                      window.open(`https://wa.me/?text=${msg}`, '_blank');
-                    }}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
-                  >
-                    <MessageSquare size={15} />
-                    <span>WhatsApp Inmediato</span>
-                  </button>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* CTA Buttons */}
             <button

@@ -207,7 +207,10 @@ async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSe
 
 @router.get('/api/doctor/patients/{patient_id}')
 async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
+    import json
     from sqlalchemy.future import select
+    from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
+
     profile_res = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == patient_id))))
     profile = profile_res.scalars().first()
     if not profile:
@@ -215,6 +218,8 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
             (models.PatientProfile.id == int(patient_id)) if patient_id.isdigit() else (models.PatientProfile.full_name == patient_id)
         )))
         profile = profile_res.scalars().first()
+
+    effective_user_id = profile.user_id if profile else patient_id
 
     if not profile:
         profile_dict = {
@@ -243,21 +248,137 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
             'weight': profile.weight
         }
 
-    triage_res = (await db.execute(select(models.TriageSession).where((models.TriageSession.user_id == patient_id)).order_by(models.TriageSession.created_at.desc())))
+    # 1. Triajes asistidos del paciente
+    triage_res = (await db.execute(
+        select(models.TriageSession)
+        .where((models.TriageSession.user_id == effective_user_id))
+        .order_by(models.TriageSession.created_at.desc())
+    ))
     triages = triage_res.scalars().all()
+    triages_list = [
+        {
+            'id': t.id,
+            'category': t.category,
+            'status': t.status,
+            'final_report': t.final_report,
+            'recommended_specialty': t.recommended_specialty,
+            'created_at': (t.created_at.isoformat() if t.created_at else None)
+        } for t in triages
+    ]
+
+    # 2. Medicación activa estructurada (Fila 23)
+    med_res = (await db.execute(
+        select(models.MedicationReminder)
+        .where((models.MedicationReminder.user_id == effective_user_id))
+        .order_by(models.MedicationReminder.created_at.desc())
+    ))
+    medications = med_res.scalars().all()
+    medications_list = [
+        {
+            'id': m.id,
+            'medication_name': m.medication_name,
+            'dosage': m.dosage or '',
+            'frequency': m.frequency or '',
+            'time_of_day': m.time_of_day or '',
+            'is_active': getattr(m, 'is_active', True)
+        } for m in medications
+    ]
+
+    # 3. Documentos y analíticas con hallazgos estructurados (Fila 23)
+    documents_list = []
+    all_diagnostics = []
+    all_anomalies = []
+    clinical_summaries = []
+
+    if profile:
+        doc_stmt = select(models.MedicalDocument).where(
+            (models.MedicalDocument.patient_id == profile.id),
+            (models.MedicalDocument.is_deleted == False)
+        ).order_by(models.MedicalDocument.uploaded_at.desc())
+        doc_result = (await db.execute(doc_stmt))
+        documents = doc_result.scalars().all()
+
+        for doc in documents:
+            parsed = {}
+            if doc.extracted_text:
+                try:
+                    parsed = json.loads(doc.extracted_text)
+                except Exception:
+                    parsed = {'raw': doc.extracted_text}
+
+            # Recolectar anomalías y diagnósticos para matching
+            if isinstance(parsed, dict):
+                diags = parsed.get('diagnosticos', [])
+                if isinstance(diags, list):
+                    all_diagnostics.extend(diags)
+                anom = parsed.get('anomalias') or parsed.get('hallazgos') or []
+                if isinstance(anom, list):
+                    all_anomalies.extend(anom)
+                resumen = parsed.get('resumen') or ''
+                if resumen:
+                    clinical_summaries.append(resumen)
+
+            download_url = None
+            if s3_client and R2_BUCKET_NAME and doc.file_url:
+                try:
+                    download_url = s3_client.generate_presigned_url(
+                        'get_object',
+                        Params={'Bucket': R2_BUCKET_NAME, 'Key': doc.file_url},
+                        ExpiresIn=3600
+                    )
+                except Exception:
+                    download_url = None
+
+            documents_list.append({
+                'id': doc.id,
+                'document_type': doc.document_type.value if hasattr(doc.document_type, 'value') else str(doc.document_type),
+                'original_filename': doc.original_filename,
+                'uploaded_at': doc.uploaded_at.isoformat() if doc.uploaded_at else None,
+                'notes': doc.notes,
+                'extracted_text': doc.extracted_text,
+                'parsed_insights': parsed,
+                'download_url': download_url
+            })
+
+    # También agregar hallazgos de triajes al matching
+    for t in triages:
+        if t.final_report:
+            clinical_summaries.append(t.final_report)
+        if t.recommended_specialty:
+            all_diagnostics.append(t.recommended_specialty)
+
+    # 4. Derivación Inteligente de Paciente a Especialista (Fila 24)
+    matching_result = match_specialty_from_clinical_data(
+        diagnostics=all_diagnostics,
+        anomalies=all_anomalies,
+        summary_text=' '.join(clinical_summaries)
+    )
+
+    recommended_specialists = []
+    if matching_result.get('specialty'):
+        recommended_specialists = await get_recommended_specialists(
+            db=db,
+            specialty=matching_result['specialty'],
+            limit=4
+        )
+
+    smart_referral = {
+        'matched': matching_result.get('matched', False),
+        'recommended_specialty': matching_result.get('specialty', 'Medicina General'),
+        'urgency': matching_result.get('urgency', 'baja'),
+        'reason': matching_result.get('reason', ''),
+        'matched_keywords': matching_result.get('matched_keywords', []),
+        'available_specialists': recommended_specialists
+    }
+
     return {
         'profile': profile_dict,
-        'triages': [
-            {
-                'id': t.id,
-                'category': t.category,
-                'status': t.status,
-                'final_report': t.final_report,
-                'recommended_specialty': t.recommended_specialty,
-                'created_at': (t.created_at.isoformat() if t.created_at else None)
-            } for t in triages
-        ]
+        'triages': triages_list,
+        'medications': medications_list,
+        'documents': documents_list,
+        'smart_referral': smart_referral
     }
+
 
 
 
