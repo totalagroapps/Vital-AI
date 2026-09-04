@@ -9,10 +9,10 @@ export const LanguageProvider = ({ children }) => {
     if (savedLang && ['es', 'en', 'fr', 'ar'].includes(savedLang)) {
       return savedLang;
     }
-    const browserLang = navigator.language || navigator.userLanguage;
-    if (browserLang && browserLang.toLowerCase().startsWith('en')) {
-      return 'en';
-    }
+    const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+    if (browserLang.startsWith('en')) return 'en';
+    if (browserLang.startsWith('fr')) return 'fr';
+    if (browserLang.startsWith('ar')) return 'ar';
     return 'es';
   });
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
   const { t } = useLanguage();
@@ -54,7 +55,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
                  <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
                </div>
                
-               <div className="flex items-center gap-4">
+               <div className="flex items-center gap-3">
+                 <LanguageSelector />
                  <div className="relative">
                    <button className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-brand-purple shadow-sm hover:shadow-md transition-shadow">
                      <Bell size={18} />

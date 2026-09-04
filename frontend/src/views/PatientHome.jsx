@@ -2,6 +2,7 @@ import React from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
 import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
   const { t } = useLanguage();
@@ -37,14 +38,15 @@ const PatientHome = ({ onNavigate, onLogout }) => {
             <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 tracking-wide">{t("your_health_understood_by_ai")}</span>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
             <div className="relative">
-              <button className="w-6 h-6 rounded-full bg-white border border-gray-100 flex items-center justify-center text-brand-purple shadow-sm hover:shadow-md transition-shadow">
-                <Bell size={12} />
+              <button className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-brand-purple shadow-sm hover:shadow-md transition-shadow">
+                <Bell size={14} />
               </button>
-              <div className="absolute top-0 right-0 w-3 h-3 bg-brand-purple rounded-full border-2 border-white"></div>
+              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></div>
             </div>
-            <button onClick={onLogout} className="w-6 h-6 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <button onClick={onLogout} className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-full h-full object-cover" />
             </button>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Users, Calendar, MoreHorizontal, Sparkles } from 'lucide-react';
+import { Home, Users, Calendar, MoreHorizontal, Sparkles, Pill } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
@@ -34,7 +34,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             onClick={() => onTabChange('treatments')}
             className={`flex flex-col items-center gap-1 ${activeTab === 'treatments' ? activeColor : 'text-gray-400'}`}
           >
-            <Users size={24} className={activeTab === 'treatments' ? activeFill : ''} />
+            <Pill size={24} className={activeTab === 'treatments' ? activeFill : ''} />
             <span className="text-[10px] font-medium">{t("treatments")}</span>
           </button>
         )}

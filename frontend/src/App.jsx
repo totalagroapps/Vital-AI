@@ -859,11 +859,13 @@ ${text}`], {type: 'text/plain'});
   if (viewMode === 'doctor') return <Navigate to="/medico" />;
   // Global BottomNav handler for all patient routes
   const activeTab = path === '/paciente' ? 'home'
-    : (path === '/paciente/historial') ? 'patients'
-    : (path === '/paciente/asistente' || path === '/paciente/triaje') ? 'ai'
+    : (path === '/paciente/historial') ? 'history'
+    : (path === '/paciente/tratamientos') ? 'treatments'
+    : (path === '/paciente/mas') ? 'more'
+    : (path === '/paciente/chat' || path === '/paciente/asistente' || path === '/paciente/triaje') ? 'ai'
     : 'home';
 
-  const handleBottomNav = (tab) => {
+    const handleBottomNav = (tab) => {
     if (tab === 'home') navigate('/paciente');
     if (tab === 'ai' || tab === 'triage') {
       startTriageSession();
@@ -883,6 +885,10 @@ ${text}`], {type: 'text/plain'});
     }
     if (tab === 'agenda') alert('Agenda en desarrollo...');
     if (tab === 'more') navigate('/paciente/mas');
+    if (tab === 'general_chat') navigate('/paciente/chat');
+    if (tab === 'documents') navigate('/paciente/documentos');
+    if (tab === 'search') setShowMedicalSearch(true);
+    if (tab === 'doctors') alert('Búsqueda de médicos en desarrollo...');
   };
 
   // The GlobalBottomNav is fixed, so it always floats above all route content
@@ -1021,14 +1027,24 @@ ${text}`], {type: 'text/plain'});
     return (
       <>
         <PatientChat 
-            patientProfile={patientProfile}
-            sessions={sessions}
+          patientProfile={patientProfile}
+          sessions={sessions}
           messages={messages}
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
           handleSend={handleSendGeneral}
           isLoading={isLoading}
           onBack={() => navigate('/paciente')}
+          imageInputRef={imageInputRef}
+          pdfInputRef={pdfInputRef}
+          handleImageChange={handleImageChange}
+          handlePdfChange={handlePdfChange}
+          selectedImagePreview={selectedImagePreview}
+          selectedPdfName={selectedPdfName}
+          onClearAttachment={() => {
+            setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
+            setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
+          }}
         />
         {GlobalBottomNav}
       </>

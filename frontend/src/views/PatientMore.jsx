@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const PatientMore = ({ onNavigate, onLogout }) => {
   const { t } = useLanguage();
@@ -43,13 +44,16 @@ const PatientMore = ({ onNavigate, onLogout }) => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-24 font-sans selection:bg-brand-purple/20">
       <div className="relative z-10 px-6 pt-12 flex-1">
-        <div className="mb-6">
-          <h2 className="text-[28px] leading-tight font-bold text-gray-900 mb-2">
-            {t('more_options')} <span className="text-brand-purple">{t('options')}</span>
-          </h2>
-          <p className="text-sm text-gray-500">
-            {t('configure_personalize_experience')}
-          </p>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h2 className="text-[28px] leading-tight font-bold text-gray-900 mb-2">
+              {t('more_options')} <span className="text-brand-purple">{t('options')}</span>
+            </h2>
+            <p className="text-sm text-gray-500">
+              {t('configure_personalize_experience')}
+            </p>
+          </div>
+          <LanguageSelector />
         </div>
 
         <div className="space-y-6">

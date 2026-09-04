@@ -3,6 +3,7 @@ import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2,
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useLanguage } from '../contexts/LanguageContext';
+import LanguageSelector from '../components/LanguageSelector';
 
 const PatientChat = ({
   messages,
@@ -21,6 +22,10 @@ const PatientChat = ({
 , patientProfile, sessions}) => {
     const [isListening, setIsListening] = useState(false);
     const { t } = useLanguage();
+    const internalImageRef = useRef(null);
+    const internalPdfRef = useRef(null);
+    const actualImageRef = imageInputRef || internalImageRef;
+    const actualPdfRef = pdfInputRef || internalPdfRef;
 
   const toggleListening = () => {
     if (isListening) return;
@@ -68,8 +73,8 @@ const PatientChat = ({
             {t('online')}
           </span>
         </div>
-        <div className="w-10 h-10 flex items-center justify-center">
-          {/* Espacio para balancear el header */}
+        <div className="flex items-center justify-end">
+          <LanguageSelector />
         </div>
       </div>
 
@@ -157,14 +162,24 @@ const PatientChat = ({
 
         <form onSubmit={handleSend} className="flex items-end gap-2">
           
-          <div className="flex items-center gap-1 mb-1">
-            <button type="button" onClick={() => imageInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
-              <ImageIcon size={18} />
-              <span>{t('upload_image')}</span>
+          <div className="flex items-center gap-1.5 mb-1">
+            <button 
+              type="button" 
+              onClick={() => actualImageRef.current?.click()} 
+              className="px-3 py-2 text-slate-700 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-1.5 text-xs font-bold border border-gray-200 bg-white shadow-sm whitespace-nowrap cursor-pointer active:scale-95"
+              title={t('upload_image') || 'Subir Imagen'}
+            >
+              <ImageIcon size={16} className="text-brand-purple" />
+              <span>{t('upload_image') || 'Subir Imagen'}</span>
             </button>
-            <button type="button" onClick={() => pdfInputRef.current?.click()} className="px-3 py-2 text-gray-500 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-2 text-sm font-semibold border border-gray-200 bg-white shadow-sm whitespace-nowrap">
-              <FileText size={18} />
-              <span>{t('upload_pdf')}</span>
+            <button 
+              type="button" 
+              onClick={() => actualPdfRef.current?.click()} 
+              className="px-3 py-2 text-slate-700 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-1.5 text-xs font-bold border border-gray-200 bg-white shadow-sm whitespace-nowrap cursor-pointer active:scale-95"
+              title={t('upload_pdf') || 'Subir PDF'}
+            >
+              <FileText size={16} className="text-brand-green" />
+              <span>{t('upload_pdf') || 'Subir PDF'}</span>
             </button>
           </div>
 
@@ -198,8 +213,8 @@ const PatientChat = ({
           )}
 
           {/* Hidden Inputs */}
-          <input type="file" ref={imageInputRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />
-          <input type="file" ref={pdfInputRef} onChange={handlePdfChange} accept="application/pdf" className="hidden" />
+          <input type="file" ref={actualImageRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />
+          <input type="file" ref={actualPdfRef} onChange={handlePdfChange} accept="application/pdf" className="hidden" />
         </form>
       </div>
 

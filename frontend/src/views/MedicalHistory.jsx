@@ -402,8 +402,8 @@ const MedicalHistory = ({
               </div>
 
               <div className="flex gap-4">
-                <button onClick={() => setViewMode('view')} className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-2xl shadow-sm">{t("cancel")}</button>
-                <button onClick={saveProfile} className="flex-1 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-3 rounded-2xl shadow-glow transition-transform active:scale-95 flex items-center justify-center gap-2">
+                <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-2xl shadow-sm">{t("cancel")}</button>
+                <button type="submit" className="flex-1 bg-brand-purple hover:bg-brand-purple/90 text-white font-bold py-3 rounded-2xl shadow-glow transition-transform active:scale-95 flex items-center justify-center gap-2">
                   <Save size={18} /> {t("save_profile")}
                 </button>
               </div>
@@ -411,7 +411,7 @@ const MedicalHistory = ({
           </div>
         )}
 
-        {viewMode === 'view' && (
+        {!isEditing && (
           <div className="relative z-10 px-6 mt-8">
             <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
               <Activity className="w-5 h-5 text-brand-purple" />
