@@ -90,7 +90,7 @@ const PatientChat = ({
             title={t('new_consultation') || 'Nueva Consulta'}
           >
             <Plus size={14} />
-            <span className="hidden sm:inline">{t('new_consultation') || 'Nueva'}</span>
+            <span className="hidden sm:inline">{t('new_consultation') || 'Nueva Consulta'}</span>
           </button>
           {sessions && sessions.length > 0 && (
             <button 
@@ -366,7 +366,7 @@ const PatientChat = ({
               className="w-full py-2.5 px-4 mb-4 rounded-xl bg-brand-purple text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
             >
               <Plus size={16} />
-              <span>+ {t('new_consultation') || 'Nueva Consulta'}</span>
+              <span>{t('new_consultation') || 'Nueva Consulta'}</span>
             </button>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1">

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Search, Loader2, ExternalLink, BookOpen, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 
 export default function MedicalSearchModal({ isOpen, onClose, userProfile, token, apiUrl }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -53,11 +54,12 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   useEffect(() => {
     if (isOpen) {
       const condition = userProfile?.chronic_conditions?.split(',')?.[0]?.trim();
-      const initialQuery = condition && condition.toLowerCase() !== 'ninguna' ? condition : 'salud preventiva';
+      const defaultQuery = language === 'en' ? 'preventive health' : language === 'fr' ? 'santé préventive' : language === 'ar' ? 'الوقاية الصحية' : 'salud preventiva';
+      const initialQuery = condition && condition.toLowerCase() !== 'ninguna' && condition.toLowerCase() !== 'none' ? condition : defaultQuery;
       setQuery(initialQuery);
       fetchResults(initialQuery);
     }
-  }, [isOpen]);
+  }, [isOpen, language]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -78,13 +80,16 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-800">Tus Notificaciones Médicas</h2>
-              <p className="text-xs text-slate-500">Últimos estudios e investigaciones publicadas</p>
+              <h2 className="text-xl font-bold text-slate-800">{t('medical_notifications') || 'Tus Notificaciones Médicas'}</h2>
+              <p className="text-xs text-slate-500">{t('latest_studies_desc') || 'Últimos estudios e investigaciones publicadas'}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Body */}
@@ -97,8 +102,8 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             <input
               type="text"
               className="block w-full pl-12 pr-32 py-3 bg-white border-2 border-slate-200 rounded-xl text-black placeholder-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base"
-              placeholder="Buscar estudios específicos..."
-                style={{ color: "#0f172a" }}
+              placeholder={t('search_studies_placeholder') || 'Buscar estudios específicos...'}
+              style={{ color: "#0f172a" }}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -107,7 +112,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               disabled={loading || !query.trim()}
               className="absolute inset-y-1.5 right-1.5 bg-brand hover:bg-brand disabled:bg-slate-100 disabled:text-slate-400 text-white font-medium rounded-lg px-4 md:px-6 transition-colors shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-sm"
             >
-              {loading ? <Loader2 className="animate-spin" size={16} /> : 'Buscar'}
+              {loading ? <Loader2 className="animate-spin" size={16} /> : (t('search_action') || 'Buscar')}
             </button>
           </form>
 
@@ -115,7 +120,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm mb-6 flex items-start gap-3 w-full">
               <AlertCircle className="text-red-500 mt-0.5 flex-shrink-0" size={18} />
               <div>
-                <h3 className="text-red-800 font-semibold text-sm">No se pudo completar la búsqueda</h3>
+                <h3 className="text-red-800 font-semibold text-sm">{t('search_error_title') || 'No se pudo completar la búsqueda'}</h3>
                 <p className="text-red-600 text-xs mt-1">{error}</p>
               </div>
             </div>
@@ -124,7 +129,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {results.length > 0 && (
             <div className="space-y-4 w-full">
               <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-2">
-                Resultados Encontrados ({results.length})
+                {t('results_found') || 'Resultados Encontrados'} ({results.length})
               </h3>
               
               <div className="grid gap-4">
@@ -142,7 +147,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                     <p className="text-slate-600 text-sm mb-4 leading-relaxed break-words whitespace-normal overflow-hidden display-webkit-box webkit-box-orient-vertical webkit-line-clamp-3">{doc.abstract}</p>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
                       <p className="text-xs text-slate-500 truncate max-w-[70%] font-medium">
-                        {doc.authors && doc.authors.length > 0 ? doc.authors.join(', ') : 'Autores no especificados'}
+                        {doc.authors && doc.authors.length > 0 ? doc.authors.join(', ') : (t('authors_not_specified') || 'Autores no especificados')}
                       </p>
                       <a 
                         href={doc.url} 
@@ -150,7 +155,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                         rel="noreferrer"
                         className="flex items-center gap-1.5 text-brand hover:text-brand text-xs font-bold transition-colors shrink-0"
                       >
-                        Ver original <ExternalLink size={12} />
+                        {t('view_original') || 'Ver original'} <ExternalLink size={12} />
                       </a>
                     </div>
                   </div>
@@ -162,8 +167,8 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {!loading && !error && results.length === 0 && (
             <div className="text-center text-slate-500 py-12 px-4">
               <BookOpen className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-              <p className="text-sm font-medium">No se encontraron estudios recientes para tus parámetros.</p>
-              <p className="text-xs text-slate-400 mt-1">Intenta realizar una búsqueda manual usando otra palabra clave.</p>
+              <p className="text-sm font-medium">{t('no_recent_studies') || 'No se encontraron estudios recientes para tus parámetros.'}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('try_manual_search') || 'Intenta realizar una búsqueda manual usando otra palabra clave.'}</p>
             </div>
           )}
           
@@ -172,7 +177,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               <div className="w-12 h-12 rounded-full bg-semantic-info-bg flex items-center justify-center animate-pulse">
                 <Loader2 className="animate-spin text-brand" size={24} />
               </div>
-              <p className="text-sm font-medium animate-pulse">Buscando las últimas investigaciones para ti...</p>
+              <p className="text-sm font-medium animate-pulse">{t('searching_latest_research') || 'Buscando las últimas investigaciones para ti...'}</p>
             </div>
           )}
 

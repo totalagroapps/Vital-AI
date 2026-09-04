@@ -230,6 +230,16 @@ Si la información no está en el expediente, dilo claramente. Sé conciso, prof
 
 {context_text}
 '''
+    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
+    target_lang = lang_map.get(request.language, 'Spanish (Español)')
+    lang_instruction = f'''
+
+CRITICAL LANGUAGE DIRECTIVE:
+You MUST communicate with the doctor EXCLUSIVELY and ENTIRELY in {target_lang}.
+DO NOT speak or reply in English or Spanish if {target_lang} is French or Arabic.
+Translate and compose your entire response strictly into {target_lang}.'''
+
+    system_prompt += lang_instruction
     try:
         openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 

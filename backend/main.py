@@ -269,6 +269,7 @@ class DoctorQueryRequest(BaseModel):
     query: str
     patient_id: str
     text_model: str = 'llama3.1'
+    language: Optional[str] = 'es'
 
 
 from pydantic import BaseModel

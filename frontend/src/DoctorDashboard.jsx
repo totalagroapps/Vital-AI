@@ -184,7 +184,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       const res = await fetch(`${apiUrl}/api/doctor/ask`, {
         method: 'POST',
         headers: { ...authHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userText, patient_id: selectedPatient.user_id, text_model: 'llama3.1' })
+        body: JSON.stringify({ query: userText, patient_id: selectedPatient.user_id, text_model: 'llama3.1', language: language })
       });
 
       if (!res.ok) throw new Error("Error fetching copilot");
@@ -314,7 +314,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         {isLoadingDetail ? (
           <div className="flex-1 flex flex-col items-center justify-center text-brand-teal">
             <Loader2 className="w-10 h-10 animate-spin mb-4" />
-            <p className="text-sm font-medium">Cargando expediente médico...</p>
+            <p className="text-sm font-medium">{t('loading_record') || 'Cargando expediente...'}</p>
           </div>
         ) : selectedPatient ? (
           patientDetail ? (

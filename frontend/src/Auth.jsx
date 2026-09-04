@@ -127,7 +127,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
 
   return (
     <div className={`flex min-h-screen w-full items-center justify-center bg-base relative overflow-hidden font-sans transition-colors duration-1000`}>
-      
+      <LanguageSelector variant="floating" />
       {/* Background decorations */}
       <div className={`absolute top-0 right-0 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none translate-x-1/3 -translate-y-1/3 ${theme.bgGradient}`} />
       <div className={`absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none -translate-x-1/3 translate-y-1/3 ${isDoc ? 'bg-brand-teal/10' : 'bg-brand-blue/10'}`} />
