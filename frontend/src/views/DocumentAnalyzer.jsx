@@ -28,7 +28,7 @@ const SeverityBadge = ({ sev }) => {
   );
 };
 
-const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
+const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDoctorDirectory }) => {
   const { t, language } = useLanguage();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -391,6 +391,54 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp }) => {
               <div className="bg-orange-50 rounded-xl px-4 py-3 border border-orange-100 flex gap-2 items-center">
                 <AlertTriangle size={14} className="text-orange-500 flex-shrink-0" />
                 <p className="text-[11px] text-orange-700">{t("phi_detected_warning")}</p>
+              </div>
+            )}
+
+            {/* Urgent specialist CTA if severity is red */}
+            {analysisResult.severidad === 'rojo' && (
+              <div className="bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 rounded-2xl p-5 border border-red-200 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <AlertCircle size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-red-900 uppercase tracking-wider">
+                      Atención Médica Urgente Requerida
+                    </h4>
+                    <p className="text-xs text-red-700 font-medium">
+                      Los hallazgos indican una lesión o anomalía que requiere valoración profesional inmediata.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const spec = (analysisResult.diagnosticos?.[0]?.toLowerCase().includes('fractur') || analysisResult.summary?.toLowerCase().includes('fractur'))
+                        ? 'Traumatología'
+                        : 'Medicina General';
+                      onOpenDoctorDirectory?.(spec);
+                    }}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Stethoscope size={15} />
+                    <span>Ver Especialistas de Urgencia</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const diagText = analysisResult.diagnosticos?.join(', ') || analysisResult.summary || 'evaluación de urgencia';
+                      const msg = encodeURIComponent(`Hola, acabo de subir un estudio médico a VitalAI con resultado URGENTE: ${diagText}. Necesito consultar con un especialista de inmediato.`);
+                      window.open(`https://wa.me/?text=${msg}`, '_blank');
+                    }}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                  >
+                    <MessageSquare size={15} />
+                    <span>WhatsApp Inmediato</span>
+                  </button>
+                </div>
               </div>
             )}
 

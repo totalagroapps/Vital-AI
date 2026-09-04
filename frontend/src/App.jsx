@@ -1033,6 +1033,10 @@ ${text}`], {type: 'text/plain'});
           onBack={() => navigate('/paciente')}
           apiUrl={API_URL}
           authHeaders={authHeaders}
+          onOpenDoctorDirectory={(spec) => {
+            setDoctorDirectorySpecialty(spec || 'Traumatología');
+            setShowDoctorDirectory(true);
+          }}
           onAskFollowUp={(extractedText, filename) => {
             // Pre-load document context into triage chat
             setMessages(prev => [
