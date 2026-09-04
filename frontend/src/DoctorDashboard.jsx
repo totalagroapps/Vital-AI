@@ -22,6 +22,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState(null);
 
   // Copilot Chat States
   const [copilotMessages, setCopilotMessages] = useState([]);
@@ -67,7 +68,20 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
   useEffect(() => {
     fetchPatients();
+    fetchDoctorProfile();
   }, []);
+
+  const fetchDoctorProfile = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/doctor/me`, { headers: authHeaders });
+      if (res.ok) {
+        const data = await res.json();
+        setDoctorProfile(data);
+      }
+    } catch (e) {
+      console.error("Error fetching doctor profile:", e);
+    }
+  };
 
   useEffect(() => {
     if (selectedPatient) {
@@ -310,10 +324,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
 
   if (doctorScreen === 'more') {
-    return <DoctorMore onNavigate={setDoctorScreen} onLogout={onLogout} />;
+    return <DoctorMore onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
   if (doctorScreen === 'home') {
-    return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} />;
+    return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
 
   return (

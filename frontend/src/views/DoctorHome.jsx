@@ -3,8 +3,9 @@ import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, V
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
+import DoctorHomeDesktop from './DoctorHomeDesktop';
 
-const DoctorHome = ({ onNavigate, onLogout }) => {
+const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -51,13 +52,27 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
     }
   };
 
+  const doctorName = doctorProfile?.full_name || 'Dr. Alejandro Ruiz';
+  const doctorSpecialty = doctorProfile?.specialty || 'Médico Especialista';
+  const doctorPhoto = doctorProfile?.photo_url || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
+
   return (
-    <div className="flex flex-col min-h-screen bg-base font-sans overflow-x-hidden relative pb-24">
+    <>
+    <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
+      {/* Background Graphic for Mobile */}
+      <div className="absolute top-14 right-0 w-[50%] h-[230px] pointer-events-none z-0 overflow-hidden">
+        <img 
+          src="/images/doctor_ai_head.jpg" 
+          alt="Vital IA Medical Intelligence" 
+          className="w-full h-full object-contain mix-blend-multiply" 
+        />
+      </div>
+
       {/* HEADER */}
       <div className="px-5 py-4 flex justify-between items-center bg-transparent relative z-20">
         <div className="flex flex-col">
           <h1 className="text-xl font-extrabold text-brand-dark tracking-tight flex items-center gap-1">
-            <span className="text-brand-blue">VITAL</span> AI
+            <span className="text-brand-blue">VITAL</span> IA
           </h1>
           <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">{t("doctors")}</span>
         </div>
@@ -68,30 +83,32 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></span>
           </button>
           <button onClick={onLogout} className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-brand-blue/30 shadow-sm" title={t("logout") || "Cerrar Sesión"}>
-            <img src="/images/ai_doctor_bg.jpg" alt={t("doctor_profile")} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
+            <img src={doctorPhoto} alt={doctorName} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
           </button>
         </div>
       </div>
 
       {/* HERO SECTION */}
       <div className="px-5 pt-2 pb-6 relative z-10 flex flex-col gap-4">
-        <div>
-          <h2 className="text-3xl font-extrabold text-brand-dark leading-tight mb-2">
-            {t("your_medical_practice")},<br/>{t("enhanced_by_ai")}<br/><span className="text-brand-blue">{t("artificial_intelligence")}</span>
+        <div className="max-w-[65%]">
+          <h2 className="text-2xl font-extrabold text-brand-dark leading-tight mb-2">
+            {t("your_medical_practice") || "Tu práctica médica"},<br/>
+            {t("enhanced_by_ai") || "potenciada por"}<br/>
+            <span className="text-brand-purple">{t("artificial_intelligence") || "inteligencia artificial."}</span>
           </h2>
-          <p className="text-sm text-gray-600 max-w-[320px] leading-relaxed">
-            {t("save_time_make_better_decisions")}
+          <p className="text-xs text-gray-600 leading-relaxed">
+            {t("save_time_make_better_decisions") || "Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente."}
           </p>
         </div>
 
         {/* Prominent Doctor Profile Card */}
-        <div className="bg-white/90 backdrop-blur-md rounded-3xl p-4 shadow-soft border border-gray-100 flex items-center gap-4">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-md shrink-0 border-2 border-brand-blue/30 bg-slate-100">
+        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-soft border border-gray-100 flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md shrink-0 border border-gray-200 bg-slate-100">
             <img 
-              src="/images/ai_doctor_bg.jpg" 
-              alt={t("doctor_profile")} 
+              src={doctorPhoto} 
+              alt={doctorName} 
               className="w-full h-full object-cover" 
-              onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doctor&background=0D8ABC&color=fff'; }} 
+              onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Dr+Ruiz&background=4F46E5&color=fff'; }} 
             />
           </div>
           <div className="flex-1 min-w-0">
@@ -99,8 +116,8 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               {t("online") || "En Línea"}
             </div>
-            <h3 className="font-extrabold text-gray-900 text-sm truncate">{t("doctor") || "Médico Especialista"}</h3>
-            <p className="text-[11px] text-gray-500 truncate">{t("verified_specialist") || "Especialista Clínico Verificado"}</p>
+            <h3 className="font-extrabold text-gray-900 text-sm truncate">{doctorName}</h3>
+            <p className="text-[11px] text-gray-500 truncate">{doctorSpecialty} · {doctorProfile?.license_number || 'Verificado'}</p>
           </div>
         </div>
       </div>
@@ -248,6 +265,12 @@ const DoctorHome = ({ onNavigate, onLogout }) => {
         if (tab === 'more') onNavigate('more');
       }} isDoctor={true} />
     </div>
+
+    {/* DESKTOP VIEW */}
+    <div className="hidden lg:block">
+      <DoctorHomeDesktop onNavigate={onNavigate} onLogout={onLogout} doctorProfile={doctorProfile} />
+    </div>
+    </>
   );
 };
 
