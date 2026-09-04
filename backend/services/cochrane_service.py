@@ -9,8 +9,8 @@ class CochraneService:
 
     def __init__(self):
         self.api_key = getenv("PUBMED_API_KEY", "")
-        self.email = getenv("PUBMED_EMAIL", "")
-        self.tool = getenv("PUBMED_TOOL", "")
+        self.email = getenv("PUBMED_EMAIL", "developer@example.com")
+        self.tool = getenv("PUBMED_TOOL", "rag_app")
 
     def _get_base_params(self) -> dict:
         params = {

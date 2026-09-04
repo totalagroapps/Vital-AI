@@ -151,16 +151,27 @@ from database import get_db
 router = APIRouter()
 
 
+def get_medical_search_service() -> MedicalSearchService:
+    return MedicalSearchService(
+        pubmed_service=PubMedService(),
+        clinical_trials_service=ClinicalTrialsService(),
+        cochrane_service=CochraneService()
+    )
+
+
 @router.post('/api/medical/search', response_model=MedicalSearchResponse)
 async def medical_search(request: MedicalSearchRequest, db: AsyncSession=Depends(get_db)):
-    service = get_medical_search_service()
-    query = request.query
+    query = (request.query or "").strip()
+    if not query:
+        return {'results': []}
+
     try:
-        result = (await service.search(query=query, max_results=request.max_results))
+        service = get_medical_search_service()
+        result = await service.search(query=query, max_results=request.max_results)
         if isinstance(result, list):
             return {'results': result}
         return result
     except Exception as e:
         logging.error(f'Error en búsqueda médica: {e}')
-        raise HTTPException(status_code=500, detail='No fue posible realizar la búsqueda médica.')
+        raise HTTPException(status_code=500, detail=f'No fue posible realizar la búsqueda médica: {str(e)}')
 

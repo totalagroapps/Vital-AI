@@ -1,49 +1,61 @@
 import { useState, useEffect } from 'react';
 import { Search, Loader2, ExternalLink, BookOpen, AlertCircle, X } from 'lucide-react';
+import { useLanguage } from './contexts/LanguageContext';
 
 export default function MedicalSearchModal({ isOpen, onClose, userProfile, token, apiUrl }) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchResults = async (searchQuery = query) => {
+    const q = (searchQuery || '').trim();
+    if (!q) {
+      setResults([]);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const url = apiUrl + '/api/medical/search';
+      const url = `${apiUrl}/api/medical/search`;
       const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          query: searchQuery,
+          query: q,
           max_results: 10,
-          user_id: 1 // hardcoded or userProfile.id if available
+          user_id: 1
         }),
       });
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.detail || 'Ocurrió un error al buscar');
+        let errMsg = 'Ocurrió un error al buscar';
+        try {
+          const errData = await response.json();
+          errMsg = errData.detail || errMsg;
+        } catch (e) {}
+        throw new Error(errMsg);
       }
 
       const data = await response.json();
       setResults(data.results || []);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Error al conectar con el servidor.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Cuando el paciente abre el modal, buscamos automáticamente basado en sus enfermedades
     if (isOpen) {
-      setQuery('');
-      fetchResults('');
+      const condition = userProfile?.chronic_conditions?.split(',')?.[0]?.trim();
+      const initialQuery = condition && condition.toLowerCase() !== 'ninguna' ? condition : 'salud preventiva';
+      setQuery(initialQuery);
+      fetchResults(initialQuery);
     }
   }, [isOpen]);
 

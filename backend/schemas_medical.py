@@ -14,7 +14,7 @@ class NormalizedDocument(BaseModel):
 class MedicalSearchRequest(BaseModel):
     query: str = ""
     max_results: int = 10
-    user_id: int
+    user_id: Optional[int] = 1
 
 class MedicalSearchResponse(BaseModel):
     results: List[NormalizedDocument]
