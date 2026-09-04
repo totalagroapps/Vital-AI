@@ -170,34 +170,71 @@ async def register(request: RegisterRequest, db: AsyncSession=Depends(get_db)):
 
 
 @router.post('/api/auth/register-doctor')
-async def register_doctor(username: str=Form(...), password: str=Form(...), full_name: str=Form(...), specialty: str=Form(...), license_number: str=Form(...), experience_years: int=Form(...), location: str=Form(...), languages: str=Form(...), bio: str=Form(None), diploma_file: UploadFile=File(None), profile_pic_file: UploadFile=File(None), db: AsyncSession=Depends(get_db)):
-    result = (await db.execute(select(models.User).where((models.User.username == username))))
+async def register_doctor(
+    username: str=Form(...),
+    password: str=Form(...),
+    full_name: str=Form(...),
+    specialty: str=Form("Medicina General"),
+    license_number: str=Form(""),
+    experience_years: str=Form("0"),
+    location: str=Form(""),
+    languages: str=Form("Español"),
+    bio: str=Form(None),
+    diploma_file: UploadFile=File(None),
+    profile_pic_file: UploadFile=File(None),
+    db: AsyncSession=Depends(get_db)
+):
+    clean_username = username.strip().lower()
+    result = (await db.execute(select(models.User).where((models.User.username == clean_username))))
     if result.scalars().first():
         raise HTTPException(status_code=400, detail='El usuario/correo ya está registrado')
+    
+    try:
+        exp_val = int(experience_years)
+    except:
+        import re
+        nums = re.findall(r'\d+', str(experience_years))
+        exp_val = int(nums[0]) if nums else 0
+
     diploma_url = None
     profile_pic_url = None
-    if (diploma_file and s3_client):
-        diploma_bytes = (await diploma_file.read())
-        diploma_key = f'doctors/diplomas/{uuid.uuid4()}_{diploma_file.filename}'
+    if (diploma_file and diploma_file.filename and s3_client):
         try:
-            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=diploma_key, Body=diploma_bytes, ContentType=diploma_file.content_type)
+            diploma_bytes = (await diploma_file.read())
+            diploma_key = f'doctors/diplomas/{uuid.uuid4()}_{diploma_file.filename}'
+            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=diploma_key, Body=diploma_bytes, ContentType=diploma_file.content_type or 'application/pdf')
             diploma_url = diploma_key
-        except ClientError as e:
-            logging.error(f'S3 Upload Error: {e}')
-            raise HTTPException(status_code=500, detail='Error subiendo el diploma.')
-    if (profile_pic_file and s3_client):
-        pic_bytes = (await profile_pic_file.read())
-        pic_key = f'doctors/profiles/{uuid.uuid4()}_{profile_pic_file.filename}'
+        except Exception as e:
+            logging.error(f'S3 Upload Error for diploma: {e}')
+            # We log error but don't crash registration if R2 is unavailable
+            diploma_url = f"local_pending/{diploma_file.filename}"
+
+    if (profile_pic_file and profile_pic_file.filename and s3_client):
         try:
-            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=pic_key, Body=pic_bytes, ContentType=profile_pic_file.content_type)
+            pic_bytes = (await profile_pic_file.read())
+            pic_key = f'doctors/profiles/{uuid.uuid4()}_{profile_pic_file.filename}'
+            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=pic_key, Body=pic_bytes, ContentType=profile_pic_file.content_type or 'image/jpeg')
             profile_pic_url = pic_key
-        except ClientError as e:
-            logging.error(f'S3 Upload Error: {e}')
-            raise HTTPException(status_code=500, detail='Error subiendo la foto de perfil.')
-    new_user = models.User(username=username, hashed_password=get_password_hash(password), role='doctor')
+        except Exception as e:
+            logging.error(f'S3 Upload Error for profile pic: {e}')
+            profile_pic_url = None
+
+    new_user = models.User(username=clean_username, hashed_password=get_password_hash(password), role='doctor')
     db.add(new_user)
     (await db.flush())
-    new_profile = models.SpecialistProfile(user_id=new_user.id, full_name=full_name, specialty=specialty, license_number=license_number, experience_years=experience_years, location=location, languages=languages, bio=bio, diploma_url=diploma_url, profile_pic_url=profile_pic_url, is_verified=False)
+    new_profile = models.SpecialistProfile(
+        user_id=new_user.id,
+        full_name=full_name,
+        specialty=specialty,
+        license_number=license_number,
+        experience_years=exp_val,
+        location=location,
+        languages=languages,
+        bio=bio,
+        diploma_url=diploma_url,
+        profile_pic_url=profile_pic_url,
+        is_verified=False
+    )
     db.add(new_profile)
     (await db.commit())
     access_token = create_access_token(data={'sub': new_user.id})

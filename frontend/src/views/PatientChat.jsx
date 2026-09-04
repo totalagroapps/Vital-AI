@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare, MessageCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,7 +23,8 @@ const PatientChat = ({
   sessions,
   loadSession,
   startNewSession,
-  currentSessionId
+  currentSessionId,
+  onOpenDoctorDirectory
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -68,6 +69,25 @@ const PatientChat = ({
     try { recognition.start(); } catch (e) { setIsListening(false); }
   };
 
+  const extractSpecialty = (raw) => {
+    if (!raw) return 'Medicina General';
+    const text = String(raw);
+    const match = text.match(/(?:Especialidad|Especialista|Derivaci[óo]n)(?:\s+a\s+la\s+que\s+deber[íi]a\s+acudir)?(?:\s+sugerida|\s+recomendada)?\s*[:*]\s*([A-Za-zÁÉÍÓÚáéíóúñÑ\s]+?)(?:\.|\n|\*|$)/i);
+    if (match && match[1]) {
+      const candidate = match[1].trim().replace(/^\*+|\*+$/g, '');
+      if (candidate.length > 2 && candidate.length < 35) {
+        return candidate;
+      }
+    }
+    const keywords = ['Cardiología', 'Traumatología', 'Dermatología', 'Neurología', 'Pediatría', 'Ginecología', 'Oftalmología', 'Psiquiatría', 'Medicina General'];
+    for (const kw of keywords) {
+      if (new RegExp(`\\b${kw}\\b`, 'i').test(text)) {
+        return kw;
+      }
+    }
+    return 'Medicina General';
+  };
+
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -103,6 +123,15 @@ const PatientChat = ({
               <span>{sessions.length}</span>
             </button>
           )}
+          <button 
+            type="button" 
+            onClick={() => onOpenDoctorDirectory?.()} 
+            className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-brand-purple font-semibold text-xs flex items-center gap-1 transition-all active:scale-95 border border-purple-200"
+            title="Directorio de Especialistas"
+          >
+            <Stethoscope size={14} />
+            <span className="hidden sm:inline">Especialistas</span>
+          </button>
         </div>
 
         <div className="flex flex-col items-center">
@@ -156,10 +185,63 @@ const PatientChat = ({
                 {isUser ? (
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text || msg.content}</p>
                 ) : (
-                  <div className="text-sm prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-gray-50 prose-pre:text-gray-800">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {msg.text || msg.content}
-                    </ReactMarkdown>
+                  <div>
+                    <div className="text-sm prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-gray-50 prose-pre:text-gray-800">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.text || msg.content}
+                      </ReactMarkdown>
+                    </div>
+
+                    {/* Detección de reporte final de triaje para ofrecer cita médica y WhatsApp */}
+                    {Boolean(
+                      (msg.text || msg.content) && (
+                        (msg.text || msg.content).includes("Informe de Prediagnóstico") ||
+                        (msg.text || msg.content).includes("Prediagnóstico y Triaje") ||
+                        (msg.text || msg.content).includes("Especialidad a la que debería acudir") ||
+                        (msg.text || msg.content).includes("Nivel de urgencia")
+                      )
+                    ) && (
+                      <div className="mt-4 pt-3 border-t border-purple-100 bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-blue-50/80 rounded-2xl p-4 border border-purple-200/80 shadow-xs">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="w-7 h-7 rounded-xl bg-brand-purple text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <Sparkles size={15} />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-800 block">
+                              Orientación de Triaje Finalizada
+                            </span>
+                            <span className="text-[10px] font-semibold text-brand-purple">
+                              Especialidad sugerida: {extractSpecialty(msg.text || msg.content)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
+                          Puedes conectar de inmediato con especialistas certificados para recibir diagnóstico formal o agendar una consulta médica.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => onOpenDoctorDirectory?.(extractSpecialty(msg.text || msg.content))}
+                            className="px-3.5 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                          >
+                            <Stethoscope size={14} />
+                            <span>Ver Especialistas ({extractSpecialty(msg.text || msg.content)})</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const spec = extractSpecialty(msg.text || msg.content);
+                              const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica preliminar en VitalAI con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
+                              window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
+                          >
+                            <MessageCircle size={14} />
+                            <span>WhatsApp Inmediato</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

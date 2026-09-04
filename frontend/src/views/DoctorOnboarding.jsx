@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, Headphones, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
 
@@ -16,29 +16,96 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    name: '',
+    surname: '',
+    fullName: '',
+    dateOfBirth: '',
+    country: 'España',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    specialty: 'Medicina General',
+    license: '',
+    college: '',
+    collegeCountry: 'España',
+    experience: '5',
+    subspecialty: '',
+    bio: '',
+    clinicName: '',
+    clinicAddress: '',
+    city: 'Madrid',
+    postalCode: '',
+    clinicPhone: '',
+    website: '',
+    languages: 'Español, Inglés',
+    diplomaFile: null,
+    idDocFile: null,
+    profilePicFile: null,
+    termsAccepted: true
+  });
+
+  const diplomaInputRef = React.useRef(null);
+  const idDocInputRef = React.useRef(null);
+  const profilePicInputRef = React.useRef(null);
+
+  const updateField = (key, value) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+    if (submitError) setSubmitError('');
+  };
 
   const handleNext = async () => {
+    setSubmitError('');
+
+    // Step 1 validation
+    if (currentStep === 1) {
+      const email = (formData.email || '').trim();
+      const pwd = formData.password || '';
+      const name = (formData.name || formData.fullName || '').trim();
+      if (!email || !pwd || !name) {
+        setSubmitError('Por favor completa los campos obligatorios: Nombre, Correo y Contraseña.');
+        return;
+      }
+      if (pwd.length < 6) {
+        setSubmitError('La contraseña debe tener al menos 6 caracteres.');
+        return;
+      }
+      if (formData.confirmPassword && pwd !== formData.confirmPassword) {
+        setSubmitError('Las contraseñas no coinciden.');
+        return;
+      }
+      if (!formData.termsAccepted) {
+        setSubmitError('Debes aceptar los Términos de Servicio y la Política de Privacidad.');
+        return;
+      }
+    }
+
     if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
       return;
     }
     
-    // Final Step Submission
+    // Final Step 4 -> 5 Submission
     setIsSubmitting(true);
     setSubmitError('');
     
     try {
       const form = new FormData();
-      form.append('username', formData.email);
+      const cleanEmail = (formData.email || '').trim().toLowerCase();
+      const computedFullName = (formData.fullName || `${formData.name || ''} ${formData.surname || ''}`).trim() || 'Dr. Profesional';
+      
+      form.append('username', cleanEmail);
       form.append('password', formData.password);
-      form.append('full_name', formData.fullName);
-      form.append('specialty', formData.specialty);
-      form.append('license_number', formData.license);
-      form.append('experience_years', formData.experience);
-      form.append('location', formData.location);
-      form.append('languages', formData.languages);
-      form.append('bio', formData.bio);
+      form.append('full_name', computedFullName);
+      form.append('specialty', formData.specialty || 'Medicina General');
+      form.append('license_number', formData.license || 'COL-12345');
+      form.append('experience_years', String(formData.experience || '5'));
+      
+      const computedLocation = [formData.clinicName, formData.city, formData.country].filter(Boolean).join(', ') || 'España';
+      form.append('location', computedLocation);
+      form.append('languages', formData.languages || 'Español');
+      form.append('bio', formData.bio || `Especialista en ${formData.specialty || 'Medicina General'} con dedicación a la atención clínica personalizada.`);
       
       if (formData.diplomaFile) form.append('diploma_file', formData.diplomaFile);
       if (formData.profilePicFile) form.append('profile_pic_file', formData.profilePicFile);
@@ -51,20 +118,25 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       const data = await res.json();
       
       if (res.ok) {
-        // Success! Set token and go to success step
+        // Success! Set token and role, go to step 5
         localStorage.setItem('med_token', data.access_token);
-        localStorage.setItem('med_role', data.role);
+        localStorage.setItem('med_role', 'doctor');
         setCurrentStep(5);
       } else {
         setSubmitError(data.detail || 'Error al registrar el médico');
       }
     } catch (e) {
-      setSubmitError('Error de conexión con el servidor');
+      console.error(e);
+      setSubmitError('Error de conexión con el servidor. Intenta de nuevo.');
     }
     
     setIsSubmitting(false);
   };
-  const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const handleBack = () => {
+    setSubmitError('');
+    setCurrentStep(prev => Math.max(prev - 1, 1));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans overflow-x-hidden">
@@ -174,48 +246,94 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
               {/* Data Sections */}
               <div className="space-y-6">
                 
+                {submitError && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium flex items-center gap-2">
+                    <Info size={16} className="text-red-500 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
                 {/* 1. Datos personales */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                   <h3 className="font-bold text-brand-purple mb-4">1. Datos personales</h3>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nombre</label>
-                      <input type="text" placeholder="Ingresa tu nombre" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nombre *</label>
+                      <input 
+                        type="text" 
+                        value={formData.name}
+                        onChange={(e) => updateField('name', e.target.value)}
+                        placeholder="Ingresa tu nombre" 
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                      />
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Apellidos</label>
-                      <input type="text" placeholder="Ingresa tus apellidos" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                      <input 
+                        type="text" 
+                        value={formData.surname}
+                        onChange={(e) => updateField('surname', e.target.value)}
+                        placeholder="Ingresa tus apellidos" 
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                      />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Fecha de nacimiento</label>
-                      <input type="date" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500" />
+                      <input 
+                        type="date" 
+                        value={formData.dateOfBirth}
+                        onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500" 
+                      />
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold text-gray-700 mb-1.5">País de residencia</label>
-                      <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500 bg-white">
-                        <option>Selecciona tu país</option>
-                        <option>España</option>
-                        <option>México</option>
+                      <select 
+                        value={formData.country}
+                        onChange={(e) => updateField('country', e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
+                      >
+                        <option value="España">España</option>
+                        <option value="México">México</option>
+                        <option value="Colombia">Colombia</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Chile">Chile</option>
+                        <option value="Estados Unidos">Estados Unidos</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Correo electrónico</label>
-                      <input type="email" placeholder="tu@email.com" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Correo electrónico *</label>
+                      <input 
+                        type="email" 
+                        value={formData.email}
+                        onChange={(e) => updateField('email', e.target.value)}
+                        placeholder="tu@email.com" 
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                      />
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Teléfono</label>
                       <div className="flex gap-2">
                         <select className="w-24 border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50 text-gray-700 outline-none">
                           <option>🇪🇸 +34</option>
+                          <option>🇲🇽 +52</option>
+                          <option>🇨🇴 +57</option>
+                          <option>🇦🇷 +54</option>
                         </select>
-                        <input type="tel" placeholder="600 123 456" className="flex-1 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                        <input 
+                          type="tel" 
+                          value={formData.phone}
+                          onChange={(e) => updateField('phone', e.target.value)}
+                          placeholder="600 123 456" 
+                          className="flex-1 border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                        />
                       </div>
                     </div>
                   </div>
@@ -226,23 +344,40 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                   <h3 className="font-bold text-brand-purple mb-4">2. Crea tu contraseña</h3>
                   <div className="grid grid-cols-2 gap-4 mb-2">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Crea una contraseña segura</label>
-                      <input type="password" placeholder="Crea una contraseña segura" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Crea una contraseña segura *</label>
+                      <input 
+                        type="password" 
+                        value={formData.password}
+                        onChange={(e) => updateField('password', e.target.value)}
+                        placeholder="Crea una contraseña segura" 
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                      />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Confirma tu contraseña</label>
-                      <input type="password" placeholder="Repite tu contraseña" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Confirma tu contraseña *</label>
+                      <input 
+                        type="password" 
+                        value={formData.confirmPassword}
+                        onChange={(e) => updateField('confirmPassword', e.target.value)}
+                        placeholder="Repite tu contraseña" 
+                        className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                      />
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-400">Mínimo 8 caracteres, incluye mayúsculas, minúsculas, números y símbolos.</p>
+                  <p className="text-[10px] text-gray-400">Mínimo 6 caracteres, incluye números o letras.</p>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 pb-12">
                    <label className="flex items-center gap-2 cursor-pointer">
-                     <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-purple focus:ring-brand-purple" />
+                     <input 
+                       type="checkbox" 
+                       checked={formData.termsAccepted}
+                       onChange={(e) => updateField('termsAccepted', e.target.checked)}
+                       className="w-4 h-4 rounded border-gray-300 text-brand-purple focus:ring-brand-purple" 
+                     />
                      <span className="text-xs text-gray-600 font-medium">He leído y acepto los <span className="text-brand-purple">Términos de servicio</span> y la <span className="text-brand-purple">Política de privacidad</span>.</span>
                    </label>
-                   <button onClick={handleNext} className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors">
+                   <button onClick={handleNext} className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md">
                      Continuar <ArrowRight size={16} />
                    </button>
                 </div>
@@ -321,78 +456,162 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 <div className="grid grid-cols-3 gap-6 mb-6">
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Especialidad principal</label>
-                    <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500 bg-white">
-                      <option>Selecciona tu especialidad</option>
-                      <option>Medicina General</option>
-                      <option>Cardiología</option>
+                    <select 
+                      value={formData.specialty}
+                      onChange={(e) => updateField('specialty', e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
+                    >
+                      <option value="Medicina General">Medicina General</option>
+                      <option value="Cardiología">Cardiología</option>
+                      <option value="Dermatología">Dermatología</option>
+                      <option value="Traumatología">Traumatología</option>
+                      <option value="Pediatría">Pediatría</option>
+                      <option value="Neurología">Neurología</option>
+                      <option value="Ginecología">Ginecología</option>
+                      <option value="Oftalmología">Oftalmología</option>
+                      <option value="Psiquiatría">Psiquiatría</option>
+                      <option value="Endocrinología">Endocrinología</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nº de colegiado</label>
-                    <input type="text" placeholder="Ingresa tu número" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.license}
+                      onChange={(e) => updateField('license', e.target.value)}
+                      placeholder="Ingresa tu número" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Colegio profesional</label>
-                    <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500 bg-white">
-                      <option>Selecciona tu colegio</option>
-                    </select>
+                    <input 
+                      type="text" 
+                      value={formData.college}
+                      onChange={(e) => updateField('college', e.target.value)}
+                      placeholder="Ej. Colegio Oficial de Médicos" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-6 mb-8">
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">País del colegio</label>
-                    <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500 bg-white">
-                      <option>Selecciona tu país</option>
+                    <select 
+                      value={formData.collegeCountry}
+                      onChange={(e) => updateField('collegeCountry', e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
+                    >
+                      <option value="España">España</option>
+                      <option value="México">México</option>
+                      <option value="Colombia">Colombia</option>
+                      <option value="Argentina">Argentina</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Años de experiencia</label>
-                    <select className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-500 bg-white">
-                      <option>Selecciona</option>
+                    <select 
+                      value={formData.experience}
+                      onChange={(e) => updateField('experience', e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
+                    >
+                      <option value="1">1 año</option>
+                      <option value="3">2 a 4 años</option>
+                      <option value="5">5 a 9 años</option>
+                      <option value="10">10 a 14 años</option>
+                      <option value="15">15 o más años</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Subespecialidad (opcional)</label>
-                    <input type="text" placeholder="Ingresa tu subespecialidad" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Idiomas de consulta</label>
+                    <input 
+                      type="text" 
+                      value={formData.languages}
+                      onChange={(e) => updateField('languages', e.target.value)}
+                      placeholder="Español, Inglés..." 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                 </div>
 
                 <h4 className="font-bold text-brand-dark text-sm mb-3">Sobre ti (opcional)</h4>
                 <div className="mb-8">
                   <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Breve descripción profesional</label>
-                  <textarea rows="4" placeholder="Cuéntanos brevemente sobre tu trayectoria profesional, áreas de interés..." className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none resize-none"></textarea>
-                  <div className="text-right text-[10px] text-gray-400 mt-1">0/300</div>
+                  <textarea 
+                    rows="4" 
+                    value={formData.bio}
+                    onChange={(e) => updateField('bio', e.target.value)}
+                    placeholder="Cuéntanos brevemente sobre tu trayectoria profesional, áreas de interés..." 
+                    className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none resize-none"
+                  />
+                  <div className="text-right text-[10px] text-gray-400 mt-1">{(formData.bio || '').length}/300</div>
                 </div>
 
                 <h4 className="font-bold text-brand-dark text-sm mb-3">Dirección profesional</h4>
                 <div className="grid grid-cols-2 gap-6 mb-4">
                    <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nombre de la clínica / centro</label>
-                    <input type="text" placeholder="Ingresa el nombre de tu centro" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.clinicName}
+                      onChange={(e) => updateField('clinicName', e.target.value)}
+                      placeholder="Ingresa el nombre de tu centro" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Dirección</label>
-                    <input type="text" placeholder="Ingresa la dirección" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.clinicAddress}
+                      onChange={(e) => updateField('clinicAddress', e.target.value)}
+                      placeholder="Ingresa la dirección" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-4 gap-6 mb-8">
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Ciudad</label>
-                    <input type="text" placeholder="Ciudad" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.city}
+                      onChange={(e) => updateField('city', e.target.value)}
+                      placeholder="Ciudad" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Código postal</label>
-                    <input type="text" placeholder="Postal" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.postalCode}
+                      onChange={(e) => updateField('postalCode', e.target.value)}
+                      placeholder="Postal" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Teléfono de consulta</label>
-                    <input type="text" placeholder="Teléfono" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.clinicPhone}
+                      onChange={(e) => updateField('clinicPhone', e.target.value)}
+                      placeholder="Teléfono" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Sitio web (opcional)</label>
-                    <input type="text" placeholder="www.tusitio.com" className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" />
+                    <input 
+                      type="text" 
+                      value={formData.website}
+                      onChange={(e) => updateField('website', e.target.value)}
+                      placeholder="www.tusitio.com" 
+                      className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
+                    />
                   </div>
                 </div>
                 
@@ -423,38 +642,87 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 <h3 className="font-bold text-brand-dark text-lg mb-1">Verificación profesional</h3>
                 <p className="text-xs text-gray-500 mb-8">Sube tus documentos para validar tu identidad y credenciales. Es 100% seguro.</p>
                 
+                {submitError && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium flex items-center gap-2 mb-6">
+                    <Info size={16} className="text-red-500 shrink-0" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
+                <input 
+                  type="file" 
+                  ref={idDocInputRef} 
+                  className="hidden" 
+                  accept=".pdf,.png,.jpg,.jpeg" 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) updateField('idDocFile', e.target.files[0]);
+                  }} 
+                />
+
+                <input 
+                  type="file" 
+                  ref={diplomaInputRef} 
+                  className="hidden" 
+                  accept=".pdf,.png,.jpg,.jpeg" 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) updateField('diplomaFile', e.target.files[0]);
+                  }} 
+                />
+
                 <div className="grid grid-cols-2 gap-8 mb-8">
-                  <div className="border border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer transition-colors group">
+                  <div 
+                    onClick={() => idDocInputRef.current?.click()}
+                    className={`border rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group ${
+                      formData.idDocFile ? 'border-green-300 bg-green-50/40' : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
                     <div className="w-12 h-12 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <UserSquare2 size={24}/>
                     </div>
                     <h4 className="font-bold text-sm text-brand-dark mb-2">Documento de identidad</h4>
                     <p className="text-xs text-gray-500 mb-4 px-4">DNI, pasaporte o documento oficial válido.</p>
-                    <button className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors">
-                      <UploadCloud size={14}/> Subir archivo
+                    <button type="button" className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors shadow-sm">
+                      <UploadCloud size={14}/> {formData.idDocFile ? 'Cambiar archivo' : 'Subir archivo'}
                     </button>
-                    <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                    {formData.idDocFile ? (
+                      <p className="text-xs text-green-700 font-semibold mt-3 flex items-center gap-1">
+                        <Check size={14} className="text-green-600"/> {formData.idDocFile.name}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                    )}
                   </div>
 
-                  <div className="border border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 cursor-pointer transition-colors group">
+                  <div 
+                    onClick={() => diplomaInputRef.current?.click()}
+                    className={`border rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group ${
+                      formData.diplomaFile ? 'border-green-300 bg-green-50/40' : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
                     <div className="w-12 h-12 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <FileText size={24}/>
                     </div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-2">Certificado de colegiación</h4>
-                    <p className="text-xs text-gray-500 mb-4 px-4">Certificado vigente de tu colegio médico.</p>
-                    <button className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors">
-                      <UploadCloud size={14}/> Subir archivo
+                    <h4 className="font-bold text-sm text-brand-dark mb-2">Diploma o Certificado de Colegiación</h4>
+                    <p className="text-xs text-gray-500 mb-4 px-4">Certificado vigente de tu colegio médico o título.</p>
+                    <button type="button" className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors shadow-sm">
+                      <UploadCloud size={14}/> {formData.diplomaFile ? 'Cambiar archivo' : 'Subir archivo'}
                     </button>
-                    <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                    {formData.diplomaFile ? (
+                      <p className="text-xs text-green-700 font-semibold mt-3 flex items-center gap-1">
+                        <Check size={14} className="text-green-600"/> {formData.diplomaFile.name}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-brand-green mb-8 bg-green-50/50 p-4 rounded-lg">
-                   <Lock size={16}/> Tu información está protegida mediante encriptación y será verificada de forma segura por nuestro equipo.
+                   <Lock size={16}/> Tu información está protegida mediante encriptación y se almacena de forma segura en la nube.
                 </div>
                 
                 <div className="flex items-center justify-end pt-4 border-t border-gray-100">
-                   <button onClick={handleNext} className="bg-brand-purple text-white px-10 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors">
+                   <button onClick={handleNext} className="bg-brand-purple text-white px-10 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md">
                      Verificar y continuar <ArrowRight size={16} />
                    </button>
                 </div>
@@ -481,13 +749,22 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 <h3 className="font-bold text-brand-dark text-2xl mb-2">Completa tu perfil profesional</h3>
                 <p className="text-sm text-gray-500 mb-6">Ayuda a tus pacientes a conocerte mejor. Añade información adicional si deseas ofrecer una experiencia más cercana y personalizada.</p>
                 
-                <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex gap-4 items-start mb-8">
-                  <div className="text-brand-blue"><Info size={20}/></div>
-                  <div>
-                    <h4 className="font-bold text-sm text-brand-dark">Este paso es opcional y no afecta a la aprobación de tu cuenta.</h4>
-                    <p className="text-xs text-gray-600">Puedes omitirlo y completarlo más adelante desde los ajustes de tu perfil.</p>
+                {submitError && (
+                  <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium flex items-center gap-2 mb-6">
+                    <Info size={16} className="text-red-500 shrink-0" />
+                    <span>{submitError}</span>
                   </div>
-                </div>
+                )}
+
+                <input 
+                  type="file" 
+                  ref={profilePicInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) updateField('profilePicFile', e.target.files[0]);
+                  }} 
+                />
 
                 <div className="space-y-4">
                   {/* Item 1 */}
@@ -500,54 +777,33 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                           <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">OPCIONAL</span>
                         </div>
                         <p className="text-xs text-gray-500">Añade una foto para que los pacientes puedan reconocerte.</p>
+                        {formData.profilePicFile && (
+                          <p className="text-xs text-green-700 font-semibold mt-1 flex items-center gap-1">
+                            <Check size={12} className="text-green-600"/> {formData.profilePicFile.name}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    <button className="border border-gray-200 bg-white text-brand-purple px-5 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-gray-50">
-                      <UploadCloud size={14}/> Subir foto
-                    </button>
-                  </div>
-
-                  {/* Item 2 */}
-                  <div className="flex items-center justify-between py-4 border-b border-gray-100">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-brand-purple"><ImageIcon size={20}/></div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-brand-dark">Imágenes de tu clínica</h4>
-                          <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">OPCIONAL</span>
-                        </div>
-                        <p className="text-xs text-gray-500">Comparte imágenes de tu consulta o equipo profesional.</p>
-                      </div>
-                    </div>
-                    <button className="border border-gray-200 bg-white text-brand-purple px-5 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-gray-50">
-                      <UploadCloud size={14}/> Añadir imágenes
-                    </button>
-                  </div>
-
-                  {/* Item 3 */}
-                  <div className="flex items-center justify-between py-4 border-b border-gray-100">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-brand-purple"><Video size={20}/></div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-brand-dark">Vídeo de presentación</h4>
-                          <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">OPCIONAL</span>
-                        </div>
-                        <p className="text-xs text-gray-500">Sube un breve vídeo contándoles a tus pacientes sobre ti.</p>
-                      </div>
-                    </div>
-                    <button className="border border-gray-200 bg-white text-brand-purple px-5 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-gray-50">
-                      <UploadCloud size={14}/> Subir vídeo
+                    <button 
+                      type="button" 
+                      onClick={() => profilePicInputRef.current?.click()}
+                      className="border border-gray-200 bg-white text-brand-purple px-5 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-gray-50 shadow-sm"
+                    >
+                      <UploadCloud size={14}/> {formData.profilePicFile ? 'Cambiar foto' : 'Subir foto'}
                     </button>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between pt-10">
-                   <button onClick={handleNext} className="text-gray-500 font-bold text-sm hover:text-gray-700">
-                     Omitir por ahora
+                   <button onClick={handleNext} disabled={isSubmitting} className="text-gray-500 font-bold text-sm hover:text-gray-700">
+                     Omitir y finalizar
                    </button>
-                   <button onClick={handleNext} className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors">
-                     Continuar y finalizar inscripción <ArrowRight size={16} />
+                   <button 
+                     onClick={handleNext} 
+                     disabled={isSubmitting}
+                     className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md disabled:opacity-50"
+                   >
+                     {isSubmitting ? 'Registrando...' : 'Finalizar inscripción'} <ArrowRight size={16} />
                    </button>
                 </div>
               </div>
@@ -556,7 +812,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
             {/* Right Col - Graphic */}
             <div className="hidden lg:flex lg:col-span-4 flex-col pt-4">
                <div className="bg-[#f8f9fc] rounded-3xl overflow-hidden shadow-sm h-full flex flex-col p-8">
-                 <img src="https://i.pravatar.cc/300?u=a042581f4e29026024d" className="w-full h-48 object-cover rounded-xl mb-6 shadow-md border-4 border-white" />
+                 <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400" className="w-full h-48 object-cover rounded-xl mb-6 shadow-md border-4 border-white" />
                  
                  <h3 className="text-xl font-bold text-brand-dark mb-4 leading-tight">Tu perfil, tu mejor carta de presentación</h3>
                  <p className="text-sm text-gray-600 mb-8 leading-relaxed">Conecta con más pacientes y genera más confianza mostrando quién eres y dónde trabajas.</p>
@@ -567,13 +823,6 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                      <div>
                        <p className="text-xs font-bold text-gray-800">Muestra tu foto profesional</p>
                        <p className="text-[11px] text-gray-500 mt-0.5">Haz que los pacientes te reconozcan.</p>
-                     </div>
-                   </div>
-                   <div className="flex items-start gap-3">
-                     <div className="w-8 h-8 rounded-full bg-white text-brand-purple flex items-center justify-center flex-shrink-0 shadow-sm"><ImageIcon size={16}/></div>
-                     <div>
-                       <p className="text-xs font-bold text-gray-800">Comparte imágenes de tu consulta</p>
-                       <p className="text-[11px] text-gray-500 mt-0.5">Muéstrales tu espacio y tu equipo.</p>
                      </div>
                    </div>
                  </div>
@@ -603,40 +852,49 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
               </div>
 
               <h1 className="text-4xl font-black text-brand-dark mb-4">¡Cuenta creada con éxito!</h1>
-              <p className="text-lg text-gray-600 mb-12">Hemos recibido tu información correctamente.</p>
+              <p className="text-lg text-gray-600 mb-8">Tu cuenta profesional de médico en VitalAI ya está lista.</p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-10">
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-brand-purple mb-4">
                     <UserSquare2 size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Verificación en proceso</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Nuestro equipo revisará tus documentos en un plazo de 24 a 48 horas hábiles.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">Acceso Inmediato</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">Puedes ingresar a tu dashboard y explorar el historial de pacientes y el Copiloto IA.</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-4">
                     <Globe size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Te notificaremos por email</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Te enviaremos un correo cuando tu cuenta sea verificada y puedas acceder.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">Visibilidad de Especialista</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">Tu perfil se lista en el directorio para derivaciones de pacientes del triaje clínico.</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-brand-green mb-4">
                     <Lock size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Tu información está segura</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Protegemos tus datos bajo los más altos estándares de seguridad y privacidad.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">Máxima Seguridad</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">Tus diplomas y datos están protegidos en nuestra nube médica con encriptación.</p>
                 </div>
               </div>
 
-              <button onClick={() => window.location.href='/'} className="bg-brand-purple text-white px-16 py-4 rounded-xl font-bold text-lg flex items-center gap-3 hover:bg-purple-700 transition-colors shadow-lg hover:shadow-purple-500/30 mb-6">
-                Ir al inicio <ArrowRight size={20} />
+              <button 
+                onClick={() => {
+                  localStorage.setItem('med_role', 'doctor');
+                  window.location.href = '/medico';
+                }} 
+                className="bg-brand-purple text-white px-12 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-purple-700 transition-colors shadow-lg hover:shadow-purple-500/30 mb-4"
+              >
+                Entrar a mi Panel Médico <ArrowRight size={20} />
               </button>
               
-              <button onClick={() => window.location.href='/'} className="flex items-center gap-2 text-brand-purple font-bold text-sm hover:text-purple-700">
-                <User size={16} /> Completar mi perfil más tarde
+              <button 
+                onClick={() => window.location.href = '/'} 
+                className="text-gray-500 hover:text-gray-700 font-semibold text-sm"
+              >
+                Ir al inicio
               </button>
 
             </div>

@@ -18,6 +18,7 @@ import BottomNav from './components/BottomNav';
 import DoctorOnboarding from './views/DoctorOnboarding';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
+import DoctorDirectoryModal from './components/DoctorDirectoryModal';
 import { 
   FolderOpen,
   Upload,
@@ -145,6 +146,8 @@ export default function App() {
   const [showMedicalHistory, setShowMedicalHistory] = useState(false);
   const [showDocuments, setShowDocuments] = useState(false);
   const [showMedicalSearch, setShowMedicalSearch] = useState(false);
+  const [showDoctorDirectory, setShowDoctorDirectory] = useState(false);
+  const [doctorDirectorySpecialty, setDoctorDirectorySpecialty] = useState('');
   const [documents, setDocuments] = useState([]);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [docType, setDocType] = useState('informe_medico');
@@ -896,22 +899,41 @@ ${text}`], {type: 'text/plain'});
     if (tab === 'general_chat') navigate('/paciente/chat');
     if (tab === 'documents') navigate('/paciente/documentos');
     if (tab === 'search') setShowMedicalSearch(true);
-    if (tab === 'doctors') alert('Búsqueda de médicos en desarrollo...');
+    if (tab === 'doctors') {
+      setDoctorDirectorySpecialty('');
+      setShowDoctorDirectory(true);
+    }
   };
+
+  const GlobalDoctorDirectoryModal = (
+    <DoctorDirectoryModal 
+      isOpen={showDoctorDirectory} 
+      onClose={() => setShowDoctorDirectory(false)} 
+      recommendedSpecialty={doctorDirectorySpecialty} 
+      apiUrl={API_URL} 
+      patientName={patientProfile?.full_name || username} 
+    />
+  );
 
   // The GlobalBottomNav is fixed, so it always floats above all route content
   const GlobalBottomNav = (
-    <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
+    <>
+      {GlobalDoctorDirectoryModal}
+      <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
+    </>
   );
 
 
   
   if (path === '/paciente/mas') {
     return (
-      <PatientMore 
-        onNavigate={handleBottomNav} 
-        onLogout={handleLogout} 
-      />
+      <>
+        {GlobalDoctorDirectoryModal}
+        <PatientMore 
+          onNavigate={handleBottomNav} 
+          onLogout={handleLogout} 
+        />
+      </>
     );
   }
   if (path === '/paciente/tratamientos') {
@@ -948,7 +970,8 @@ ${text}`], {type: 'text/plain'});
           onLogout={handleLogout}
           onNavigate={(screen) => {
             if (screen === 'doctors') {
-              alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
+              setDoctorDirectorySpecialty('');
+              setShowDoctorDirectory(true);
             } else {
               if (screen === 'history') {
                 fetchPatientProfile();
@@ -987,7 +1010,8 @@ ${text}`], {type: 'text/plain'});
           onLogout={handleLogout}
           onNavigate={(screen) => {
             if (screen === 'doctors') {
-              alert('El módulo de especialistas se encuentra en desarrollo. ¡Pronto disponible!');
+              setDoctorDirectorySpecialty('');
+              setShowDoctorDirectory(true);
             } else {
               if (screen === 'history') {
                 fetchPatientProfile();
@@ -1056,6 +1080,10 @@ ${text}`], {type: 'text/plain'});
           loadSession={loadSession}
           startNewSession={startNewSession}
           currentSessionId={currentSessionId}
+          onOpenDoctorDirectory={(spec) => {
+            setDoctorDirectorySpecialty(spec || '');
+            setShowDoctorDirectory(true);
+          }}
         />
         {GlobalBottomNav}
       </>
@@ -1087,6 +1115,10 @@ ${text}`], {type: 'text/plain'});
           loadSession={loadSession}
           startNewSession={startNewSession}
           currentSessionId={currentSessionId}
+          onOpenDoctorDirectory={(spec) => {
+            setDoctorDirectorySpecialty(spec || '');
+            setShowDoctorDirectory(true);
+          }}
         />
         {GlobalBottomNav}
       </>
@@ -1868,7 +1900,8 @@ ${text}`], {type: 'text/plain'});
                             <button 
                               onClick={() => {
                                 setShowHistory(false);
-                                setShowDoctors(true);
+                                setDoctorDirectorySpecialty(t.recommended_specialty || '');
+                                setShowDoctorDirectory(true);
                               }}
                               className="text-xs bg-brand hover:bg-brand-hover text-white px-3 py-2 rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
                             >
@@ -1938,6 +1971,7 @@ ${text}`], {type: 'text/plain'});
         apiUrl={API_URL} 
         userProfile={patientProfile} 
       />
+      {GlobalDoctorDirectoryModal}
     </div>
   );
 }

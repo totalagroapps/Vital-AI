@@ -153,8 +153,6 @@ router = APIRouter()
 
 @router.post('/api/triage/chat')
 async def triage_chat(request: TriageRequest):
-    ollama_host = os.getenv('OLLAMA_HOST', 'https://molecular-playable-saga.ngrok-free.dev')
-    client = ollama.AsyncClient(host=ollama_host, timeout=60.0)
     lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
     target_lang = lang_map.get(request.language, 'Spanish (Español)')
     lang_instruction = f'''
