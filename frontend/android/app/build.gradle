@@ -51,9 +51,39 @@ tasks.register('syncWebAssets', Copy) {
     into 'src/main/assets/public'
 }
 
+tasks.register('copyApkToPublicDownload') {
+    doLast {
+        def debugApk = file("${buildDir}/outputs/apk/debug/app-debug.apk")
+        if (debugApk.exists()) {
+            try {
+                def publicTarget = file("${projectDir}/../../public/download/mivor-latest.apk")
+                publicTarget.parentFile.mkdirs()
+                java.nio.file.Files.copy(
+                    debugApk.toPath(),
+                    publicTarget.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                )
+                def backendTarget = file("${projectDir}/../../../../backend/downloads/mivor-latest.apk")
+                backendTarget.parentFile.mkdirs()
+                java.nio.file.Files.copy(
+                    debugApk.toPath(),
+                    backendTarget.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                )
+                println ">>> [Auto-Copy APK] Copiado con éxito a public/download/mivor-latest.apk y backend/downloads/mivor-latest.apk <<<"
+            } catch (Exception e) {
+                println ">>> [Auto-Copy APK] Nota: " + e.getMessage()
+            }
+        }
+    }
+}
+
 tasks.configureEach { task ->
     if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
         task.dependsOn 'syncWebAssets'
+    }
+    if (task.name == 'assembleDebug') {
+        task.finalizedBy 'copyApkToPublicDownload'
     }
 }
 

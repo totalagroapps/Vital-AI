@@ -12,8 +12,10 @@ on:
 
 jobs:
   build-apk:
-    name: Build VitalAI Android APK
+    name: Build MIVOR.ai Android APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -52,9 +54,27 @@ jobs:
         working-directory: frontend/android
         run: ./gradlew clean assembleDebug --stacktrace --info --no-daemon
 
+      - name: Prepare MIVOR Latest APK
+        run: |
+          mkdir -p frontend/public/download
+          cp frontend/android/app/build/outputs/apk/debug/app-debug.apk frontend/public/download/mivor-latest.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: VitalAI-Android-APK
-          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          name: MIVOR-Android-APK
+          path: frontend/public/download/mivor-latest.apk
           retention-days: 30
+
+      - name: Publish to GitHub Releases (latest)
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        with:
+          tag_name: latest
+          name: "MIVOR.ai Latest Build"
+          body: "Descarga directa de la última versión compilada automáticamente de MIVOR.ai para Android."
+          draft: false
+          prerelease: false
+          files: frontend/public/download/mivor-latest.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
