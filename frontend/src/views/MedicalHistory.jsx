@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { 
-  ArrowLeft, ShieldCheck, Activity, Edit3, QrCode, 
+  ArrowLeft, ShieldCheck, ShieldAlert, Activity, Edit3, QrCode, 
   Droplet, Heart, Scale, Ruler, Pill, AlertTriangle, 
   Calendar, Phone, Save, X, FileText
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
+import EmergencyPassportModal from './EmergencyPassportModal';
 
 const MedicalHistory = ({
   patientProfile,
@@ -15,6 +16,7 @@ const MedicalHistory = ({
 }) => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
+  const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const triageSessions = sessions?.filter(s => s.type === "triage") || [];
 
   // Calculate age
@@ -194,19 +196,24 @@ const MedicalHistory = ({
           </p>
         </div>
 
-        {/* QR Passport - Refined Glass Card */}
-        <div className="bg-brand-purple text-white rounded-[28px] p-6 shadow-glow relative overflow-hidden flex items-center justify-between mb-6">
+        {/* QR Passport & Chapa Militar - Refined Glass Card */}
+        <div className="bg-brand-purple text-white rounded-[28px] p-6 shadow-glow relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="relative z-10">
-            <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-              <ShieldCheck size={20} />
-              {t("medical_identity")}
-            </h3>
+          <div className="relative z-10 flex-1 w-full">
+            <div className="flex items-center justify-between sm:justify-start gap-2 mb-1">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <ShieldCheck size={20} />
+                {t("medical_identity")}
+              </h3>
+              <span className="text-[10px] uppercase font-black tracking-widest bg-red-500/80 text-white px-2 py-0.5 rounded-full border border-red-400/40">
+                Urgencias
+              </span>
+            </div>
             <p className="text-xs text-white/90 font-medium mb-1">{patientProfile.full_name || t("patient")}</p>
-            <p className="text-[10px] text-white/70 mb-4">{t("scan_in_emergencies")}</p>
+            <p className="text-[10px] text-white/70 mb-3">{t("scan_in_emergencies")}</p>
             
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 mb-4">
               <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
                 <Droplet size={14} className="text-white" /> {patientProfile.blood_type || '--'}
               </div>
@@ -215,25 +222,45 @@ const MedicalHistory = ({
               </div>
             </div>
             
-            <div className="flex gap-2 mt-4">
-              <button onClick={handleExportPDF} className="w-full flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-brand-purple hover:bg-gray-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm">
-                <FileText size={16} /> {t("export_passport_pdf")}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button 
+                type="button"
+                onClick={() => setShowEmergencyModal(true)} 
+                className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-brand-purple hover:bg-gray-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
+              >
+                <ShieldAlert size={15} className="text-red-600" />
+                <span>Chapa Militar QR</span>
+              </button>
+
+              <button 
+                type="button"
+                onClick={handleExportPDF} 
+                className="flex items-center justify-center gap-2 text-[11px] font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 py-2 rounded-xl transition-all active:scale-95"
+              >
+                <FileText size={15} />
+                <span>{t("export_passport_pdf")}</span>
               </button>
             </div>
           </div>
 
-          <div className="relative z-10">
+          <button 
+            type="button"
+            onClick={() => setShowEmergencyModal(true)}
+            className="relative z-10 transition-transform active:scale-95 hover:opacity-95 focus:outline-none"
+            title="Ampliar Chapa Militar y Código QR"
+          >
             {patientProfile.qr_code_base64 ? (
-              <div className="bg-white p-2 rounded-2xl shadow-inner">
-                <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-20 h-20 rounded-xl" />
+              <div className="bg-white p-2.5 rounded-2xl shadow-xl flex flex-col items-center">
+                <img src={`data:image/png;base64,${patientProfile.qr_code_base64}`} alt="QR Code" className="w-24 h-24 rounded-xl" />
+                <span className="text-[9px] font-bold text-slate-700 mt-1 uppercase tracking-wider">Tocar para ampliar</span>
               </div>
             ) : (
-              <div className="w-20 h-20 bg-black/20 rounded-2xl flex flex-col items-center justify-center text-white/50 border border-white/30 border-dashed p-3">
-                <QrCode size={20} className="mb-1" />
+              <div className="w-24 h-24 bg-black/20 rounded-2xl flex flex-col items-center justify-center text-white/50 border border-white/30 border-dashed p-3">
+                <QrCode size={24} className="mb-1" />
                 <span className="text-[9px] text-center">{t("missing_data")}</span>
               </div>
             )}
-          </div>
+          </button>
         </div>
 
         {!isEditing ? (
@@ -465,6 +492,14 @@ const MedicalHistory = ({
         )}
 
       </div>
+
+      {/* Chapa Militar & Pasaporte QR de Emergencia Modal */}
+      <EmergencyPassportModal
+        isOpen={showEmergencyModal}
+        onClose={() => setShowEmergencyModal(false)}
+        patientProfile={patientProfile}
+        onExportPDF={handleExportPDF}
+      />
     </div>
   );
 };

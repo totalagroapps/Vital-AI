@@ -151,6 +151,80 @@ from database import get_db
 router = APIRouter()
 
 
+@router.get('/api/public/emergency/{patient_id}')
+async def get_public_emergency_profile(patient_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Endpoint PÚBLICO para emergencias médicas, paramédicos y servicios de urgencia.
+    Accesible escaneando la 'Chapa Militar' o Pasaporte QR de Salud VitalAI.
+    No requiere autenticación.
+    """
+    from sqlalchemy.future import select
+    # 1. Búsqueda por user_id directo
+    stmt = select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id)
+    res = await db.execute(stmt)
+    profile = res.scalars().first()
+
+    if not profile:
+        # Fallback a id numérico o por full_name
+        if patient_id.isdigit():
+            res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id)))
+            profile = res.scalars().first()
+        if not profile:
+            res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.full_name == patient_id))
+            profile = res.scalars().first()
+
+    if not profile:
+        raise HTTPException(status_code=404, detail="Ficha médica de emergencia no encontrada.")
+
+    # 2. Triajes recientes (resumen de urgencia no confidencial)
+    triage_res = await db.execute(
+        select(models.TriageSession)
+        .where(models.TriageSession.user_id == profile.user_id)
+        .order_by(models.TriageSession.created_at.desc())
+    )
+    triages = triage_res.scalars().all()
+    recent_triages = []
+    for t in triages[:3]:
+        recent_triages.append({
+            'id': t.id,
+            'category': t.category,
+            'status': t.status,
+            'recommended_specialty': t.recommended_specialty,
+            'created_at': t.created_at.isoformat() if t.created_at else None
+        })
+
+    # 3. URL de emergencia pública y QR Code
+    frontend_base = os.getenv('FRONTEND_URL', 'https://vitalai.up.railway.app').rstrip('/')
+    emergency_url = f"{frontend_base}/emergencia/{profile.user_id}"
+
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(emergency_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='black', back_color='white')
+    buffered = BytesIO()
+    img.save(buffered, format='PNG')
+    qr_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    return {
+        'user_id': profile.user_id,
+        'full_name': profile.full_name or 'Paciente No Identificado',
+        'date_of_birth': profile.date_of_birth or '',
+        'gender': profile.gender or 'No especificado',
+        'blood_type': profile.blood_type or 'N/D',
+        'allergies': profile.allergies or 'Ninguna conocida',
+        'chronic_conditions': profile.chronic_conditions or 'Ninguna registrada',
+        'current_medications': profile.current_medications or 'Ninguna registrada',
+        'emergency_contact': profile.emergency_contact or 'No especificado',
+        'height': profile.height or '--',
+        'weight': profile.weight or '--',
+        'preferred_language': profile.preferred_language or 'es',
+        'emergency_url': emergency_url,
+        'qr_code_base64': qr_base64,
+        'recent_triages': recent_triages,
+        'updated_at': profile.updated_at.isoformat() if profile.updated_at else None
+    }
+
+
 @router.get('/api/patient/profile')
 async def get_patient_profile(db: AsyncSession=Depends(get_db), user_id: str=Depends(get_current_user_id)):
     from sqlalchemy.future import select
@@ -158,15 +232,12 @@ async def get_patient_profile(db: AsyncSession=Depends(get_db), user_id: str=Dep
     profile = result.scalars().first()
     if (not profile):
         return {}
-    qr_data = f'''FICHA MEDICA DE EMERGENCIA
-Nombre: {profile.full_name}
-Sangre: {profile.blood_type}
-Altura: {(profile.height or 'N/D')} | Peso: {(profile.weight or 'N/D')}
-Alergias: {(profile.allergies or 'Ninguna')}
-Condiciones: {(profile.chronic_conditions or 'Ninguna')}
-Contacto: {(profile.emergency_contact or 'No especificado')}'''
+    
+    frontend_base = os.getenv('FRONTEND_URL', 'https://vitalai.up.railway.app').rstrip('/')
+    emergency_url = f"{frontend_base}/emergencia/{user_id}"
+
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data(qr_data)
+    qr.add_data(emergency_url)
     qr.make(fit=True)
     img = qr.make_image(fill_color='black', back_color='white')
     buffered = BytesIO()
@@ -178,7 +249,22 @@ Contacto: {(profile.emergency_contact or 'No especificado')}'''
     for t in triages:
         if t.final_report:
             triage_list.append({'id': t.id, 'category': t.category, 'status': t.status, 'final_report': t.final_report, 'recommended_specialty': t.recommended_specialty, 'created_at': (t.created_at.isoformat() if t.created_at else None)})
-    return {'full_name': profile.full_name, 'date_of_birth': profile.date_of_birth, 'gender': profile.gender, 'blood_type': profile.blood_type, 'allergies': profile.allergies, 'chronic_conditions': profile.chronic_conditions, 'current_medications': profile.current_medications, 'emergency_contact': profile.emergency_contact, 'height': profile.height, 'weight': profile.weight, 'qr_code_base64': qr_base64, 'triages': triage_list}
+    return {
+        'user_id': profile.user_id,
+        'full_name': profile.full_name,
+        'date_of_birth': profile.date_of_birth,
+        'gender': profile.gender,
+        'blood_type': profile.blood_type,
+        'allergies': profile.allergies,
+        'chronic_conditions': profile.chronic_conditions,
+        'current_medications': profile.current_medications,
+        'emergency_contact': profile.emergency_contact,
+        'height': profile.height,
+        'weight': profile.weight,
+        'qr_code_base64': qr_base64,
+        'emergency_url': emergency_url,
+        'triages': triage_list
+    }
 
 
 

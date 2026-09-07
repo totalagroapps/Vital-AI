@@ -16,6 +16,7 @@ import PatientChat from './views/PatientChat';
 import MedicalHistory from './views/MedicalHistory';
 import BottomNav from './components/BottomNav';
 import DoctorOnboarding from './views/DoctorOnboarding';
+import EmergencyPassportView from './views/EmergencyPassportView';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
 import DoctorDirectoryModal from './components/DoctorDirectoryModal';
@@ -837,6 +838,10 @@ ${text}`], {type: 'text/plain'});
 
   if (path === '/registro/medico') {
     return <DoctorOnboarding onNavigateLogin={() => navigate('/login')} />;
+  }
+
+  if (path.startsWith('/emergencia/')) {
+    return <EmergencyPassportView apiUrl={API_URL} onNavigateLogin={() => navigate('/login')} />;
   }
 
   if (!token && path !== '/login') {

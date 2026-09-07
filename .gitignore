@@ -13,8 +13,14 @@ backend/.env
 
 # Limpieza Produccion
 backend/*.db
+*.db
+*.sqlite
+*.sqlite3
 *.pdf
 *.docx
 *.xlsx
 dump.txt
 node_modules/
+.idea/
+*.iml
+frontend/android/.idea/
