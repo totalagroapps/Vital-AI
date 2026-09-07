@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import { Stethoscope, Lock, User, ArrowRight, HeartPulse, ChevronLeft, Sparkles, Activity } from 'lucide-react';
@@ -76,7 +76,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               MIVOR<span className="text-teal-600">.ai</span>
             </h1>
             <p className="text-xs uppercase tracking-widest font-black text-teal-700 mt-1.5">
-              Better Health. Brighter Lives.
+              {t('app_slogan')}
             </p>
             <p className="text-gray-500 mt-3 font-medium text-sm">{t("portal_select")}</p>
           </div>
@@ -237,3 +237,4 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
     </div>
   );
 }
+

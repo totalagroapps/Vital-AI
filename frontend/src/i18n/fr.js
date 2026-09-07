@@ -1,4 +1,5 @@
-export const fr = {
+﻿export const fr = {
+  app_slogan: "UNE MEILLEURE SANTÉ. DES VIES PLUS ÉCLATANTES.",
   my_triage_history: "Mon Historique de Triage",
     urgency: "Urgence",
     attention: "Attention",
@@ -416,4 +417,5 @@ export const fr = {
     privacy: "Confidentialité",
     visual_theme: "Thème visuel",
 };
+
 

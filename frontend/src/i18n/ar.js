@@ -1,4 +1,5 @@
-export const ar = {
+﻿export const ar = {
+  app_slogan: "صحة أفضل. حياة أجمل.",
   my_triage_history: "تاريخ الفرز الخاص بي",
     urgency: "استعجال",
     attention: "انتباه",
@@ -416,4 +417,5 @@ export const ar = {
     privacy: "الخصوصية",
     visual_theme: "المظهر المرئي",
 };
+
 

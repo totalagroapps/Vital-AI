@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -56,7 +56,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
                      MIVOR<span className="text-teal-600">.ai</span>
                    </span>
                    <span className="text-[9px] uppercase font-bold tracking-widest text-teal-700 leading-none mt-1">
-                     Better health. Brighter lives.
+                     {t('app_slogan')}
                    </span>
                  </div>
                </div>

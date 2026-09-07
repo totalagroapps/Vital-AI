@@ -137,26 +137,29 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
 
       {/* Background */}
       {step !== 'results' && (
-        <div className="absolute top-0 right-0 w-full h-[400px] z-0 overflow-hidden pointer-events-none">
-          <img src="/images/abstract_woman_bg.jpg" alt="" className="absolute top-0 right-0 w-[85%] md:w-[60%] h-full object-cover opacity-80"
-            style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 40%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 40%)' }} />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
+        <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
+          <img src="/images/abstract_woman_bg.jpg" alt="" className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply"
+            style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)' }} />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
+          <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
         </div>
       )}
 
       <div className="relative z-10 px-6 pt-12">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <button onClick={step === 'results' ? () => setStep('upload') : onBack}
-            className="w-10 h-10 flex items-center justify-center">
-            <ArrowLeft className="text-gray-900" size={24} />
+            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-all">
+            <ArrowLeft className="text-slate-800" size={20} />
           </button>
-          <h2 className="text-lg font-bold text-gray-900">
-            {step === 'upload' && t("analyze_your_medical_tests")}
-            {step === 'analyzing' && t("analyzing_document")}
-            {step === 'results' && t("analysis_results")}
-          </h2>
+          <div className="px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs">
+            <h2 className="text-sm md:text-base font-extrabold text-slate-900 tracking-tight">
+              {step === 'upload' && t("analyze_your_medical_tests")}
+              {step === 'analyzing' && t("analyzing_document")}
+              {step === 'results' && t("analysis_results")}
+            </h2>
+          </div>
           <div className="w-10" />
         </div>
 
@@ -164,24 +167,25 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
         {step === 'upload' && (
           <>
             {/* Hero */}
-            <div className="mb-6">
-              <h2 className="text-[30px] leading-tight font-bold text-gray-900 mb-3 max-w-[80%]">
+            <div className="mb-6 relative max-w-full md:max-w-[75%]">
+              <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
+              <h2 className="relative z-10 text-[26px] md:text-[30px] leading-tight font-extrabold text-slate-900 mb-1.5 drop-shadow-xs">
                 {t("upload_your_tests")}
                 <br /> {t("get_clear_answers")}
                 <br />
-                <span className="text-brand-green">{t("clear_and_understandable")}</span>
+                <span className="text-teal-700 font-black tracking-tight">{t("clear_and_understandable")}</span>
               </h2>
-              <p className="text-sm text-gray-500 max-w-[75%]">
+              <p className="relative z-10 text-xs sm:text-sm font-semibold text-slate-700 max-w-[90%]">
                 {t("vitalai_extracts_interprets")}
               </p>
             </div>
 
             {/* Security */}
-            <div className="glass-card rounded-2xl p-4 flex gap-3 items-center mb-6 max-w-sm">
-              <div className="bg-brand-green/10 p-2 rounded-xl text-brand-green"><Shield size={18} /></div>
+            <div className="bg-white/90 backdrop-blur-xs border border-teal-200/60 rounded-2xl p-4 flex gap-3 items-center mb-6 max-w-sm shadow-xs">
+              <div className="bg-teal-100 p-2 rounded-xl text-teal-800 shrink-0"><Shield size={18} /></div>
               <div>
-                <p className="text-xs font-semibold text-gray-900">{t("your_information_is_protected")}</p>
-                <p className="text-[10px] text-gray-500">{t("hospital_level_privacy")}</p>
+                <p className="text-xs font-bold text-slate-900">{t("your_information_is_protected")}</p>
+                <p className="text-[10px] text-slate-600 font-medium">{t("hospital_level_privacy")}</p>
               </div>
             </div>
 
@@ -196,9 +200,9 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
             {/* Drop Zone */}
             <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
               className={`bg-white rounded-[28px] p-6 shadow-soft border-2 border-dashed mb-6 transition-all flex flex-col items-center text-center
-                ${isDragging ? 'border-brand-green bg-brand-green/5 scale-[1.01]' : 'border-gray-200'}`}>
+                ${isDragging ? 'border-teal-500 bg-teal-50/20 scale-[1.01]' : 'border-gray-200'}`}>
               <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors
-                ${isDragging ? 'bg-brand-green text-white' : 'bg-brand-green/10 text-brand-green'}`}>
+                ${isDragging ? 'bg-teal-600 text-white' : 'bg-teal-100 text-teal-800'}`}>
                 <CloudUpload size={28} />
               </div>
               <h3 className="font-bold text-gray-900 mb-1">
@@ -209,11 +213,11 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               
               <div className="flex gap-3 w-full mb-3">
                 <button onClick={() => fileInputRef.current.click()}
-                  className="flex-1 bg-brand-green/10 hover:bg-brand-green/20 text-brand-green font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 border border-brand-green/20">
+                  className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold py-3 px-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 border border-teal-200/80">
                   <ImageIcon size={18} /> {t("upload_image")}
                 </button>
                 <button onClick={() => fileInputRef.current.click()}
-                  className="flex-1 bg-brand-green hover:bg-brand-green/90 text-white font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-glow">
+                  className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md">
                   <FileText size={18} /> {t("upload_pdf")}
                 </button>
               </div>

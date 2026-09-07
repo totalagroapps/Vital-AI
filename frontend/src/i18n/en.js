@@ -1,4 +1,5 @@
-export const en = {
+﻿export const en = {
+  app_slogan: "BETTER HEALTH. BRIGHTER LIVES.",
   in_progress: "In progress",
     no_complete_report: "No complete report.",
     blood_type_label: "Blood Type",
@@ -419,3 +420,4 @@ export const en = {
     privacy: "Privacy",
     visual_theme: "Visual theme",
 };
+

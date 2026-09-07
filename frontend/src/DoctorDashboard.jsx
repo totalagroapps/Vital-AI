@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
@@ -147,7 +147,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     const bodyHtml = `
       <div class="header">
         <h1><span class="brand">MIVOR.ai</span> · Expediente Clínico Oficial</h1>
-        <p>Historial Médico Integral del Paciente · Better health. Brighter lives.</p>
+        <p>Historial Médico Integral del Paciente · {t('app_slogan')}</p>
       </div>
       
       <h2>Ficha del Paciente</h2>

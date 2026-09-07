@@ -1,4 +1,5 @@
-export const es = {
+﻿export const es = {
+  app_slogan: "MEJOR SALUD. VIDAS MÁS BRILLANTES.",
   in_progress: "En curso",
     no_complete_report: "Sin reporte completo.",
     blood_type_label: "Tipo de Sangre",
@@ -419,3 +420,4 @@ export const es = {
     privacy: "Privacidad",
     visual_theme: "Tema visual",
 };
+

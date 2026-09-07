@@ -53,7 +53,7 @@ const MedicalHistory = ({
     const bodyHtml = `
       <div class="header">
         <h1><span class="brand">MIVOR.ai</span> · ${t("medical_passport")}</h1>
-        <p>${t("emergency_info_document")} · Better health. Brighter lives.</p>
+        <p>${t("emergency_info_document")} · {t('app_slogan')}</p>
       </div>
       
       <div class="grid">
@@ -126,65 +126,69 @@ const MedicalHistory = ({
   return (
     <div className="flex flex-col min-h-screen bg-base font-sans relative pb-28 overflow-x-hidden">
       
-      {/* Background graphic (matches PatientHome and DocumentAnalyzer) */}
-      <div className="absolute top-0 right-0 w-[85%] md:w-[60%] h-[400px] z-0 overflow-hidden pointer-events-none">
+      {/* Background Graphic */}
+      <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 
           src="/images/abstract_woman_bg.jpg" 
           alt="" 
-          className="absolute top-0 right-0 w-full h-full object-cover opacity-80"
-          style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 40%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 40%)' }} 
+          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply"
+          style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)' }} 
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
+        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
       </div>
 
       <div className="relative z-10 px-6 pt-12">
         
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={onBack} className="w-10 h-10 flex items-center justify-center">
-            <ArrowLeft className="text-gray-900" size={24} />
+        <div className="flex items-center justify-between mb-6">
+          <button onClick={onBack} className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-all">
+            <ArrowLeft className="text-slate-800" size={20} />
           </button>
-          <h2 className="text-lg font-bold text-gray-900">
-            {t("medical_profile")}
-          </h2>
+          <div className="px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs">
+            <h2 className="text-sm md:text-base font-extrabold text-slate-900 tracking-tight">
+              {t("medical_profile")}
+            </h2>
+          </div>
           <button 
             type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className={`px-4 py-2.5 flex items-center gap-2 font-bold text-xs md:text-sm rounded-xl transition-all shadow-md active:scale-95 ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-brand-purple text-white hover:bg-brand-purple/90 border border-brand-purple'}`}
+            className={`px-3.5 py-1.5 flex items-center gap-1.5 font-extrabold text-xs rounded-full transition-all shadow-xs active:scale-95 ${isEditing ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100' : 'bg-teal-700 text-white hover:bg-teal-800 border border-teal-700 shadow-sm'}`}
             title={isEditing ? (t("cancel") || "Cancelar") : (t("edit_information") || "Editar Información")}
           >
-            {isEditing ? <X size={16} /> : <Edit3 size={16} />}
-            <span>{isEditing ? (t("cancel") || "Cancelar") : (t("edit_information") || "Editar Información")}</span>
+            {isEditing ? <X size={15} /> : <Edit3 size={15} />}
+            <span>{isEditing ? (t("cancel") || "Cancelar") : (t("edit_information") || "Editar")}</span>
           </button>
         </div>
 
         {/* Hero Title */}
-        <div className="mb-6">
-          <h2 className="text-[30px] leading-tight font-bold text-gray-900 mb-3 max-w-[80%]">
+        <div className="mb-6 relative max-w-full md:max-w-[75%]">
+          <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
+          <h2 className="relative z-10 text-[26px] md:text-[30px] leading-tight font-extrabold text-slate-900 mb-1.5 drop-shadow-xs">
             {t("your_info")} <br />
-            <span className="text-brand-purple">{t("centralized_clinical")}</span>
+            <span className="text-teal-700 font-black tracking-tight">{t("centralized_clinical")}</span>
           </h2>
-          <p className="text-sm text-gray-500 max-w-[85%]">
+          <p className="relative z-10 text-xs sm:text-sm font-semibold text-slate-700 max-w-[90%]">
             {t("keep_data_updated")}
           </p>
         </div>
 
         {/* QR Passport & Chapa Militar - Refined Glass Card */}
-        <div className="bg-brand-purple text-white rounded-[28px] p-6 shadow-glow relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-teal-800 text-white rounded-[28px] p-6 shadow-lg relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 border border-teal-500/20">
+          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-teal-400/20 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative z-10 flex-1 w-full">
             <div className="flex items-center justify-between sm:justify-start gap-2 mb-1">
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <ShieldCheck size={20} />
+              <h3 className="font-extrabold text-lg flex items-center gap-2 text-white">
+                <ShieldCheck size={20} className="text-teal-300" />
                 {t("medical_identity")}
               </h3>
-              <span className="text-[10px] uppercase font-black tracking-widest bg-red-500/80 text-white px-2 py-0.5 rounded-full border border-red-400/40">
+              <span className="text-[10px] uppercase font-black tracking-widest bg-red-500/90 text-white px-2 py-0.5 rounded-full border border-red-400/40">
                 Urgencias
               </span>
             </div>
             <p className="text-xs text-white/90 font-medium mb-1">{patientProfile.full_name || t("patient")}</p>
-            <p className="text-[10px] text-white/70 mb-3">{t("scan_in_emergencies")}</p>
+            <p className="text-[10px] text-teal-100/70 mb-3">{t("scan_in_emergencies")}</p>
             
             <div className="flex flex-wrap gap-2 mb-4">
               <div className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5">
@@ -199,7 +203,7 @@ const MedicalHistory = ({
               <button 
                 type="button"
                 onClick={() => setShowEmergencyModal(true)} 
-                className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-brand-purple hover:bg-gray-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
+                className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white text-teal-900 hover:bg-teal-50 backdrop-blur-sm px-4 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
               >
                 <ShieldAlert size={15} className="text-red-600" />
                 <span>Chapa Militar QR</span>
@@ -478,3 +482,4 @@ const MedicalHistory = ({
 };
 
 export default MedicalHistory;
+

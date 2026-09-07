@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
 import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,14 +11,15 @@ const PatientHome = ({ onNavigate, onLogout }) => {
     <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
       
       {/* Background Graphic */}
-      <div className="absolute top-0 right-0 w-[80%] md:w-[60%] lg:w-[50%] h-[400px] md:h-[800px] z-0 overflow-hidden pointer-events-none animate-float-slow">
+      <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[600px] z-0 overflow-hidden pointer-events-none">
         <img 
           src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-90 mix-blend-multiply"
-          style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 70%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 20%, black 70%)' }}
+          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply"
+          style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)' }}
         />
-        <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-base to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
+        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
       </div>
 
       <div className="relative z-10 px-4 pt-2">
@@ -34,16 +35,16 @@ const PatientHome = ({ onNavigate, onLogout }) => {
               />
               <span className="font-black text-xl tracking-tight text-slate-900">MIVOR<span className="text-teal-600">.ai</span></span>
             </div>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-700 ml-8 -mt-0.5">Better health. Brighter lives.</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-700 ml-8 -mt-0.5">{t('app_slogan')}</span>
           </div>
           
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <div className="relative">
-              <button className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-brand-purple shadow-sm hover:shadow-md transition-shadow">
+              <button className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-teal-700 shadow-sm hover:shadow-md transition-shadow">
                 <Bell size={14} />
               </button>
-              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></div>
+              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-teal-600 rounded-full border-2 border-white"></div>
             </div>
             <button onClick={onLogout} className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-full h-full object-cover" />
@@ -53,12 +54,12 @@ const PatientHome = ({ onNavigate, onLogout }) => {
 
         {/* Hero Section */}
         <div className="relative mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
-          <div className="absolute -inset-4 bg-gradient-to-r from-base via-base/80 to-transparent blur-md z-[-1] pointer-events-none"></div>
-          <h2 className="relative z-10 text-[22px] leading-tight font-bold text-content-primary mb-1.5">
+          <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
+          <h2 className="relative z-10 text-[23px] leading-tight font-extrabold text-slate-900 mb-1.5 drop-shadow-xs">
             {t("welcome")},<br/>
-            <span className="text-brand-purple drop-shadow-sm">{t("we_are_here_to_care_for_your_health")}</span>
+            <span className="text-teal-700 font-black tracking-tight">{t("we_are_here_to_care_for_your_health")}</span>
           </h2>
-          <p className="relative z-10 text-content-secondary text-[11px] leading-snug max-w-[90%] font-medium">
+          <p className="relative z-10 text-slate-700 text-[12px] leading-snug max-w-[90%] font-semibold">
             {t("access_all_tools_of_vitalai_to_understand_manage_and_improve_your_wellbeing")}
           </p>
         </div>

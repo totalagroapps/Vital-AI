@@ -46,24 +46,28 @@ const TriageWizard = ({ onBack, onStartChat }) => {
     <div className="min-h-screen bg-base font-sans relative overflow-x-hidden">
       
       {/* Background Graphic */}
-      <div className="absolute top-0 right-0 w-full h-[500px] z-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 
           src="/images/abstract_woman_bg.jpg" 
           alt="AI Hologram" 
-          className="absolute top-0 right-0 w-[85%] md:w-[60%] lg:w-[50%] h-[400px] md:h-full object-cover opacity-90" style={{ maskImage: "linear-gradient(to right, transparent 0%, black 40%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 40%)" }}
+          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply" 
+          style={{ maskImage: "linear-gradient(to right, transparent 0%, transparent 30%, black 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 30%, black 100%)" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-base/60 to-base" />
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
+        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
       </div>
 
       <div className="relative z-10 px-6 pt-12 pb-32">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <button onClick={onBack} className="w-10 h-10 flex items-center justify-center">
-            <ArrowLeft className="text-gray-900" size={24} />
+        <div className="flex justify-between items-center mb-6">
+          <button onClick={onBack} className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-all">
+            <ArrowLeft className="text-slate-800" size={20} />
           </button>
-          <h2 className="text-lg font-bold text-gray-900">{t('understand_your_symptoms')}</h2>
-          <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center bg-white/50 backdrop-blur">
-            <MoreHorizontal className="text-gray-600" size={20} />
+          <div className="px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs">
+            <h2 className="text-sm md:text-base font-extrabold text-slate-900 tracking-tight">{t('understand_your_symptoms')}</h2>
+          </div>
+          <button className="w-10 h-10 rounded-full border border-slate-200/80 flex items-center justify-center bg-white/90 backdrop-blur-xs text-slate-800 shadow-xs">
+            <MoreHorizontal size={20} />
           </button>
         </div>
 
@@ -72,8 +76,8 @@ const TriageWizard = ({ onBack, onStartChat }) => {
           <div className="absolute top-3 left-6 right-6 h-0.5 bg-gray-200 -z-10" />
           
           <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-brand-purple text-white flex items-center justify-center text-[10px] font-bold">1</div>
-            <span className="text-[10px] font-semibold text-brand-purple">{t('describe')}</span>
+            <div className="w-6 h-6 rounded-full bg-teal-700 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">1</div>
+            <span className="text-[10px] font-bold text-teal-800">{t('describe')}</span>
           </div>
           <div className="flex flex-col items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center text-[10px] font-bold">2</div>
@@ -90,24 +94,25 @@ const TriageWizard = ({ onBack, onStartChat }) => {
         </div>
 
         {/* Hero Title */}
-        <div className="mb-6 relative">
-          <div className="absolute right-0 top-0 bg-brand-purple text-white text-[10px] font-bold px-2 py-1 rounded-md">IA</div>
-          <h2 className="text-[32px] leading-tight font-bold text-gray-900 mb-4 max-w-[80%]">
+        <div className="mb-6 relative max-w-full md:max-w-[75%]">
+          <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
+          <div className="inline-block bg-teal-700 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full mb-2 tracking-wider">IA</div>
+          <h2 className="relative z-10 text-[26px] md:text-[32px] leading-tight font-extrabold text-slate-900 mb-2 drop-shadow-xs">
             {t('hello_im_here')} <br />
-            {t('to_understand_how')} <br />
+            <span className="text-teal-700 font-black tracking-tight">{t('to_understand_how')}</span> <br />
             {t('i_can_help_you')}
           </h2>
-          <p className="text-sm text-gray-600 max-w-[70%]">
+          <p className="relative z-10 text-xs sm:text-sm font-semibold text-slate-700 max-w-[85%]">
             {t('tell_me_what_happens')}
           </p>
         </div>
 
         {/* Info Box */}
-        <div className="glass-card rounded-2xl p-4 flex gap-3 items-start w-full max-w-sm mb-8">
-          <div className="mt-0.5 text-brand-purple border border-brand-purple/30 rounded-full p-1">
+        <div className="bg-white/90 backdrop-blur-xs border border-teal-200/60 rounded-2xl p-4 flex gap-3 items-start w-full max-w-sm mb-8 shadow-xs">
+          <div className="mt-0.5 text-teal-800 bg-teal-100 p-1.5 rounded-full">
             <Info size={16} />
           </div>
-          <p className="text-[11px] text-gray-600 leading-relaxed">
+          <p className="text-[11px] text-slate-700 font-medium leading-relaxed">
             {t('more_info_better_analysis')}
           </p>
         </div>
@@ -130,23 +135,23 @@ const TriageWizard = ({ onBack, onStartChat }) => {
 
           {/* Quick Tags */}
           <div className="flex flex-wrap gap-2 mb-8">
-            <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
+            <button className="text-[11px] text-teal-800 font-semibold bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200/60 flex items-center gap-1.5 active:scale-95 transition-all">
               <CalendarIcon /> {t('since_when')}
             </button>
-            <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
+            <button className="text-[11px] text-teal-800 font-semibold bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200/60 flex items-center gap-1.5 active:scale-95 transition-all">
               <ActivityIcon /> {t('intensity')}
             </button>
-            <button className="text-[11px] text-brand-purple font-medium bg-brand-purple/5 px-3 py-1.5 rounded-full border border-brand-purple/10 flex items-center gap-1.5">
+            <button className="text-[11px] text-teal-800 font-semibold bg-teal-50 px-3 py-1.5 rounded-full border border-teal-200/60 flex items-center gap-1.5 active:scale-95 transition-all">
               <MapPinIcon /> {t('where_do_you_feel_it')}
             </button>
-            <button className="text-[11px] text-gray-500 font-medium bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+            <button className="text-[11px] text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
               + {t('add_more')}
             </button>
           </div>
 
           {/* Voice Record */}
           <div className="flex flex-col items-center justify-center pt-4 pb-2">
-            <div className="w-full flex items-center justify-center gap-2 mb-4 text-brand-purple/30">
+            <div className="w-full flex items-center justify-center gap-2 mb-4 text-teal-700/40">
               {/* Fake Audio Waveform */}
               <div className="flex items-center gap-1">
                 {[1, 2, 1, 3, 2, 4, 2, 1, 3, 1, 2].map((h, i) => (
@@ -155,7 +160,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
               </div>
               <button 
                   onClick={toggleListening}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-inner mx-4 transition-all duration-300 ${isListening ? 'bg-brand-purple text-white shadow-glow animate-pulse scale-110' : 'bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 hover:scale-105'}`}
+                  className={`w-16 h-16 rounded-full flex items-center justify-center shadow-inner mx-4 transition-all duration-300 ${isListening ? 'bg-teal-700 text-white shadow-lg animate-pulse scale-110' : 'bg-teal-50 text-teal-800 border border-teal-200/80 hover:bg-teal-100 hover:scale-105'}`}
                 >
                   <Mic size={28} />
                 </button>
@@ -175,8 +180,8 @@ const TriageWizard = ({ onBack, onStartChat }) => {
         </div>
 
         {/* Security Badge */}
-        <div className="bg-brand-purple/5 rounded-2xl p-4 flex gap-4 items-center mb-8 relative z-20">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-brand-purple shadow-sm">
+        <div className="bg-teal-50/60 border border-teal-200/50 rounded-2xl p-4 flex gap-4 items-center mb-8 relative z-20">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-teal-800 shadow-sm shrink-0">
             <Lock size={20} />
           </div>
           <div>
@@ -187,11 +192,11 @@ const TriageWizard = ({ onBack, onStartChat }) => {
       </div>
 
       {/* Sticky Bottom Action */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-100 z-50">
+      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/95 backdrop-blur-xs border-t border-gray-100 z-50">
         <button 
           onClick={() => onStartChat(symptoms)}
           disabled={!symptoms.trim()}
-          className="w-full bg-gradient-to-r from-brand-purple to-brand-purpleLight text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-glow disabled:opacity-50 disabled:shadow-none transition-all"
+          className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:shadow-none transition-all active:scale-[0.99]"
         >
           {t('continue')} <ArrowRight size={20} />
         </button>
