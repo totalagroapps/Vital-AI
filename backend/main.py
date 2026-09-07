@@ -126,6 +126,30 @@ async def on_startup():
     try:
         async with database.engine.begin() as conn:
             await conn.run_sync(models.Base.metadata.create_all)
+
+            # Auto-migración de columnas para PostgreSQL en producción (Railway)
+            needed_cols = [
+                ("license_number", "VARCHAR"),
+                ("experience_years", "INTEGER DEFAULT 0"),
+                ("city", "VARCHAR"),
+                ("location", "VARCHAR"),
+                ("languages", "VARCHAR"),
+                ("bio", "TEXT"),
+                ("verified", "BOOLEAN DEFAULT FALSE"),
+                ("is_verified", "BOOLEAN DEFAULT FALSE"),
+                ("availability_schedule", "JSON"),
+                ("photo_url", "VARCHAR"),
+                ("diploma_url", "VARCHAR"),
+                ("profile_pic_url", "VARCHAR"),
+                ("created_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"),
+                ("updated_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
+            ]
+            for col_name, col_type in needed_cols:
+                try:
+                    await conn.execute(text(f"ALTER TABLE specialist_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
+                except Exception as col_err:
+                    logger.debug(f"Col {col_name} migration note: {col_err}")
+
         logger.info("Base metadata and tables verified.")
     except Exception as e:
         logger.warning(f"Error initializing DB tables on startup: {e}")

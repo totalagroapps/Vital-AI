@@ -15,9 +15,34 @@ from sqlalchemy.future import select
 async def seed_data():
     print("[START] Iniciando creación de tablas y población de usuario médico demo MIVOR.ai...")
 
-    # 1. Asegurar tablas creadas
+    # 1. Asegurar tablas creadas y columnas migradas
     async with database.engine.begin() as conn:
         await conn.run_sync(models.Base.metadata.create_all)
+        
+        # Asegurar columnas en specialist_profiles para Postgres
+        from sqlalchemy import text
+        needed_cols = [
+            ("license_number", "VARCHAR"),
+            ("experience_years", "INTEGER DEFAULT 0"),
+            ("city", "VARCHAR"),
+            ("location", "VARCHAR"),
+            ("languages", "VARCHAR"),
+            ("bio", "TEXT"),
+            ("verified", "BOOLEAN DEFAULT FALSE"),
+            ("is_verified", "BOOLEAN DEFAULT FALSE"),
+            ("availability_schedule", "JSON"),
+            ("photo_url", "VARCHAR"),
+            ("diploma_url", "VARCHAR"),
+            ("profile_pic_url", "VARCHAR"),
+            ("created_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"),
+            ("updated_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
+        ]
+        for col_name, col_type in needed_cols:
+            try:
+                await conn.execute(text(f"ALTER TABLE specialist_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
+            except Exception:
+                pass
+
     print("[OK] Tablas de base de datos verificadas y creadas.")
 
     async with database.AsyncSessionLocal() as session:
