@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, X, ShieldCheck } from 'lucide-react';
+import { App as CapApp } from '@capacitor/app';
 
-export const CURRENT_APP_VERSION = '1.0.0';
+export const CURRENT_APP_VERSION = '1.0.1';
 // Servidor de Railway o respaldo en version.json
 export const VERSION_CHECK_URL = 'https://vitalai.up.railway.app/api/version';
 export const FALLBACK_APK_URL = 'https://vitalai.up.railway.app/download/mivor-latest.apk';
@@ -14,6 +15,17 @@ export function UpdateModal({ t, apiUrl }) {
     let isMounted = true;
 
     async function checkVersion() {
+      // Obtener versión instalada desde Capacitor (Android) o constante de respaldo (Web)
+      let installedVersion = CURRENT_APP_VERSION;
+      try {
+        const info = await CapApp.getInfo();
+        if (info && info.version) {
+          installedVersion = info.version;
+        }
+      } catch (e) {
+        // En entorno web se usa CURRENT_APP_VERSION
+      }
+
       const candidates = [
         apiUrl ? `${apiUrl}/api/version` : null,
         VERSION_CHECK_URL,
@@ -26,7 +38,7 @@ export function UpdateModal({ t, apiUrl }) {
           const response = await fetch(url, { cache: 'no-store' });
           if (!response.ok) continue;
           const data = await response.json();
-          if (data && data.version && isNewerVersion(data.version, CURRENT_APP_VERSION)) {
+          if (data && data.version && isNewerVersion(data.version, installedVersion)) {
             if (isMounted) {
               setUpdateInfo(data);
               setIsVisible(true);
@@ -47,11 +59,17 @@ export function UpdateModal({ t, apiUrl }) {
   }, [apiUrl]);
 
   function isNewerVersion(latest, current) {
-    const latestParts = String(latest).split('.').map(Number);
-    const currentParts = String(current).split('.').map(Number);
+    if (!latest || !current) return false;
+    const cleanLatest = String(latest).replace(/^v/i, '').trim();
+    const cleanCurrent = String(current).replace(/^v/i, '').trim();
+
+    if (cleanLatest === cleanCurrent) return false;
+
+    const latestParts = cleanLatest.split('.').map(Number);
+    const currentParts = cleanCurrent.split('.').map(Number);
     for (let i = 0; i < Math.max(latestParts.length, currentParts.length); i++) {
-      const l = latestParts[i] || 0;
-      const c = currentParts[i] || 0;
+      const l = isNaN(latestParts[i]) ? 0 : latestParts[i];
+      const c = isNaN(currentParts[i]) ? 0 : currentParts[i];
       if (l > c) return true;
       if (l < c) return false;
     }
