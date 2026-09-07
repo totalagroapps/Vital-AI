@@ -1,15 +1,20 @@
+import { Printer } from '@capgo/capacitor-printer';
+import { Capacitor } from '@capacitor/core';
+
 /**
  * Utilidad segura de exportación e impresión PDF para Web y APK Android (Capacitor).
- * En Android utiliza el puente nativo AndroidPrinter (PrintManager de Android) para abrir
- * el diálogo del sistema "Guardar como PDF / Imprimir" sin abandonar la app ni bloquear el WebView.
- * En Web de escritorio utiliza un iframe invisible para no alterar la navegación ni el historial.
+ * En APK de Android utiliza @capgo/capacitor-printer que conecta directamente con
+ * el PrintManager nativo del sistema operativo ("Guardar como PDF / Imprimir") sin
+ * desviar el WebView ni bloquear la app.
+ * En Web de escritorio abre una ventana de impresión limpia sin alterar la sesión del usuario.
  */
 
-export const printHtmlContent = (title, htmlBody) => {
+export const printHtmlContent = async (title, htmlBody) => {
   const fullHtml = `<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${title || 'MIVOR.ai - Documento Clínico'}</title>
     <style>
       @page { size: auto; margin: 15mm; }
@@ -44,53 +49,67 @@ export const printHtmlContent = (title, htmlBody) => {
   </body>
 </html>`;
 
-  // 1. Si existe el puente nativo de Android (en la APK de Android)
-  if (window.AndroidPrinter && typeof window.AndroidPrinter.printHtml === 'function') {
+  // 1. En entornos nativos (Android / iOS):
+  if (Capacitor.isNativePlatform()) {
     try {
-      window.AndroidPrinter.printHtml(title, fullHtml);
+      await Printer.printHtml({
+        name: title || 'MIVOR Document',
+        html: fullHtml,
+      });
       return;
-    } catch (e) {
-      console.warn("Error usando AndroidPrinter nativo:", e);
+    } catch (err) {
+      console.warn("Fallo Printer nativo de Capacitor:", err);
     }
   }
 
-  // 2. Si estamos en navegador Web de escritorio o navegadores modernos
-  const iframe = document.createElement('iframe');
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
-  iframe.style.opacity = '0';
-  iframe.style.pointerEvents = 'none';
-  document.body.appendChild(iframe);
-
+  // 2. En entorno Web de escritorio:
+  // Abrir ventana emergente o nueva pestaña para imprimir de manera segura y limpia
   try {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(fullHtml);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        try {
+          printWindow.print();
+        } catch (e) {
+          console.warn("Error ejecutando print() en nueva ventana:", e);
+        }
+      }, 300);
+      return;
+    }
+  } catch (e) {
+    console.warn("Fallo al abrir ventana de impresión web:", e);
+  }
+
+  // Fallback con iframe
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
     const doc = iframe.contentWindow.document;
     doc.open();
     doc.write(fullHtml);
     doc.close();
-
     iframe.contentWindow.focus();
     setTimeout(() => {
       try {
         iframe.contentWindow.print();
-      } catch (err) {
-        console.warn("Fallo al imprimir desde iframe:", err);
-        try {
-          window.print();
-        } catch (e) {}
-      }
+      } catch (e) {}
       setTimeout(() => {
         try {
-          if (iframe && iframe.parentNode) {
-            document.body.removeChild(iframe);
-          }
+          if (iframe && iframe.parentNode) document.body.removeChild(iframe);
         } catch (e) {}
-      }, 3000);
-    }, 350);
+      }, 2000);
+    }, 300);
   } catch (e) {
-    console.error("Error al generar vista previa de impresión:", e);
+    console.error("Error al exportar documento:", e);
   }
 };
