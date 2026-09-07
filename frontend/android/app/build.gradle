@@ -46,7 +46,18 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+tasks.register('buildWebAssets', Exec) {
+    workingDir file("${projectDir}/../../")
+    ignoreExitValue true
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'npm run build'
+    } else {
+        commandLine 'npm', 'run', 'build'
+    }
+}
+
 tasks.register('syncWebAssets', Copy) {
+    dependsOn 'buildWebAssets'
     from '../../dist'
     into 'src/main/assets/public'
 }
