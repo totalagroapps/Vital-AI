@@ -1,4 +1,8 @@
 ﻿export const ar = {
+  new_version_available: "تحديث جديد متاح!",
+  new_version_desc: "تحديث جديد لـ MIVOR.ai جاهز للتثبيت.",
+  update_now: "تحديث الآن",
+  remind_me_later: "تذكيري لاحقاً",
   app_slogan: "صحة أفضل. حياة أجمل.",
   my_triage_history: "تاريخ الفرز الخاص بي",
     urgency: "استعجال",
@@ -417,5 +421,6 @@
     privacy: "الخصوصية",
     visual_theme: "المظهر المرئي",
 };
+
 
 

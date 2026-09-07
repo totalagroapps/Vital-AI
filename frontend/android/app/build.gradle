@@ -46,6 +46,17 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+tasks.register('syncWebAssets', Copy) {
+    from '../../dist'
+    into 'src/main/assets/public'
+}
+
+tasks.configureEach { task ->
+    if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
+        task.dependsOn 'syncWebAssets'
+    }
+}
+
 apply from: 'capacitor.build.gradle'
 
 try {

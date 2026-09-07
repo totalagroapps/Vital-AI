@@ -55,7 +55,7 @@ import PyPDF2
 from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
 
 
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -177,6 +177,29 @@ async def on_startup():
 @app.get('/health')
 def health_check():
     return {'status': 'healthy'}
+
+
+@app.get('/api/version')
+def get_version():
+    return {
+        "version": os.getenv("APP_LATEST_VERSION", "1.0.1"),
+        "apkUrl": os.getenv("APP_APK_URL", "https://vitalai.up.railway.app/download/mivor-latest.apk"),
+        "notes": os.getenv("APP_UPDATE_NOTES", "Nuevas mejoras en el portal de médicos y correcciones."),
+        "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1")
+    }
+
+
+DOWNLOADS_DIR = os.path.join(os.path.dirname(__file__), "downloads")
+os.makedirs(DOWNLOADS_DIR, exist_ok=True)
+
+
+@app.get('/download/{filename}')
+async def download_apk_file(filename: str):
+    file_path = os.path.join(DOWNLOADS_DIR, filename)
+    if os.path.exists(file_path):
+        return FileResponse(file_path, filename=filename, media_type="application/vnd.android.package-archive")
+    github_release_url = "https://github.com/totalagroapps/Vital-AI/releases/latest/download/app-release.apk"
+    return RedirectResponse(url=github_release_url, status_code=302)
 
 
 

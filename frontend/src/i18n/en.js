@@ -1,4 +1,8 @@
 ﻿export const en = {
+  new_version_available: "New version available!",
+  new_version_desc: "A new update for MIVOR.ai is ready to install with new features.",
+  update_now: "UPDATE NOW",
+  remind_me_later: "Remind me later",
   app_slogan: "BETTER HEALTH. BRIGHTER LIVES.",
   in_progress: "In progress",
     no_complete_report: "No complete report.",
@@ -420,4 +424,5 @@
     privacy: "Privacy",
     visual_theme: "Visual theme",
 };
+
 

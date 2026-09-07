@@ -1,4 +1,8 @@
 ﻿export const fr = {
+  new_version_available: "Nouvelle version disponible!",
+  new_version_desc: "Une nouvelle mise à jour de MIVOR.ai est prête à ser installée.",
+  update_now: "METTRE À JOUR",
+  remind_me_later: "Rappeler plus tard",
   app_slogan: "UNE MEILLEURE SANTÉ. DES VIES PLUS ÉCLATANTES.",
   my_triage_history: "Mon Historique de Triage",
     urgency: "Urgence",
@@ -417,5 +421,6 @@
     privacy: "Confidentialité",
     visual_theme: "Thème visuel",
 };
+
 
 

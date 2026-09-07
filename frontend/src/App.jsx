@@ -21,6 +21,7 @@ import EmergencyPassportView from './views/EmergencyPassportView';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
 import DoctorDirectoryModal from './components/DoctorDirectoryModal';
+import { UpdateModal } from './components/UpdateModal';
 import { 
   FolderOpen,
   Upload,
@@ -865,11 +866,21 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/registro/medico') {
-    return <DoctorOnboarding onNavigateLogin={() => navigate('/login')} />;
+    return (
+      <>
+        <DoctorOnboarding onNavigateLogin={() => navigate('/login')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
   }
 
   if (path.startsWith('/emergencia/')) {
-    return <EmergencyPassportView apiUrl={API_URL} onNavigateLogin={() => navigate('/login')} />;
+    return (
+      <>
+        <EmergencyPassportView apiUrl={API_URL} onNavigateLogin={() => navigate('/login')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
   }
 
   if (!token && path !== '/login') {
@@ -878,32 +889,42 @@ ${text}`], {type: 'text/plain'});
 
   if (path === '/login') {
     if (token) return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
-    return <Auth 
-      onLogin={(jwt, role) => { 
-        setToken(jwt); 
-        localStorage.setItem('med_token', jwt); 
-        if(role) { 
-          setViewMode(role); 
-          localStorage.setItem('med_role', role); 
-          navigate(role === 'doctor' ? '/medico' : '/paciente');
-        } else {
-          navigate('/paciente');
-        }
-      }} 
-      apiUrl={API_URL} 
-      onNavigateDoctorRegister={() => navigate('/registro/medico')}
-    />;
+    return (
+      <>
+        <Auth 
+          onLogin={(jwt, role) => { 
+            setToken(jwt); 
+            localStorage.setItem('med_token', jwt); 
+            if(role) { 
+              setViewMode(role); 
+              localStorage.setItem('med_role', role); 
+              navigate(role === 'doctor' ? '/medico' : '/paciente');
+            } else {
+              navigate('/paciente');
+            }
+          }} 
+          apiUrl={API_URL} 
+          onNavigateDoctorRegister={() => navigate('/registro/medico')}
+        />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
   }
 
   if (path.startsWith('/medico')) {
     if (viewMode !== 'doctor') return <Navigate to="/paciente" />;
-    return <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {
-      setToken(null); 
-      localStorage.removeItem('med_token'); 
-      localStorage.removeItem('med_role'); 
-      setViewMode('patient');
-      navigate('/login');
-    }} />;
+    return (
+      <>
+        <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {
+          setToken(null); 
+          localStorage.removeItem('med_token'); 
+          localStorage.removeItem('med_role'); 
+          setViewMode('patient');
+          navigate('/login');
+        }} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
   }
 
   // If we reach here, we are in a patient route
@@ -2016,6 +2037,8 @@ ${text}`], {type: 'text/plain'});
         userProfile={patientProfile} 
       />
       {GlobalDoctorDirectoryModal}
+      <UpdateModal t={t} apiUrl={API_URL} />
     </div>
   );
 }
+

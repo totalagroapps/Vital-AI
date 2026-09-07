@@ -1,4 +1,8 @@
 ﻿export const es = {
+  new_version_available: "¡Nueva versión disponible!",
+  new_version_desc: "Hay una actualización de MIVOR.ai lista para instalar con nuevas mejoras.",
+  update_now: "ACTUALIZAR AHORA",
+  remind_me_later: "Recordar más tarde",
   app_slogan: "MEJOR SALUD. VIDAS MÁS BRILLANTES.",
   in_progress: "En curso",
     no_complete_report: "Sin reporte completo.",
@@ -420,4 +424,5 @@
     privacy: "Privacidad",
     visual_theme: "Tema visual",
 };
+
 
