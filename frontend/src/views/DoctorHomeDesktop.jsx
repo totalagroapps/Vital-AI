@@ -206,7 +206,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
           <div className="relative w-72 h-72 lg:w-84 lg:h-84 flex items-center justify-center pointer-events-none shrink-0">
             <img 
               src="/images/doctor_ai_head.jpg" 
-              alt="Vital IA Medical Intelligence" 
+              alt="MIVOR.ai Medical Intelligence" 
               className="w-full h-full object-contain drop-shadow-sm mix-blend-multiply"
             />
           </div>
@@ -313,7 +313,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             </div>
             <div>
               <h4 className="text-sm font-extrabold text-gray-900">¿Qué necesitas hacer?</h4>
-              <p className="text-xs text-gray-500">Busca un paciente o pregunta a Vital IA...</p>
+              <p className="text-xs text-gray-500">Busca un paciente o pregunta a MIVOR.ai...</p>
             </div>
           </div>
 

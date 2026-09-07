@@ -104,7 +104,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                 PROTOCOLO DE URGENCIA
               </span>
             </div>
-            <h1 className="text-sm font-bold text-slate-300">VitalAI Emergency Response</h1>
+            <h1 className="text-sm font-bold text-slate-300">MIVOR.ai Emergency Response</h1>
           </div>
         </div>
 
@@ -329,7 +329,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
               <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-500">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-emerald-500" />
-                  <span>Historial verificado por VitalAI</span>
+                  <span>Historial verificado por MIVOR.ai</span>
                 </div>
                 <span>Actualizado: {profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Reciente'}</span>
               </div>
@@ -362,10 +362,10 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
               
               <button 
                 onClick={() => onNavigateLogin?.()}
-                className="flex items-center gap-1.5 text-xs text-brand-purple hover:text-purple-400 font-semibold transition-colors"
+                className="flex items-center gap-1.5 text-xs text-teal-400 hover:text-teal-300 font-semibold transition-colors"
               >
                 <ExternalLink size={14} />
-                <span>¿Eres el paciente? Iniciar sesión en VitalAI</span>
+                <span>¿Eres el paciente? Iniciar sesión en MIVOR.ai</span>
               </button>
             </footer>
           </>

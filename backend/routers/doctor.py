@@ -171,11 +171,11 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
             "specialty": "Médico",
             "license_number": "COL-482910",
             "city": "Madrid, España",
-            "location": "Consulta VitalAI",
+            "location": "Consulta MIVOR.ai",
             "photo_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
             "is_verified": True,
             "experience_years": 8,
-            "bio": "Especialista clínico en VitalAI."
+            "bio": "Especialista clínico en MIVOR.ai."
         }
 
     photo = profile.photo_url or profile.profile_pic_url
@@ -195,7 +195,7 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
         "specialty": profile.specialty or "Médico",
         "license_number": profile.license_number or "COL-482910",
         "city": profile.city or profile.location or "Madrid, España",
-        "location": profile.location or profile.city or "Consulta VitalAI",
+        "location": profile.location or profile.city or "Consulta MIVOR.ai",
         "photo_url": photo or "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
         "is_verified": bool(profile.is_verified or profile.verified),
         "experience_years": profile.experience_years or 8,
@@ -256,6 +256,20 @@ class AppointmentCreate(BaseModel):
 class AppointmentStatusUpdate(BaseModel):
     status: str
 
+@router.api_route('/api/doctor/seed-demo', methods=['GET', 'POST'])
+async def trigger_seed_demo():
+    """
+    Endpoint para poblar o actualizar la base de datos con el médico demo,
+    sus 15 pacientes completos con triajes y las 14 citas de la agenda médica.
+    """
+    try:
+        from scripts.seed_demo_doctor import seed_data
+        await seed_data()
+        return {"status": "ok", "message": "Demo doctor, 15 pacientes y agenda médica poblados con éxito."}
+    except Exception as e:
+        logger.error(f"Error al ejecutar seed_demo: {e}")
+        return {"status": "error", "message": str(e)}
+
 @router.get('/api/doctor/appointments')
 async def get_doctor_appointments(
     date: Optional[str] = None,
@@ -268,6 +282,7 @@ async def get_doctor_appointments(
     stmt = select(models.Appointment).where(
         or_(
             models.Appointment.doctor_id == current_user_id,
+            models.Appointment.doctor_id == 'doc-alejandro-ruiz',
             models.Appointment.doctor_id == 'doctor@mivor.ai',
             models.Appointment.doctor_id == 'all'
         )

@@ -26,22 +26,42 @@ export default function DoctorCalendarView({
   // Modal para nueva cita
   const [showNewModal, setShowNewModal] = useState(false);
   const [newPatientName, setNewPatientName] = useState('');
-  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newDate, setNewDate] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [newTime, setNewTime] = useState('10:00');
   const [newType, setNewType] = useState('presencial');
   const [newReason, setNewReason] = useState('');
   const [newTriage, setNewTriage] = useState('Verde');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fechas de referencia
-  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  // Fechas de referencia (tanto local como UTC para máxima compatibilidad)
+  const getLocalDateStr = (d = new Date()) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = useMemo(() => getLocalDateStr(new Date()), []);
+  const todayUtcStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+
   const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return getLocalDateStr(d);
+  }, []);
+  const tomorrowUtcStr = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     return d.toISOString().split('T')[0];
   }, []);
 
-  const fetchAppointments = async () => {
+  const fetchAppointments = async (canAutoSeed = true) => {
     setIsLoading(true);
     try {
       const res = await fetch(`${apiUrl}/api/doctor/appointments`, {
@@ -49,6 +69,25 @@ export default function DoctorCalendarView({
       });
       if (res.ok) {
         const data = await res.json();
+        if (data.length === 0 && canAutoSeed) {
+          // Si no hay citas, autoejecutar población demo para el usuario de prueba
+          try {
+            await fetch(`${apiUrl}/api/doctor/seed-demo`, {
+              method: 'POST',
+              headers: authHeaders
+            });
+            const retryRes = await fetch(`${apiUrl}/api/doctor/appointments`, {
+              headers: authHeaders
+            });
+            if (retryRes.ok) {
+              const retryData = await retryRes.json();
+              setAppointments(retryData);
+              return;
+            }
+          } catch (seedErr) {
+            console.warn("Auto-seed citas falló:", seedErr);
+          }
+        }
         setAppointments(data);
       } else {
         setAppointments([]);
@@ -56,6 +95,21 @@ export default function DoctorCalendarView({
     } catch (err) {
       console.error("Error al cargar citas:", err);
       setAppointments([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSeedDemo = async () => {
+    setIsLoading(true);
+    try {
+      await fetch(`${apiUrl}/api/doctor/seed-demo`, {
+        method: 'POST',
+        headers: authHeaders
+      });
+      await fetchAppointments(false);
+    } catch (err) {
+      console.error("Error al poblar citas demo:", err);
     } finally {
       setIsLoading(false);
     }
@@ -123,12 +177,16 @@ export default function DoctorCalendarView({
     }
   };
 
+  // Ayudantes para comparar fechas considerando zona horaria
+  const isDateToday = (d) => d === todayStr || d === todayUtcStr;
+  const isDateTomorrow = (d) => d === tomorrowStr || d === tomorrowUtcStr;
+
   // Filtrado de citas
   const filteredAppointments = useMemo(() => {
     return appointments.filter(a => {
       // Filtro por fecha
-      if (activeDayFilter === 'today' && a.appointment_date !== todayStr) return false;
-      if (activeDayFilter === 'tomorrow' && a.appointment_date !== tomorrowStr) return false;
+      if (activeDayFilter === 'today' && !isDateToday(a.appointment_date)) return false;
+      if (activeDayFilter === 'tomorrow' && !isDateTomorrow(a.appointment_date)) return false;
       
       // Filtro por modalidad
       if (typeFilter !== 'all' && a.appointment_type !== typeFilter) return false;
@@ -146,18 +204,18 @@ export default function DoctorCalendarView({
 
       return true;
     });
-  }, [appointments, activeDayFilter, typeFilter, statusFilter, searchQuery, todayStr, tomorrowStr]);
+  }, [appointments, activeDayFilter, typeFilter, statusFilter, searchQuery, todayStr, todayUtcStr, tomorrowStr, tomorrowUtcStr]);
 
   // Contadores de estadísticas
   const stats = useMemo(() => {
-    const todayAppts = appointments.filter(a => a.appointment_date === todayStr);
+    const todayAppts = appointments.filter(a => isDateToday(a.appointment_date));
     return {
       totalToday: todayAppts.length,
       waiting: todayAppts.filter(a => a.status === 'en_espera').length,
       telemed: todayAppts.filter(a => a.appointment_type === 'teleconsulta').length,
       completed: todayAppts.filter(a => a.status === 'completada').length
     };
-  }, [appointments, todayStr]);
+  }, [appointments, todayStr, todayUtcStr]);
 
   // Render badge de triaje
   const renderTriageBadge = (category) => {
@@ -316,13 +374,13 @@ export default function DoctorCalendarView({
               onClick={() => setActiveDayFilter('today')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${activeDayFilter === 'today' ? 'bg-slate-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
-              Hoy ({appointments.filter(a => a.appointment_date === todayStr).length})
+              Hoy ({appointments.filter(a => isDateToday(a.appointment_date)).length})
             </button>
             <button
               onClick={() => setActiveDayFilter('tomorrow')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${activeDayFilter === 'tomorrow' ? 'bg-slate-900 text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
-              Mañana ({appointments.filter(a => a.appointment_date === tomorrowStr).length})
+              Mañana ({appointments.filter(a => isDateTomorrow(a.appointment_date)).length})
             </button>
             <button
               onClick={() => setActiveDayFilter('all')}
@@ -383,17 +441,33 @@ export default function DoctorCalendarView({
               <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
                 <CalendarIcon size={26} />
               </div>
-              <h3 className="text-sm font-bold text-slate-800 mb-1">No hay citas en este filtro</h3>
+              <h3 className="text-sm font-bold text-slate-800 mb-1">
+                {appointments.length === 0 ? "Agenda médica sin citas inicializadas" : "No hay citas en este filtro"}
+              </h3>
               <p className="text-xs text-slate-500 max-w-xs mx-auto mb-4">
-                Puedes cambiar el filtro de fecha o agregar una nueva cita a tu agenda.
+                {appointments.length === 0 
+                  ? "Carga las 14 citas de demostración y 15 pacientes con triajes para comenzar a probar." 
+                  : "Puedes cambiar el filtro de fecha o agregar una nueva cita a tu agenda."}
               </p>
-              <button
-                onClick={() => setShowNewModal(true)}
-                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 shadow-sm"
-              >
-                <Plus size={15} />
-                <span>Agendar Cita Ahora</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={() => setShowNewModal(true)}
+                  className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <Plus size={15} />
+                  <span>Agendar Cita Ahora</span>
+                </button>
+                {appointments.length === 0 && (
+                  <button
+                    onClick={handleSeedDemo}
+                    disabled={isLoading}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl inline-flex items-center gap-1.5 shadow-sm"
+                  >
+                    <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+                    <span>Poblar Agenda y Pacientes Demo</span>
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             filteredAppointments.map((appt) => {

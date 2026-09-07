@@ -44,15 +44,21 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
         <div>
             {/* Header Logo & User Actions */}
             <div className="flex items-center justify-between mb-8 pr-12 relative z-50">
-               <div className="flex items-center gap-2">
-                 <div className="text-brand-purple">
-                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                     <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                     <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2" />
-                     <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
-                   </svg>
+               <div className="flex items-center gap-2.5">
+                 <img 
+                   src="/images/mivor_logo.png" 
+                   alt="MIVOR.ai" 
+                   className="w-9 h-9 object-contain drop-shadow-sm" 
+                   onError={(e) => { e.target.src = '/logo.png'; }}
+                 />
+                 <div className="flex flex-col">
+                   <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
+                     MIVOR<span className="text-teal-600">.ai</span>
+                   </span>
+                   <span className="text-[9px] uppercase font-bold tracking-widest text-teal-700 leading-none mt-1">
+                     Better health. Brighter lives.
+                   </span>
                  </div>
-                 <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
                </div>
                
                <div className="flex items-center gap-3">
@@ -74,8 +80,10 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
 
             {/* Hero text */}
             <div className="max-w-[45%] mb-8 animate-fade-in-left">
-               <h2 className="text-sm font-bold tracking-widest text-gray-800 mb-1 uppercase">{t("welcome_to")}</h2>
-               <h1 className="text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-blue-600 to-brand-purple bg-clip-text text-transparent">VITALAI</h1>
+               <h2 className="text-xs font-black tracking-widest text-teal-700 mb-1.5 uppercase">{t("welcome_to")}</h2>
+               <h1 className="text-5xl lg:text-6xl font-black mb-6 tracking-tight text-slate-900">
+                 MIVOR<span className="text-teal-600">.ai</span>
+               </h1>
                
                <h3 className="text-lg lg:text-xl font-bold text-gray-900 mb-3">{t("your_health_made_easy")}</h3>
                <p className="text-gray-600 mb-2 leading-relaxed text-xs lg:text-sm">

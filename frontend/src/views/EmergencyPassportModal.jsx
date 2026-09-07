@@ -79,7 +79,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 60px system-ui, -apple-system, sans-serif';
-      const patientName = (patientProfile?.full_name || 'PACIENTE VITALAI').toUpperCase();
+      const patientName = (patientProfile?.full_name || 'PACIENTE MIVOR.AI').toUpperCase();
       ctx.fillText(patientName, width / 2, 345);
 
       // Blood Type Hero Badge
@@ -172,7 +172,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
       // 7. Footer Instructions
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-      ctx.fillText('VITAL-AI MEDICAL PASSPORT  •  HISTORIAL DIGITAL PROTEGIDO', width / 2, 1780);
+      ctx.fillText('MIVOR.AI MEDICAL PASSPORT  •  HISTORIAL DIGITAL PROTEGIDO', width / 2, 1780);
       ctx.font = 'normal 22px system-ui, -apple-system, sans-serif';
       ctx.fillText('Los datos médicos de este código QR son públicos para uso de paramédicos y salvamento.', width / 2, 1820);
 

@@ -155,7 +155,7 @@ router = APIRouter()
 async def get_public_emergency_profile(patient_id: str, db: AsyncSession = Depends(get_db)):
     """
     Endpoint PÚBLICO para emergencias médicas, paramédicos y servicios de urgencia.
-    Accesible escaneando la 'Chapa Militar' o Pasaporte QR de Salud VitalAI.
+    Accesible escaneando la 'Chapa Militar' o Pasaporte QR de Salud MIVOR.ai.
     No requiere autenticación.
     """
     from sqlalchemy.future import select

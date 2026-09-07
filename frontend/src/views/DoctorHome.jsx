@@ -63,7 +63,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
       <div className="absolute top-14 right-0 w-[50%] h-[230px] pointer-events-none z-0 overflow-hidden">
         <img 
           src="/images/doctor_ai_head.jpg" 
-          alt="Vital IA Medical Intelligence" 
+          alt="MIVOR.ai Medical Intelligence" 
           className="w-full h-full object-contain mix-blend-multiply" 
         />
       </div>

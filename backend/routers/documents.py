@@ -198,7 +198,7 @@ async def upload_document(file: UploadFile=File(...), language: Optional[str]=Fo
             img_b64_raw = base64.b64encode(content).decode('utf-8')
             img_b64_optimized = resize_image_to_base64(img_b64_raw)
             logger.info('Analizando imagen médica directamente con GPT-4o-mini Vision...')
-            vision_system_prompt = f'''Eres VitalAI, un sistema médico de élite especialista en radiología clínica, diagnóstico por imagen, traumatología y análisis de documentos clínicos.
+            vision_system_prompt = f'''Eres MIVOR.ai, un sistema médico de élite especialista en radiología clínica, diagnóstico por imagen, traumatología y análisis de documentos clínicos.
 Tu objetivo es analizar con la máxima rigurosidad y precisión diagnóstica la imagen médica o documento que te proporciona el usuario.
 
 {lang_directive}
@@ -301,7 +301,7 @@ Texto: {response_data['extracted_text']}
         if ((summary_data_json is None) and response_data.get('extracted_text') and (len(response_data['extracted_text'].strip()) > 20)):
             try:
                 summary_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-                summary_prompt = f'''Eres VitalAI, un asistente médico experto. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+                summary_prompt = f'''Eres MIVOR.ai, un asistente médico experto. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
 {lang_directive}
 
 {{

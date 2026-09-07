@@ -126,15 +126,29 @@ async def on_startup():
     try:
         async with database.engine.begin() as conn:
             await conn.run_sync(models.Base.metadata.create_all)
+        logger.info("Base metadata and tables verified.")
+    except Exception as e:
+        logger.warning(f"Error initializing DB tables on startup: {e}")
 
+    try:
         from scripts.seed_demo_doctor import seed_data
         async with database.AsyncSessionLocal() as session:
             check_doc = await session.execute(select(models.User).where(models.User.username == 'doctor@mivor.ai'))
-            if not check_doc.scalars().first():
-                logger.info("Demo doctor not found, seeding initial demo data...")
+            has_doc = check_doc.scalars().first() is not None
+
+            check_appts = await session.execute(select(models.Appointment))
+            appts_count = len(check_appts.scalars().all())
+
+            check_patients = await session.execute(select(models.PatientProfile))
+            patients_count = len(check_patients.scalars().all())
+
+            logger.info(f"Startup DB state: doctor_exists={has_doc}, appointments={appts_count}, patient_profiles={patients_count}")
+
+            if not has_doc or appts_count < 5 or patients_count < 15:
+                logger.info("Demo data missing or incomplete, seeding demo doctor, patients and calendar...")
                 await seed_data()
     except Exception as e:
-        logger.warning(f"Error initializing DB tables / seed on startup: {e}")
+        logger.warning(f"Error seeding demo data on startup: {e}")
 
 @app.get('/health')
 def health_check():
@@ -252,7 +266,7 @@ TRIAGE_SYSTEM_PROMPT = '\nEres un Asistente Médico Inteligente diseñado para r
 from sqlalchemy.future import select
 
 
-TRIAGE_SYSTEM_PROMPT_V2 = '\nActúas como un médico de familia empático y experto en triaje clínico de la clínica MedAI (VitalAI).\nTu objetivo es orientar al paciente sobre su síntoma, determinar el nivel de urgencia y derivarlo adecuadamente, pero haciéndolo a través de una conversación natural, fluida y distendida.\n\nREGLAS DE INTERACCIÓN:\n1. Sé conversacional y empático. No suenes como un robot leyendo un cuestionario.\n2. Permite contrapreguntas. Si el paciente tiene dudas sobre lo que le estás preguntando, respóndelas amablemente.\n3. Haz las preguntas médicas necesarias (sobre dolor, duración, síntomas acompañantes, etc.) pero intégralas en la conversación de forma natural, de a una o dos a la vez. No sigas un árbol de decisiones rígido.\n4. Adapta tu lenguaje para que sea fácil de entender.\n5. NO des diagnósticos definitivos ni recetes medicamentos. Tu propósito es el triaje y la orientación.\n\nCIERRE DEL TRIAJE:\nUna vez que tengas suficiente información para hacer una recomendación segura (normalmente después de 3 a 5 intercambios), despídete y genera el reporte final.\nPara generar el reporte, DEBES incluir OBLIGATORIAMENTE la frase exacta: "📝 Informe de Prediagnóstico y Triaje" seguida de:\n- Nivel de urgencia sugerido (Alta, Media, Baja).\n- Especialidad a la que debería acudir.\n- Resumen clínico breve.\n'
+TRIAGE_SYSTEM_PROMPT_V2 = '\nActúas como un médico de familia empático y experto en triaje clínico de la clínica MIVOR.ai.\nTu objetivo es orientar al paciente sobre su síntoma, determinar el nivel de urgencia y derivarlo adecuadamente, pero haciéndolo a través de una conversación natural, fluida y distendida.\n\nREGLAS DE INTERACCIÓN:\n1. Sé conversacional y empático. No suenes como un robot leyendo un cuestionario.\n2. Permite contrapreguntas. Si el paciente tiene dudas sobre lo que le estás preguntando, respóndelas amablemente.\n3. Haz las preguntas médicas necesarias (sobre dolor, duración, síntomas acompañantes, etc.) pero intégralas en la conversación de forma natural, de a una o dos a la vez. No sigas un árbol de decisiones rígido.\n4. Adapta tu lenguaje para que sea fácil de entender.\n5. NO des diagnósticos definitivos ni recetes medicamentos. Tu propósito es el triaje y la orientación.\n\nCIERRE DEL TRIAJE:\nUna vez que tengas suficiente información para hacer una recomendación segura (normalmente después de 3 a 5 intercambios), despídete y genera el reporte final.\nPara generar el reporte, DEBES incluir OBLIGATORIAMENTE la frase exacta: "📝 Informe de Prediagnóstico y Triaje" seguida de:\n- Nivel de urgencia sugerido (Alta, Media, Baja).\n- Especialidad a la que debería acudir.\n- Resumen clínico breve.\n'
 
 
 import qrcode

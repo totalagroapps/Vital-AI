@@ -268,7 +268,7 @@ async def general_chat(
     last_msg = (request.messages[(- 1)].content.lower() if request.messages else '')
     symptom_keywords = ['me duele', 'siento', 'tengo fiebre', 'urgencia', 'sangre', 'mareo', 'vomito', 'dolor']
     is_symptom = any(((k in last_msg) for k in symptom_keywords))
-    SYSTEM_PROMPT = "Eres VitalAI, un asistente general de salud y bienestar. \nResponde de forma concisa, educada y profesional.\nREGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. \nSi el usuario pregunta por sus síntomas, dile educadamente que para hacer un pre-diagnóstico preciso debe usar el módulo 'Entiende tus síntomas' (Triaje)."
+    SYSTEM_PROMPT = """Eres MIVOR.ai, un asistente general de salud y bienestar. \nResponde de forma concisa, educada y profesional.\nREGLA CRITICA: NO TIENES ACCESO AL HISTORIAL MEDICO DEL PACIENTE AQUI. \nSi el usuario pregunta por sus síntomas, dile educadamente que para hacer un pre-diagnóstico preciso debe usar el módulo 'Entiende tus síntomas' (Triaje)."""
     if is_symptom:
         SYSTEM_PROMPT += '\n\nATENCION: El usuario parece estar describiendo un síntoma activo. Sugiere amablemente usar la sección de Triaje para un análisis formal.'
     

@@ -461,7 +461,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
                       type="button"
                       onClick={() => {
                         const diagText = analysisResult.diagnosticos?.join(', ') || analysisResult.summary || 'evaluación de estudio médico';
-                        const msg = encodeURIComponent(`Hola, acabo de subir un estudio a VitalAI con recomendación para ${matchedSpec}: ${diagText}. Me gustaría consultar disponibilidad.`);
+                        const msg = encodeURIComponent(`Hola, acabo de subir un estudio a MIVOR.ai con recomendación para ${matchedSpec}: ${diagText}. Me gustaría consultar disponibilidad.`);
                         window.open(`https://wa.me/?text=${msg}`, '_blank');
                       }}
                       className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"

@@ -144,17 +144,18 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       {/* Top Header */}
       <header className="bg-white border-b border-gray-100 py-4 px-8 flex items-center justify-between sticky top-0 z-50">
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-             <div className="text-brand-purple">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                 <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2" />
-                 <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
-               </svg>
-             </div>
-             <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
+          <div className="flex items-center gap-2">
+             <img 
+               src="/images/mivor_logo.png" 
+               alt="MIVOR.ai" 
+               className="w-7 h-7 object-contain" 
+               onError={(e) => { e.target.src = '/logo.png'; }}
+             />
+             <span className="font-black text-xl tracking-tight text-slate-900">
+               MIVOR<span className="text-teal-600">.ai</span>
+             </span>
           </div>
-          <span className="text-[10px] text-brand-blue font-bold tracking-widest uppercase ml-7">MÉDICOS</span>
+          <span className="text-[10px] text-teal-700 font-bold tracking-widest uppercase ml-9">MÉDICOS</span>
         </div>
 
                 {/* Stepper */}
@@ -200,7 +201,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
             {/* Left Col - Benefits */}
             <div className="hidden lg:flex lg:col-span-3 flex-col pt-12">
-              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">Únete a<br/><span className="text-brand-purple">VitalAI</span></h2>
+              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">Únete a<br/><span className="text-teal-600">MIVOR.ai</span></h2>
               <p className="text-sm text-gray-500 mb-10 pr-4 leading-relaxed">
                 La plataforma de IA médica hecha para profesionales como tú.
               </p>
@@ -233,7 +234,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                  <Headphones className="text-gray-400" size={24}/>
                  <div>
                    <h4 className="font-bold text-xs text-brand-dark">¿Necesitas ayuda?</h4>
-                   <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-brand-blue">soporte@vitalai.com</a></p>
+                   <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-teal-600 font-semibold">soporte@mivor.ai</a></p>
                  </div>
               </div>
             </div>
@@ -852,7 +853,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
               </div>
 
               <h1 className="text-4xl font-black text-brand-dark mb-4">¡Cuenta creada con éxito!</h1>
-              <p className="text-lg text-gray-600 mb-8">Tu cuenta profesional de médico en VitalAI ya está lista.</p>
+              <p className="text-lg text-gray-600 mb-8">Tu cuenta profesional de médico en MIVOR.ai ya está lista.</p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-10">
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
