@@ -28,6 +28,7 @@ const PatientChat = ({
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const { t, language } = useLanguage();
   const internalImageRef = useRef(null);
   const internalPdfRef = useRef(null);
@@ -134,14 +135,22 @@ const PatientChat = ({
           </button>
         </div>
 
-        <div className="flex flex-col items-center">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-1">
-            VITAL <span className="text-brand-purple">AI</span>
-          </h2>
-          <span className="text-[10px] text-brand-green font-medium flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-            {t('online')}
-          </span>
+        <div className="flex items-center gap-1.5">
+          <img 
+            src="/images/mivor_logo.png" 
+            alt="MIVOR.ai" 
+            className="w-6 h-6 object-contain" 
+            onError={(e) => { e.target.src = '/logo.png'; }}
+          />
+          <div className="flex flex-col">
+            <h2 className="text-sm font-black text-slate-900 flex items-center leading-tight">
+              MIVOR<span className="text-teal-600">.ai</span>
+            </h2>
+            <span className="text-[9px] text-teal-600 font-bold flex items-center gap-1 leading-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              {t('online')}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center justify-end">
@@ -231,7 +240,7 @@ const PatientChat = ({
                             type="button"
                             onClick={() => {
                               const spec = extractSpecialty(msg.text || msg.content);
-                              const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica preliminar en VitalAI con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
+                              const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica preliminar en MIVOR.ai con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
                               window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
                             }}
                             className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
@@ -284,30 +293,54 @@ const PatientChat = ({
           </div>
         )}
 
-        <form onSubmit={handleSend} className="flex items-end gap-2">
+        <form onSubmit={handleSend} className="flex items-center gap-2 relative">
           
-          <div className="flex items-center gap-1.5 mb-1">
+          {/* Clip (Adjuntar) a la izquierda */}
+          <div className="relative shrink-0">
             <button 
               type="button" 
-              onClick={() => actualImageRef.current?.click()} 
-              className="px-3 py-2 text-slate-700 hover:text-brand-purple transition-colors rounded-xl hover:bg-brand-purple/10 flex items-center gap-1.5 text-xs font-bold border border-gray-200 bg-white shadow-sm whitespace-nowrap cursor-pointer active:scale-95"
-              title={t('upload_image') || 'Subir Imagen'}
+              onClick={() => setShowAttachMenu(!showAttachMenu)} 
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 border ${showAttachMenu ? 'bg-teal-600 text-white border-teal-700 shadow-md' : 'bg-gray-100 text-gray-600 hover:text-teal-700 hover:bg-teal-50 border-gray-200'}`}
+              title="Adjuntar archivo o imagen"
             >
-              <ImageIcon size={16} className="text-brand-purple" />
-              <span>{t('upload_image') || 'Subir Imagen'}</span>
+              <Paperclip size={19} className={showAttachMenu ? "rotate-45 transition-transform duration-200" : "transition-transform duration-200"} />
             </button>
-            <button 
-              type="button" 
-              onClick={() => actualPdfRef.current?.click()} 
-              className="px-3 py-2 text-slate-700 hover:text-brand-green transition-colors rounded-xl hover:bg-brand-green/10 flex items-center gap-1.5 text-xs font-bold border border-gray-200 bg-white shadow-sm whitespace-nowrap cursor-pointer active:scale-95"
-              title={t('upload_pdf') || 'Subir PDF'}
-            >
-              <FileText size={16} className="text-brand-green" />
-              <span>{t('upload_pdf') || 'Subir PDF'}</span>
-            </button>
+
+            {/* Menu Popover flotante para adjuntos */}
+            {showAttachMenu && (
+              <div className="absolute bottom-12 left-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 flex flex-col gap-1 min-w-[170px] z-30 animate-in fade-in zoom-in-95 duration-150">
+                <button
+                  type="button"
+                  onClick={() => {
+                    actualImageRef.current?.click();
+                    setShowAttachMenu(false);
+                  }}
+                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-teal-50 hover:text-teal-700 rounded-xl transition-colors text-left"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
+                    <ImageIcon size={15} />
+                  </div>
+                  <span>Subir Imagen</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    actualPdfRef.current?.click();
+                    setShowAttachMenu(false);
+                  }}
+                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors text-left"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+                    <FileText size={15} />
+                  </div>
+                  <span>Subir PDF</span>
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="flex-1 bg-gray-100 rounded-3xl flex items-center px-4 py-1 min-h-[44px]">
+          {/* Campo de texto en el medio */}
+          <div className="flex-1 bg-gray-100 rounded-3xl flex items-center px-4 py-1 min-h-[44px] focus-within:ring-2 focus-within:ring-teal-500/30 focus-within:bg-white transition-all border border-transparent focus-within:border-teal-500/40">
             <input
               type="text"
               value={inputMessage}
@@ -318,23 +351,28 @@ const PatientChat = ({
             />
           </div>
 
-          {inputMessage.trim() || selectedImagePreview || selectedPdfName ? (
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-11 h-11 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-glow mb-0.5 transition-transform active:scale-95 disabled:opacity-50 disabled:shadow-none"
-            >
-              <Send size={20} className="ml-1" />
-            </button>
-          ) : (
+          {/* Micrófono y Enviar a la derecha */}
+          <div className="flex items-center gap-1.5 shrink-0">
             <button 
               type="button" 
               onClick={toggleListening}
-              className={`w-11 h-11 rounded-full flex items-center justify-center mb-0.5 transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'}`}
+              title={isListening ? "Detener dictado" : "Dictar por voz"}
             >
-              <Mic size={22} />
+              <Mic size={20} />
             </button>
-          )}
+
+            {(inputMessage.trim() || selectedImagePreview || selectedPdfName) && (
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-10 h-10 bg-teal-600 hover:bg-teal-700 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:shadow-none"
+                title="Enviar mensaje"
+              >
+                <Send size={18} className="ml-0.5" />
+              </button>
+            )}
+          </div>
 
           {/* Hidden Inputs */}
           <input type="file" ref={actualImageRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />

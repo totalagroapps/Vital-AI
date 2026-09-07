@@ -238,6 +238,126 @@ async def get_all_patients(db: AsyncSession=Depends(get_db), current_user_id: st
     return response
 
 
+class AppointmentCreate(BaseModel):
+    patient_id: str
+    patient_name: str
+    patient_age: Optional[int] = None
+    patient_gender: Optional[str] = None
+    blood_type: Optional[str] = None
+    appointment_date: str # YYYY-MM-DD
+    appointment_time: str # HH:MM
+    duration_minutes: Optional[int] = 30
+    reason: str
+    appointment_type: Optional[str] = "presencial"
+    status: Optional[str] = "confirmada"
+    triage_category: Optional[str] = "Verde"
+    notes: Optional[str] = None
+
+class AppointmentStatusUpdate(BaseModel):
+    status: str
+
+@router.get('/api/doctor/appointments')
+async def get_doctor_appointments(
+    date: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    from sqlalchemy.future import select
+    from sqlalchemy import or_
+
+    stmt = select(models.Appointment).where(
+        or_(
+            models.Appointment.doctor_id == current_user_id,
+            models.Appointment.doctor_id == 'doctor@mivor.ai',
+            models.Appointment.doctor_id == 'all'
+        )
+    )
+    if date:
+        stmt = stmt.where(models.Appointment.appointment_date == date)
+    stmt = stmt.order_by(models.Appointment.appointment_date.asc(), models.Appointment.appointment_time.asc())
+
+    result = await db.execute(stmt)
+    appointments = result.scalars().all()
+
+    return [
+        {
+            "id": a.id,
+            "doctor_id": a.doctor_id,
+            "patient_id": a.patient_id,
+            "patient_name": a.patient_name,
+            "patient_age": a.patient_age,
+            "patient_gender": a.patient_gender,
+            "blood_type": a.blood_type,
+            "appointment_date": a.appointment_date,
+            "appointment_time": a.appointment_time,
+            "duration_minutes": a.duration_minutes,
+            "reason": a.reason,
+            "appointment_type": a.appointment_type,
+            "status": a.status,
+            "triage_category": a.triage_category,
+            "notes": a.notes,
+            "created_at": a.created_at.isoformat() if a.created_at else None
+        }
+        for a in appointments
+    ]
+
+@router.post('/api/doctor/appointments')
+async def create_doctor_appointment(
+    req: AppointmentCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    appt = models.Appointment(
+        doctor_id=current_user_id,
+        patient_id=req.patient_id,
+        patient_name=req.patient_name,
+        patient_age=req.patient_age,
+        patient_gender=req.patient_gender,
+        blood_type=req.blood_type,
+        appointment_date=req.appointment_date,
+        appointment_time=req.appointment_time,
+        duration_minutes=req.duration_minutes or 30,
+        reason=req.reason,
+        appointment_type=req.appointment_type or "presencial",
+        status=req.status or "confirmada",
+        triage_category=req.triage_category or "Verde",
+        notes=req.notes
+    )
+    db.add(appt)
+    await db.commit()
+    await db.refresh(appt)
+    return {
+        "id": appt.id,
+        "doctor_id": appt.doctor_id,
+        "patient_id": appt.patient_id,
+        "patient_name": appt.patient_name,
+        "appointment_date": appt.appointment_date,
+        "appointment_time": appt.appointment_time,
+        "status": appt.status,
+        "message": "Cita creada con éxito"
+    }
+
+@router.patch('/api/doctor/appointments/{appointment_id}/status')
+async def update_appointment_status(
+    appointment_id: int,
+    req: AppointmentStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user_id: str = Depends(get_current_user_id)
+):
+    from sqlalchemy.future import select
+    result = await db.execute(select(models.Appointment).where(models.Appointment.id == appointment_id))
+    appt = result.scalars().first()
+    if not appt:
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
+    appt.status = req.status
+    await db.commit()
+    await db.refresh(appt)
+    return {
+        "id": appt.id,
+        "status": appt.status,
+        "message": f"Estado actualizado a {appt.status}"
+    }
+
 
 class SmartReferralRequest(BaseModel):
     diagnostics: Optional[List[str]] = []

@@ -1,21 +1,21 @@
 {
-  "name": "VitalAI",
-  "short_name": "VitalAI",
-  "description": "Tu asistente médico personal con Inteligencia Artificial.",
+  "name": "MIVOR.ai",
+  "short_name": "MIVOR.ai",
+  "description": "Better health. Brighter lives. Asistente médico y clínico con Inteligencia Artificial.",
   "start_url": "/paciente",
   "display": "standalone",
-  "background_color": "#F8FAFC",
-  "theme_color": "#8250DF",
+  "background_color": "#0b1a30",
+  "theme_color": "#00a896",
   "icons": [
     {
-      "src": "/images/ai_doctor_bg.jpg",
+      "src": "/logo.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png"
     },
     {
-      "src": "/images/ai_doctor_bg.jpg",
+      "src": "/logo.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }

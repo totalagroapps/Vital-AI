@@ -63,17 +63,22 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-brand-purple/20 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="w-full max-w-4xl relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="text-center mb-12 flex flex-col items-center">
-            <div className="w-20 h-20 bg-white rounded-3xl shadow-soft flex items-center justify-center mb-6 relative">
-              <Activity className="w-10 h-10 text-brand-purple" />
-              <div className="absolute -top-2 -right-2 w-6 h-6 bg-brand-teal rounded-full border-2 border-white flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-white" />
-              </div>
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="mb-4">
+              <img 
+                src="/images/mivor_logo.png" 
+                alt="MIVOR.ai" 
+                className="w-28 h-28 object-contain mx-auto drop-shadow-lg" 
+                onError={(e) => { e.target.src = '/logo.png'; }}
+              />
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-brand-dark tracking-tight flex items-center gap-2">
-              <span className="text-brand-blue">VITAL</span> AI
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight flex items-center justify-center gap-1">
+              MIVOR<span className="text-teal-600">.ai</span>
             </h1>
-            <p className="text-gray-500 mt-3 font-medium text-lg">{t("portal_select")}</p>
+            <p className="text-xs uppercase tracking-widest font-black text-teal-700 mt-1.5">
+              Better Health. Brighter Lives.
+            </p>
+            <p className="text-gray-500 mt-3 font-medium text-sm">{t("portal_select")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl px-4">

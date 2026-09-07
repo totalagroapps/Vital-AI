@@ -170,3 +170,28 @@ class MedicationLog(Base):
     taken_date = Column(String, index=True) # YYYY-MM-DD
     taken_time = Column(String) # HH:MM
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Appointment(Base):
+    """
+    Citas médicas y agenda del profesional de salud.
+    """
+    __tablename__ = "appointments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(String, index=True) # ID o username del doctor (ej. doctor@mivor.ai)
+    patient_id = Column(String, index=True) # ID o username del paciente
+    patient_name = Column(String)
+    patient_age = Column(Integer, nullable=True)
+    patient_gender = Column(String, nullable=True)
+    blood_type = Column(String, nullable=True)
+    appointment_date = Column(String, index=True) # Formato YYYY-MM-DD
+    appointment_time = Column(String) # Formato HH:MM (ej. 09:30)
+    duration_minutes = Column(Integer, default=30)
+    reason = Column(String) # Motivo de consulta
+    appointment_type = Column(String, default="presencial") # presencial | teleconsulta
+    status = Column(String, default="confirmada") # confirmada | en_espera | completada | cancelada
+    triage_category = Column(String, default="Verde") # Rojo | Amarillo | Verde
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+

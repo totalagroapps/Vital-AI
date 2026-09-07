@@ -1,6 +1,6 @@
 {
   "appId": "com.vitalai.app",
-  "appName": "VitalAI",
+  "appName": "MIVOR.ai",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

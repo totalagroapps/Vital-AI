@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
+import { printHtmlContent } from '../utils/printPdf';
 
 const MedicalHistory = ({
   patientProfile,
@@ -48,86 +49,58 @@ const MedicalHistory = ({
 
   
   const handleExportPDF = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    const title = `${t("medical_passport")} - ${patientProfile.full_name || 'Paciente'}`;
+    const bodyHtml = `
+      <div class="header">
+        <h1><span class="brand">MIVOR.ai</span> · ${t("medical_passport")}</h1>
+        <p>${t("emergency_info_document")} · Better health. Brighter lives.</p>
+      </div>
+      
+      <div class="grid">
+        <div><div class="label">${t("patient_name")}</div><div class="value">${patientProfile.full_name || t("not_specified")}</div></div>
+        <div><div class="label">${t("emergency_contact")}</div><div class="value">${patientProfile.emergency_contact || t("not_specified")}</div></div>
+      </div>
 
-    const html = `
-      <html>
-        <head>
-          <title>${t("medical_passport")} - ${patientProfile.full_name}</title>
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; color: #333; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 40px; }
-            .header { text-align: center; border-bottom: 2px solid #8250DF; padding-bottom: 20px; margin-bottom: 30px; }
-            .header h1 { color: #8250DF; margin: 0; font-size: 28px; }
-            .header p { color: #64748b; margin: 5px 0 0 0; }
-            h2 { color: #0f172a; margin-top: 30px; font-size: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-            .label { color: #64748b; font-size: 0.85em; text-transform: uppercase; font-weight: 600; }
-            .value { font-weight: 700; font-size: 16px; color: #1e293b; }
-            .badge { display: inline-block; padding: 4px 10px; background-color: #f1f5f9; border-radius: 12px; font-size: 14px; margin-right: 5px; margin-bottom: 5px; font-weight: 500; }
-            .alert-badge { background-color: #fee2e2; color: #b91c1c; }
-            .med-badge { background-color: #e0e7ff; color: #4338ca; }
-            .footer { margin-top: 50px; text-align: center; font-size: 0.8em; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>VitalAI - ${t("medical_passport")}</h1>
-            <p>${t("emergency_info_document")}</p>
+      <h2>${t("biometric_data_vital_signs")}</h2>
+      <div class="grid">
+        <div><div class="label">${t("date_of_birth")}</div><div class="value">${patientProfile.date_of_birth || t("not_specified")} (${age} ${t("years")})</div></div>
+        <div><div class="label">${t("gender")}</div><div class="value">${patientProfile.gender || t("not_specified")}</div></div>
+        <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 18px;">${patientProfile.blood_type || t("not_specified")}</div></div>
+        <div>
+          <div class="label">${t("bmi_index")}</div>
+          <div class="value">
+            ${bmiInfo ? `${bmiInfo.value} (${bmiInfo.status})` : t("insufficient_data")}
           </div>
-          
-          <div class="grid">
-            <div><div class="label">${t("patient_name")}</div><div class="value">${patientProfile.full_name || t("not_specified")}</div></div>
-            <div><div class="label">${t("emergency_contact")}</div><div class="value">${patientProfile.emergency_contact || t("not_specified")}</div></div>
-          </div>
-
-          <h2>${t("biometric_data_vital_signs")}</h2>
-          <div class="grid">
-            <div><div class="label">${t("date_of_birth")}</div><div class="value">${patientProfile.date_of_birth || t("not_specified")} (${age} ${t("years")})</div></div>
-            <div><div class="label">${t("gender")}</div><div class="value">${patientProfile.gender || t("not_specified")}</div></div>
-            <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 20px;">${patientProfile.blood_type || t("not_specified")}</div></div>
-            <div>
-              <div class="label">${t("bmi_index")}</div>
-              <div class="value">
-                ${bmiInfo ? `
-                ${bmiInfo.value} (${bmiInfo.status})` : t("insufficient_data")}
-              </div>
-            </div>
-          </div>
-          
-          <h2>${t("clinical_history")}</h2>
-          <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">${t("known_allergies")}</div>
-            <div>
-              ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">${a.trim()}</span>`).join('') : t("none_registered")}
-            </div>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">${t("chronic_diseases")}</div>
-            <div>
-              ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">${a.trim()}</span>`).join('') : t("none_registered")}
-            </div>
-          </div>
-          <div style="margin-bottom: 20px;">
-            <div class="label" style="margin-bottom: 8px;">${t("current_medications")}</div>
-            <div>
-              ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">${a.trim()}</span>`).join('') : t("none_registered")}
-            </div>
-          </div>
-          
-          <div class="footer">
-            ${t("auto_generated_document")} ${new Date().toLocaleString()}<br/>
-            ${t("informative_summary")}
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          </script>
-        </body>
-      </html>
+        </div>
+      </div>
+      
+      <h2>${t("clinical_history")}</h2>
+      <div style="margin-bottom: 20px;">
+        <div class="label" style="margin-bottom: 8px;">${t("known_allergies")}</div>
+        <div>
+          ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">${a.trim()}</span>`).join('') : t("none_registered")}
+        </div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <div class="label" style="margin-bottom: 8px;">${t("chronic_diseases")}</div>
+        <div>
+          ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">${a.trim()}</span>`).join('') : t("none_registered")}
+        </div>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <div class="label" style="margin-bottom: 8px;">${t("current_medications")}</div>
+        <div>
+          ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">${a.trim()}</span>`).join('') : t("none_registered")}
+        </div>
+      </div>
+      
+      <div class="footer">
+        ${t("auto_generated_document")} ${new Date().toLocaleString()}<br/>
+        ${t("informative_summary")} · MIVOR.ai Medical Systems
+      </div>
     `;
     
-    printWindow.document.write(html);
-    printWindow.document.close();
+    printHtmlContent(title, bodyHtml);
   };
 
   const handleSave = async (e) => {

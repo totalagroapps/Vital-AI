@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
+import DoctorCalendarView from './views/DoctorCalendarView';
+import { printHtmlContent } from './utils/printPdf';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -110,9 +112,6 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
   const handleExportPDF = () => {
     if (!patientDetail) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
 
     let triagesHtml = (patientDetail.triages || []).map(triageItem => `
       <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
@@ -136,82 +135,65 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     let referralHtml = '';
     if (patientDetail.smart_referral?.matched) {
       referralHtml = `
-        <div style="background: #f8fafc; border-left: 4px solid #0d9488; padding: 15px; margin: 20px 0; border-radius: 4px;">
-          <h3 style="margin: 0 0 8px 0; color: #0f766e;">Derivación Inteligente Recomendada</h3>
+        <div class="referral-box">
+          <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;">Derivación Inteligente Recomendada</h3>
           <p style="margin: 0 0 5px 0;"><strong>Especialidad sugerida:</strong> ${patientDetail.smart_referral.recommended_specialty} (${patientDetail.smart_referral.urgency.toUpperCase()})</p>
           <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong>Motivo clínico:</strong> ${patientDetail.smart_referral.reason}</p>
         </div>
       `;
     }
 
-    const html = `
-      <html>
-        <head>
-          <title>Historia Clínica - ${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</title>
-          <style>
-            body { font-family: system-ui, -apple-system, sans-serif; color: #1e293b; line-height: 1.5; max-width: 850px; margin: 0 auto; padding: 30px; }
-            h1 { color: #0f172a; border-bottom: 2px solid #0d9488; padding-bottom: 8px; font-size: 24px; }
-            h2 { color: #0f172a; margin-top: 25px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-            .label { color: #64748b; font-size: 0.8em; text-transform: uppercase; font-weight: bold; }
-            .value { font-weight: 600; font-size: 0.95em; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-            th { background: #f1f5f9; padding: 8px; border: 1px solid #cbd5e1; text-align: left; }
-          </style>
-        </head>
-        <body>
-          <h1>VitalAI - Expediente Clínico Oficial</h1>
-          
-          <h2>Ficha del Paciente</h2>
-          <div class="grid">
-            <div><div class="label">${t('name')}</div><div class="value">${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</div></div>
-            <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail?.profile?.date_of_birth || '--'}</div></div>
-            <div><div class="label">${t('gender')}</div><div class="value">${patientDetail?.profile?.gender || '--'}</div></div>
-            <div><div class="label">${t('blood_type_label')}</div><div class="value">${patientDetail?.profile?.blood_type || 'N/A'}</div></div>
-            <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail?.profile?.allergies || 'Ninguna alergia registrada'}</div></div>
-            <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail?.profile?.chronic_conditions || 'Sin condiciones crónicas registradas'}</div></div>
-            <div><div class="label">Altura / Peso</div><div class="value">${patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--'} / ${patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--'}</div></div>
-            <div><div class="label">Contacto de Emergencia</div><div class="value">${patientDetail?.profile?.emergency_contact || '--'}</div></div>
-          </div>
+    const title = `Expediente Clínico - ${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}`;
+    const bodyHtml = `
+      <div class="header">
+        <h1><span class="brand">MIVOR.ai</span> · Expediente Clínico Oficial</h1>
+        <p>Historial Médico Integral del Paciente · Better health. Brighter lives.</p>
+      </div>
+      
+      <h2>Ficha del Paciente</h2>
+      <div class="grid">
+        <div><div class="label">${t('name')}</div><div class="value">${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</div></div>
+        <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail?.profile?.date_of_birth || '--'}</div></div>
+        <div><div class="label">${t('gender')}</div><div class="value">${patientDetail?.profile?.gender || '--'}</div></div>
+        <div><div class="label">${t('blood_type_label')}</div><div class="value" style="color: #e11d48;">${patientDetail?.profile?.blood_type || 'N/A'}</div></div>
+        <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail?.profile?.allergies || 'Ninguna alergia registrada'}</div></div>
+        <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail?.profile?.chronic_conditions || 'Sin condiciones crónicas registradas'}</div></div>
+        <div><div class="label">Altura / Peso</div><div class="value">${patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--'} / ${patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--'}</div></div>
+        <div><div class="label">Contacto de Emergencia</div><div class="value">${patientDetail?.profile?.emergency_contact || '--'}</div></div>
+      </div>
 
-          ${referralHtml}
+      ${referralHtml}
 
-          <h2>Tratamiento Farmacológico Activo</h2>
-          ${medicationsHtml ? `
-            <table>
-              <thead>
-                <tr>
-                  <th>Fármaco</th>
-                  <th>Dosis</th>
-                  <th>Frecuencia</th>
-                  <th>Horario</th>
-                </tr>
-              </thead>
-              <tbody>${medicationsHtml}</tbody>
-            </table>
-          ` : '<p style="color: #64748b; font-size: 0.9em;">No hay medicamentos activos pautados.</p>'}
-          
-          <h2>Historial de Triajes y Evaluaciones</h2>
-          ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay triajes registrados.</p>'}
-          
-          <div style="margin-top: 40px; text-align: center; font-size: 0.8em; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            Documento emitido por VitalAI Medical System · Fecha de impresión: ${new Date().toLocaleString()}
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          </script>
-        </body>
-      </html>
+      <h2>Tratamiento Farmacológico Activo</h2>
+      ${medicationsHtml ? `
+        <table>
+          <thead>
+            <tr>
+              <th>Fármaco</th>
+              <th>Dosis</th>
+              <th>Frecuencia</th>
+              <th>Horario</th>
+            </tr>
+          </thead>
+          <tbody>${medicationsHtml}</tbody>
+        </table>
+      ` : '<p style="color: #64748b; font-size: 0.9em;">No hay medicamentos activos pautados.</p>'}
+      
+      <h2>Historial de Triajes y Evaluaciones</h2>
+      ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay triajes registrados.</p>'}
+      
+      <div class="footer">
+        Documento emitido por MIVOR.ai Medical System · Fecha de impresión: ${new Date().toLocaleString()}
+      </div>
     `;
-    
-    printWindow.document.write(html);
-    printWindow.document.close();
+
+    printHtmlContent(title, bodyHtml);
   };
 
   const handleReferPatient = (specialist, referral) => {
     const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
     const reason = referral?.reason || 'Valoración especializada';
-    const text = `Hola Dr(a). ${specialist.full_name}, le comparto la derivación clínica desde VitalAI del paciente *${patientName}*.\n\n*Motivo de Derivación:* ${reason}\n*Especialidad requerida:* ${specialist.specialty}.\n\nQuedamos a su disposición para coordinar la consulta.`;
+    const text = `Hola Dr(a). ${specialist.full_name}, le comparto la derivación clínica desde MIVOR.ai del paciente *${patientName}*.\n\n*Motivo de Derivación:* ${reason}\n*Especialidad requerida:* ${specialist.specialty}.\n\nQuedamos a su disposición para coordinar la consulta.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -326,6 +308,20 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   if (doctorScreen === 'more') {
     return <DoctorMore onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
+  if (doctorScreen === 'agenda') {
+    return (
+      <DoctorCalendarView 
+        onNavigate={setDoctorScreen} 
+        onSelectPatient={(p) => {
+          setSelectedPatient(p);
+          setDoctorScreen('patients');
+        }}
+        apiUrl={apiUrl} 
+        authHeaders={authHeaders} 
+        doctorProfile={doctorProfile} 
+      />
+    );
+  }
   if (doctorScreen === 'home') {
     return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
@@ -345,11 +341,11 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
         
         <div className="flex-1 w-full flex flex-col items-center gap-4">
-          <button className="w-12 h-12 bg-brand-teal/10 text-brand-teal rounded-xl flex items-center justify-center transition-all">
+          <button onClick={() => setDoctorScreen('patients')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'patients' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Pacientes">
             <Users className="w-6 h-6" />
           </button>
-          <button className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all">
-            <FolderOpen className="w-6 h-6" />
+          <button onClick={() => setDoctorScreen('agenda')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'agenda' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Mi Agenda">
+            <Calendar className="w-6 h-6" />
           </button>
         </div>
 

@@ -70,11 +70,19 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
 
       {/* HEADER */}
       <div className="px-5 py-4 flex justify-between items-center bg-transparent relative z-20">
-        <div className="flex flex-col">
-          <h1 className="text-xl font-extrabold text-brand-dark tracking-tight flex items-center gap-1">
-            <span className="text-brand-blue">VITAL</span> IA
-          </h1>
-          <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest">{t("doctors")}</span>
+        <div className="flex items-center gap-2">
+          <img 
+            src="/images/mivor_logo.png" 
+            alt="MIVOR.ai" 
+            className="w-8 h-8 object-contain drop-shadow-sm" 
+            onError={(e) => { e.target.src = '/logo.png'; }}
+          />
+          <div className="flex flex-col">
+            <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-1">
+              MIVOR<span className="text-teal-600">.ai</span>
+            </h1>
+            <span className="text-[9px] font-black text-teal-700 uppercase tracking-widest">Portal Médico</span>
+          </div>
         </div>
         <div className="flex items-center gap-2.5">
           <LanguageSelector />
@@ -142,7 +150,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
           </button>
 
           {/* Card 2: Mi agenda */}
-          <button onClick={() => alert(t("agenda_in_development"))} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
+          <button onClick={() => onNavigate('agenda')} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
             <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center mb-4">
               <Calendar size={22} />
             </div>
@@ -261,6 +269,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
       <BottomNav activeTab="home" onTabChange={(tab) => {
         if (tab === 'home') onNavigate('home');
         if (tab === 'patients') onNavigate('patients');
+        if (tab === 'agenda') onNavigate('agenda');
         if (tab === 'ai') onNavigate('copilot');
         if (tab === 'more') onNavigate('more');
       }} isDoctor={true} />

@@ -119,7 +119,22 @@ if (R2_ACCOUNT_ID and R2_ACCESS_KEY_ID):
     s3_client = boto3.client('s3', endpoint_url=f'https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com', aws_access_key_id=R2_ACCESS_KEY_ID, aws_secret_access_key=R2_SECRET_ACCESS_KEY, config=Config(signature_version='s3v4'), region_name='auto')
 
 
-app = FastAPI(title='VitalAI V2 - Team API', version='2.0')
+app = FastAPI(title='MIVOR.ai - Team API', version='2.0')
+
+@app.on_event('startup')
+async def on_startup():
+    try:
+        async with database.engine.begin() as conn:
+            await conn.run_sync(models.Base.metadata.create_all)
+
+        from scripts.seed_demo_doctor import seed_data
+        async with database.AsyncSessionLocal() as session:
+            check_doc = await session.execute(select(models.User).where(models.User.username == 'doctor@mivor.ai'))
+            if not check_doc.scalars().first():
+                logger.info("Demo doctor not found, seeding initial demo data...")
+                await seed_data()
+    except Exception as e:
+        logger.warning(f"Error initializing DB tables / seed on startup: {e}")
 
 @app.get('/health')
 def health_check():

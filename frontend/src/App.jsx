@@ -1,6 +1,7 @@
 import DoctorDashboard from './DoctorDashboard';
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { App as CapApp } from '@capacitor/app';
 
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
@@ -110,6 +111,33 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Native Android hardware back button handler via Capacitor
+  useEffect(() => {
+    let backHandle = null;
+    const initCapacitorBack = async () => {
+      try {
+        backHandle = await CapApp.addListener('backButton', ({ canGoBack }) => {
+          const currentPath = window.location.pathname;
+          if (currentPath !== '/' && currentPath !== '/paciente') {
+            window.history.back();
+          } else if (canGoBack) {
+            window.history.back();
+          } else {
+            CapApp.exitApp();
+          }
+        });
+      } catch (err) {
+        // App is in regular web browser
+      }
+    };
+    initCapacitorBack();
+    return () => {
+      if (backHandle && backHandle.remove) {
+        backHandle.remove();
+      }
+    };
   }, []);
 
   // Helper to change screen and update history
@@ -1166,7 +1194,7 @@ ${text}`], {type: 'text/plain'});
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-lg leading-none text-brand">VitalAI</h1>
+              <h1 className="font-bold text-lg leading-none text-brand">MIVOR.ai</h1>
               <span className="text-[11px] text-slate-600 font-medium">{t("medical_assistant")}</span>
             </div>
           </div>
@@ -1361,7 +1389,7 @@ ${text}`], {type: 'text/plain'});
                 <Sparkles className="w-8 h-8 text-brand" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a VitalAI</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Bienvenido a MIVOR.ai</h2>
                 <p className="text-slate-600 text-sm mt-2 max-w-md mx-auto">
                   Tu asistente médico de confianza. Te ayudamos a entender tus estudios médicos, radiografías y síntomas de forma clara, rápida y segura.
                 </p>
@@ -1528,7 +1556,7 @@ ${text}`], {type: 'text/plain'});
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2 h-2 bg-brand rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-xs font-medium text-slate-600">VitalAI está conectando...</span>
+                <span className="text-xs font-medium text-slate-600">MIVOR.ai está conectando...</span>
               </div>
             </div>
           )}
@@ -1944,7 +1972,7 @@ ${text}`], {type: 'text/plain'});
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <Server className="w-5 h-5 text-brand" />
-                Acerca de VitalAI
+                Acerca de MIVOR.ai
               </h2>
               <button onClick={() => setShowSettings(false)} className="text-slate-600 hover:text-semantic-danger-text">
                 <X className="w-5 h-5" />

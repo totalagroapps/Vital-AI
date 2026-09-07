@@ -26,16 +26,15 @@ const PatientHome = ({ onNavigate, onLogout }) => {
         <div className="flex justify-between items-start mb-3">
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <div className="text-brand-purple">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                  <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2" />
-                  <path d="M8 13h8" className="text-brand-blue" strokeWidth="2" />
-                </svg>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-brand-dark">VITAL <span className="text-brand-purple">AI</span></span>
+              <img 
+                src="/images/mivor_logo.png" 
+                alt="MIVOR.ai" 
+                className="w-7 h-7 object-contain drop-shadow-sm" 
+                onError={(e) => { e.target.src = '/logo.png'; }}
+              />
+              <span className="font-black text-xl tracking-tight text-slate-900">MIVOR<span className="text-teal-600">.ai</span></span>
             </div>
-            <span className="text-[11px] text-content-secondary font-medium ml-8 -mt-1 tracking-wide">{t("your_health_understood_by_ai")}</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-700 ml-8 -mt-0.5">Better health. Brighter lives.</span>
           </div>
           
           <div className="flex items-center gap-2">

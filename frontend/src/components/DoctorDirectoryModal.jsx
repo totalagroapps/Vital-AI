@@ -192,7 +192,7 @@ export default function DoctorDirectoryModal({
   if (!isOpen) return null;
 
   const handleWhatsApp = (doctor) => {
-    const patientIntro = patientName ? `Mi nombre es ${patientName}.` : 'Soy usuario de la plataforma VitalAI.';
+    const patientIntro = patientName ? `Mi nombre es ${patientName}.` : 'Soy usuario de la plataforma MIVOR.ai.';
     const triageContext = recommendedSpecialty 
       ? `Acabo de realizar un triaje médico digital donde se me orientó consultar con un especialista en *${doctor.specialty}*.`
       : `Le contacto porque me gustaría agendar una consulta médica en su especialidad (*${doctor.specialty}*).`;

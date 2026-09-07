@@ -65,19 +65,18 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
       <header className="w-full bg-white border-b border-gray-100 px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">
         {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
-          <div className="text-brand-purple">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              <path d="M12 21.5V13" className="text-brand-blue" strokeWidth="2.2" />
-              <path d="M8 13h8" className="text-brand-blue" strokeWidth="2.2" />
-            </svg>
-          </div>
+          <img 
+            src="/images/mivor_logo.png" 
+            alt="MIVOR.ai" 
+            className="w-8 h-8 object-contain"
+            onError={(e) => { e.target.src = '/logo.png'; }}
+          />
           <div className="flex flex-col">
-            <span className="font-black text-xl tracking-tight text-brand-dark leading-none">
-              VITAL <span className="text-brand-purple">IA</span>
+            <span className="font-black text-xl tracking-tight text-slate-900 leading-none">
+              MIVOR<span className="text-teal-600">.ai</span>
             </span>
-            <span className="text-[10px] font-bold text-brand-blue uppercase tracking-widest leading-none mt-1">
-              MÉDICOS
+            <span className="text-[10px] font-bold text-teal-700 uppercase tracking-widest leading-none mt-1">
+              PORTAL MÉDICO
             </span>
           </div>
         </div>
@@ -97,7 +96,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             Pacientes
           </button>
           <button 
-            onClick={() => alert("Módulo de agenda médica en desarrollo (Asignado a Facundo).")} 
+            onClick={() => onNavigate('agenda')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
             Agenda
@@ -241,7 +240,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
 
           {/* Card 2: Mi agenda */}
           <div 
-            onClick={() => alert("Módulo de agenda médica en desarrollo (Asignado a Facundo según el plan de trabajo).")}
+            onClick={() => onNavigate('agenda')}
             className="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group"
           >
             <div className="flex items-start gap-4 flex-1 pr-4">
