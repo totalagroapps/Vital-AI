@@ -82,7 +82,7 @@ tasks.configureEach { task ->
     if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
         task.dependsOn 'syncWebAssets'
     }
-    if (task.name == 'assembleDebug') {
+    if (task.name == 'assembleDebug' || task.name == 'packageDebug' || task.name == 'installDebug') {
         task.finalizedBy 'copyApkToPublicDownload'
     }
 }
