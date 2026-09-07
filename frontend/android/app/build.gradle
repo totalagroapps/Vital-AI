@@ -74,7 +74,7 @@ tasks.register('copyApkToPublicDownload') {
                     publicTarget.toPath(),
                     java.nio.file.StandardCopyOption.REPLACE_EXISTING
                 )
-                def backendTarget = file("${projectDir}/../../../../backend/downloads/mivor-latest.apk")
+                def backendTarget = file("${projectDir}/../../../backend/downloads/mivor-latest.apk")
                 backendTarget.parentFile.mkdirs()
                 java.nio.file.Files.copy(
                     debugApk.toPath(),

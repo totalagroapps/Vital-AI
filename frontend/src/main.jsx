@@ -1,4 +1,4 @@
-﻿import { StrictMode } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
@@ -15,12 +15,24 @@ createRoot(document.getElementById('root')).render(
   </StrictMode>,
 )
 
-
+// Erradicar Service Workers anteriores y purgar CacheStorage persistente
+// Esto evita que Android WebView o navegadores queden atrapados en bundles desactualizados
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(
-      (registration) => { console.log('SW registered: ', registration); },
-      (err) => { console.log('SW registration failed: ', err); }
-    );
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister().then((unregistered) => {
+        if (unregistered) console.log('SW desregistrado con éxito:', registration);
+      });
+    }
+  });
+}
+
+if ('caches' in window) {
+  caches.keys().then((keys) => {
+    for (const key of keys) {
+      caches.delete(key).then(() => {
+        console.log('Caché eliminada:', key);
+      });
+    }
   });
 }
