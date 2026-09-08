@@ -10,8 +10,9 @@ import {
   Sparkles, 
   Brain, 
   Paperclip, 
-  AudioLines, 
-  ArrowRight 
+  AudioLines,
+  ArrowRight,
+  BookOpen
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -216,20 +217,20 @@ const PatientHome = ({ onNavigate, onLogout }) => {
             </div>
           </div>
 
-          {/* 4. Conéctate con médicos especialistas */}
+          {/* 4. Biblioteca Médica RAG */}
           <div 
-            onClick={() => onNavigate('doctors')}
+            onClick={() => onNavigate('search')}
             className="bg-[#fff7ed] hover:bg-[#ffeedb] active:scale-[0.98] border border-orange-100 rounded-3xl p-3.5 flex flex-col justify-between min-h-[142px] shadow-2xs cursor-pointer transition-all relative group"
           >
             <div>
               <div className="w-10 h-10 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center mb-2 shadow-2xs">
-                <Users size={20} />
+                <BookOpen size={20} />
               </div>
               <h4 className="text-[13px] font-bold text-[#0b1a30] leading-tight mb-1">
-                Conéctate con médicos especialistas
+                Biblioteca Médica RAG
               </h4>
               <p className="text-[10px] text-slate-500 leading-tight font-medium">
-                Encuentra al especialista adecuado y realiza videoconsultas seguras.
+                Busca en estudios clínicos y literatura científica con IA.
               </p>
             </div>
             <div className="self-end mt-2 w-7 h-7 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform shrink-0">
