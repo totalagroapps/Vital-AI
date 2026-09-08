@@ -1,177 +1,254 @@
-﻿import React from 'react';
+import React from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
-import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, MessageSquareText, ShieldCheck, ArrowRight, Sparkles, LogOut, Bell, Search, Mic } from 'lucide-react';
+import { 
+  Stethoscope, 
+  FileText, 
+  Folder, 
+  Users, 
+  ShieldCheck, 
+  ChevronRight, 
+  Sparkles, 
+  Brain, 
+  Paperclip, 
+  AudioLines, 
+  ArrowRight 
+} from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
 const PatientHome = ({ onNavigate, onLogout }) => {
   const { t } = useLanguage();
+
   return (
     <>
-    <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-24 font-sans bg-base overflow-x-hidden">
-      
-      {/* Background Graphic */}
-      <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[600px] z-0 overflow-hidden pointer-events-none">
-        <img 
-          src="/images/abstract_woman_bg.jpg" 
-          alt="AI Hologram" 
-          className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply"
-          style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)' }}
-        />
-        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
-        <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
-      </div>
-
-      <div className="relative z-10 px-4 pt-2">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/images/mivor_logo.png" 
-                alt="MIVOR.ai" 
-                className="w-7 h-7 object-contain drop-shadow-sm" 
-                onError={(e) => { e.target.src = '/logo.png'; }}
-              />
-              <span className="font-black text-xl tracking-tight text-slate-900">MIVOR<span className="text-teal-600">.ai</span></span>
+      {/* ================= VISTA MÓVIL (DISEÑO OFICIAL MIVOR.ai) ================= */}
+      <div className="block lg:hidden flex-1 w-full relative min-h-screen pb-28 font-sans bg-[#fcfdfe] overflow-x-hidden select-none">
+        
+        {/* Barra Superior: Logo MIVOR.ai + Selector de Idioma */}
+        <div className="flex items-center justify-between pt-3 pb-2 px-5">
+          <div className="flex items-center gap-2.5">
+            <img 
+              src="/images/mivor_logo.png" 
+              alt="MIVOR.ai" 
+              className="w-9 h-9 object-contain drop-shadow-sm" 
+              onError={(e) => { e.target.src = '/logo.png'; }}
+            />
+            <div className="flex flex-col">
+              <span className="font-black text-2xl tracking-tight text-[#0b1a30]">
+                MIVOR<span className="text-[#00a896]">.ai</span>
+              </span>
+              <span className="text-[8.5px] uppercase font-extrabold tracking-widest text-[#00a896] -mt-1">
+                BETTER HEALTH. BRIGHTER LIVES.
+              </span>
             </div>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-700 ml-8 -mt-0.5">{t('app_slogan')}</span>
           </div>
           
           <div className="flex items-center gap-2">
             <LanguageSelector />
-            <div className="relative">
-              <button className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-teal-700 shadow-sm hover:shadow-md transition-shadow">
-                <Bell size={14} />
-              </button>
-              <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-teal-600 rounded-full border-2 border-white"></div>
-            </div>
-            <button onClick={onLogout} className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Profile" className="w-full h-full object-cover" />
-            </button>
           </div>
         </div>
 
-        {/* Hero Section */}
-        <div className="relative mt-4 mb-6 max-w-full md:max-w-[70%] animate-fade-in-left opacity-0" style={{ animationDelay: '100ms' }}>
-          <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
-          <h2 className="relative z-10 text-[23px] leading-tight font-extrabold text-slate-900 mb-1.5 drop-shadow-xs">
-            {t("welcome")},<br/>
-            <span className="text-teal-700 font-black tracking-tight">{t("we_are_here_to_care_for_your_health")}</span>
-          </h2>
-          <p className="relative z-10 text-slate-700 text-[12px] leading-snug max-w-[90%] font-semibold">
-            {t("access_all_tools_of_vitalai_to_understand_manage_and_improve_your_wellbeing")}
-          </p>
-        </div>
-
-        {/* Action Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          
-          {/* Card 1 */}
-          <button onClick={() => onNavigate('triage')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
-            <div className="mb-1.5">
-              <div className="w-6 h-6 rounded-full border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-3 bg-brand-purple/5">
-                <Stethoscope size={12} />
-              </div>
-            </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("understand_your_symptoms")}</h4>
-            <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              {t("describe_what_you_feel_and_get_possible_causes_explanations_and_advice")}
-            </p>
-            <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-purple rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
-              <ArrowRight size={12} />
-            </div>
-          </button>
-
-          {/* Card 2 */}
-          <button onClick={() => onNavigate('documents')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
-            <div className="mb-1.5">
-              <div className="w-6 h-6 rounded-full border border-brand-blue/20 flex items-center justify-center text-brand-blue mb-3 bg-brand-blue/5">
-                <FileText size={12} />
-              </div>
-            </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("analyze_your_medical_tests")}</h4>
-            <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              {t("upload_your_reports_xrays_and_analytics_the_ai_analyzes_them_for_you")}
-            </p>
-            <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-blue rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
-              <ArrowRight size={12} />
-            </div>
-          </button>
-
-          {/* Card 3 */}
-          <button onClick={() => onNavigate('history')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
-            <div className="mb-1.5">
-              <div className="w-6 h-6 rounded-full border border-brand-green/20 flex items-center justify-center text-brand-green mb-3 bg-brand-green/5">
-                <FolderHeart size={12} />
-              </div>
-            </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("organize_your_health_history")}</h4>
-            <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              {t("centralize_your_medical_information_and_have_everything_at_hand")}
-            </p>
-            <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-green rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
-              <ArrowRight size={12} />
-            </div>
-          </button>
-
-          {/* Card 4 */}
-          <button onClick={() => onNavigate('search')} className="bg-white rounded-2xl md:rounded-3xl p-4 text-left text-content-primary border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-card-hover transition-all duration-300 ease-out flex flex-col h-full">
-            <div className="mb-1.5">
-              <div className="w-6 h-6 rounded-full border border-brand-orange/20 flex items-center justify-center text-brand-orange mb-3 bg-brand-orange/5">
-                <BookOpen size={12} />
-              </div>
-            </div>
-            <h4 className="font-bold text-[11px] md:text-base leading-tight mb-1 pr-2" style={{ color: "#1E293B" }}>{t("medical_library_rag")}</h4>
-            <p className="text-[9px] md:text-[11px] leading-tight mb-4 flex-1 pr-1" style={{ color: "#64748B" }}>
-              {t("search_in_clinical_studies_and_scientific_literature_with_ai")}
-            </p>
-            <div className="absolute bottom-2 right-2 w-5 h-5 md:w-7 md:h-7 bg-brand-orange rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-sm">
-              <ArrowRight size={12} />
-            </div>
-          </button>
-        </div>
-
-        {/* AI Banner Footer */}
-        <div className="bg-white/90 backdrop-blur-xl border border-brand-purple/10 rounded-2xl p-2.5 md:p-5 shadow-sm mb-2 hover:shadow-md transition-shadow duration-300" style={{ animationDelay: "550ms" }}>
-          <div className="flex items-start gap-2 mb-2">
-            <div className="bg-brand-purple/5 p-2 rounded-full text-brand-purple">
-              <Sparkles size={12} />
-            </div>
-            <div className="flex-1">
-              <h5 className="font-bold text-brand-dark text-[12px] mb-0.5">{t("ask_vitalai")}</h5>
-              <p className="text-[11px] text-content-secondary leading-relaxed pr-2">
-                {t("ask_about_your_health_or_discover_the_latest_medical_and_scientific_advancements_on_any_disease")}
+        {/* Sección Hero: Titular Principal + Ilustración Circular */}
+        <div className="px-5 pt-3 pb-3 relative">
+          <div className="flex items-center justify-between gap-2">
+            
+            {/* Columna Izquierda: Textos */}
+            <div className="flex-1 max-w-[62%]">
+              <h1 className="text-[25px] leading-[1.18] font-black text-[#0b1a30] tracking-tight">
+                Tu salud,<br />
+                en manos de la<br />
+                <span className="text-[#2563eb]">IA más avanzada</span><br />
+                <span className="text-[#2563eb]">en medicina.</span>
+              </h1>
+              <p className="mt-2 text-[11.5px] leading-snug text-slate-500 font-medium pr-1">
+                Entiende, gestiona y mejora tu bienestar con información médica fiable, personalizada y siempre disponible.
               </p>
             </div>
+
+            {/* Columna Derecha: Ilustración Circular y Lema */}
+            <div className="w-[38%] flex flex-col items-center relative">
+              <div className="absolute inset-0 bg-cyan-400/10 rounded-full blur-2xl pointer-events-none" />
+              <img 
+                src="/images/mivor_hero_art_clean.png" 
+                alt="Juntos por una medicina más humana y eficiente"
+                className="w-full max-w-[155px] object-contain drop-shadow-md relative z-10"
+                onError={(e) => { e.target.src = '/images/mivor_hero_art.png'; }}
+              />
+            </div>
           </div>
-          
-          <div className="relative cursor-text" onClick={() => onNavigate('general_chat')}>
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-secondary/70">
-              <Search size={12} />
+        </div>
+
+        {/* Tarjeta de Seguridad y Privacidad */}
+        <div 
+          onClick={() => onNavigate('history')}
+          className="mx-5 mb-3.5 p-3.5 bg-[#f0f7ff] hover:bg-[#e6f2ff] active:scale-[0.99] border border-blue-100/90 rounded-2xl flex items-center justify-between gap-3 shadow-2xs cursor-pointer transition-all"
+        >
+          <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-[#2563eb] flex items-center justify-center shrink-0 shadow-2xs">
+            <ShieldCheck size={22} className="stroke-[2.2]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-[12.5px] font-bold text-slate-900 leading-tight">
+              Tus datos están protegidos
+            </h4>
+            <p className="text-[10px] text-slate-500 leading-tight mt-0.5 font-medium">
+              Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).
+            </p>
+          </div>
+          <ChevronRight size={18} className="text-slate-400 shrink-0" />
+        </div>
+
+        {/* Tarjeta de Consulta IA: "Pregunta a MIVOR.ai" */}
+        <div className="mx-5 mb-4 p-4 bg-white border border-slate-100 rounded-3xl shadow-sm relative overflow-hidden">
+          {/* Cabecera de la tarjeta */}
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-2xl bg-purple-100/80 text-purple-600 flex items-center justify-center shrink-0">
+                <Sparkles size={18} className="fill-purple-600/30" />
+              </div>
+              <h3 className="text-[14px] font-bold text-slate-900 leading-tight">
+                Pregunta a MIVOR.ai
+              </h3>
             </div>
-            <div className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-8 pr-10 text-[10px] text-content-secondary/70 font-medium shadow-inner">
-              {t("example_why_do_i_have_a_headache")}
+            <div className="bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full flex items-center gap-1.5 shrink-0">
+              <Brain size={13} className="text-[#2563eb]" />
+              <span className="text-[10px] font-bold text-[#2563eb] tracking-tight">IA médica avanzada</span>
             </div>
-            <div 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-brand-purple rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-105 transition-transform"
+          </div>
+
+          <p className="text-[11px] text-slate-500 leading-relaxed mb-3 font-medium">
+            Consulta sobre tu salud o descubre los últimos avances médicos y científicos, con la ayuda de la IA más avanzada en medicina.
+          </p>
+
+          {/* Barra de Entrada de Consulta / Dictado */}
+          <div 
+            onClick={() => onNavigate('general_chat')}
+            className="w-full bg-white border border-slate-200 hover:border-blue-400 rounded-full py-1.5 pl-3.5 pr-1.5 flex items-center gap-2 shadow-2xs transition-all cursor-text"
+          >
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigate('documents');
+              }}
+              className="text-slate-400 hover:text-slate-600 p-1 -ml-1 transition-colors"
+              title="Adjuntar estudio o análisis"
+            >
+              <Paperclip size={18} className="rotate-45" />
+            </button>
+            <div className="w-[1px] h-4 bg-slate-200" />
+            <span className="text-[11.5px] text-slate-400 font-normal flex-1 truncate">
+              Ej.: ¿por qué tengo dolor de cabeza?
+            </span>
+            <button 
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 localStorage.setItem('autoStartMic', 'true');
                 onNavigate('triage');
               }}
+              className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-transform shrink-0"
+              title="Dictar por voz"
             >
-              <Mic size={12} />
-            </div>
+              <AudioLines size={16} />
+            </button>
           </div>
         </div>
 
+        {/* Cuadrícula de 4 Acciones (2x2) */}
+        <div className="mx-5 grid grid-cols-2 gap-3 mb-4">
+          
+          {/* 1. Entiende tus síntomas */}
+          <div 
+            onClick={() => onNavigate('triage')}
+            className="bg-[#faf5ff] hover:bg-[#f5eeff] active:scale-[0.98] border border-purple-100 rounded-3xl p-4 flex flex-col justify-between h-[165px] shadow-2xs cursor-pointer transition-all relative group"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-purple-100/80 text-purple-600 flex items-center justify-center mb-2 shadow-2xs">
+                <Stethoscope size={18} />
+              </div>
+              <h4 className="text-[12.5px] font-bold text-slate-900 leading-tight mb-1">
+                Entiende tus síntomas
+              </h4>
+              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                Describe lo que sientes y obtén posibles causas, explicaciones y consejos.
+              </p>
+            </div>
+            <div className="self-end w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <ArrowRight size={13} />
+            </div>
+          </div>
+
+          {/* 2. Analiza tus pruebas médicas */}
+          <div 
+            onClick={() => onNavigate('documents')}
+            className="bg-[#f0f9ff] hover:bg-[#e4f4ff] active:scale-[0.98] border border-sky-100 rounded-3xl p-4 flex flex-col justify-between h-[165px] shadow-2xs cursor-pointer transition-all relative group"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-sky-100/80 text-[#2563eb] flex items-center justify-center mb-2 shadow-2xs">
+                <FileText size={18} />
+              </div>
+              <h4 className="text-[12.5px] font-bold text-slate-900 leading-tight mb-1">
+                Analiza tus pruebas médicas
+              </h4>
+              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                Sube tus informes, radiografías y analíticas. La IA los analiza por ti en segundos.
+              </p>
+            </div>
+            <div className="self-end w-7 h-7 rounded-full bg-[#2563eb] text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <ArrowRight size={13} />
+            </div>
+          </div>
+
+          {/* 3. Organiza tu historial de salud */}
+          <div 
+            onClick={() => onNavigate('history')}
+            className="bg-[#f0fdf4] hover:bg-[#e3fcee] active:scale-[0.98] border border-emerald-100 rounded-3xl p-4 flex flex-col justify-between h-[165px] shadow-2xs cursor-pointer transition-all relative group"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center mb-2 shadow-2xs">
+                <Folder size={18} />
+              </div>
+              <h4 className="text-[12.5px] font-bold text-slate-900 leading-tight mb-1">
+                Organiza tu historial de salud
+              </h4>
+              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                Centraliza toda la información médica y ten todo siempre a mano.
+              </p>
+            </div>
+            <div className="self-end w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <ArrowRight size={13} />
+            </div>
+          </div>
+
+          {/* 4. Conéctate con médicos especialistas */}
+          <div 
+            onClick={() => onNavigate('doctors')}
+            className="bg-[#fff7ed] hover:bg-[#ffeedb] active:scale-[0.98] border border-orange-100 rounded-3xl p-4 flex flex-col justify-between h-[165px] shadow-2xs cursor-pointer transition-all relative group"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-orange-100/80 text-orange-600 flex items-center justify-center mb-2 shadow-2xs">
+                <Users size={18} />
+              </div>
+              <h4 className="text-[12.5px] font-bold text-slate-900 leading-tight mb-1">
+                Conéctate con médicos especialistas
+              </h4>
+              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                Encuentra al especialista adecuado y realiza videoconsultas seguras.
+              </p>
+            </div>
+            <div className="self-end w-7 h-7 rounded-full bg-orange-600 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <ArrowRight size={13} />
+            </div>
+          </div>
+
+        </div>
+
       </div>
-    </div>
-    
-    <div className="hidden lg:block">
-      <PatientHomeDesktop onNavigate={onNavigate} onLogout={onLogout} />
-    </div>
+
+      {/* ================= VISTA ESCRITORIO (PRESERVADA) ================= */}
+      <div className="hidden lg:block">
+        <PatientHomeDesktop onNavigate={onNavigate} onLogout={onLogout} />
+      </div>
     </>
   );
 };

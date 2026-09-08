@@ -56,10 +56,28 @@ tasks.register('buildWebAssets', Exec) {
     }
 }
 
+tasks.register('cleanAndroidAssetsApk') {
+    doLast {
+        delete fileTree('src/main/assets/public') {
+            include '**/*.apk'
+        }
+        delete file('src/main/assets/public/download')
+    }
+}
+
 tasks.register('syncWebAssets', Copy) {
     dependsOn 'buildWebAssets'
-    from '../../dist'
+    from('../../dist') {
+        exclude 'download/**'
+        exclude '**/*.apk'
+    }
     into 'src/main/assets/public'
+    doLast {
+        delete fileTree('src/main/assets/public') {
+            include '**/*.apk'
+        }
+        delete file('src/main/assets/public/download')
+    }
 }
 
 tasks.register('copyApkToPublicDownload') {
@@ -91,6 +109,7 @@ tasks.register('copyApkToPublicDownload') {
 
 tasks.configureEach { task ->
     if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
+        task.dependsOn 'cleanAndroidAssetsApk'
         task.dependsOn 'syncWebAssets'
     }
     if (task.name == 'assembleDebug' || task.name == 'packageDebug' || task.name == 'installDebug') {

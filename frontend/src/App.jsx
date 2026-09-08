@@ -80,13 +80,19 @@ export default function App() {
 
 
   const handleNavigate = (screen) => {
+    if (screen === 'doctors') {
+      setDoctorDirectorySpecialty('');
+      setShowDoctorDirectory(true);
+      return;
+    }
     const screenMap = {
       'home': '/paciente',
       'general_chat': '/paciente/chat',
       'documents': '/paciente/documentos',
       'history': '/paciente/historial',
       'triage': '/paciente/asistente',
-      'doctors': '/paciente/doctors',
+      'agenda': '/paciente/tratamientos',
+      'treatments': '/paciente/tratamientos',
       'more': '/paciente/mas',
       'search': '/paciente/biblioteca'
     };
@@ -929,12 +935,11 @@ ${text}`], {type: 'text/plain'});
 
   // If we reach here, we are in a patient route
   if (viewMode === 'doctor') return <Navigate to="/medico" />;
-  // Global BottomNav handler for all patient routes
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
-    : (path === '/paciente/tratamientos') ? 'treatments'
+    : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'agenda'
+    : (showDoctorDirectory) ? 'doctors'
     : (path === '/paciente/mas') ? 'more'
-    : (path === '/paciente/chat' || path === '/paciente/asistente' || path === '/paciente/triaje') ? 'ai'
     : 'home';
 
     const handleBottomNav = (tab) => {
@@ -943,19 +948,13 @@ ${text}`], {type: 'text/plain'});
       startTriageSession();
       navigate('/paciente/asistente');
     }
-    if (tab === 'patients') {
-      fetchPatientProfile();
-      fetchHistory();
-      navigate('/paciente/historial');
-    }
-    if (tab === 'history') {
+    if (tab === 'patients' || tab === 'history') {
       fetchPatientProfile();
       navigate('/paciente/historial');
     }
-    if (tab === 'treatments') {
+    if (tab === 'treatments' || tab === 'agenda') {
       navigate('/paciente/tratamientos');
     }
-    if (tab === 'agenda') alert('Agenda en desarrollo...');
     if (tab === 'more') navigate('/paciente/mas');
     if (tab === 'general_chat') navigate('/paciente/chat');
     if (tab === 'documents') navigate('/paciente/documentos');
