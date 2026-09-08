@@ -20,6 +20,9 @@ public class MainActivity extends BridgeActivity {
                 WebStorage.getInstance().deleteAllData();
                 WebSettings settings = webView.getSettings();
                 settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+                // Registrar bridge para actualización directa in-app
+                webView.addJavascriptInterface(new AppUpdaterBridge(this, webView), "AndroidUpdater");
             }
         } catch (Exception e) {
             // Se inicializará si el WebView carga en otro ciclo
