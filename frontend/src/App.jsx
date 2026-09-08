@@ -937,7 +937,7 @@ ${text}`], {type: 'text/plain'});
   if (viewMode === 'doctor') return <Navigate to="/medico" />;
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
-    : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'agenda'
+    : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'treatments'
     : (showDoctorDirectory) ? 'doctors'
     : (path === '/paciente/mas') ? 'more'
     : 'home';

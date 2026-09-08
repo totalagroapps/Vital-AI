@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Clock, Calendar, Users, MoreHorizontal, Sparkles } from 'lucide-react';
+import { Home, Clock, Calendar, Users, MoreHorizontal, Sparkles, Pill } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
@@ -58,21 +58,23 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
   }
 
   // ================= BARRA DE NAVEGACIÓN PACIENTE (5 PESTAÑAS DEL DISEÑO MIVOR.ai) =================
+  const isTreatmentsActive = activeTab === 'treatments' || activeTab === 'agenda';
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-2 pb-5 z-50 select-none">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3.5 z-50 select-none">
       <div className="max-w-md mx-auto grid grid-cols-5 items-center text-center">
         
         {/* 1. Inicio */}
         <button 
           type="button"
           onClick={() => onTabChange('home')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none"
         >
           <Home 
-            size={22} 
+            size={21} 
             className={activeTab === 'home' ? 'text-[#2563eb] fill-[#2563eb]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] font-bold ${activeTab === 'home' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-bold ${activeTab === 'home' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
             Inicio
           </span>
         </button>
@@ -81,29 +83,29 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         <button 
           type="button"
           onClick={() => onTabChange('history')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none"
         >
           <Clock 
-            size={22} 
+            size={21} 
             className={activeTab === 'history' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] font-bold ${activeTab === 'history' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-bold ${activeTab === 'history' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
             Historial
           </span>
         </button>
 
-        {/* 3. Agenda */}
+        {/* 3. Tratamientos */}
         <button 
           type="button"
-          onClick={() => onTabChange('agenda')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          onClick={() => onTabChange('treatments')}
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none"
         >
-          <Calendar 
-            size={22} 
-            className={activeTab === 'agenda' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
+          <Pill 
+            size={21} 
+            className={isTreatmentsActive ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] font-bold ${activeTab === 'agenda' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
-            Agenda
+          <span className={`text-[10px] font-bold ${isTreatmentsActive ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+            Tratamientos
           </span>
         </button>
 
@@ -111,13 +113,13 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         <button 
           type="button"
           onClick={() => onTabChange('doctors')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none"
         >
           <Users 
-            size={22} 
+            size={21} 
             className={activeTab === 'doctors' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] font-bold ${activeTab === 'doctors' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-bold ${activeTab === 'doctors' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
             Médicos
           </span>
         </button>
@@ -126,13 +128,13 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         <button 
           type="button"
           onClick={() => onTabChange('more')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none"
         >
           <MoreHorizontal 
-            size={22} 
+            size={21} 
             className={activeTab === 'more' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] font-bold ${activeTab === 'more' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
+          <span className={`text-[10px] font-bold ${activeTab === 'more' ? 'text-[#2563eb]' : 'text-slate-500'}`}>
             Más
           </span>
         </button>
