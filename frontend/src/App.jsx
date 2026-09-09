@@ -83,6 +83,7 @@ export default function App() {
     if (screen === 'doctors') {
       setDoctorDirectorySpecialty('');
       setShowDoctorDirectory(true);
+      navigate('/paciente/medicos');
       return;
     }
     const screenMap = {
@@ -94,9 +95,14 @@ export default function App() {
       'agenda': '/paciente/tratamientos',
       'treatments': '/paciente/tratamientos',
       'more': '/paciente/mas',
-      'search': '/paciente/biblioteca'
+      'search': '/paciente/biblioteca',
+      'doctors': '/paciente/medicos'
     };
     if (screen === 'triage') startTriageSession();
+    if (screen === 'history') {
+      fetchPatientProfile();
+      fetchHistory();
+    }
     navigate(screenMap[screen] || '/paciente');
   };
 
@@ -939,7 +945,7 @@ ${text}`], {type: 'text/plain'});
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
     : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'treatments'
-    : (showDoctorDirectory) ? 'doctors'
+    : (path === '/paciente/medicos' || showDoctorDirectory) ? 'doctors'
     : (path === '/paciente/mas') ? 'more'
     : 'home';
 
@@ -959,17 +965,23 @@ ${text}`], {type: 'text/plain'});
     if (tab === 'more') navigate('/paciente/mas');
     if (tab === 'general_chat') navigate('/paciente/chat');
     if (tab === 'documents') navigate('/paciente/documentos');
-    if (tab === 'search') setShowMedicalSearch(true);
+    if (tab === 'search') navigate('/paciente/biblioteca');
     if (tab === 'doctors') {
       setDoctorDirectorySpecialty('');
       setShowDoctorDirectory(true);
+      navigate('/paciente/medicos');
     }
   };
 
   const GlobalDoctorDirectoryModal = (
     <DoctorDirectoryModal 
-      isOpen={showDoctorDirectory} 
-      onClose={() => setShowDoctorDirectory(false)} 
+      isOpen={showDoctorDirectory || path === '/paciente/medicos'} 
+      onClose={() => {
+        setShowDoctorDirectory(false);
+        if (path === '/paciente/medicos') {
+          navigate('/paciente');
+        }
+      }} 
       recommendedSpecialty={doctorDirectorySpecialty} 
       apiUrl={API_URL} 
       patientName={patientProfile?.full_name || username} 
@@ -1000,11 +1012,25 @@ ${text}`], {type: 'text/plain'});
   if (path === '/paciente/tratamientos') {
     return (
       <>
+        {GlobalDoctorDirectoryModal}
         <PatientTreatments 
           apiUrl={API_URL} 
           authHeaders={authHeaders} 
           onNavigate={handleBottomNav} 
         />
+      </>
+    );
+  }
+
+  if (path === '/paciente/medicos') {
+    return (
+      <>
+        <PatientHome 
+          onLogout={handleLogout}
+          onNavigate={handleNavigate} 
+        />
+        {GlobalDoctorDirectoryModal}
+        {GlobalBottomNav}
       </>
     );
   }
@@ -1029,19 +1055,8 @@ ${text}`], {type: 'text/plain'});
       <>
         <PatientHome 
           onLogout={handleLogout}
-          onNavigate={(screen) => {
-            if (screen === 'doctors') {
-              setDoctorDirectorySpecialty('');
-              setShowDoctorDirectory(true);
-            } else {
-              if (screen === 'history') {
-                fetchPatientProfile();
-                fetchHistory();
-              }
-              handleNavigate(screen);
-            }
-          }} 
-          />
+          onNavigate={handleNavigate} 
+        />
         {GlobalBottomNav}
       </>
     );
@@ -1069,19 +1084,8 @@ ${text}`], {type: 'text/plain'});
       <>
         <PatientHome 
           onLogout={handleLogout}
-          onNavigate={(screen) => {
-            if (screen === 'doctors') {
-              setDoctorDirectorySpecialty('');
-              setShowDoctorDirectory(true);
-            } else {
-              if (screen === 'history') {
-                fetchPatientProfile();
-                fetchHistory();
-              }
-              handleNavigate(screen);
-            }
-          }} 
-          />
+          onNavigate={handleNavigate} 
+        />
         <MedicalSearchModal isOpen={true} onClose={() => navigate('/paciente')} token={token} apiUrl={API_URL} userProfile={patientProfile} />
         {GlobalBottomNav}
       </>
