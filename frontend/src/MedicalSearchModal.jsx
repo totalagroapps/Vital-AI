@@ -156,7 +156,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4">
-      <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white text-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200" style={{ color: "#0f172a" }}>
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
@@ -196,15 +196,26 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {/* Search Box */}
           <form onSubmit={handleSearch} className="relative w-full group">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-brand transition-colors" />
+              <Search className="h-5 w-5 text-slate-500 group-focus-within:text-brand transition-colors" />
             </div>
             <input
               type="text"
-              className="block w-full pl-12 pr-28 py-3.5 bg-white border-2 border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base font-medium"
+              style={{ color: "#0f172a", backgroundColor: "#ffffff" }}
+              className="block w-full pl-12 pr-36 py-3.5 bg-white border-2 border-slate-300 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base font-semibold"
               placeholder={t('search_studies_placeholder') || 'Buscar por enfermedad, tratamiento o patología (ej: Cáncer, Diabetes, Inmunoterapia)...'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="absolute inset-y-0 right-28 pr-2 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
+                aria-label="Limpiar búsqueda"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading || !query.trim()}
