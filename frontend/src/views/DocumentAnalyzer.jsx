@@ -3,7 +3,8 @@ import {
   ArrowLeft, CloudUpload, FileText, ImageIcon, Activity, Beaker, File,
   Clock, ChevronRight, AlertCircle, CheckCircle2, AlertTriangle, Pill,
   Stethoscope, Lightbulb, MessageSquare, RotateCcw, Shield, Loader2,
-  FileDown, Download, TrendingUp, TrendingDown, Minus, HelpCircle, Copy, Check, Share2, BarChart3
+  FileDown, Download, TrendingUp, TrendingDown, Minus, HelpCircle, Copy, Check, Share2, BarChart3,
+  Sparkles, UserCheck, MapPin, Calendar
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -157,6 +158,90 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
     if (apiUrl && authHeaders) fetchDocs();
     else setLoadingDocs(false);
   }, [apiUrl, authHeaders]);
+
+  const uploadAndAnalyze = async (file) => {
+    if (!file) return;
+    if (!ACCEPTED_MIME.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp|heic|bmp|gif)$/i)) {
+      setError(t("unsupported_format", { fileName: file.name }));
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) { setError(t("file_too_large")); return; }
+
+    setStep('analyzing');
+    setError(null);
+    setAnalysisResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (language) formData.append('language', language);
+
+      const res = await fetch(`${apiUrl}/api/documents/upload`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || t("server_error", { status: res.status }));
+      }
+
+      const data = await res.json();
+
+      if (!data.extracted_text || data.extracted_text.trim().length < 10) {
+        throw new Error(t("text_extraction_failed"));
+      }
+
+      setAnalysisResult({ ...data, filename: file.name });
+      setStep('results');
+
+      // Refresh history list
+      try {
+        const docsRes = await fetch(`${apiUrl}/api/me/documents`, { headers: authHeaders });
+        if (docsRes.ok) setDocuments(await docsRes.json());
+      } catch (e) { /* silent */ }
+
+    } catch (e) {
+      setError(e.message || t("unexpected_error"));
+      setStep('upload');
+    }
+  };
+
+  const handleFileChange = (e) => { if (e.target.files?.[0]) uploadAndAnalyze(e.target.files[0]); };
+  const onDragOver = useCallback((e) => { e.preventDefault(); setIsDragging(true); }, []);
+  const onDragLeave = useCallback((e) => { e.preventDefault(); setIsDragging(false); }, []);
+  const onDrop = useCallback((e) => { e.preventDefault(); setIsDragging(false); uploadAndAnalyze(e.dataTransfer.files[0]); }, []);
+
+  const handleHistoryClick = (doc) => {
+    if (doc.analysis_result) {
+      try {
+        const parsed = JSON.parse(doc.analysis_result);
+        setAnalysisResult({
+          ...doc,
+          id: doc.id,
+          filename: doc.filename,
+          summary: parsed.resumen || parsed.summary || '',
+          hallazgos: parsed.hallazgos || [],
+          medicamentos: parsed.medicamentos || [],
+          diagnosticos: parsed.diagnosticos || [],
+          biomarcadores: parsed.biomarcadores || [],
+          comparativa_historica: parsed.comparativa_historica || [],
+          preguntas_medico: parsed.preguntas_medico || [],
+          smart_referral: parsed.smart_referral || null,
+          severidad: parsed.severidad || 'verde',
+          recomendacion: parsed.recomendacion || '',
+          is_image: doc.document_type === 'medical_image'
+        });
+        setStep('results');
+        return;
+      } catch (e) {
+        console.error("Failed to parse analysis_result", e);
+      }
+    }
+    // Fallback if no detailed report exists for old docs
+    onAskFollowUp(doc.extracted_text, doc.filename);
+  };
 
   const generateClientSidePdf = (data) => {
     try {
@@ -736,80 +821,195 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               </div>
             )}
 
-            {/* Smart Clinical Referral Card (Fila 24) */}
+            {/* Derivación Inteligente de Paciente a Especialista (Fila 14) */}
             {(() => {
-              const corpus = `${analysisResult.summary || ''} ${(analysisResult.diagnosticos || []).join(' ')} ${(analysisResult.hallazgos || []).join(' ')} ${(analysisResult.anomalias || []).join(' ')}`.toLowerCase();
-              let matchedSpec = 'Medicina General';
+              const referral = analysisResult.smart_referral;
+              // Client fallback if referral is not present (legacy docs)
+              const corpus = `${analysisResult.summary || ''} ${(analysisResult.diagnosticos || []).join(' ')} ${(analysisResult.hallazgos || []).join(' ')}`.toLowerCase();
+              let fallbackSpec = 'Medicina General';
               if (corpus.includes('fractur') || corpus.includes('rotura') || corpus.includes('luxaci') || corpus.includes('óseo') || corpus.includes('oseo') || corpus.includes('esguince') || corpus.includes('menisco')) {
-                matchedSpec = 'Traumatología';
+                fallbackSpec = 'Traumatología';
               } else if (corpus.includes('troponin') || corpus.includes('infarto') || corpus.includes('cardio') || corpus.includes('arritmia') || corpus.includes('electrocardiograma') || corpus.includes('ecg') || corpus.includes('colesterol')) {
-                matchedSpec = 'Cardiología';
+                fallbackSpec = 'Cardiología';
               } else if (corpus.includes('glucosa') || corpus.includes('hba1c') || corpus.includes('diabetes') || corpus.includes('tiroides') || corpus.includes('tsh') || corpus.includes('metabólic')) {
-                matchedSpec = 'Endocrinología';
+                fallbackSpec = 'Endocrinología';
               } else if (corpus.includes('creatinina') || corpus.includes('renal') || corpus.includes('urea') || corpus.includes('tfg')) {
-                matchedSpec = 'Nefrología';
+                fallbackSpec = 'Nefrología';
               } else if (corpus.includes('transaminas') || corpus.includes('hepátic') || corpus.includes('hígado') || corpus.includes('bilirrubina') || corpus.includes('digestiv')) {
-                matchedSpec = 'Gastroenterología';
+                fallbackSpec = 'Gastroenterología';
               } else if (corpus.includes('hemoglobina') || corpus.includes('anemia') || corpus.includes('plaqueta') || corpus.includes('leucocit')) {
-                matchedSpec = 'Hematología';
+                fallbackSpec = 'Hematología';
               } else if (corpus.includes('pulmonar') || corpus.includes('neumo') || corpus.includes('espirometr') || corpus.includes('asma') || corpus.includes('tórax')) {
-                matchedSpec = 'Neumología';
+                fallbackSpec = 'Neumología';
               } else if (corpus.includes('piel') || corpus.includes('cutáne') || corpus.includes('dermat') || corpus.includes('melanoma') || corpus.includes('lunar')) {
-                matchedSpec = 'Dermatología';
+                fallbackSpec = 'Dermatología';
               }
 
-              const isUrgent = analysisResult.severidad === 'rojo';
-              const isAttention = analysisResult.severidad === 'amarillo' || matchedSpec !== 'Medicina General';
+              const specialty = referral?.specialty || referral?.short_specialty || fallbackSpec;
+              const urgency = referral?.urgency || (analysisResult.severidad === 'rojo' ? 'alta' : (analysisResult.severidad === 'amarillo' ? 'media' : 'baja'));
+              const reason = referral?.reason || (urgency === 'alta' 
+                ? `Los hallazgos requieren valoración prioritaria por un especialista en ${specialty}.` 
+                : `Según los valores analizados, se sugiere consulta médica en ${specialty}.`);
+              const alteredBms = referral?.altered_biomarkers || (analysisResult.biomarcadores || []).filter(bm => ['elevado', 'bajo', 'alterado', 'alto'].includes((bm.estado || '').toLowerCase()));
+              const specialists = referral?.recommended_specialists || [];
 
-              if (!isUrgent && !isAttention) return null;
+              const isUrgent = urgency === 'alta';
+              const isMedium = urgency === 'media';
 
               return (
-                <div className={`rounded-2xl p-5 border shadow-sm flex flex-col gap-3 ${
+                <div className={`rounded-3xl p-5 md:p-6 border shadow-soft flex flex-col gap-4 transition-all ${
                   isUrgent 
-                    ? 'bg-gradient-to-br from-red-50 via-rose-50 to-orange-50 border-red-200' 
-                    : 'bg-gradient-to-br from-teal-50 via-sky-50 to-emerald-50 border-teal-200'
+                    ? 'bg-gradient-to-br from-red-50/90 via-rose-50/70 to-orange-50/80 border-red-200/90' 
+                    : isMedium
+                    ? 'bg-gradient-to-br from-amber-50/90 via-yellow-50/60 to-orange-50/70 border-amber-200/80'
+                    : 'bg-gradient-to-br from-teal-50/90 via-sky-50/60 to-emerald-50/70 border-teal-200/80'
                 }`}>
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-xl text-white flex items-center justify-center flex-shrink-0 shadow-sm ${
-                      isUrgent ? 'bg-red-600' : 'bg-brand-teal'
-                    }`}>
-                      {isUrgent ? <AlertCircle size={18} /> : <Stethoscope size={18} />}
+                  {/* Top Badge & Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/5">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-10 h-10 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-sm ${
+                        isUrgent ? 'bg-red-600' : isMedium ? 'bg-amber-600' : 'bg-teal-700'
+                      }`}>
+                        {isUrgent ? <AlertCircle size={22} /> : isMedium ? <AlertTriangle size={22} /> : <Stethoscope size={22} />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                            isUrgent ? 'bg-red-100 text-red-700 border border-red-200' : isMedium ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-teal-100 text-teal-800 border border-teal-200'
+                          }`}>
+                            {isUrgent ? 'Prioridad Alta • Atención Urgente' : isMedium ? 'Prioridad Media • Consulta Recomendada' : 'Seguimiento Preventivo'}
+                          </span>
+                        </div>
+                        <h4 className="text-base font-extrabold text-slate-900 mt-0.5">
+                          Derivación Inteligente: <span className={isUrgent ? 'text-red-700' : isMedium ? 'text-amber-800' : 'text-teal-800'}>{specialty}</span>
+                        </h4>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className={`text-xs font-bold uppercase tracking-wider ${isUrgent ? 'text-red-900' : 'text-teal-900'}`}>
-                        {isUrgent ? 'Atención Médica Urgente Requerida' : 'Derivación Inteligente Recomendada'}
-                      </h4>
-                      <p className={`text-xs font-medium ${isUrgent ? 'text-red-700' : 'text-teal-700'}`}>
-                        {isUrgent 
-                          ? `Los hallazgos requieren valoración inmediata por un especialista en ${matchedSpec}.` 
-                          : `Según los valores analizados, se recomienda consulta médica en ${matchedSpec}.`}
-                      </p>
+
+                    <div className="flex items-center gap-1.5 self-start sm:self-center bg-white/80 px-2.5 py-1 rounded-xl border border-slate-200/60 text-[11px] font-bold text-slate-700 shadow-2xs">
+                      <Sparkles size={13} className="text-teal-600" />
+                      <span>Matching Algorítmico MIVOR</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                  {/* Justificación Clínica */}
+                  <div className="bg-white/80 backdrop-blur-xs rounded-2xl p-3.5 border border-slate-200/60 shadow-2xs">
+                    <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                      <span className="font-bold text-slate-900">Criterio Clínico: </span>
+                      {reason}
+                    </p>
+                  </div>
+
+                  {/* Biomarcadores Detonantes */}
+                  {alteredBms.length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1">
+                        <Activity size={12} className={isUrgent ? 'text-red-600' : 'text-teal-700'} />
+                        Biomarcadores detonantes de la derivación:
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {alteredBms.map((bm, idx) => {
+                          const isHigh = (bm.estado || '').toLowerCase().includes('elevado') || (bm.estado || '').toLowerCase().includes('alto');
+                          return (
+                            <span 
+                              key={idx}
+                              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl shadow-2xs border ${
+                                isHigh 
+                                  ? 'bg-red-50 text-red-700 border-red-200' 
+                                  : 'bg-blue-50 text-blue-700 border-blue-200'
+                              }`}
+                            >
+                              {isHigh ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                              <span>{bm.parametro}: {bm.valor} {bm.unidad || ''}</span>
+                              <span className="text-[10px] font-medium opacity-80">({bm.estado})</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Especialistas Recomendados (Mini-cards) */}
+                  {specialists.length > 0 && (
+                    <div className="flex flex-col gap-2 pt-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1">
+                          <UserCheck size={13} className="text-teal-700" />
+                          Especialistas recomendados en MIVOR.ai:
+                        </span>
+                        <span className="text-[10px] font-bold text-teal-800 bg-teal-100/70 px-2 py-0.5 rounded-full">
+                          Verificados
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {specialists.slice(0, 4).map((docItem) => (
+                          <div 
+                            key={docItem.id || docItem.user_id}
+                            className="bg-white/90 rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3 hover:border-teal-400 hover:shadow-xs transition-all group"
+                          >
+                            <div className="relative flex-shrink-0">
+                              <img 
+                                src={docItem.photo_url || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=120&auto=format&fit=crop&q=80"} 
+                                alt={docItem.full_name}
+                                className="w-11 h-11 rounded-xl object-cover border border-slate-100"
+                              />
+                              {docItem.is_verified && (
+                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-teal-600 rounded-full flex items-center justify-center text-white ring-2 ring-white">
+                                  <Check size={9} strokeWidth={3} />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-xs font-bold text-slate-900 truncate group-hover:text-teal-800 transition-colors">
+                                {docItem.full_name}
+                              </h5>
+                              <p className="text-[11px] font-semibold text-teal-700 truncate">
+                                {docItem.specialty} {docItem.experience_years ? `• ${docItem.experience_years}a exp.` : ''}
+                              </p>
+                              <p className="text-[10px] text-slate-500 truncate flex items-center gap-0.5 mt-0.5">
+                                <MapPin size={10} className="flex-shrink-0" />
+                                <span>{docItem.location || docItem.city || 'Consulta Online'}</span>
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onOpenDoctorDirectory?.(docItem.specialty || specialty)}
+                              className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-[11px] border border-teal-200/70 active:scale-95 transition-all flex-shrink-0 cursor-pointer"
+                            >
+                              Agendar
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                     <button
                       type="button"
-                      onClick={() => onOpenDoctorDirectory?.(matchedSpec)}
-                      className={`w-full py-2.5 px-3.5 rounded-xl active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
-                        isUrgent ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-teal hover:bg-teal-700'
+                      onClick={() => onOpenDoctorDirectory?.(specialty)}
+                      className={`w-full py-3 px-4 rounded-xl active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
+                        isUrgent ? 'bg-red-600 hover:bg-red-700' : isMedium ? 'bg-amber-600 hover:bg-amber-700' : 'bg-teal-700 hover:bg-teal-800'
                       }`}
                     >
-                      <Stethoscope size={15} />
-                      <span>Ver Especialistas en {matchedSpec}</span>
+                      <Calendar size={16} />
+                      <span>Agendar Cita en {specialty}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
-                        const diagText = analysisResult.diagnosticos?.join(', ') || analysisResult.summary || 'evaluación de estudio médico';
-                        const msg = encodeURIComponent(`Hola, acabo de subir un estudio a MIVOR.ai con recomendación para ${matchedSpec}: ${diagText}. Me gustaría consultar disponibilidad.`);
+                        const diagText = (analysisResult.diagnosticos || []).join(', ') || analysisResult.summary || 'evaluación de estudio médico';
+                        const alteredStr = alteredBms.map(b => `${b.parametro} (${b.estado})`).join(', ');
+                        const msg = encodeURIComponent(`Hola, acabo de analizar un estudio en MIVOR.ai con derivación recomendada para ${specialty}.\nMotivo: ${reason}\n${alteredStr ? `Valores alterados: ${alteredStr}\n` : ''}Me gustaría consultar disponibilidad para una valoración.`);
                         window.open(`https://wa.me/?text=${msg}`, '_blank');
                       }}
-                      className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                      className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                     >
-                      <MessageSquare size={15} />
-                      <span>WhatsApp Especialista</span>
+                      <MessageSquare size={16} />
+                      <span>Consultar WhatsApp Especialista</span>
                     </button>
                   </div>
                 </div>

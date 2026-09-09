@@ -445,7 +445,32 @@ TEXTO DEL DOCUMENTO:
 
         response_data['comparativa_historica'] = comparativa_historica
 
-        # Re-pack unified analysis JSON with biomarkers and historical trends
+        # Derivación Inteligente de Paciente a Especialista (Fila 14)
+        from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
+        referral_match = match_specialty_from_clinical_data(
+            diagnostics=response_data.get('diagnosticos', []),
+            anomalies=response_data.get('hallazgos', []),
+            summary_text=f"{response_data.get('summary', '')} {response_data.get('extracted_text', '')[:1200]}",
+            biomarkers=response_data.get('biomarcadores', [])
+        )
+        recommended_specialists = await get_recommended_specialists(
+            db=db,
+            specialty=referral_match.get('specialty', 'Medicina General'),
+            limit=4
+        )
+        referral_data = {
+            "matched": referral_match.get("matched", False),
+            "specialty": referral_match.get("specialty", "Medicina General"),
+            "short_specialty": referral_match.get("short_specialty", "Medicina General"),
+            "urgency": referral_match.get("urgency", "baja"),
+            "reason": referral_match.get("reason", ""),
+            "matched_keywords": referral_match.get("matched_keywords", []),
+            "altered_biomarkers": referral_match.get("altered_biomarkers", []),
+            "recommended_specialists": recommended_specialists
+        }
+        response_data['smart_referral'] = referral_data
+
+        # Re-pack unified analysis JSON with biomarkers, historical trends and smart referral
         summary_payload = {
             'resumen': response_data.get('summary', ''),
             'hallazgos': response_data.get('hallazgos', []),
@@ -454,6 +479,7 @@ TEXTO DEL DOCUMENTO:
             'biomarcadores': response_data.get('biomarcadores', []),
             'preguntas_medico': response_data.get('preguntas_medico', []),
             'comparativa_historica': response_data.get('comparativa_historica', []),
+            'smart_referral': referral_data,
             'severidad': response_data.get('severidad', 'verde'),
             'recomendacion': response_data.get('recomendacion', '')
         }
@@ -678,11 +704,47 @@ async def get_document_summary(document_id: str, db: AsyncSession=Depends(get_db
 
 @router.get('/api/me/documents')
 async def get_my_documents(db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
-    'Returns all documents uploaded by the current authenticated user.'
+    'Returns all documents uploaded by the current authenticated user with smart clinical referral.'
+    from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
     stmt = select(models.DocumentMetadata).where((models.DocumentMetadata.user_id == current_user_id)).order_by(models.DocumentMetadata.created_at.desc())
     result = (await db.execute(stmt))
     docs = result.scalars().all()
-    return [{'id': doc.id, 'filename': doc.filename, 'document_type': doc.document_type, 'extracted_text': doc.extracted_text, 'analysis_result': doc.analysis_result, 'created_at': (doc.created_at.isoformat() if doc.created_at else None)} for doc in docs]
+    out = []
+    for doc in docs:
+        analysis_str = doc.analysis_result
+        if analysis_str:
+            try:
+                data = json.loads(analysis_str)
+                if not data.get('smart_referral'):
+                    referral_match = match_specialty_from_clinical_data(
+                        diagnostics=data.get('diagnosticos', []),
+                        anomalies=data.get('hallazgos', []),
+                        summary_text=f"{data.get('resumen', '')} {doc.extracted_text or ''}",
+                        biomarkers=data.get('biomarcadores', [])
+                    )
+                    recommended = await get_recommended_specialists(db=db, specialty=referral_match.get('specialty', 'Medicina General'), limit=4)
+                    data['smart_referral'] = {
+                        "matched": referral_match.get("matched", False),
+                        "specialty": referral_match.get("specialty", "Medicina General"),
+                        "short_specialty": referral_match.get("short_specialty", "Medicina General"),
+                        "urgency": referral_match.get("urgency", "baja"),
+                        "reason": referral_match.get("reason", ""),
+                        "matched_keywords": referral_match.get("matched_keywords", []),
+                        "altered_biomarkers": referral_match.get("altered_biomarkers", []),
+                        "recommended_specialists": recommended
+                    }
+                    analysis_str = json.dumps(data)
+            except Exception:
+                pass
+        out.append({
+            'id': doc.id,
+            'filename': doc.filename,
+            'document_type': doc.document_type,
+            'extracted_text': doc.extracted_text,
+            'analysis_result': analysis_str,
+            'created_at': (doc.created_at.isoformat() if doc.created_at else None)
+        })
+    return out
 
 
 @router.get('/api/documents/{document_id}/pdf')
