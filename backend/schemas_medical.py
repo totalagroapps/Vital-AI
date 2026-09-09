@@ -17,4 +17,7 @@ class MedicalSearchRequest(BaseModel):
     user_id: Optional[int] = 1
 
 class MedicalSearchResponse(BaseModel):
-    results: List[NormalizedDocument]
+    results: List[NormalizedDocument] = []
+    total_results: Optional[int] = 0
+    query: Optional[str] = ""
+    sources: Optional[dict] = {}

@@ -1463,8 +1463,8 @@ ${text}`], {type: 'text/plain'});
                 className="p-3.5 glass-card rounded-xl border border-slate-200 shadow-sm hover:border-brand/40 text-left transition-all hover:scale-[1.02] group"
               >
                 <BookOpen className="w-5 h-5 text-content-secondary mb-2 group-hover:scale-110 transition-transform" />
-                <div className="font-semibold text-xs text-slate-800">Biblioteca Médica</div>
-                <div className="text-[11px] text-slate-600 mt-1">Busca información personalizada en nuestra base de estudios y literatura científica asistido por IA.</div>
+                <div className="font-semibold text-xs text-slate-800">Últimos Avances Médicos</div>
+                <div className="text-[11px] text-slate-600 mt-1">Busca los últimos avances médicos sobre cualquier enfermedad o tratamiento con IA.</div>
               </button>
               </div>
             </div>

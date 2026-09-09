@@ -217,20 +217,20 @@ const PatientHome = ({ onNavigate, onLogout }) => {
             </div>
           </div>
 
-          {/* 4. Biblioteca Médica RAG */}
+          {/* 4. Últimos Avances Médicos */}
           <div 
             onClick={() => onNavigate('search')}
             className="bg-[#fff7ed] hover:bg-[#ffeedb] active:scale-[0.98] border border-orange-100 rounded-3xl p-3.5 flex flex-col justify-between min-h-[142px] shadow-2xs cursor-pointer transition-all relative group"
           >
             <div>
               <div className="w-10 h-10 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center mb-2 shadow-2xs">
-                <BookOpen size={20} />
+                <Sparkles size={20} />
               </div>
               <h4 className="text-[13px] font-bold text-[#0b1a30] leading-tight mb-1">
-                Biblioteca Médica RAG
+                {t("latest_medical_advances") || "Últimos Avances Médicos"}
               </h4>
               <p className="text-[10px] text-slate-500 leading-tight font-medium">
-                Busca en estudios clínicos y literatura científica con IA.
+                {t("latest_medical_advances_desc") || "Busca los últimos avances médicos sobre cualquier enfermedad o tratamiento."}
               </p>
             </div>
             <div className="self-end mt-2 w-7 h-7 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform shrink-0">

@@ -108,10 +108,10 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             Análisis
           </button>
           <button 
-            onClick={() => alert("Biblioteca de evidencia médica (PubMed / Cochrane).")} 
+            onClick={() => onNavigate('search')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
-            Recursos
+            Últimos Avances
           </button>
           <button 
             onClick={() => onNavigate('more')} 
@@ -282,7 +282,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
 
           {/* Card 4: Evidencia médica */}
           <div 
-            onClick={() => alert("Biblioteca científica y guías médicas conectadas a PubMed y Cochrane.")}
+            onClick={() => onNavigate('search')}
             className="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group"
           >
             <div className="flex items-start gap-4 flex-1 pr-4">
@@ -290,14 +290,14 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                 <BookOpen size={24} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-1">Evidencia médica</h3>
+                <h3 className="text-base font-extrabold text-gray-900 mb-1">Últimos Avances Médicos</h3>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-sm">
-                  Accede a los últimos avances científicos, guías clínicas, estudios relevantes y recibe alertas de novedades importantes.
+                  Busca los últimos avances científicos, guías clínicas y ensayos en PubMed, ClinicalTrials y Cochrane.
                 </p>
               </div>
             </div>
-            <div className="w-9 h-9 rounded-full bg-orange-600 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
-              <ArrowRight size={16} />
+            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-brand group-hover:text-white transition-all shrink-0">
+              <ArrowRight size={18} />
             </div>
           </div>
 

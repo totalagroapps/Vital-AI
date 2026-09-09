@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell } from 'lucide-react';
+import React from 'react';
+import { Stethoscope, BookOpen, FileText, FolderHeart, UserSquare2, Brain, Activity, Folder, User, ArrowRight, Lock, Info, Bell, Sparkles } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
@@ -117,9 +117,9 @@ const PatientHomeDesktop = ({ onNavigate, onLogout }) => {
               </div>
 
               <div onClick={() => onNavigate('search')} className="bg-white rounded-2xl lg:rounded-3xl p-4 lg:p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer flex flex-col group">
-                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><BookOpen size={20}/></div>
-                <h4 className="font-bold text-[11px] lg:text-sm text-blue-500 mb-1.5">{t("medical_library_rag")}</h4>
-                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">{t("search_scientific_literature")}</p>
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mb-3 group-hover:scale-110 transition-transform"><Sparkles size={20}/></div>
+                <h4 className="font-bold text-[11px] lg:text-sm text-blue-500 mb-1.5">{t("latest_medical_advances") || t("medical_library_rag")}</h4>
+                <p className="text-[10px] lg:text-xs text-gray-500 mb-4 flex-1">{t("latest_medical_advances_desc") || t("search_scientific_literature")}</p>
                 <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-full bg-blue-500 text-white flex items-center justify-center group-hover:translate-x-2 transition-transform"><ArrowRight size={14}/></div>
               </div>
 
