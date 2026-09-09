@@ -4,6 +4,7 @@ from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extr
 
 
 from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
+from services.clinical_pdf_service import generate_clinical_pdf
 
 
 from services.medical_search_service import MedicalSearchService
@@ -212,16 +213,31 @@ INSTRUCCIONES CLÍNICAS FUNDAMENTALES:
    - NUNCA digas que "no hay contenido relevante" ni que "no proporciona información médica" si estás ante una imagen radiológica: describe siempre en detalle la anatomía ósea y las lesiones visibles.
 
 2. SI ES UNA RECETA MÉDICA, INFORME EN PAPEL O ANÁLISIS DE LABORATORIO:
-   - Transcribe y analiza con fidelidad los diagnósticos, medicamentos con sus dosis/instrucciones y parámetros analíticos fuera de rango.
+   - Transcribe y analiza con fidelidad los diagnósticos, medicamentos con sus dosis/instrucciones y parámetros analíticos o biomarcadores de laboratorio con sus valores y unidades.
 
 3. DEBES RESPONDER ÚNICAMENTE UN OBJETO JSON con esta estructura exacta:
 {{
-  "resumen": "Resumen claro, comprensible y empático para el paciente que explique exactamente lo que se aprecia en la imagen (ej. si hay una fractura ósea desplazada, explicar la localización y severidad).",
-  "hallazgos": ["Hallazgo detallado 1 (ej. Fractura completa y desplazada en la diáfisis del fémur)", "Hallazgo 2 (ej. Desplazamiento y cabalgamiento de fragmentos óseos)", "Hallazgo 3..."],
-  "medicamentos": ["Medicamentos identificados con dosis, si aplica (vacío si es una radiografía sin fármacos)"],
-  "diagnosticos": ["Diagnóstico presuntivo o conclusión clínica clara (ej. Fractura diafisaria de fémur izquierdo desplazada)"],
+  "resumen": "Resumen claro, comprensible y empático para el paciente que explique exactamente lo que se aprecia en la imagen.",
+  "hallazgos": ["Hallazgo detallado 1 (ej. Fractura completa y desplazada en la diáfisis del fémur)", "Hallazgo 2..."],
+  "medicamentos": ["Medicamentos identificados con dosis, si aplica (vacío si no hay fármacos)"],
+  "diagnosticos": ["Diagnóstico presuntivo o conclusión clínica clara"],
+  "biomarcadores": [
+    {{
+      "parametro": "Nombre del analito (ej. Glucosa, Colesterol, Hemoglobina, etc. Lista vacía [] si es radiografía sin valores)",
+      "valor": 110.0,
+      "unidad": "mg/dL",
+      "rango_referencia": "70 - 100",
+      "min_referencia": 70.0,
+      "max_referencia": 100.0,
+      "estado": "elevado"
+    }}
+  ],
+  "preguntas_medico": [
+    "Pregunta 1 que el paciente debería formular a su médico en su próxima consulta...",
+    "Pregunta 2..."
+  ],
   "severidad": "verde" | "amarillo" | "rojo",
-  "recomendacion": "Recomendaciones médicas claras y paso a paso para el paciente (ej. Acudir inmediatamente a urgencias hospitalarias/traumatología, inmovilizar la extremidad, bajo ninguna circunstancia apoyar peso corporal)."
+  "recomendacion": "Recomendaciones médicas claras y paso a paso para el paciente."
 }}
 
 Criterios de severidad:
@@ -241,6 +257,8 @@ Criterios de severidad:
             hallazgos = img_data.get('hallazgos', [])
             medicamentos = img_data.get('medicamentos', [])
             diagnosticos = img_data.get('diagnosticos', [])
+            biomarcadores = img_data.get('biomarcadores', [])
+            preguntas_medico = img_data.get('preguntas_medico', [])
             severidad = img_data.get('severidad', 'verde')
             recomendacion = img_data.get('recomendacion', '')
             all_text_combined = f"{summary} {' '.join(hallazgos)} {' '.join(diagnosticos)}".lower()
@@ -250,6 +268,8 @@ Criterios de severidad:
             response_data['hallazgos'] = hallazgos
             response_data['medicamentos'] = medicamentos
             response_data['diagnosticos'] = diagnosticos
+            response_data['biomarcadores'] = biomarcadores
+            response_data['preguntas_medico'] = preguntas_medico
             response_data['severidad'] = severidad
             response_data['recomendacion'] = recomendacion
             report_lines = []
@@ -265,7 +285,7 @@ Criterios de severidad:
             (scrubbed_text, phi_detected) = scrub_phi(extracted_text)
             response_data['extracted_text'] = scrubbed_text
             response_data['phi_detected'] = phi_detected
-            summary_data_json = json.dumps({'resumen': summary, 'hallazgos': hallazgos, 'medicamentos': medicamentos, 'diagnosticos': diagnosticos, 'severidad': severidad, 'recomendacion': recomendacion})
+            summary_data_json = json.dumps({'resumen': summary, 'hallazgos': hallazgos, 'medicamentos': medicamentos, 'diagnosticos': diagnosticos, 'biomarcadores': biomarcadores, 'preguntas_medico': preguntas_medico, 'severidad': severidad, 'recomendacion': recomendacion})
         else:
             raise HTTPException(status_code=400, detail='Formato de archivo no soportado. Usa PDF, JPG o PNG.')
         if response_data['extracted_text']:
@@ -301,7 +321,7 @@ Texto: {response_data['extracted_text']}
         if ((summary_data_json is None) and response_data.get('extracted_text') and (len(response_data['extracted_text'].strip()) > 20)):
             try:
                 summary_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-                summary_prompt = f'''Eres MIVOR.ai, un asistente médico experto. Analiza el siguiente texto extraído de un documento médico y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
+                summary_prompt = f'''Eres MIVOR.ai, un asistente médico experto. Analiza el siguiente texto extraído de un documento médico (analítica de laboratorio, informe clínico, receta o estudio) y devuelve ÚNICAMENTE un JSON con esta estructura exacta:
 {lang_directive}
 
 {{
@@ -309,21 +329,40 @@ Texto: {response_data['extracted_text']}
   "hallazgos": ["hallazgo detallado 1", "hallazgo detallado 2"],
   "medicamentos": ["medicamento con dosis e instrucciones si aplica"],
   "diagnosticos": ["diagnóstico médico explicado claramente"],
+  "biomarcadores": [
+    {{
+      "parametro": "Nombre del analito o parámetro (ej. Glucosa en ayunas, Colesterol Total, Triglicéridos, Creatinina, Hemoglobina, Plaquetas, TSH, etc.)",
+      "valor": 110.0,
+      "unidad": "mg/dL",
+      "rango_referencia": "70 - 100",
+      "min_referencia": 70.0,
+      "max_referencia": 100.0,
+      "estado": "elevado"
+    }}
+  ],
+  "preguntas_medico": [
+    "Pregunta relevante que el paciente puede formular a su médico sobre estos resultados...",
+    "Pregunta 2..."
+  ],
   "severidad": "verde",
   "recomendacion": "Recomendaciones paso a paso."
 }}
+Donde estado en biomarcadores es: "normal", "elevado", o "bajo". Si no hay analitos numéricos, usa lista vacía [].
 Donde severidad es: "verde" (normal/rutina), "amarillo" (requiere atención médica pronto), "rojo" (urgente).
 Si el campo no aplica, usa lista vacía [].
 
 TEXTO DEL DOCUMENTO:
 {response_data['extracted_text'][:3000]}'''
-                summary_resp = (await summary_client.chat.completions.create(model='gpt-4o-mini', messages=[{'role': 'user', 'content': summary_prompt}], response_format={'type': 'json_object'}, max_tokens=800, temperature=0.1))
+                summary_resp = (await summary_client.chat.completions.create(model='gpt-4o-mini', messages=[{'role': 'user', 'content': summary_prompt}], response_format={'type': 'json_object'}, max_tokens=1000, temperature=0.1))
                 summary_data = json.loads(summary_resp.choices[0].message.content)
-                summary_data_json = json.dumps(summary_data)
+                biomarcadores = summary_data.get('biomarcadores', [])
+                preguntas_medico = summary_data.get('preguntas_medico', [])
                 response_data['summary'] = summary_data.get('resumen', '')
                 response_data['hallazgos'] = summary_data.get('hallazgos', [])
                 response_data['medicamentos'] = summary_data.get('medicamentos', [])
                 response_data['diagnosticos'] = summary_data.get('diagnosticos', [])
+                response_data['biomarcadores'] = biomarcadores
+                response_data['preguntas_medico'] = preguntas_medico
                 response_data['severidad'] = summary_data.get('severidad', 'verde')
                 response_data['recomendacion'] = summary_data.get('recomendacion', '')
             except Exception as summ_e:
@@ -333,7 +372,92 @@ TEXTO DEL DOCUMENTO:
                 response_data['hallazgos'] = []
                 response_data['medicamentos'] = []
                 response_data['diagnosticos'] = []
+                response_data['biomarcadores'] = []
+                response_data['preguntas_medico'] = []
                 response_data['recomendacion'] = ''
+
+        # Historical biomarker comparison against previous documents of the same patient
+        comparativa_historica = []
+        cur_bms = response_data.get('biomarcadores', [])
+        if cur_bms and current_user_id:
+            try:
+                prev_docs_stmt = select(models.DocumentMetadata).where(
+                    models.DocumentMetadata.user_id == current_user_id
+                ).order_by(models.DocumentMetadata.created_at.desc()).limit(15)
+                prev_docs_res = await db.execute(prev_docs_stmt)
+                prev_docs = prev_docs_res.scalars().all()
+
+                for cur_bm in cur_bms:
+                    cur_param_name = cur_bm.get('parametro', '').strip().lower()
+                    if not cur_param_name or cur_bm.get('valor') is None:
+                        continue
+                    try:
+                        cur_val = float(cur_bm['valor'])
+                    except (ValueError, TypeError):
+                        continue
+
+                    matched_prev = None
+                    matched_date = None
+                    for p_doc in prev_docs:
+                        if not p_doc.analysis_result:
+                            continue
+                        try:
+                            p_data = json.loads(p_doc.analysis_result)
+                            p_bms = p_data.get('biomarcadores', [])
+                            for p_bm in p_bms:
+                                p_name = p_bm.get('parametro', '').strip().lower()
+                                if p_name and (p_name == cur_param_name or cur_param_name in p_name or p_name in cur_param_name):
+                                    if p_bm.get('valor') is not None:
+                                        try:
+                                            _ = float(p_bm['valor'])
+                                            matched_prev = p_bm
+                                            matched_date = p_doc.created_at.strftime("%d/%m/%Y") if p_doc.created_at else "Anterior"
+                                            break
+                                        except (ValueError, TypeError):
+                                            pass
+                            if matched_prev:
+                                break
+                        except Exception:
+                            pass
+
+                    if matched_prev:
+                        try:
+                            prev_val = float(matched_prev['valor'])
+                            diff = round(cur_val - prev_val, 2)
+                            pct_change = round((diff / prev_val) * 100, 1) if prev_val != 0 else 0.0
+                            tendencia = 'sube' if diff > 0 else ('baja' if diff < 0 else 'estable')
+                            comparativa_historica.append({
+                                'parametro': cur_bm.get('parametro', ''),
+                                'valor_actual': cur_val,
+                                'valor_anterior': prev_val,
+                                'unidad': cur_bm.get('unidad', '') or matched_prev.get('unidad', ''),
+                                'fecha_anterior': matched_date or 'Anterior',
+                                'diferencia': diff,
+                                'cambio_porcentual': pct_change,
+                                'tendencia': tendencia,
+                                'estado_actual': cur_bm.get('estado', 'normal'),
+                                'rango_referencia': cur_bm.get('rango_referencia', '')
+                            })
+                        except Exception:
+                            pass
+            except Exception as hist_err:
+                logger.error(f"Error calculando comparativa histórica: {hist_err}")
+
+        response_data['comparativa_historica'] = comparativa_historica
+
+        # Re-pack unified analysis JSON with biomarkers and historical trends
+        summary_payload = {
+            'resumen': response_data.get('summary', ''),
+            'hallazgos': response_data.get('hallazgos', []),
+            'medicamentos': response_data.get('medicamentos', []),
+            'diagnosticos': response_data.get('diagnosticos', []),
+            'biomarcadores': response_data.get('biomarcadores', []),
+            'preguntas_medico': response_data.get('preguntas_medico', []),
+            'comparativa_historica': response_data.get('comparativa_historica', []),
+            'severidad': response_data.get('severidad', 'verde'),
+            'recomendacion': response_data.get('recomendacion', '')
+        }
+        summary_data_json = json.dumps(summary_payload)
         try:
             new_doc = models.DocumentMetadata(user_id=current_user_id, filename=response_data['filename'], extracted_text=response_data['extracted_text'], document_type=response_data['document_type'], analysis_result=summary_data_json)
             db.add(new_doc)
@@ -559,4 +683,96 @@ async def get_my_documents(db: AsyncSession=Depends(get_db), current_user_id: st
     result = (await db.execute(stmt))
     docs = result.scalars().all()
     return [{'id': doc.id, 'filename': doc.filename, 'document_type': doc.document_type, 'extracted_text': doc.extracted_text, 'analysis_result': doc.analysis_result, 'created_at': (doc.created_at.isoformat() if doc.created_at else None)} for doc in docs]
+
+
+@router.get('/api/documents/{document_id}/pdf')
+async def download_document_pdf(document_id: str, db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
+    """
+    Genera y descarga un informe clínico en PDF estructurado con ReportLab.
+    """
+    doc = None
+    try:
+        if document_id.isdigit():
+            stmt = select(models.DocumentMetadata).where(
+                models.DocumentMetadata.id == int(document_id),
+                models.DocumentMetadata.user_id == current_user_id
+            )
+            res = await db.execute(stmt)
+            doc = res.scalar_one_or_none()
+        else:
+            stmt = select(models.DocumentMetadata).where(
+                models.DocumentMetadata.user_id == current_user_id
+            )
+            res = await db.execute(stmt)
+            all_user_docs = res.scalars().all()
+            for d in all_user_docs:
+                if str(d.id) == str(document_id):
+                    doc = d
+                    break
+    except Exception as e:
+        logger.error(f"Error consultando DocumentMetadata para PDF: {e}")
+
+    if not doc:
+        try:
+            stmt_med = select(models.MedicalDocument).where(models.MedicalDocument.id == document_id)
+            res_med = await db.execute(stmt_med)
+            doc_med = res_med.scalar_one_or_none()
+            if doc_med:
+                payload = {}
+                if doc_med.extracted_text:
+                    try:
+                        payload = json.loads(doc_med.extracted_text)
+                    except Exception:
+                        payload = {"resumen": doc_med.extracted_text}
+                pdf_bytes = generate_clinical_pdf(payload, filename=doc_med.original_filename or "documento.pdf")
+                safe_fn = re.sub(r'[^a-zA-Z0-9_\.-]', '_', doc_med.original_filename or f"informe_{document_id}")
+                if not safe_fn.lower().endswith(".pdf"):
+                    safe_fn = f"{safe_fn}.pdf"
+                return StreamingResponse(
+                    io.BytesIO(pdf_bytes),
+                    media_type="application/pdf",
+                    headers={"Content-Disposition": f'attachment; filename="{safe_fn}"'}
+                )
+        except Exception as e_med:
+            logger.error(f"Error consultando MedicalDocument para PDF: {e_med}")
+
+        raise HTTPException(status_code=404, detail="Documento clínico no encontrado.")
+
+    data = {}
+    if doc.analysis_result:
+        try:
+            data = json.loads(doc.analysis_result)
+        except Exception:
+            data = {"resumen": doc.extracted_text or "Informe clínico procesado."}
+    else:
+        data = {"resumen": doc.extracted_text or "Informe clínico procesado."}
+
+    pdf_bytes = generate_clinical_pdf(data, filename=doc.filename or "informe_clinico.pdf")
+    safe_fn = re.sub(r'[^a-zA-Z0-9_\.-]', '_', doc.filename or f"informe_{document_id}")
+    if not safe_fn.lower().endswith(".pdf"):
+        safe_fn = f"{safe_fn}.pdf"
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_fn}"'}
+    )
+
+
+@router.post('/api/documents/export-pdf')
+async def export_document_pdf(payload: dict, current_user_id: str=Depends(get_current_user_id)):
+    """
+    Genera en tiempo real un informe clínico en PDF a partir del payload JSON proporcionado.
+    """
+    filename = payload.get("filename") or "informe_clinico.pdf"
+    pdf_bytes = generate_clinical_pdf(payload, filename=filename)
+    safe_fn = re.sub(r'[^a-zA-Z0-9_\.-]', '_', filename)
+    if not safe_fn.lower().endswith(".pdf"):
+        safe_fn = f"{safe_fn}.pdf"
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_fn}"'}
+    )
+
 

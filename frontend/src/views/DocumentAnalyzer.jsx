@@ -2,12 +2,118 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
   ArrowLeft, CloudUpload, FileText, ImageIcon, Activity, Beaker, File,
   Clock, ChevronRight, AlertCircle, CheckCircle2, AlertTriangle, Pill,
-  Stethoscope, Lightbulb, MessageSquare, RotateCcw, Shield, Loader2
+  Stethoscope, Lightbulb, MessageSquare, RotateCcw, Shield, Loader2,
+  FileDown, Download, TrendingUp, TrendingDown, Minus, HelpCircle, Copy, Check, Share2, BarChart3
 } from 'lucide-react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import jsPDF from 'jspdf';
 import { useLanguage } from '../contexts/LanguageContext';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
 const ACCEPTED_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif';
 const ACCEPTED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/bmp', 'image/gif'];
+
+const BiomarkerRangeMeter = ({ bm }) => {
+  const val = parseFloat(bm.valor);
+  const isNum = !isNaN(val);
+  const status = (bm.estado || 'normal').toLowerCase();
+
+  let statusBadge = (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+      <CheckCircle2 size={11} /> Normal
+    </span>
+  );
+  if (status === 'elevado') {
+    statusBadge = (
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+        <TrendingUp size={11} /> Elevado
+      </span>
+    );
+  } else if (status === 'bajo') {
+    statusBadge = (
+      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+        <TrendingDown size={11} /> Bajo
+      </span>
+    );
+  }
+
+  let minRef = parseFloat(bm.min_referencia);
+  let maxRef = parseFloat(bm.max_referencia);
+  if (isNaN(minRef) || isNaN(maxRef)) {
+    const rangeStr = bm.rango_referencia || '';
+    const match = rangeStr.match(/([\d\.,]+)\s*[-–]\s*([\d\.,]+)/);
+    if (match) {
+      minRef = parseFloat(match[1].replace(',', '.'));
+      maxRef = parseFloat(match[2].replace(',', '.'));
+    } else {
+      const lessMatch = rangeStr.match(/[<\u2264]\s*([\d\.,]+)/);
+      if (lessMatch) {
+        maxRef = parseFloat(lessMatch[1].replace(',', '.'));
+        minRef = 0;
+      }
+    }
+  }
+
+  let percent = 50;
+  if (isNum && !isNaN(minRef) && !isNaN(maxRef) && maxRef > minRef) {
+    const span = maxRef - minRef;
+    const lower = minRef - span * 0.35;
+    const upper = maxRef + span * 0.35;
+    percent = Math.min(Math.max(((val - lower) / (upper - lower)) * 100, 6), 94);
+  } else if (status === 'elevado') {
+    percent = 84;
+  } else if (status === 'bajo') {
+    percent = 16;
+  }
+
+  return (
+    <div className="bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/70 flex flex-col gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h4 className="text-xs font-bold text-slate-900 truncate">{bm.parametro}</h4>
+          <p className="text-[10px] text-slate-500">Ref: {bm.rango_referencia || 'No especificado'}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-sm font-black text-slate-900">{bm.valor} <span className="text-[10px] font-normal text-slate-500">{bm.unidad}</span></span>
+          {statusBadge}
+        </div>
+      </div>
+
+      <div className="relative pt-2 pb-1">
+        <div className="h-2 w-full rounded-full bg-slate-200 flex overflow-hidden">
+          <div className="w-1/4 bg-blue-300" title="Bajo" />
+          <div className="w-1/2 bg-emerald-400" title="Normal" />
+          <div className="w-1/4 bg-rose-400" title="Elevado" />
+        </div>
+        <div
+          className="absolute top-0.5 -ml-2 flex flex-col items-center pointer-events-none transition-all duration-300"
+          style={{ left: `${percent}%` }}
+        >
+          <div className={`w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs ${
+            status === 'elevado' ? 'bg-red-600' : status === 'bajo' ? 'bg-blue-600' : 'bg-emerald-600'
+          }`} />
+        </div>
+        <div className="flex justify-between text-[9px] text-slate-400 font-medium px-0.5 mt-1">
+          <span>Bajo</span>
+          <span className="text-emerald-700 font-semibold">Rango Óptimo</span>
+          <span>Elevado</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const SeverityBadge = ({ sev }) => {
   const { t } = useLanguage();
@@ -37,6 +143,8 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
   const [error, setError] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [copiedQuestions, setCopiedQuestions] = useState(false);
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -50,82 +158,178 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
     else setLoadingDocs(false);
   }, [apiUrl, authHeaders]);
 
-  const uploadAndAnalyze = async (file) => {
-    if (!file) return;
-    if (!ACCEPTED_MIME.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp|heic|bmp|gif)$/i)) {
-      setError(t("unsupported_format", { fileName: file.name }));
-      return;
-    }
-    if (file.size > 50 * 1024 * 1024) { setError(t("file_too_large")); return; }
-
-    setStep('analyzing');
-    setError(null);
-    setAnalysisResult(null);
-
+  const generateClientSidePdf = (data) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('language', language);
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 40;
+      let y = 50;
 
-      const res = await fetch(`${apiUrl}/api/documents/upload`, {
-        method: 'POST',
-        headers: authHeaders,
-        body: formData,
-      });
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(15, 118, 110);
+      doc.text('MIVOR.ai - INFORME CLÍNICO INTELIGENTE', margin, y);
+      y += 18;
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || t("server_error", { status: res.status }));
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')} | Documento: ${data.filename || 'Estudio Clínico'}`, margin, y);
+      y += 20;
+
+      doc.setDrawColor(15, 118, 110);
+      doc.setLineWidth(1.5);
+      doc.line(margin, y, 555, y);
+      y += 20;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(15, 23, 42);
+      doc.text('1. RESUMEN CLÍNICO', margin, y);
+      y += 15;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(30, 41, 59);
+      const summaryText = data.summary || 'Estudio procesado correctamente.';
+      const splitSummary = doc.splitTextToSize(summaryText, 515);
+      doc.text(splitSummary, margin, y);
+      y += splitSummary.length * 13 + 15;
+
+      if (data.biomarcadores?.length > 0) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text('2. BIOMARCADORES Y PARÁMETROS DE LABORATORIO', margin, y);
+        y += 15;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        data.biomarcadores.forEach((bm) => {
+          if (y > 750) { doc.addPage(); y = 50; }
+          doc.text(`• ${bm.parametro}: ${bm.valor} ${bm.unidad || ''} (Ref: ${bm.rango_referencia || '-'}) [${(bm.estado || 'normal').toUpperCase()}]`, margin + 10, y);
+          y += 14;
+        });
+        y += 10;
       }
 
-      const data = await res.json();
+      if (data.comparativa_historica?.length > 0) {
+        if (y > 720) { doc.addPage(); y = 50; }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text('3. COMPARATIVA HISTÓRICA Y EVOLUCIÓN', margin, y);
+        y += 15;
 
-      if (!data.extracted_text || data.extracted_text.trim().length < 10) {
-        throw new Error(t("text_extraction_failed"));
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        data.comparativa_historica.forEach((c) => {
+          if (y > 750) { doc.addPage(); y = 50; }
+          const diffStr = `${c.diferencia > 0 ? '+' : ''}${c.diferencia} (${c.cambio_porcentual > 0 ? '+' : ''}${c.cambio_porcentual}%)`;
+          doc.text(`• ${c.parametro}: Previo ${c.valor_anterior} ${c.unidad || ''} -> Actual ${c.valor_actual} ${c.unidad || ''} [${diffStr}]`, margin + 10, y);
+          y += 14;
+        });
+        y += 10;
       }
 
-      setAnalysisResult({ ...data, filename: file.name });
-      setStep('results');
+      if (data.preguntas_medico?.length > 0) {
+        if (y > 720) { doc.addPage(); y = 50; }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text('4. PREGUNTAS SUGERIDAS PARA SU MÉDICO', margin, y);
+        y += 15;
 
-      // Refresh history list
-      try {
-        const docsRes = await fetch(`${apiUrl}/api/me/documents`, { headers: authHeaders });
-        if (docsRes.ok) setDocuments(await docsRes.json());
-      } catch (e) { /* silent */ }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        data.preguntas_medico.forEach((p, idx) => {
+          if (y > 750) { doc.addPage(); y = 50; }
+          const splitP = doc.splitTextToSize(`${idx + 1}. ${p}`, 505);
+          doc.text(splitP, margin + 10, y);
+          y += splitP.length * 12 + 4;
+        });
+        y += 10;
+      }
 
+      if (data.recomendacion) {
+        if (y > 720) { doc.addPage(); y = 50; }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(15, 23, 42);
+        doc.text('5. RECOMENDACIONES Y PLAN DE ACCIÓN', margin, y);
+        y += 15;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        const splitRec = doc.splitTextToSize(data.recomendacion, 515);
+        doc.text(splitRec, margin, y);
+        y += splitRec.length * 13 + 15;
+      }
+
+      if (y > 760) { doc.addPage(); y = 50; }
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Aviso Legal: Informe generado con asistencia de IA clínica para pre-triaje. No sustituye la consulta médica presencial.', margin, 800);
+
+      const safeName = (data.filename || 'mivor').replace(/[^a-zA-Z0-9_\.-]/g, '_');
+      doc.save(`informe_clinico_${safeName}.pdf`);
     } catch (e) {
-      setError(e.message || t("unexpected_error"));
-      setStep('upload');
+      console.error('Error in jsPDF generation:', e);
     }
   };
 
-  const handleFileChange = (e) => { if (e.target.files?.[0]) uploadAndAnalyze(e.target.files[0]); };
-  const onDragOver = useCallback((e) => { e.preventDefault(); setIsDragging(true); }, []);
-  const onDragLeave = useCallback((e) => { e.preventDefault(); setIsDragging(false); }, []);
-  const onDrop = useCallback((e) => { e.preventDefault(); setIsDragging(false); uploadAndAnalyze(e.dataTransfer.files[0]); }, []);
-
-  const handleHistoryClick = (doc) => {
-    if (doc.analysis_result) {
-      try {
-        const parsed = JSON.parse(doc.analysis_result);
-        setAnalysisResult({
-          ...doc,
-          summary: parsed.resumen || parsed.summary,
-          hallazgos: parsed.hallazgos || [],
-          medicamentos: parsed.medicamentos || [],
-          diagnosticos: parsed.diagnosticos || [],
-          severidad: parsed.severidad || 'verde',
-          recomendacion: parsed.recomendacion || '',
-          is_image: doc.document_type === 'medical_image'
+  const handleDownloadPdf = async () => {
+    if (!analysisResult) return;
+    setIsGeneratingPdf(true);
+    try {
+      let res = null;
+      if (analysisResult.id) {
+        res = await fetch(`${apiUrl}/api/documents/${analysisResult.id}/pdf`, {
+          headers: authHeaders
         });
-        setStep('results');
-        return;
-      } catch (e) {
-        console.error("Failed to parse analysis_result", e);
       }
+      if (!res || !res.ok) {
+        res = await fetch(`${apiUrl}/api/documents/export-pdf`, {
+          method: 'POST',
+          headers: {
+            ...authHeaders,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            filename: analysisResult.filename || 'informe_clinico.pdf',
+            resumen: analysisResult.summary || '',
+            diagnosticos: analysisResult.diagnosticos || [],
+            hallazgos: analysisResult.hallazgos || [],
+            medicamentos: analysisResult.medicamentos || [],
+            biomarcadores: analysisResult.biomarcadores || [],
+            comparativa_historica: analysisResult.comparativa_historica || [],
+            preguntas_medico: analysisResult.preguntas_medico || [],
+            severidad: analysisResult.severidad || 'verde',
+            recomendacion: analysisResult.recomendacion || ''
+          })
+        });
+      }
+
+      if (res && res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeName = (analysisResult.filename || 'estudio').replace(/[^a-zA-Z0-9_\.-]/g, '_');
+        a.download = `informe_mivor_${safeName}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+      throw new Error('Backend PDF endpoint unavailable');
+    } catch (err) {
+      console.warn('Fallback a generación PDF en cliente:', err);
+      generateClientSidePdf(analysisResult);
+    } finally {
+      setIsGeneratingPdf(false);
     }
-    // Fallback if no detailed report exists for old docs
-    onAskFollowUp(doc.extracted_text, doc.filename);
   };
 
   const docTypeIcon = (type) => type === 'medical_image'
@@ -160,7 +364,18 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               {step === 'results' && t("analysis_results")}
             </h2>
           </div>
-          <div className="w-10" />
+          {step === 'results' ? (
+            <button
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              title="Descargar Informe Clínico (PDF)"
+              className="w-10 h-10 rounded-full bg-teal-700 hover:bg-teal-800 text-white shadow-xs flex items-center justify-center active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {isGeneratingPdf ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}
+            </button>
+          ) : (
+            <div className="w-10" />
+          )}
         </div>
 
         {/* ─── STEP: UPLOAD ─── */}
@@ -332,6 +547,129 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               </div>
             )}
 
+            {/* Biomarcadores Analíticos y Medidores de Rango (Fila 2) */}
+            {analysisResult.biomarcadores?.length > 0 && (
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Activity size={14} className="text-teal-700" /> Parámetros y Biomarcadores Extraídos
+                  </h3>
+                  <span className="text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-0.5 rounded-full">
+                    {analysisResult.biomarcadores.length} analitos
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5 mt-1">
+                  {analysisResult.biomarcadores.map((bm, i) => (
+                    <BiomarkerRangeMeter key={i} bm={bm} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Evolución y Comparativa Histórica con Chart.js (Fila 2) */}
+            {analysisResult.comparativa_historica?.length > 0 && (
+              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
+                      <BarChart3 size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Evolución y Comparativa Histórica</h3>
+                      <p className="text-[10px] text-slate-500">Contraste directo contra estudios previos del paciente</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold bg-teal-100 text-teal-800 px-2.5 py-1 rounded-full">
+                    {analysisResult.comparativa_historica.length} vinculados
+                  </span>
+                </div>
+
+                {/* Side-by-side comparative Bar Chart */}
+                <div className="h-60 w-full pt-1">
+                  <Bar
+                    data={{
+                      labels: analysisResult.comparativa_historica.map(item => item.parametro),
+                      datasets: [
+                        {
+                          label: 'Estudio Anterior',
+                          data: analysisResult.comparativa_historica.map(item => item.valor_anterior),
+                          backgroundColor: 'rgba(148, 163, 184, 0.85)',
+                          borderRadius: 6,
+                        },
+                        {
+                          label: 'Estudio Actual',
+                          data: analysisResult.comparativa_historica.map(item => item.valor_actual),
+                          backgroundColor: 'rgba(15, 118, 110, 0.9)',
+                          borderRadius: 6,
+                        }
+                      ]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                          labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } }
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}`
+                          }
+                        }
+                      },
+                      scales: {
+                        x: {
+                          grid: { display: false },
+                          ticks: { font: { size: 10, weight: 'bold' }, maxRotation: 20 }
+                        },
+                        y: {
+                          beginAtZero: true,
+                          grid: { color: 'rgba(241, 245, 249, 1)' },
+                          ticks: { font: { size: 10 } }
+                        }
+                      }
+                    }}
+                  />
+                </div>
+
+                {/* Detailed variations list */}
+                <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
+                  {analysisResult.comparativa_historica.map((item, idx) => {
+                    const isUp = item.tendencia === 'sube';
+                    const isDown = item.tendencia === 'baja';
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-800 truncate">{item.parametro}</p>
+                          <p className="text-[10px] text-slate-500">
+                            Previo: {item.valor_anterior} {item.unidad} ({item.fecha_anterior || 'Previo'}) &rarr; Actual: {item.valor_actual} {item.unidad}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {isUp && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 border border-red-200">
+                              <TrendingUp size={12} /> +{item.cambio_porcentual}%
+                            </span>
+                          )}
+                          {isDown && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200">
+                              <TrendingDown size={12} /> {item.cambio_porcentual}%
+                            </span>
+                          )}
+                          {!isUp && !isDown && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200">
+                              <Minus size={12} /> 0%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Diagnostics */}
             {analysisResult.diagnosticos?.length > 0 && (
               <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -478,7 +816,91 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               );
             })()}
 
+            {/* Preguntas Sugeridas para el Médico (Fila 2) */}
+            {analysisResult.preguntas_medico?.length > 0 && (
+              <div className="bg-indigo-50/70 rounded-2xl p-5 border border-indigo-100 shadow-sm flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+                      <HelpCircle size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-bold text-indigo-950 uppercase tracking-wider">Preguntas Sugeridas para su Médico</h3>
+                      <p className="text-[10px] text-indigo-700 font-medium">Recomendaciones para consultar en su próxima cita médica</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 mt-1">
+                  {analysisResult.preguntas_medico.map((p, idx) => (
+                    <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl bg-white border border-indigo-100 shadow-xs">
+                      <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <p className="text-xs text-slate-800 leading-relaxed font-medium">{p}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = analysisResult.preguntas_medico.map((q, i) => `${i + 1}. ${q}`).join('\n');
+                      navigator.clipboard.writeText(`Preguntas sobre mi estudio médico (${analysisResult.filename}):\n\n${text}`);
+                      setCopiedQuestions(true);
+                      setTimeout(() => setCopiedQuestions(false), 2500);
+                    }}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-indigo-200 active:scale-95 text-indigo-900 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+                  >
+                    {copiedQuestions ? (
+                      <>
+                        <Check size={14} className="text-emerald-600" />
+                        <span className="text-emerald-700">¡Copiadas al portapapeles!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} />
+                        <span>Copiar Preguntas</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = analysisResult.preguntas_medico.map((q, i) => `${i + 1}. ${q}`).join('\n');
+                      const msg = encodeURIComponent(`Hola doctor(a), tengo estas consultas sobre mi estudio (${analysisResult.filename}):\n\n${text}`);
+                      window.open(`https://wa.me/?text=${msg}`, '_blank');
+                    }}
+                    className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <Share2 size={14} />
+                    <span>WhatsApp Médico</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* CTA Buttons */}
+            <button
+              onClick={handleDownloadPdf}
+              disabled={isGeneratingPdf}
+              className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
+            >
+              {isGeneratingPdf ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Generando Informe Clínico (PDF)...</span>
+                </>
+              ) : (
+                <>
+                  <FileDown size={20} />
+                  <span>Descargar Informe Clínico (PDF)</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={() => onAskFollowUp(analysisResult.extracted_text, analysisResult.filename)}
               className="w-full bg-brand-purple text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-glow hover:bg-brand-purple/90 transition-colors"

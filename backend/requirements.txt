@@ -1,4 +1,4 @@
-﻿annotated-doc==0.0.5
+annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.14.2
 asyncpg==0.31.0
@@ -41,3 +41,4 @@ python-multipart
 xmltodict==0.13.0
 openai==1.59.3
 PyMuPDF
+reportlab==5.0.1
