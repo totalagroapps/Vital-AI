@@ -339,6 +339,7 @@ export default function App() {
   const [showDoctorOnboarding, setShowDoctorOnboarding] = useState(false);
   const [patientProfile, setPatientProfile] = useState({
     full_name: '', date_of_birth: '', gender: '', blood_type: '', height: '', weight: '',
+    organ_donor: 'No especificado', medical_notes: '', insurance_provider: '',
     allergies: '', chronic_conditions: '', current_medications: '', emergency_contact: '', qr_code_base64: ''
   });
   const [engineSettings, setEngineSettings] = useState(() => {

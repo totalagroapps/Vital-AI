@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Droplet, Phone, AlertTriangle, Heart, Activity, 
   Pill, User, Calendar, Ruler, Scale, Share2, ArrowLeft, 
-  ExternalLink, Check, Copy, Ambulance, ShieldCheck
+  ExternalLink, Check, Copy, Ambulance, ShieldCheck, Printer, HeartHandshake, Shield
 } from 'lucide-react';
 
 const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
@@ -13,6 +13,21 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
 
   // Extract patientId from URL pathname: /emergencia/:patientId
   const patientId = window.location.pathname.replace(/^\/emergencia\/?/, '').trim();
+
+  const handleShareWhatsApp = () => {
+    const url = window.location.href;
+    const text = `🚨 *Ficha Médica de Emergencia MIVOR.ai*\n` +
+      `👤 *Paciente:* ${profile?.full_name || 'Paciente'}\n` +
+      `🩸 *Grupo Sanguíneo:* ${profile?.blood_type || 'N/D'}\n` +
+      `❤️ *Donante:* ${profile?.organ_donor || 'No especificado'}\n` +
+      `⚠️ *Alergias:* ${profile?.allergies || 'Sin alergias conocidas'}\n` +
+      (profile?.medical_notes ? `⚡ *Alerta Médica:* ${profile.medical_notes}\n` : '') +
+      (profile?.insurance_provider ? `🛡️ *Seguro:* ${profile.insurance_provider}\n` : '') +
+      `📞 *Contacto Urgencias:* ${profile?.emergency_contact || 'No especificado'}\n\n` +
+      `🔗 *Ver Ficha Táctica en vivo (sin clave):*\n${url}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   useEffect(() => {
     if (!patientId) {
@@ -108,14 +123,34 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
           </div>
         </div>
 
-        <button 
-          onClick={handleShare}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 border border-slate-700 hover:border-slate-500 rounded-xl text-xs text-slate-300 transition-all active:scale-95 shadow-md"
-          title="Compartir o Copiar enlace"
-        >
-          {copied ? <Check size={14} className="text-green-400" /> : <Share2 size={14} />}
-          <span>{copied ? "¡Copiado!" : "Compartir"}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => window.print()}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-900 border border-slate-700 hover:border-slate-500 rounded-xl text-xs text-slate-300 transition-all active:scale-95 shadow-md"
+            title="Imprimir Ficha de Urgencias"
+          >
+            <Printer size={13} />
+            <span className="hidden sm:inline">Imprimir</span>
+          </button>
+
+          <button 
+            onClick={handleShareWhatsApp}
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 shadow-md"
+            title="Compartir por WhatsApp"
+          >
+            <Share2 size={13} />
+            <span>WhatsApp</span>
+          </button>
+
+          <button 
+            onClick={handleShare}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-900 border border-slate-700 hover:border-slate-500 rounded-xl text-xs text-slate-300 transition-all active:scale-95 shadow-md"
+            title="Copiar enlace"
+          >
+            {copied ? <Check size={14} className="text-green-400" /> : <Copy size={13} />}
+            <span>{copied ? "¡Copiado!" : "Enlace"}</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Content Area */}
@@ -171,14 +206,26 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   </div>
                 </div>
 
-                {/* Blood Type Highlight */}
-                <div className="flex items-center gap-2 bg-red-950/80 border-2 border-red-600/80 px-3.5 py-1.5 rounded-2xl shadow-lg shadow-red-950/60">
-                  <Droplet className="w-5 h-5 text-red-500 fill-red-500" />
-                  <div className="text-right">
-                    <span className="text-[9px] uppercase font-bold text-red-400 block leading-none">GRUPO</span>
-                    <span className="text-xl font-black text-white leading-tight tracking-wider">
-                      {profile.blood_type || 'N/D'}
-                    </span>
+                {/* Blood Type & Organ Donor Highlight */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 bg-red-950/80 border-2 border-red-600/80 px-3.5 py-1.5 rounded-2xl shadow-lg shadow-red-950/60">
+                    <Droplet className="w-5 h-5 text-red-500 fill-red-500" />
+                    <div className="text-right">
+                      <span className="text-[9px] uppercase font-bold text-red-400 block leading-none">GRUPO</span>
+                      <span className="text-xl font-black text-white leading-tight tracking-wider">
+                        {profile.blood_type || 'N/D'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 bg-sky-950/80 border-2 border-sky-600/80 px-3 py-1.5 rounded-2xl shadow-lg shadow-sky-950/60">
+                    <Heart className="w-4 h-4 text-sky-400 fill-sky-400" />
+                    <div className="text-right">
+                      <span className="text-[9px] uppercase font-bold text-sky-400 block leading-none">DONANTE</span>
+                      <span className="text-xs font-black text-white leading-tight tracking-wider">
+                        {profile.organ_donor === 'Sí' ? '❤️ SÍ' : (profile.organ_donor || 'N/D')}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -214,6 +261,21 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   )}
                 </div>
               </div>
+
+              {/* CRITICAL MEDICAL ALERTS / IMPLANTS (Lifesaving Alert) */}
+              {profile.medical_notes && (
+                <div className="mb-5 bg-rose-950/70 border-2 border-rose-500 rounded-2xl p-4 shadow-xl shadow-rose-950/50">
+                  <div className="flex items-center gap-2 mb-2 text-rose-400">
+                    <ShieldAlert size={20} className="text-rose-500 animate-pulse" />
+                    <h4 className="text-xs font-black uppercase tracking-wider">
+                      ALERTA MÉDICA CRÍTICA / CONDICIÓN VITAL
+                    </h4>
+                  </div>
+                  <p className="text-sm font-black text-white leading-relaxed">
+                    {profile.medical_notes}
+                  </p>
+                </div>
+              )}
 
               {/* CRITICAL ALLERGIES (Highest Priority Alert) */}
               <div className="mb-5 bg-red-950/40 border-2 border-red-600/60 rounded-2xl p-4">
@@ -288,6 +350,23 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   )}
                 </div>
               </div>
+
+              {/* HEALTH INSURANCE / MUTUA */}
+              {profile.insurance_provider && (
+                <div className="mb-5 bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-teal-950 border border-teal-700/60 flex items-center justify-center text-teal-400 shrink-0">
+                    <Shield size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Seguro Médico / Póliza de Salud
+                    </span>
+                    <p className="text-sm font-bold text-teal-200 truncate">
+                      {profile.insurance_provider}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* EMERGENCY CONTACT WITH 1-TAP DIAL */}
               <div className="bg-slate-800/90 border border-slate-700 rounded-2xl p-4">

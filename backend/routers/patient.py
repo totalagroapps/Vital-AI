@@ -217,6 +217,9 @@ async def get_public_emergency_profile(patient_id: str, db: AsyncSession = Depen
         'emergency_contact': profile.emergency_contact or 'No especificado',
         'height': profile.height or '--',
         'weight': profile.weight or '--',
+        'organ_donor': profile.organ_donor or 'No especificado',
+        'medical_notes': profile.medical_notes or '',
+        'insurance_provider': profile.insurance_provider or '',
         'preferred_language': profile.preferred_language or 'es',
         'emergency_url': emergency_url,
         'qr_code_base64': qr_base64,
@@ -261,6 +264,9 @@ async def get_patient_profile(db: AsyncSession=Depends(get_db), user_id: str=Dep
         'emergency_contact': profile.emergency_contact,
         'height': profile.height,
         'weight': profile.weight,
+        'organ_donor': profile.organ_donor or 'No especificado',
+        'medical_notes': profile.medical_notes or '',
+        'insurance_provider': profile.insurance_provider or '',
         'qr_code_base64': qr_base64,
         'emergency_url': emergency_url,
         'triages': triage_list
@@ -286,6 +292,9 @@ async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSe
     profile.emergency_contact = profile_data.emergency_contact
     profile.height = profile_data.height
     profile.weight = profile_data.weight
+    profile.organ_donor = profile_data.organ_donor or 'No especificado'
+    profile.medical_notes = profile_data.medical_notes or ''
+    profile.insurance_provider = profile_data.insurance_provider or ''
     (await db.commit())
     return {'status': 'success'}
 
@@ -318,7 +327,10 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
             'current_medications': '',
             'emergency_contact': '',
             'height': '',
-            'weight': ''
+            'weight': '',
+            'organ_donor': 'No especificado',
+            'medical_notes': '',
+            'insurance_provider': ''
         }
     else:
         profile_dict = {
@@ -331,7 +343,10 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
             'current_medications': profile.current_medications,
             'emergency_contact': profile.emergency_contact,
             'height': profile.height,
-            'weight': profile.weight
+            'weight': profile.weight,
+            'organ_donor': profile.organ_donor or 'No especificado',
+            'medical_notes': profile.medical_notes or '',
+            'insurance_provider': profile.insurance_provider or ''
         }
 
     # 1. Triajes asistidos del paciente

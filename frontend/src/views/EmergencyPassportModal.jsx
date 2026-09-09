@@ -36,6 +36,18 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShareWhatsApp = () => {
+    const text = `🚨 *Ficha Médica de Emergencia MIVOR.ai*\n` +
+      `👤 *Paciente:* ${patientProfile?.full_name || 'Paciente'}\n` +
+      `🩸 *Grupo Sanguíneo:* ${patientProfile?.blood_type || 'N/D'}\n` +
+      `❤️ *Donante:* ${patientProfile?.organ_donor || 'No especificado'}\n` +
+      `⚠️ *Alergias:* ${patientProfile?.allergies || 'Sin alergias conocidas'}\n` +
+      (patientProfile?.medical_notes ? `⚡ *Alerta Médica:* ${patientProfile.medical_notes}\n` : '') +
+      `📞 *Contacto Urgencias:* ${patientProfile?.emergency_contact || 'No especificado'}\n\n` +
+      `🔗 *Ficha Táctica en vivo (sin clave):*\n${emergencyUrl}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   /**
    * Generates a high-contrast 1080x1920 mobile Lock Screen Wallpaper using HTML5 Canvas.
    * Enables first responders / emergency staff to scan without unlocking the phone!
@@ -71,45 +83,66 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
       ctx.fillStyle = '#fecaca'; // red-200
       ctx.fillText('ESCANEAR CON LA CÁMARA SIN DESBLOQUEAR EL MÓVIL', width / 2, 135);
 
-      // 3. Patient Name & Blood Type Section
+      // 3. Patient Name & Hero Metrics
       ctx.textAlign = 'center';
       ctx.fillStyle = '#94a3b8';
       ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
-      ctx.fillText('PACIENTE / TITULAR', width / 2, 270);
+      ctx.fillText('PACIENTE / TITULAR', width / 2, 260);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 60px system-ui, -apple-system, sans-serif';
+      ctx.font = '900 56px system-ui, -apple-system, sans-serif';
       const patientName = (patientProfile?.full_name || 'PACIENTE MIVOR.AI').toUpperCase();
-      ctx.fillText(patientName, width / 2, 345);
+      ctx.fillText(patientName, width / 2, 330);
 
-      // Blood Type Hero Badge
+      // Blood Type Badge (Left) & Organ Donor Badge (Right)
       const blood = patientProfile?.blood_type || 'N/D';
-      ctx.fillStyle = '#450a0a'; // dark red container
+      const donor = (patientProfile?.organ_donor || 'No especificado').toUpperCase();
+      
+      // Blood Box (Left)
+      ctx.fillStyle = '#450a0a';
       ctx.strokeStyle = '#ef4444';
-      ctx.lineWidth = 6;
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.roundRect(width / 2 - 280, 390, 560, 140, 30);
+      ctx.roundRect(80, 365, 430, 130, 24);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-      ctx.fillText('GRUPO SANGUÍNEO', width / 2, 440);
+      ctx.fillStyle = '#f87171';
+      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      ctx.fillText('GRUPO SANGUÍNEO', 295, 410);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 68px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`🩸  ${blood}`, width / 2, 505);
+      ctx.font = '900 52px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`🩸  ${blood}`, 295, 470);
+
+      // Donor Box (Right)
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.roundRect(570, 365, 430, 130, 24);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      ctx.fillText('DONANTE DE ÓRGANOS', 785, 410);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 44px system-ui, -apple-system, sans-serif';
+      const donorShort = donor.includes('SÍ') ? '❤️  DONANTE: SÍ' : (donor.includes('NO') ? 'NO REGISTRADO' : '❤️  ' + donor);
+      ctx.fillText(donorShort, 785, 470);
 
       // 4. Center QR Code Container
-      const qrBoxSize = 540;
+      const qrBoxSize = 510;
       const qrBoxX = (width - qrBoxSize) / 2;
-      const qrBoxY = 570;
+      const qrBoxY = 525;
 
       ctx.fillStyle = '#ffffff';
       ctx.strokeStyle = '#3b82f6';
       ctx.lineWidth = 8;
       ctx.beginPath();
-      ctx.roundRect(qrBoxX - 20, qrBoxY - 20, qrBoxSize + 40, qrBoxSize + 40, 36);
+      ctx.roundRect(qrBoxX - 16, qrBoxY - 16, qrBoxSize + 32, qrBoxSize + 32, 32);
       ctx.fill();
       ctx.stroke();
 
@@ -130,46 +163,70 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
         ctx.fillText('ESCANEAR QR', width / 2, qrBoxY + qrBoxSize / 2);
       }
 
-      // 5. Critical Allergies Box
-      const allergiesY = 1190;
+      // 5. Dynamic Alert / Notes Box (if present)
+      let currentY = 1095;
+      if (patientProfile?.medical_notes) {
+        ctx.fillStyle = '#7f1d1d'; // dark ruby
+        ctx.strokeStyle = '#f43f5e';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.roundRect(80, currentY, width - 160, 130, 20);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fecdd3';
+        ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+        ctx.fillText('⚡  ALERTA MÉDICA / CONDICIÓN CRÍTICA', width / 2, currentY + 42);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 28px system-ui, -apple-system, sans-serif';
+        const noteText = patientProfile.medical_notes.length > 55 
+          ? patientProfile.medical_notes.substring(0, 52) + '...' 
+          : patientProfile.medical_notes;
+        ctx.fillText(noteText.toUpperCase(), width / 2, currentY + 95);
+
+        currentY += 150;
+      }
+
+      // 6. Critical Allergies Box
       const allergies = patientProfile?.allergies || 'Ninguna conocida';
       ctx.fillStyle = '#450a0a';
       ctx.strokeStyle = '#dc2626';
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.roundRect(80, allergiesY, width - 160, 160, 24);
+      ctx.roundRect(80, currentY, width - 160, 135, 20);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#f87171';
-      ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
-      ctx.fillText('⚠️  ALERGIAS SEVERAS / MEDICAMENTOS PROHIBIDOS', width / 2, allergiesY + 50);
+      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      ctx.fillText('⚠️  ALERGIAS SEVERAS / CONTRAINDICACIONES', width / 2, currentY + 42);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 36px system-ui, -apple-system, sans-serif';
-      const allergyText = allergies.length > 45 ? allergies.substring(0, 42) + '...' : allergies;
-      ctx.fillText(allergyText.toUpperCase(), width / 2, allergiesY + 115);
+      ctx.font = '900 32px system-ui, -apple-system, sans-serif';
+      const allergyText = allergies.length > 48 ? allergies.substring(0, 45) + '...' : allergies;
+      ctx.fillText(allergyText.toUpperCase(), width / 2, currentY + 98);
+      currentY += 155;
 
-      // 6. Emergency Contact
-      const contactY = 1390;
+      // 7. Emergency Contact Box
       ctx.fillStyle = '#064e3b'; // dark green
       ctx.strokeStyle = '#10b981';
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.roundRect(80, contactY, width - 160, 160, 24);
+      ctx.roundRect(80, currentY, width - 160, 135, 20);
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = '#34d399';
-      ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
-      ctx.fillText('📞  CONTACTO DE EMERGENCIA', width / 2, contactY + 50);
+      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      ctx.fillText('📞  CONTACTO DE EMERGENCIA', width / 2, currentY + 42);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 38px system-ui, -apple-system, sans-serif';
+      ctx.font = '900 34px system-ui, -apple-system, sans-serif';
       const contactText = patientProfile?.emergency_contact || 'No especificado';
-      ctx.fillText(contactText, width / 2, contactY + 115);
+      ctx.fillText(contactText, width / 2, currentY + 98);
 
-      // 7. Footer Instructions
+      // 8. Footer Instructions
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
       ctx.fillText('MIVOR.AI MEDICAL PASSPORT  •  HISTORIAL DIGITAL PROTEGIDO', width / 2, 1780);
@@ -253,11 +310,32 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
                 </p>
               </div>
 
-              <div className="bg-red-950/90 border-2 border-red-600 px-3.5 py-1 rounded-2xl text-center shadow-md">
-                <span className="text-[9px] uppercase font-bold text-red-400 block">SANGRE</span>
-                <span className="text-xl font-black text-white">{patientProfile?.blood_type || 'N/D'}</span>
+              <div className="flex gap-2">
+                <div className="bg-red-950/90 border-2 border-red-600 px-3.5 py-1 rounded-2xl text-center shadow-md">
+                  <span className="text-[9px] uppercase font-bold text-red-400 block">SANGRE</span>
+                  <span className="text-xl font-black text-white">{patientProfile?.blood_type || 'N/D'}</span>
+                </div>
+                <div className="bg-sky-950/90 border-2 border-sky-600 px-3 py-1 rounded-2xl text-center shadow-md">
+                  <span className="text-[9px] uppercase font-bold text-sky-400 block">DONANTE</span>
+                  <span className="text-xs font-black text-white mt-1 block">
+                    {patientProfile?.organ_donor === 'Sí' ? '❤️ SÍ' : (patientProfile?.organ_donor || 'N/D')}
+                  </span>
+                </div>
               </div>
             </div>
+
+            {/* Critical Medical Notes Alert (if present) */}
+            {patientProfile?.medical_notes && (
+              <div className="bg-rose-950/60 border-2 border-rose-500/80 rounded-xl p-3 mb-3 shadow-md">
+                <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold mb-1">
+                  <ShieldAlert size={14} className="text-rose-500 animate-pulse" />
+                  <span>ALERTA MÉDICA CRÍTICA / IMPLANTES:</span>
+                </div>
+                <p className="text-xs text-rose-100 font-black">
+                  {patientProfile.medical_notes}
+                </p>
+              </div>
+            )}
 
             {/* Critical Allergies Badge */}
             <div className="bg-red-950/50 border border-red-700/60 rounded-xl p-3 mb-3">
@@ -337,6 +415,15 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
           {/* Action Buttons: Wallpaper & PDF */}
           <div className="space-y-3 pt-2">
             
+            {/* WhatsApp Direct Share Button */}
+            <button
+              onClick={handleShareWhatsApp}
+              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all active:scale-95"
+            >
+              <Share2 size={16} />
+              <span>Compartir Ficha de Rescate por WhatsApp</span>
+            </button>
+
             {/* Download Lockscreen Wallpaper Button */}
             <button
               onClick={handleDownloadLockscreenWallpaper}
@@ -351,7 +438,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
               </span>
             </button>
             <p className="text-[11px] text-center text-slate-400">
-              💡 Pon esta imagen como fondo de pantalla de bloqueo en tu Xiaomi para que esté accesible sin desbloquear.
+              💡 Pon esta imagen como fondo de pantalla de bloqueo en tu móvil para que los médicos la lean sin desbloquear el teléfono.
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-1">

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { 
   ArrowLeft, ShieldCheck, ShieldAlert, Activity, Edit3, QrCode, 
   Droplet, Heart, Scale, Ruler, Pill, AlertTriangle, 
-  Calendar, Phone, Save, X, FileText
+  Calendar, Phone, Save, X, FileText, Share2, HeartHandshake, Shield
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
@@ -48,12 +48,28 @@ const MedicalHistory = ({
   }, [patientProfile.weight, patientProfile.height]);
 
   
+  const handleShareWhatsApp = () => {
+    const emergencyUrl = patientProfile.emergency_url || 
+      `${window.location.origin}/emergencia/${encodeURIComponent(patientProfile.user_id || 'me')}`;
+    const text = `🚨 *Ficha Médica de Emergencia MIVOR.ai*\n` +
+      `👤 *Paciente:* ${patientProfile.full_name || 'Paciente'}\n` +
+      `🩸 *Grupo Sanguíneo:* ${patientProfile.blood_type || 'N/D'}\n` +
+      `❤️ *Donante de Órganos:* ${patientProfile.organ_donor || 'No especificado'}\n` +
+      `⚠️ *Alergias:* ${patientProfile.allergies || 'Sin alergias conocidas'}\n` +
+      (patientProfile.medical_notes ? `⚡ *Alerta Médica:* ${patientProfile.medical_notes}\n` : '') +
+      (patientProfile.insurance_provider ? `🛡️ *Seguro:* ${patientProfile.insurance_provider}\n` : '') +
+      `📞 *Contacto de Urgencias:* ${patientProfile.emergency_contact || 'No especificado'}\n\n` +
+      `🔗 *Ver Ficha Táctica en vivo (sin clave):*\n${emergencyUrl}`;
+    
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
   const handleExportPDF = () => {
     const title = `${t("medical_passport")} - ${patientProfile.full_name || 'Paciente'}`;
     const bodyHtml = `
       <div class="header">
         <h1><span class="brand">MIVOR.ai</span> · ${t("medical_passport")}</h1>
-        <p>${t("emergency_info_document")} · {t('app_slogan')}</p>
+        <p>${t("emergency_info_document")} · ${t('app_slogan')}</p>
       </div>
       
       <div class="grid">
@@ -65,14 +81,23 @@ const MedicalHistory = ({
       <div class="grid">
         <div><div class="label">${t("date_of_birth")}</div><div class="value">${patientProfile.date_of_birth || t("not_specified")} (${age} ${t("years")})</div></div>
         <div><div class="label">${t("gender")}</div><div class="value">${patientProfile.gender || t("not_specified")}</div></div>
-        <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 18px;">${patientProfile.blood_type || t("not_specified")}</div></div>
+        <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 18px; font-weight: bold;">${patientProfile.blood_type || t("not_specified")}</div></div>
+        <div><div class="label">${t("organ_donor")}</div><div class="value">${patientProfile.organ_donor || t("donor_not_specified")}</div></div>
         <div>
           <div class="label">${t("bmi_index")}</div>
           <div class="value">
             ${bmiInfo ? `${bmiInfo.value} (${bmiInfo.status})` : t("insufficient_data")}
           </div>
         </div>
+        <div><div class="label">${t("insurance_provider")}</div><div class="value">${patientProfile.insurance_provider || t("not_specified")}</div></div>
       </div>
+
+      ${patientProfile.medical_notes ? `
+      <h2>⚡ ${t("medical_notes")}</h2>
+      <div style="margin-bottom: 20px; background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 8px; color: #9f1239; font-weight: bold;">
+        ${patientProfile.medical_notes}
+      </div>
+      ` : ''}
       
       <h2>${t("clinical_history")}</h2>
       <div style="margin-bottom: 20px;">
@@ -264,15 +289,68 @@ const MedicalHistory = ({
               </div>
             </div>
 
-            {/* Direct Edit Button */}
-            <button
-              type="button"
-              onClick={() => setIsEditing(true)}
-              className="w-full py-3.5 px-4 bg-brand-purple/10 hover:bg-brand-purple/20 active:scale-[0.99] text-brand-purple font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border border-brand-purple/30 transition-all shadow-sm"
-            >
-              <Edit3 size={16} className="text-brand-purple" />
-              <span>{t("edit_information") || "Editar Información"}</span>
-            </button>
+            {/* Critical Identity Badges (Organ Donor & Insurance) */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${patientProfile.organ_donor === 'Sí' ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-600'}`}>
+                  <HeartHandshake size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">{t("organ_donor") || "Donante"}</span>
+                  <span className={`text-xs font-extrabold truncate block ${patientProfile.organ_donor === 'Sí' ? 'text-rose-600' : 'text-slate-800'}`}>
+                    {patientProfile.organ_donor === 'Sí' ? (t("donor_yes") || "Sí, donante") : (patientProfile.organ_donor || t("donor_not_specified") || "No especificado")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-[24px] p-4 shadow-soft border border-gray-100 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                  <Shield size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">{t("insurance_provider") || "Seguro"}</span>
+                  <span className="text-xs font-extrabold text-slate-800 truncate block">
+                    {patientProfile.insurance_provider || t("not_specified") || "No registrado"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Critical Medical Alert Notes */}
+            {patientProfile.medical_notes && (
+              <div className="bg-rose-50 border-2 border-rose-200 rounded-[24px] p-4 flex items-start gap-3 shadow-xs">
+                <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5 animate-pulse" />
+                <div>
+                  <h4 className="text-xs font-black text-rose-900 uppercase tracking-wide">
+                    {t("medical_notes") || "Alerta Médica / Implantes Críticos"}
+                  </h4>
+                  <p className="text-xs font-bold text-rose-800 mt-1 leading-relaxed">
+                    {patientProfile.medical_notes}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Action Bar (Share WhatsApp & Edit) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={handleShareWhatsApp}
+                className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition-all shadow-sm"
+              >
+                <Share2 size={16} />
+                <span>{t("share_medical_file_whatsapp") || "Compartir por WhatsApp"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="py-3 px-4 bg-brand-purple/10 hover:bg-brand-purple/20 active:scale-[0.99] text-brand-purple font-bold text-xs rounded-2xl flex items-center justify-center gap-2 border border-brand-purple/30 transition-all shadow-sm"
+              >
+                <Edit3 size={16} className="text-brand-purple" />
+                <span>{t("edit_information") || "Editar Información"}</span>
+              </button>
+            </div>
 
             {/* Clinical Data */}
             <div className="bg-white rounded-[28px] shadow-soft border border-gray-100 overflow-hidden">
@@ -398,6 +476,42 @@ const MedicalHistory = ({
                   <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("weight_kg")}</label>
                   <input type="number" value={patientProfile.weight || ""} onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" placeholder="70" />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("organ_donor") || "Donante de Órganos"}</label>
+                  <select 
+                    value={patientProfile.organ_donor || "No especificado"} 
+                    onChange={e => setPatientProfile({...patientProfile, organ_donor: e.target.value})} 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50"
+                  >
+                    <option value="No especificado">{t("donor_not_specified") || "No especificado"}</option>
+                    <option value="Sí">{t("donor_yes") || "Sí, donante de órganos"}</option>
+                    <option value="No">{t("donor_no") || "No"}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("insurance_provider") || "Seguro Médico / Mutua"}</label>
+                  <input 
+                    type="text" 
+                    value={patientProfile.insurance_provider || ""} 
+                    onChange={e => setPatientProfile({...patientProfile, insurance_provider: e.target.value})} 
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" 
+                    placeholder={t("insurance_provider_placeholder") || "Ej. Sanitas, Adeslas (Póliza #)..."} 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-500 mb-1">{t("medical_notes") || "Notas Médicas Críticas / Implantes"}</label>
+                <textarea 
+                  value={patientProfile.medical_notes || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, medical_notes: e.target.value})} 
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-purple/50" 
+                  rows={2} 
+                  placeholder={t("medical_notes_placeholder") || "Ej. Marcapasos bicameral, prótesis de titanio, diabético insulino-dependiente..."}
+                ></textarea>
               </div>
 
               <div>

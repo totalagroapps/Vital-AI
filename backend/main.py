@@ -144,9 +144,24 @@ async def on_startup():
                 ("created_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"),
                 ("updated_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
             ]
+            is_sqlite = "sqlite" in str(database.POSTGRES_URL).lower()
             for col_name, col_type in needed_cols:
                 try:
-                    await conn.execute(text(f"ALTER TABLE specialist_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"))
+                    sql = f"ALTER TABLE specialist_profiles ADD COLUMN {col_name} {col_type};" if is_sqlite else f"ALTER TABLE specialist_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"
+                    await conn.execute(text(sql))
+                except Exception as col_err:
+                    logger.debug(f"Col {col_name} migration note: {col_err}")
+
+            # Auto-migración para patient_profiles (Fila 3: Donante de órganos, notas críticas y seguro)
+            patient_cols = [
+                ("organ_donor", "VARCHAR DEFAULT 'No especificado'"),
+                ("medical_notes", "TEXT"),
+                ("insurance_provider", "VARCHAR")
+            ]
+            for col_name, col_type in patient_cols:
+                try:
+                    sql = f"ALTER TABLE patient_profiles ADD COLUMN {col_name} {col_type};" if is_sqlite else f"ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"
+                    await conn.execute(text(sql))
                 except Exception as col_err:
                     logger.debug(f"Col {col_name} migration note: {col_err}")
 
@@ -337,6 +352,9 @@ class PatientProfileSchema(BaseModel):
     emergency_contact: Optional[str] = None
     height: Optional[str] = None
     weight: Optional[str] = None
+    organ_donor: Optional[str] = "No especificado"
+    medical_notes: Optional[str] = None
+    insurance_provider: Optional[str] = None
     preferred_language: Optional[str] = 'es'
 
 
