@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
   ChevronRight, 
-  ChevronDown,
+  ChevronDown, 
   ArrowRight, 
   Bell, 
-  X,
+  X, 
   MessageCircle, 
   Mail, 
   CheckCircle2, 
-  Lock,
-  LogOut,
-  User,
-  FileText
+  Lock, 
+  LogOut, 
+  User, 
+  FileText, 
+  Heart 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -23,6 +24,30 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowAboutModal(false);
+        setShowContactModal(false);
+        setShowSecurityModal(false);
+        setShowUserMenu(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const isModalOpen = showAboutModal || showContactModal || showSecurityModal;
+    if (isModalOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [showAboutModal, showContactModal, showSecurityModal]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between font-sans select-none overflow-x-hidden">
@@ -48,7 +73,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             onClick={() => onNavigate('home')} 
             className="relative text-sm font-bold text-[#1d63ed] transition-colors py-1 cursor-pointer"
           >
-            Inicio
+            {t('patient_nav_home') || 'Inicio'}
             <span className="absolute -bottom-1.5 left-0 right-0 h-[2.5px] bg-[#1d63ed] rounded-full" />
           </button>
           
@@ -56,21 +81,21 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             onClick={() => setShowAboutModal(true)} 
             className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
           >
-            Sobre MIVOR.ai
+            {t('patient_nav_about') || 'Sobre MIVOR.ai'}
           </button>
           
           <button 
             onClick={() => onNavigate('triage')} 
             className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
           >
-            Cómo funciona
+            {t('patient_how_it_works') || 'Cómo funciona'}
           </button>
           
           <button 
             onClick={() => setShowContactModal(true)} 
             className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
           >
-            Contacto
+            {t('patient_nav_contact') || 'Contacto'}
           </button>
         </nav>
 
@@ -96,7 +121,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               type="button"
               onClick={() => setShowUserMenu(prev => !prev)}
               className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white pl-1.5 pr-3.5 py-1.5 rounded-full shadow-xs flex items-center gap-2 transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#1d63ed]/30"
-              title={userProfile?.full_name || username || "Mi cuenta"}
+              title={userProfile?.full_name || username || t('patient_nav_my_account') || "Mi cuenta"}
             >
               {/* Avatar integrado */}
               <div className="w-7 h-7 lg:w-7.5 lg:h-7.5 rounded-full overflow-hidden border border-white/80 shadow-2xs shrink-0">
@@ -109,7 +134,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
               {/* Texto Mi cuenta */}
               <span className="font-bold text-xs sm:text-sm tracking-tight">
-                Mi cuenta
+                {t('patient_nav_my_account') || 'Mi cuenta'}
               </span>
 
               {/* Chevron animado */}
@@ -164,8 +189,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         <User size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Mi historial de salud</span>
-                        <span className="block text-[10px] text-slate-400 font-normal">Ficha médica y antecedentes</span>
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_history_desc') || 'Ficha médica y antecedentes'}</span>
                       </div>
                     </button>
 
@@ -181,8 +206,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         <FileText size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Mis pruebas y documentos</span>
-                        <span className="block text-[10px] text-slate-400 font-normal">Informes y análisis con IA</span>
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_docs_desc') || 'Estudios y pruebas médicas'}</span>
                       </div>
                     </button>
 
@@ -198,8 +223,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         <ShieldCheck size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Seguridad y privacidad</span>
-                        <span className="block text-[10px] text-slate-400 font-normal">Cifrado y protección de datos</span>
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_data_protected') || 'Seguridad y privacidad'}</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_meds_desc') || 'Cifrado y protección de datos'}</span>
                       </div>
                     </button>
 
@@ -215,7 +240,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         <MessageCircle size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Contacto y soporte</span>
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_contact_support') || 'Contacto y soporte'}</span>
                         <span className="block text-[10px] text-slate-400 font-normal">Atención 24/7</span>
                       </div>
                     </button>
@@ -234,7 +259,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                       <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
                         <LogOut size={15} />
                       </div>
-                      <span>Cerrar sesión</span>
+                      <span>{t('patient_menu_logout_title') || 'Cerrar sesión'}</span>
                     </button>
                   </div>
                 </div>
@@ -395,18 +420,24 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
       {/* MODAL: SOBRE MIVOR.ai */}
       {showAboutModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+        <div 
+          onClick={() => setShowAboutModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
                   <CheckCircle2 size={20} />
                 </div>
-                <h3 className="font-bold text-lg text-slate-900">Sobre MIVOR.ai</h3>
+                <h3 className="font-bold text-lg text-slate-900">{t('patient_about_title') || 'Sobre MIVOR.ai'}</h3>
               </div>
               <button 
                 onClick={() => setShowAboutModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -436,7 +467,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 onClick={() => setShowAboutModal(false)}
                 className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
-                Entendido
+                {t('patient_understood') || 'Entendido'}
               </button>
             </div>
           </div>
@@ -445,18 +476,24 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
       {/* MODAL: CONTACTO & SOPORTE */}
       {showContactModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95">
+        <div 
+          onClick={() => setShowContactModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1d63ed] flex items-center justify-center">
                   <MessageCircle size={20} />
                 </div>
-                <h3 className="font-bold text-lg text-slate-900">Contacto & Soporte</h3>
+                <h3 className="font-bold text-lg text-slate-900">{t('patient_contact_support') || 'Contacto & Soporte'}</h3>
               </div>
               <button 
                 onClick={() => setShowContactModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -497,7 +534,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 onClick={() => setShowContactModal(false)}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
-                Cerrar
+                {t('patient_close') || 'Cerrar'}
               </button>
             </div>
           </div>
@@ -506,21 +543,27 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
       {/* MODAL: PROTECCIÓN DE DATOS Y PRIVACIDAD */}
       {showSecurityModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+        <div 
+          onClick={() => setShowSecurityModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+          >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1d63ed] flex items-center justify-center">
                   <ShieldCheck size={24} className="stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 leading-tight">Tus datos están protegidos</h3>
+                  <h3 className="font-bold text-lg text-slate-900 leading-tight">{t('patient_data_protected') || 'Tus datos están protegidos'}</h3>
                   <p className="text-[11px] text-slate-500 font-medium">Seguridad de grado hospitalario y privacidad clínica</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowSecurityModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -569,7 +612,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 onClick={() => setShowSecurityModal(false)}
                 className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
-                Entendido
+                {t('patient_understood') || 'Entendido'}
               </button>
             </div>
           </div>

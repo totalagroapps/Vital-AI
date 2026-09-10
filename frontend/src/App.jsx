@@ -1,4 +1,4 @@
-﻿import DoctorDashboard from './DoctorDashboard';
+import DoctorDashboard from './DoctorDashboard';
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
@@ -11,7 +11,6 @@ import PatientHome from './views/PatientHome';
 import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
 
-import TriageWizard from './views/TriageWizard';
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
 import MedicalHistory from './views/MedicalHistory';
@@ -413,11 +412,19 @@ ${text}`], {type: 'text/plain'});
   const handleLogout = () => {
     setToken(null);
     setUsername(null);
+    setViewMode('patient');
     localStorage.removeItem('med_token');
     localStorage.removeItem('med_role');
+    localStorage.removeItem('currentSessionId');
+    localStorage.removeItem('triageSessionId');
+    localStorage.removeItem('isTriageClosed');
+    localStorage.removeItem('chatMessages');
     setSessions([]);
     setMessages([]);
     setCurrentSessionId(null);
+    setTriageSessionId(null);
+    setIsTriageClosed(false);
+    setPatientProfile(null);
     navigate('/login');
   };
 
@@ -928,13 +935,7 @@ ${text}`], {type: 'text/plain'});
     if (viewMode !== 'doctor') return <Navigate to="/paciente" />;
     return (
       <>
-        <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={() => {
-          setToken(null); 
-          localStorage.removeItem('med_token'); 
-          localStorage.removeItem('med_role'); 
-          setViewMode('patient');
-          navigate('/login');
-        }} />
+        <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
@@ -1066,22 +1067,6 @@ ${text}`], {type: 'text/plain'});
           username={username}
         />
         <UpdateModal t={t} apiUrl={API_URL} />
-      </>
-    );
-  }
-
-  if (path === '/paciente/triaje') {
-    return (
-      <>
-        <TriageWizard 
-        onBack={() => navigate('/paciente')} 
-        onStartChat={(symptoms) => {
-          navigate('/paciente/asistente');
-          setInputMessage(symptoms);
-          startTriageSession();
-
-        }} />
-        {GlobalBottomNav}
       </>
     );
   }

@@ -1,8 +1,9 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
-import { printHtmlContent } from './utils/printPdf';
+import { printHtmlContent, escapeHtml } from './utils/printPdf';
+import MedicalSearchModal from './MedicalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -96,6 +97,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     copilotEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [copilotMessages, isCopilotThinking]);
 
+  useEffect(() => {
+    if (doctorScreen === 'copilot' && !selectedPatient && patients.length > 0) {
+      setSelectedPatient(patients[0]);
+    }
+  }, [doctorScreen, selectedPatient, patients]);
+
   const fetchPatients = async () => {
     setIsLoadingPatients(true);
     try {
@@ -115,20 +122,20 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
     let triagesHtml = (patientDetail.triages || []).map(triageItem => `
       <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
-        <strong>Fecha:</strong> ${triageItem.created_at ? new Date(triageItem.created_at).toLocaleString() : '--'}<br/>
-        <strong>Categoría:</strong> ${triageItem.category || 'N/A'} | <strong>Estado:</strong> ${triageItem.status || '--'}<br/>
-        ${triageItem.recommended_specialty ? `<strong>Especialidad sugerida:</strong> ${triageItem.recommended_specialty}<br/>` : ''}
+        <strong>Fecha:</strong> ${triageItem.created_at ? escapeHtml(new Date(triageItem.created_at).toLocaleString()) : '--'}<br/>
+        <strong>Categoría:</strong> ${escapeHtml(triageItem.category || 'N/A')} | <strong>Estado:</strong> ${escapeHtml(triageItem.status || '--')}<br/>
+        ${triageItem.recommended_specialty ? `<strong>Especialidad sugerida:</strong> ${escapeHtml(triageItem.recommended_specialty)}<br/>` : ''}
         <strong>Informe Clínico:</strong><br/>
-        <div style="white-space: pre-wrap; font-size: 0.9em; color: #334155; margin-top: 4px;">${triageItem.final_report || t('no_complete_report')}</div>
+        <div style="white-space: pre-wrap; font-size: 0.9em; color: #334155; margin-top: 4px;">${escapeHtml(triageItem.final_report || t('no_complete_report'))}</div>
       </div>
     `).join('');
 
     let medicationsHtml = (patientDetail.medications || []).map(m => `
       <tr>
-        <td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>${m.medication_name}</strong></td>
-        <td style="padding: 8px; border: 1px solid #e2e8f0;">${m.dosage || '--'}</td>
-        <td style="padding: 8px; border: 1px solid #e2e8f0;">${m.frequency || '--'}</td>
-        <td style="padding: 8px; border: 1px solid #e2e8f0;">${m.time_of_day || '--'}</td>
+        <td style="padding: 8px; border: 1px solid #e2e8f0;"><strong>${escapeHtml(m.medication_name)}</strong></td>
+        <td style="padding: 8px; border: 1px solid #e2e8f0;">${escapeHtml(m.dosage || '--')}</td>
+        <td style="padding: 8px; border: 1px solid #e2e8f0;">${escapeHtml(m.frequency || '--')}</td>
+        <td style="padding: 8px; border: 1px solid #e2e8f0;">${escapeHtml(m.time_of_day || '--')}</td>
       </tr>
     `).join('');
 
@@ -137,29 +144,30 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       referralHtml = `
         <div class="referral-box">
           <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;">Derivación Inteligente Recomendada</h3>
-          <p style="margin: 0 0 5px 0;"><strong>Especialidad sugerida:</strong> ${patientDetail.smart_referral.recommended_specialty} (${patientDetail.smart_referral.urgency.toUpperCase()})</p>
-          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong>Motivo clínico:</strong> ${patientDetail.smart_referral.reason}</p>
+          <p style="margin: 0 0 5px 0;"><strong>Especialidad sugerida:</strong> ${escapeHtml(patientDetail.smart_referral.recommended_specialty)} (${escapeHtml(patientDetail.smart_referral.urgency?.toUpperCase() || '')})</p>
+          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong>Motivo clínico:</strong> ${escapeHtml(patientDetail.smart_referral.reason)}</p>
         </div>
       `;
     }
 
-    const title = `Expediente Clínico - ${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}`;
+    const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
+    const title = `Expediente Clínico - ${patientName}`;
     const bodyHtml = `
       <div class="header">
         <h1><span class="brand">MIVOR.ai</span> · Expediente Clínico Oficial</h1>
-        <p>Historial Médico Integral del Paciente · {t('app_slogan')}</p>
+        <p>Historial Médico Integral del Paciente · ${escapeHtml(t('app_slogan'))}</p>
       </div>
       
       <h2>Ficha del Paciente</h2>
       <div class="grid">
-        <div><div class="label">${t('name')}</div><div class="value">${patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</div></div>
-        <div><div class="label">${t('date_of_birth')}</div><div class="value">${patientDetail?.profile?.date_of_birth || '--'}</div></div>
-        <div><div class="label">${t('gender')}</div><div class="value">${patientDetail?.profile?.gender || '--'}</div></div>
-        <div><div class="label">${t('blood_type_label')}</div><div class="value" style="color: #e11d48;">${patientDetail?.profile?.blood_type || 'N/A'}</div></div>
-        <div><div class="label">${t('allergies')}</div><div class="value">${patientDetail?.profile?.allergies || 'Ninguna alergia registrada'}</div></div>
-        <div><div class="label">${t('chronic_conditions_label')}</div><div class="value">${patientDetail?.profile?.chronic_conditions || 'Sin condiciones crónicas registradas'}</div></div>
-        <div><div class="label">Altura / Peso</div><div class="value">${patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--'} / ${patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--'}</div></div>
-        <div><div class="label">Contacto de Emergencia</div><div class="value">${patientDetail?.profile?.emergency_contact || '--'}</div></div>
+        <div><div class="label">${escapeHtml(t('name'))}</div><div class="value">${escapeHtml(patientName)}</div></div>
+        <div><div class="label">${escapeHtml(t('date_of_birth'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.date_of_birth || '--')}</div></div>
+        <div><div class="label">${escapeHtml(t('gender'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.gender || '--')}</div></div>
+        <div><div class="label">${escapeHtml(t('blood_type_label'))}</div><div class="value" style="color: #e11d48;">${escapeHtml(patientDetail?.profile?.blood_type || 'N/A')}</div></div>
+        <div><div class="label">${escapeHtml(t('allergies'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.allergies || 'Ninguna alergia registrada')}</div></div>
+        <div><div class="label">${escapeHtml(t('chronic_conditions_label'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.chronic_conditions || 'Sin condiciones crónicas registradas')}</div></div>
+        <div><div class="label">Altura / Peso</div><div class="value">${escapeHtml(patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--')} / ${escapeHtml(patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--')}</div></div>
+        <div><div class="label">Contacto de Emergencia</div><div class="value">${escapeHtml(patientDetail?.profile?.emergency_contact || '--')}</div></div>
       </div>
 
       ${referralHtml}
@@ -183,7 +191,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay triajes registrados.</p>'}
       
       <div class="footer">
-        Documento emitido por MIVOR.ai Medical System · Fecha de impresión: ${new Date().toLocaleString()}
+        Documento emitido por MIVOR.ai Medical System · Fecha de impresión: ${escapeHtml(new Date().toLocaleString())}
       </div>
     `;
 
@@ -194,7 +202,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
     const reason = referral?.reason || 'Valoración especializada';
     const text = `Hola Dr(a). ${specialist.full_name}, le comparto la derivación clínica desde MIVOR.ai del paciente *${patientName}*.\n\n*Motivo de Derivación:* ${reason}\n*Especialidad requerida:* ${specialist.specialty}.\n\nQuedamos a su disposición para coordinar la consulta.`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
   const fetchPatientDetail = async (userId) => {
@@ -305,6 +313,17 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
 
 
+  if (doctorScreen === 'search') {
+    return (
+      <MedicalSearchModal 
+        isOpen={true} 
+        onClose={() => setDoctorScreen('home')} 
+        token={authHeaders?.Authorization?.replace('Bearer ', '')} 
+        apiUrl={apiUrl} 
+        userProfile={doctorProfile} 
+      />
+    );
+  }
   if (doctorScreen === 'more') {
     return <DoctorMore onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
 import { 
   Brain, 
@@ -33,6 +33,32 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowDrawer(false);
+        setShowAboutModal(false);
+        setShowHowModal(false);
+        setShowMissionModal(false);
+        setShowContactModal(false);
+        setShowSecurityModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const isOverlayOpen = showDrawer || showAboutModal || showHowModal || showMissionModal || showContactModal || showSecurityModal;
+    if (isOverlayOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [showDrawer, showAboutModal, showHowModal, showMissionModal, showContactModal, showSecurityModal]);
 
   return (
     <>
@@ -293,8 +319,14 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* 6. DRAWER / MENÚ LATERAL MÓVIL */}
         {showDrawer && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200">
-            <div className="w-4/5 max-w-xs bg-white h-full p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-250">
+          <div 
+            onClick={() => setShowDrawer(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex justify-end animate-in fade-in duration-200 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="w-4/5 max-w-xs bg-white h-full p-5 flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-250 cursor-default"
+            >
               
               <div>
                 {/* Header Drawer */}
@@ -401,16 +433,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* MODAL: SOBRE MIVOR.ai */}
         {showAboutModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+          <div 
+            onClick={() => setShowAboutModal(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
                     <CheckCircle2 size={18} />
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">Sobre MIVOR.ai</h3>
+                  <h3 className="font-bold text-base text-slate-900">{t('patient_about_title') || 'Sobre MIVOR.ai'}</h3>
                 </div>
-                <button onClick={() => setShowAboutModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                <button onClick={() => setShowAboutModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -430,8 +468,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                 </div>
               </div>
               <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowAboutModal(false)} className="bg-[#1d63ed] text-white font-semibold text-xs px-4 py-2 rounded-full">
-                  Entendido
+                <button onClick={() => setShowAboutModal(false)} className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-full cursor-pointer">
+                  {t('patient_understood') || 'Entendido'}
                 </button>
               </div>
             </div>
@@ -440,16 +478,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* MODAL: CÓMO FUNCIONA */}
         {showHowModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+          <div 
+            onClick={() => setShowHowModal(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#1d63ed] flex items-center justify-center">
                     <Sliders size={18} />
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">Cómo funciona</h3>
+                  <h3 className="font-bold text-base text-slate-900">{t('patient_how_it_works') || 'Cómo funciona'}</h3>
                 </div>
-                <button onClick={() => setShowHowModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                <button onClick={() => setShowHowModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -468,8 +512,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                 </div>
               </div>
               <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowHowModal(false)} className="bg-[#1d63ed] text-white font-semibold text-xs px-4 py-2 rounded-full">
-                  Cerrar
+                <button onClick={() => setShowHowModal(false)} className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-full cursor-pointer">
+                  {t('patient_close') || 'Cerrar'}
                 </button>
               </div>
             </div>
@@ -478,30 +522,36 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* MODAL: MISIÓN / JUNTOS POR UNA MEDICINA */}
         {showMissionModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+          <div 
+            onClick={() => setShowMissionModal(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
                     <Heart size={18} />
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">Nuestro Compromiso</h3>
+                  <h3 className="font-bold text-base text-slate-900">{t('patient_our_commitment') || 'Nuestro Compromiso'}</h3>
                 </div>
-                <button onClick={() => setShowMissionModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                <button onClick={() => setShowMissionModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
               <div className="py-3 space-y-2 text-xs text-slate-600 leading-relaxed">
                 <p className="font-semibold text-slate-800 text-[13px]">
-                  "Juntos por una medicina más humana y eficiente."
+                  {t('patient_commitment_quote') || '"Juntos por una medicina más humana y eficiente."'}
                 </p>
                 <p>
                   En MIVOR.ai creemos que la tecnología debe empoderar al paciente y facilitar la labor del profesional médico, reduciendo la ansiedad provocada por la falta de información y agilizando la atención médica.
                 </p>
               </div>
               <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowMissionModal(false)} className="bg-[#1d63ed] text-white font-semibold text-xs px-4 py-2 rounded-full">
-                  Cerrar
+                <button onClick={() => setShowMissionModal(false)} className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-4 py-2 rounded-full cursor-pointer">
+                  {t('patient_close') || 'Cerrar'}
                 </button>
               </div>
             </div>
@@ -510,16 +560,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* MODAL: CONTACTO */}
         {showContactModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+          <div 
+            onClick={() => setShowContactModal(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#1d63ed] flex items-center justify-center">
                     <MessageCircle size={18} />
                   </div>
-                  <h3 className="font-bold text-base text-slate-900">Contacto & Soporte</h3>
+                  <h3 className="font-bold text-base text-slate-900">{t('patient_contact_support') || 'Contacto & Soporte'}</h3>
                 </div>
-                <button onClick={() => setShowContactModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400">
+                <button onClick={() => setShowContactModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 cursor-pointer">
                   <X size={18} />
                 </button>
               </div>
@@ -549,8 +605,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                 </a>
               </div>
               <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowContactModal(false)} className="bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2 rounded-full">
-                  Cerrar
+                <button onClick={() => setShowContactModal(false)} className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2 rounded-full cursor-pointer">
+                  {t('patient_close') || 'Cerrar'}
                 </button>
               </div>
             </div>
@@ -559,21 +615,27 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
         {/* MODAL: PROTECCIÓN DE DATOS Y PRIVACIDAD */}
         {showSecurityModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+          <div 
+            onClick={() => setShowSecurityModal(false)}
+            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+          >
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-100 animate-in zoom-in-95 cursor-default"
+            >
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-2xl bg-blue-50 text-[#1d63ed] flex items-center justify-center shrink-0">
                     <ShieldCheck size={22} className="stroke-[2.2]" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base text-slate-900 leading-tight">Tus datos están protegidos</h3>
+                    <h3 className="font-bold text-base text-slate-900 leading-tight">{t('patient_data_protected') || 'Tus datos están protegidos'}</h3>
                     <p className="text-[10px] text-slate-500 font-medium">Seguridad de grado hospitalario y privacidad</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setShowSecurityModal(false)} 
-                  className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                  className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -622,7 +684,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                   onClick={() => setShowSecurityModal(false)} 
                   className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2 rounded-full transition-colors cursor-pointer"
                 >
-                  Entendido
+                  {t('patient_understood') || 'Entendido'}
                 </button>
               </div>
             </div>

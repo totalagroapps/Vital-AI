@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Calendar, Sparkles, BookOpen, Search, Mic, ArrowRight, 
   Bell, ChevronDown, LogOut 
@@ -12,6 +12,16 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
   const [isListening, setIsListening] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowProfileMenu(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const toggleListening = () => {
     if (isListening) {
@@ -158,25 +168,31 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="text-xs font-bold text-gray-900 truncate">{doctorName}</p>
-                  <p className="text-[11px] text-gray-500 truncate">{doctorProfile?.license_number || 'Colegiado'}</p>
+              <>
+                <div 
+                  className="fixed inset-0 z-40 cursor-default" 
+                  onClick={() => setShowProfileMenu(false)} 
+                />
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs font-bold text-gray-900 truncate">{doctorName}</p>
+                    <p className="text-[11px] text-gray-500 truncate">{doctorProfile?.license_number || 'Colegiado'}</p>
+                  </div>
+                  <button 
+                    onClick={() => { setShowProfileMenu(false); onNavigate('more'); }}
+                    className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors"
+                  >
+                    Ver Perfil y Configuración
+                  </button>
+                  <button 
+                    onClick={onLogout}
+                    className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                  >
+                    <LogOut size={13} />
+                    Cerrar Sesión
+                  </button>
                 </div>
-                <button 
-                  onClick={() => { setShowProfileMenu(false); onNavigate('more'); }}
-                  className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors"
-                >
-                  Ver Perfil y Configuración
-                </button>
-                <button 
-                  onClick={onLogout}
-                  className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
-                >
-                  <LogOut size={13} />
-                  Cerrar Sesión
-                </button>
-              </div>
+              </>
             )}
           </div>
 

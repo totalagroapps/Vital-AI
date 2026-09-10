@@ -2,20 +2,32 @@ import { Printer } from '@capgo/capacitor-printer';
 import { Capacitor } from '@capacitor/core';
 
 /**
+ * Utilidad segura de sanitización de texto para prevenir inyecciones HTML / XSS en plantillas de impresión.
+ */
+export const escapeHtml = (str) => {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+/**
  * Utilidad segura de exportación e impresión PDF para Web y APK Android (Capacitor).
  * En APK de Android utiliza @capgo/capacitor-printer que conecta directamente con
  * el PrintManager nativo del sistema operativo ("Guardar como PDF / Imprimir") sin
  * desviar el WebView ni bloquear la app.
  * En Web de escritorio abre una ventana de impresión limpia sin alterar la sesión del usuario.
  */
-
 export const printHtmlContent = async (title, htmlBody) => {
   const fullHtml = `<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${title || 'MIVOR.ai - Documento Clínico'}</title>
+    <title>${escapeHtml(title) || 'MIVOR.ai - Documento Clínico'}</title>
     <style>
       @page { size: auto; margin: 15mm; }
       body { 
@@ -70,6 +82,9 @@ export const printHtmlContent = async (title, htmlBody) => {
       printWindow.document.open();
       printWindow.document.write(fullHtml);
       printWindow.document.close();
+      try {
+        printWindow.opener = null;
+      } catch (_) {}
       printWindow.focus();
       setTimeout(() => {
         try {

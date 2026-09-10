@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
-import { printHtmlContent } from '../utils/printPdf';
+import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 
 const MedicalHistory = ({
   patientProfile,
@@ -63,11 +63,20 @@ const MedicalHistory = ({
       `📞 *Contacto de Urgencias:* ${patientProfile.emergency_contact || 'No especificado'}\n\n` +
       `🔗 *Ver Ficha Táctica en vivo (sin clave):*\n${emergencyUrl}`;
     
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
   const handleExportPDF = () => {
-    const title = `${t("medical_passport")} - ${patientProfile.full_name || 'Paciente'}`;
+    const safeName = escapeHtml(patientProfile.full_name) || t("not_specified");
+    const safeContact = escapeHtml(patientProfile.emergency_contact) || t("not_specified");
+    const safeDob = escapeHtml(patientProfile.date_of_birth) || t("not_specified");
+    const safeGender = escapeHtml(patientProfile.gender) || t("not_specified");
+    const safeBlood = escapeHtml(patientProfile.blood_type) || t("not_specified");
+    const safeDonor = escapeHtml(patientProfile.organ_donor) || t("donor_not_specified");
+    const safeInsurance = escapeHtml(patientProfile.insurance_provider) || t("not_specified");
+    const safeNotes = escapeHtml(patientProfile.medical_notes);
+
+    const title = `${t("medical_passport")} - ${safeName || 'Paciente'}`;
     const bodyHtml = `
       <div class="header">
         <h1><span class="brand">MIVOR.ai</span> · ${t("medical_passport")}</h1>
@@ -75,29 +84,29 @@ const MedicalHistory = ({
       </div>
       
       <div class="grid">
-        <div><div class="label">${t("patient_name")}</div><div class="value">${patientProfile.full_name || t("not_specified")}</div></div>
-        <div><div class="label">${t("emergency_contact")}</div><div class="value">${patientProfile.emergency_contact || t("not_specified")}</div></div>
+        <div><div class="label">${t("patient_name")}</div><div class="value">${safeName}</div></div>
+        <div><div class="label">${t("emergency_contact")}</div><div class="value">${safeContact}</div></div>
       </div>
 
       <h2>${t("biometric_data_vital_signs")}</h2>
       <div class="grid">
-        <div><div class="label">${t("date_of_birth")}</div><div class="value">${patientProfile.date_of_birth || t("not_specified")} (${age} ${t("years")})</div></div>
-        <div><div class="label">${t("gender")}</div><div class="value">${patientProfile.gender || t("not_specified")}</div></div>
-        <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 18px; font-weight: bold;">${patientProfile.blood_type || t("not_specified")}</div></div>
-        <div><div class="label">${t("organ_donor")}</div><div class="value">${patientProfile.organ_donor || t("donor_not_specified")}</div></div>
+        <div><div class="label">${t("date_of_birth")}</div><div class="value">${safeDob} (${escapeHtml(age)} ${t("years")})</div></div>
+        <div><div class="label">${t("gender")}</div><div class="value">${safeGender}</div></div>
+        <div><div class="label">${t("blood_type")}</div><div class="value" style="color: #e11d48; font-size: 18px; font-weight: bold;">${safeBlood}</div></div>
+        <div><div class="label">${t("organ_donor")}</div><div class="value">${safeDonor}</div></div>
         <div>
           <div class="label">${t("bmi_index")}</div>
           <div class="value">
-            ${bmiInfo ? `${bmiInfo.value} (${bmiInfo.status})` : t("insufficient_data")}
+            ${bmiInfo ? `${escapeHtml(bmiInfo.value)} (${escapeHtml(bmiInfo.status)})` : t("insufficient_data")}
           </div>
         </div>
-        <div><div class="label">${t("insurance_provider")}</div><div class="value">${patientProfile.insurance_provider || t("not_specified")}</div></div>
+        <div><div class="label">${t("insurance_provider")}</div><div class="value">${safeInsurance}</div></div>
       </div>
 
-      ${patientProfile.medical_notes ? `
+      ${safeNotes ? `
       <h2>⚡ ${t("medical_notes")}</h2>
       <div style="margin-bottom: 20px; background: #fff1f2; border: 1px solid #fecdd3; padding: 12px; border-radius: 8px; color: #9f1239; font-weight: bold;">
-        ${patientProfile.medical_notes}
+        ${safeNotes}
       </div>
       ` : ''}
       
@@ -105,24 +114,24 @@ const MedicalHistory = ({
       <div style="margin-bottom: 20px;">
         <div class="label" style="margin-bottom: 8px;">${t("known_allergies")}</div>
         <div>
-          ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">${a.trim()}</span>`).join('') : t("none_registered")}
+          ${patientProfile.allergies ? patientProfile.allergies.split(',').map(a => `<span class="badge alert-badge">${escapeHtml(a.trim())}</span>`).join('') : t("none_registered")}
         </div>
       </div>
       <div style="margin-bottom: 20px;">
         <div class="label" style="margin-bottom: 8px;">${t("chronic_diseases")}</div>
         <div>
-          ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">${a.trim()}</span>`).join('') : t("none_registered")}
+          ${patientProfile.chronic_conditions ? patientProfile.chronic_conditions.split(',').map(a => `<span class="badge">${escapeHtml(a.trim())}</span>`).join('') : t("none_registered")}
         </div>
       </div>
       <div style="margin-bottom: 20px;">
         <div class="label" style="margin-bottom: 8px;">${t("current_medications")}</div>
         <div>
-          ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">${a.trim()}</span>`).join('') : t("none_registered")}
+          ${patientProfile.current_medications ? patientProfile.current_medications.split(',').map(a => `<span class="badge med-badge">${escapeHtml(a.trim())}</span>`).join('') : t("none_registered")}
         </div>
       </div>
       
       <div class="footer">
-        ${t("auto_generated_document")} ${new Date().toLocaleString()}<br/>
+        ${t("auto_generated_document")} ${escapeHtml(new Date().toLocaleString())}<br/>
         ${t("informative_summary")} · MIVOR.ai Medical Systems
       </div>
     `;
