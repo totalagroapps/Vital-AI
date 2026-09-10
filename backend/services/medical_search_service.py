@@ -1,11 +1,13 @@
 import asyncio
+import logging
 from typing import List
 
 from schemas_medical import NormalizedDocument
-
 from services.pubmed_service import PubMedService
 from services.clinical_trials_service import ClinicalTrialsService
 from services.cochrane_service import CochraneService
+
+logger = logging.getLogger(__name__)
 
 
 class MedicalSearchService:
@@ -76,9 +78,8 @@ class MedicalSearchService:
 
     @staticmethod
     def _safe_result(result):
-
         if isinstance(result, Exception):
-            print(f"Error consultando fuente médica: {result}")
+            logger.warning(f"Error consultando fuente médica: {result}")
             return []
 
         return result

@@ -4,9 +4,12 @@ Matching algorítmico por tipo de análisis, valores alterados y especialidad m�
 """
 from typing import List, Dict, Any, Optional
 import re
+import logging
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import models
+
+logger = logging.getLogger(__name__)
 
 # Matriz de reglas clínicas: Asociación de biomarcadores, términos y anomalías con especialidades
 SPECIALTY_RULES = [
@@ -426,7 +429,7 @@ async def get_recommended_specialists(
                     "is_verified": bool(s.is_verified or s.verified)
                 })
         except Exception as e:
-            print(f"Advertencia consultando SpecialistProfile en BD: {e}")
+            logger.warning(f"Advertencia consultando SpecialistProfile en BD: {e}")
 
     # Si faltan especialistas para cubrir el límite, complementar con el directorio de referencia
     if len(specialists) < limit:

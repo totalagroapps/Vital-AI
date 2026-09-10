@@ -1,6 +1,11 @@
-import httpx
+import logging
 from typing import List, Optional
+
+import httpx
+
 from schemas_medical import NormalizedDocument
+
+logger = logging.getLogger(__name__)
 
 
 class ClinicalTrialsService:
@@ -14,7 +19,7 @@ class ClinicalTrialsService:
             "format": "json"
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(self.BASE_URL, params=params)
             response.raise_for_status()
             data = response.json()
@@ -74,5 +79,5 @@ class ClinicalTrialsService:
                 }
             )
         except Exception as e:
-            print(f"Error procesando ensayo de ClinicalTrials: {e}")
+            logger.warning(f"Error procesando ensayo de ClinicalTrials: {e}")
             return None

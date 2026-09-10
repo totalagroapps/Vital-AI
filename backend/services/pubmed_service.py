@@ -1,8 +1,14 @@
+import logging
+from os import getenv
+from typing import List, Optional
+
 import httpx
 import xmltodict
-from typing import List, Optional
-from os import getenv
+
 from schemas_medical import NormalizedDocument
+
+logger = logging.getLogger(__name__)
+
 
 class PubMedService:
     BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -32,7 +38,7 @@ class PubMedService:
             "retmax": max_results,
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             data = response.json()
@@ -51,7 +57,7 @@ class PubMedService:
             "retmode": "xml",
         }
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             
@@ -123,7 +129,7 @@ class PubMedService:
                 metadata={"journal": journal_title}
             )
         except Exception as e:
-            print(f"Error procesando artículo: {e}")
+            logger.warning(f"Error procesando artículo en PubMed: {e}")
             return None
 
     async def search_and_fetch(self, query: str, max_results: int = 5) -> List[NormalizedDocument]:

@@ -66,26 +66,41 @@ async def register_doctor(
 
     diploma_url = None
     profile_pic_url = None
-    if (diploma_file and diploma_file.filename and s3_client):
-        try:
-            diploma_bytes = (await diploma_file.read())
-            diploma_key = f'doctors/diplomas/{uuid.uuid4()}_{diploma_file.filename}'
-            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=diploma_key, Body=diploma_bytes, ContentType=diploma_file.content_type or 'application/pdf')
-            diploma_url = diploma_key
-        except Exception as e:
-            logging.error(f'S3 Upload Error for diploma: {e}')
-            # We log error but don't crash registration if R2 is unavailable
+    if (diploma_file and diploma_file.filename):
+        diploma_bytes = (await diploma_file.read())
+        if len(diploma_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="El archivo del diploma excede el límite máximo de 10MB.")
+        if not diploma_bytes.startswith(b'%PDF-'):
+            raise HTTPException(status_code=400, detail="El diploma debe ser un archivo PDF válido.")
+        if s3_client:
+            try:
+                diploma_key = f'doctors/diplomas/{uuid.uuid4()}_{diploma_file.filename}'
+                s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=diploma_key, Body=diploma_bytes, ContentType='application/pdf')
+                diploma_url = diploma_key
+            except Exception as e:
+                logging.error(f'S3 Upload Error for diploma: {e}')
+                diploma_url = f"local_pending/{diploma_file.filename}"
+        else:
             diploma_url = f"local_pending/{diploma_file.filename}"
 
-    if (profile_pic_file and profile_pic_file.filename and s3_client):
-        try:
-            pic_bytes = (await profile_pic_file.read())
-            pic_key = f'doctors/profiles/{uuid.uuid4()}_{profile_pic_file.filename}'
-            s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=pic_key, Body=pic_bytes, ContentType=profile_pic_file.content_type or 'image/jpeg')
-            profile_pic_url = pic_key
-        except Exception as e:
-            logging.error(f'S3 Upload Error for profile pic: {e}')
-            profile_pic_url = None
+    if (profile_pic_file and profile_pic_file.filename):
+        pic_bytes = (await profile_pic_file.read())
+        if len(pic_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="La foto de perfil excede el límite máximo de 10MB.")
+        is_jpeg = pic_bytes.startswith(b'\xff\xd8\xff')
+        is_png = pic_bytes.startswith(b'\x89PNG')
+        is_webp = pic_bytes.startswith(b'RIFF') and b'WEBP' in pic_bytes[:16]
+        if not (is_jpeg or is_png or is_webp):
+            raise HTTPException(status_code=400, detail="La foto de perfil debe ser una imagen válida (JPEG, PNG o WEBP).")
+        if s3_client:
+            try:
+                pic_key = f'doctors/profiles/{uuid.uuid4()}_{profile_pic_file.filename}'
+                content_type = 'image/png' if is_png else ('image/webp' if is_webp else 'image/jpeg')
+                s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=pic_key, Body=pic_bytes, ContentType=content_type)
+                profile_pic_url = pic_key
+            except Exception as e:
+                logging.error(f'S3 Upload Error for profile pic: {e}')
+                profile_pic_url = None
 
     new_user = models.User(username=clean_username, hashed_password=get_password_hash(password), role='doctor')
     db.add(new_user)

@@ -1,158 +1,27 @@
-
-from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger, scrub_phi, TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
-
-
-from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
-
-
-from services.medical_search_service import MedicalSearchService
-
-
-from services.pubmed_service import PubMedService
-
-
-from services.clinical_trials_service import ClinicalTrialsService
-
-
-from services.cochrane_service import CochraneService
-
-
-import base64
-
-
-import io
-
-
-import logging
-
-
 import os
-
-
-import re
-
-
-import traceback
-
-
+import json
+import logging
 from typing import Optional, List
 
-
-import asyncio
-
-
-from openai import AsyncOpenAI
-
-
-from PIL import Image
-
-
-import PyPDF2
-
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-
-
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-from pydantic import BaseModel
-
-
-import ollama
-
-
-from sqlalchemy import text
-
-
-import database
-
-
-import models
-
-
-import boto3
-
-
-from botocore.config import Config
-
-
-from botocore.exceptions import ClientError
-
-
-import uuid
-
-
-from sqlalchemy import select, update
-
-
-from fastapi import Form
-
-
-from database import get_db
-
-
 from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from fastapi.security import OAuth2PasswordRequestForm
-
-
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-
-
-from sqlalchemy.future import select
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from database import get_db
-
-
-from sqlalchemy.future import select
-
-
-import qrcode
-
-
-import base64
-
-
-from io import BytesIO
-
-
-from pydantic import BaseModel
-
-
-from sqlalchemy.future import select
-
-
-from datetime import datetime
-
-
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update
-from typing import List, Optional
-import os
-import base64
-import uuid
+from sqlalchemy import select
 
 import database
 import models
 import security
 from database import get_db
+from security import get_current_user, require_role
+from main import TriageRequest, logger, scrub_phi, TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
+from openai import AsyncOpenAI
 
 router = APIRouter()
 
 
+
 @router.post('/api/triage/chat')
-async def triage_chat(request: TriageRequest):
+async def triage_chat(request: TriageRequest, current_user: models.User=Depends(get_current_user)):
     lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
     target_lang = lang_map.get(request.language, 'Spanish (Español)')
     lang_instruction = f'''
@@ -180,9 +49,11 @@ Formulate all medical responses, questions, and guidance directly in {target_lan
 
 
 @router.post('/api/triage/start')
-async def start_triage_session(db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
-    '\n    Crea una nueva sesión de triaje en la base de datos asociada al usuario.\n    '
-    new_session = models.TriageSession(user_id=current_user_id, status='in_progress')
+async def start_triage_session(db: AsyncSession=Depends(get_db), current_user: models.User=Depends(get_current_user)):
+    '''
+    Crea una nueva sesión de triaje en la base de datos asociada al usuario.
+    '''
+    new_session = models.TriageSession(user_id=current_user.id, status='in_progress')
     db.add(new_session)
     (await db.commit())
     (await db.refresh(new_session))
@@ -191,23 +62,32 @@ async def start_triage_session(db: AsyncSession=Depends(get_db), current_user_id
 
 
 @router.get('/api/triage/{session_id}')
-async def get_triage_session(session_id: int, db: AsyncSession=Depends(get_db)):
-    '\n    Recupera el estado actual de un triaje (ej: si el paciente recarga la página).\n    '
+async def get_triage_session(session_id: int, db: AsyncSession=Depends(get_db), current_user: models.User=Depends(get_current_user)):
+    '''
+    Recupera el estado actual de un triaje validando ownership.
+    '''
     result = (await db.execute(select(models.TriageSession).where((models.TriageSession.id == session_id))))
     session = result.scalars().first()
     if (not session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
+    if session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+        raise HTTPException(status_code=403, detail='No autorizado para ver esta sesión de triaje')
     return {'session_id': session.id, 'status': session.status, 'questions_asked': session.questions_asked, 'final_report': session.final_report}
 
 
 
 @router.post('/api/triage/{session_id}/message')
-async def send_triage_message(session_id: int, request: TriageRequest, db: AsyncSession=Depends(get_db)):
-    '\n    Aplica PHI scrubbing, interactúa con el modelo y monitorea si emite el informe final.\n    '
+async def send_triage_message(session_id: int, request: TriageRequest, db: AsyncSession=Depends(get_db), current_user: models.User=Depends(get_current_user)):
+    '''
+    Aplica PHI scrubbing, interactúa con el modelo y monitorea si emite el informe final.
+    Valida ownership de la sesión antes de procesar o llamar a OpenAI.
+    '''
     result = (await db.execute(select(models.TriageSession).where((models.TriageSession.id == session_id))))
     t_session = result.scalars().first()
     if (not t_session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
+    if t_session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+        raise HTTPException(status_code=403, detail='No autorizado para interactuar en esta sesión de triaje')
     if (t_session.status != 'in_progress'):
         raise HTTPException(status_code=400, detail='Esta sesión de triaje ya está cerrada.')
     sanitized_messages = []
