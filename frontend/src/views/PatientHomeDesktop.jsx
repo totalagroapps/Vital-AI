@@ -25,6 +25,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   const { t } = useLanguage();
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [showSecurityModal, setShowSecurityModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between font-sans select-none overflow-x-hidden">
@@ -154,7 +155,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
             {/* Trust Security Card */}
             <div 
-              onClick={() => onNavigate('history')}
+              onClick={() => setShowSecurityModal(true)}
               className="bg-[#f0f7ff] hover:bg-[#e4f0ff] border border-blue-100/90 rounded-2xl p-3 px-4 flex items-center justify-between gap-3.5 max-w-[460px] shadow-2xs transition-all cursor-pointer group"
             >
               <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[#1d63ed] flex items-center justify-center shrink-0">
@@ -426,6 +427,78 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: PROTECCIÓN DE DATOS Y PRIVACIDAD */}
+      {showSecurityModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#1d63ed] flex items-center justify-center">
+                  <ShieldCheck size={24} className="stroke-[2.2]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 leading-tight">Tus datos están protegidos</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Seguridad de grado hospitalario y privacidad clínica</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowSecurityModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p>
+                En <strong>MIVOR.ai</strong>, la confidencialidad y protección de tu información de salud es nuestra máxima prioridad:
+              </p>
+
+              <div className="space-y-2.5">
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+                  <Lock size={18} className="text-[#1d63ed] shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">Cifrado de extremo a extremo</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Todos los datos, análisis clínicos e imágenes médicas se transmiten y almacenan bajo cifrado militar AES-256.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+                  <CheckCircle2 size={18} className="text-teal-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">Cumplimiento ISO 27001 & RGPD</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Auditorías continuas de seguridad de la información conforme a estándares internacionales y normativa europea de protección de datos.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
+                  <ShieldCheck size={18} className="text-indigo-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-xs text-slate-900">Privacidad absoluta de tus consultas</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Tus informes y consultas médicas jamás son compartidos ni utilizados para entrenar modelos públicos de inteligencia artificial.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button 
+                onClick={() => setShowSecurityModal(false)}
+                className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+              >
+                Entendido
               </button>
             </div>
           </div>
