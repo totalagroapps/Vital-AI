@@ -1063,7 +1063,6 @@ ${text}`], {type: 'text/plain'});
           userProfile={patientProfile}
           username={username}
         />
-        {GlobalBottomNav}
       </>
     );
   }
