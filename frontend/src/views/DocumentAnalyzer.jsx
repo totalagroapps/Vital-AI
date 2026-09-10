@@ -165,7 +165,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
       setError(t("unsupported_format", { fileName: file.name }));
       return;
     }
-    if (file.size > 50 * 1024 * 1024) { setError(t("file_too_large")); return; }
+    if (file.size > 10 * 1024 * 1024) { setError(t("file_too_large")); return; }
 
     setStep('analyzing');
     setError(null);

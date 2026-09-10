@@ -107,6 +107,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       form.append('languages', formData.languages || 'Español');
       form.append('bio', formData.bio || `Especialista en ${formData.specialty || 'Medicina General'} con dedicación a la atención clínica personalizada.`);
       
+      if (formData.idDocFile) form.append('id_doc_file', formData.idDocFile);
       if (formData.diplomaFile) form.append('diploma_file', formData.diplomaFile);
       if (formData.profilePicFile) form.append('profile_pic_file', formData.profilePicFile);
 

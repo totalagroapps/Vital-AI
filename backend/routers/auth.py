@@ -1,10 +1,12 @@
 import os
 import re
+import time
 import uuid
 import logging
+from collections import defaultdict
 from typing import Optional, List
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -17,13 +19,32 @@ from main import RegisterRequest, s3_client, R2_BUCKET_NAME, logger
 
 router = APIRouter()
 
+# Rate limit de fuerza bruta para login (Punto 6 Auditoría R3)
+_login_ip_rate_limit_store = defaultdict(list)
+LOGIN_IP_WINDOW = 60
+LOGIN_IP_MAX = 10
+
+
+def apply_login_rate_limit(client_ip: str):
+    now = time.time()
+    _login_ip_rate_limit_store[client_ip] = [
+        t for t in _login_ip_rate_limit_store[client_ip] if now - t < LOGIN_IP_WINDOW
+    ]
+    if len(_login_ip_rate_limit_store[client_ip]) >= LOGIN_IP_MAX:
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados intentos de inicio de sesión. Por favor, espere un minuto antes de reintentar.",
+            headers={"Retry-After": str(LOGIN_IP_WINDOW)}
+        )
+    _login_ip_rate_limit_store[client_ip].append(now)
 
 
 @router.post('/api/auth/register')
 async def register(request: RegisterRequest, db: AsyncSession=Depends(get_db)):
     result = (await db.execute(select(models.User).where((models.User.username == request.username))))
     if result.scalars().first():
-        raise HTTPException(status_code=400, detail='El nombre de usuario ya está registrado')
+        # Mitigación de enumeración de usuarios (Punto 16 Auditoría R3)
+        raise HTTPException(status_code=400, detail='No fue posible completar el registro. Verifique los datos ingresados o inicie sesión si ya dispone de una cuenta.')
     hashed_pwd = get_password_hash(request.password)
     new_user = models.User(username=request.username, hashed_password=hashed_pwd, role=request.role)
     db.add(new_user)
@@ -50,12 +71,14 @@ async def register_doctor(
     bio: str=Form(None),
     diploma_file: UploadFile=File(None),
     profile_pic_file: UploadFile=File(None),
+    id_doc_file: UploadFile=File(None),
     db: AsyncSession=Depends(get_db)
 ):
     clean_username = username.strip().lower()
     result = (await db.execute(select(models.User).where((models.User.username == clean_username))))
     if result.scalars().first():
-        raise HTTPException(status_code=400, detail='El usuario/correo ya está registrado')
+        # Mitigación de enumeración de usuarios (Punto 16 Auditoría R3)
+        raise HTTPException(status_code=400, detail='No fue posible completar el registro. Verifique los datos ingresados o inicie sesión si ya dispone de una cuenta.')
     
     try:
         exp_val = int(experience_years)
@@ -66,6 +89,8 @@ async def register_doctor(
 
     diploma_url = None
     profile_pic_url = None
+    id_doc_url = None
+
     if (diploma_file and diploma_file.filename):
         diploma_bytes = (await diploma_file.read())
         if len(diploma_bytes) > 10 * 1024 * 1024:
@@ -102,6 +127,28 @@ async def register_doctor(
                 logging.error(f'S3 Upload Error for profile pic: {e}')
                 profile_pic_url = None
 
+    if (id_doc_file and id_doc_file.filename):
+        id_doc_bytes = (await id_doc_file.read())
+        if len(id_doc_bytes) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="El documento de identidad excede el límite máximo de 10MB.")
+        is_pdf = id_doc_bytes.startswith(b'%PDF-')
+        is_jpeg = id_doc_bytes.startswith(b'\xff\xd8\xff')
+        is_png = id_doc_bytes.startswith(b'\x89PNG')
+        is_webp = id_doc_bytes.startswith(b'RIFF') and b'WEBP' in id_doc_bytes[:16]
+        if not (is_pdf or is_jpeg or is_png or is_webp):
+            raise HTTPException(status_code=400, detail="El documento de identidad debe ser un archivo PDF o una imagen válida (JPEG, PNG o WEBP).")
+        if s3_client:
+            try:
+                content_type = 'application/pdf' if is_pdf else ('image/png' if is_png else ('image/webp' if is_webp else 'image/jpeg'))
+                id_doc_key = f'doctors/identities/{uuid.uuid4()}_{id_doc_file.filename}'
+                s3_client.put_object(Bucket=R2_BUCKET_NAME, Key=id_doc_key, Body=id_doc_bytes, ContentType=content_type)
+                id_doc_url = id_doc_key
+            except Exception as e:
+                logging.error(f'S3 Upload Error for id doc: {e}')
+                id_doc_url = f"local_pending/{id_doc_file.filename}"
+        else:
+            id_doc_url = f"local_pending/{id_doc_file.filename}"
+
     new_user = models.User(username=clean_username, hashed_password=get_password_hash(password), role='doctor')
     db.add(new_user)
     (await db.flush())
@@ -116,6 +163,7 @@ async def register_doctor(
         bio=bio,
         diploma_url=diploma_url,
         profile_pic_url=profile_pic_url,
+        id_doc_url=id_doc_url,
         is_verified=False
     )
     db.add(new_profile)
@@ -126,7 +174,10 @@ async def register_doctor(
 
 
 @router.post('/api/auth/login')
-async def login(form_data: OAuth2PasswordRequestForm=Depends(), db: AsyncSession=Depends(get_db)):
+async def login(request: Request, form_data: OAuth2PasswordRequestForm=Depends(), db: AsyncSession=Depends(get_db)):
+    client_ip = request.client.host if request.client else "unknown"
+    apply_login_rate_limit(client_ip)
+
     result = (await db.execute(select(models.User).where((models.User.username == form_data.username))))
     user = result.scalars().first()
     if ((not user) or (not verify_password(form_data.password, user.hashed_password))):

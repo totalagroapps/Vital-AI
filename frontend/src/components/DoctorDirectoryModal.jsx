@@ -144,6 +144,21 @@ export default function DoctorDirectoryModal({
     }
   }, [recommendedSpecialty, isOpen]);
 
+  // Cierre por tecla Escape y scroll lock (Punto 17 Auditoría R3)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
+
   // Cargar especialistas reales de la base de datos
   useEffect(() => {
     if (!isOpen) return;
@@ -218,8 +233,10 @@ export default function DoctorDirectoryModal({
     setBookingNotes('');
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
       <div 
         className="bg-white w-full max-w-4xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-100 animate-scaleUp"
         onClick={e => e.stopPropagation()}

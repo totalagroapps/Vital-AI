@@ -35,6 +35,21 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   const [selectedSource, setSelectedSource] = useState('all');
   const [expandedCards, setExpandedCards] = useState({});
 
+  // Cierre con Escape y scroll lock (Punto 17 Auditoría R3)
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
+
   const toggleExpand = (idx) => {
     setExpandedCards(prev => ({
       ...prev,
@@ -155,8 +170,12 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4">
-      <div className="bg-white text-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200" style={{ color: "#0f172a" }}>
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4" onClick={onClose}>
+      <div 
+        className="bg-white text-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-slate-100 animate-in fade-in zoom-in-95 duration-200" 
+        style={{ color: "#0f172a" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">

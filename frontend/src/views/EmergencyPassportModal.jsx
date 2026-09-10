@@ -2,14 +2,22 @@ import React, { useState, useRef, useMemo } from 'react';
 import { 
   X, ShieldAlert, Droplet, Phone, AlertTriangle, 
   Heart, Pill, QrCode, Download, Share2, Copy, 
-  Check, ExternalLink, Smartphone, Printer, Sparkles
+  Check, ExternalLink, Smartphone, Printer, Sparkles, Loader2
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }) => {
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [generatingWallpaper, setGeneratingWallpaper] = useState(false);
+
+  // Validación de UUID del paciente para evitar enlaces rotos o malformados (Punto 12 Auditoría R3)
+  const isUserIdValid = Boolean(patientProfile?.user_id && UUID_REGEX.test(patientProfile.user_id));
+  const emergencyUrl = isUserIdValid 
+    ? (patientProfile?.emergency_url || `${window.location.origin}/emergencia/${patientProfile.user_id}`)
+    : null;
 
   // Fallback age calculation
   const age = useMemo(() => {
@@ -27,16 +35,15 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
 
   if (!isOpen) return null;
 
-  const emergencyUrl = patientProfile?.emergency_url || 
-    `${window.location.origin}/emergencia/${encodeURIComponent(patientProfile?.user_id || 'me')}`;
-
   const handleCopyLink = () => {
+    if (!emergencyUrl) return;
     navigator.clipboard.writeText(emergencyUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShareWhatsApp = () => {
+    if (!emergencyUrl) return;
     const text = `🚨 *Ficha Médica de Emergencia MIVOR.ai*\n` +
       `👤 *Paciente:* ${patientProfile?.full_name || 'Paciente'}\n` +
       `🩸 *Grupo Sanguíneo:* ${patientProfile?.blood_type || 'N/D'}\n` +
@@ -374,7 +381,12 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
             </p>
 
             <div className="bg-white p-3 rounded-2xl shadow-xl mb-4">
-              {patientProfile?.qr_code_base64 ? (
+              {!isUserIdValid ? (
+                <div className="w-44 h-44 flex flex-col items-center justify-center text-slate-500 text-xs gap-2 p-2 text-center">
+                  <Loader2 size={32} className="animate-spin text-brand-purple" />
+                  <span>Cargando identificador seguro...</span>
+                </div>
+              ) : patientProfile?.qr_code_base64 ? (
                 <img 
                   src={`data:image/png;base64,${patientProfile.qr_code_base64}`} 
                   alt="QR Code Emergencia"
@@ -391,24 +403,31 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
             {/* Public URL with Copy button */}
             <div className="w-full flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl p-2 max-w-md">
               <span className="text-xs text-slate-400 truncate flex-1 font-mono text-left px-2">
-                {emergencyUrl}
+                {emergencyUrl || "Generando enlace seguro..."}
               </span>
               <button
                 onClick={handleCopyLink}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
+                disabled={!emergencyUrl}
+                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
               >
                 {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
                 <span>{copied ? "¡Listo!" : "Copiar"}</span>
               </button>
-              <a
-                href={emergencyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 bg-brand-purple/20 text-purple-300 hover:bg-brand-purple/30 rounded-lg transition-all"
-                title="Probar vista en nueva pestaña"
-              >
-                <ExternalLink size={16} />
-              </a>
+              {emergencyUrl ? (
+                <a
+                  href={emergencyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 bg-brand-purple/20 text-purple-300 hover:bg-brand-purple/30 rounded-lg transition-all"
+                  title="Probar vista en nueva pestaña"
+                >
+                  <ExternalLink size={16} />
+                </a>
+              ) : (
+                <span className="p-1.5 text-slate-600 cursor-not-allowed">
+                  <ExternalLink size={16} />
+                </span>
+              )}
             </div>
           </div>
 
@@ -418,7 +437,8 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
             {/* WhatsApp Direct Share Button */}
             <button
               onClick={handleShareWhatsApp}
-              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all active:scale-95"
+              disabled={!emergencyUrl}
+              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all active:scale-95"
             >
               <Share2 size={16} />
               <span>Compartir Ficha de Rescate por WhatsApp</span>

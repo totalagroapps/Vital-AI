@@ -90,7 +90,13 @@ const DoctorMore = ({ onNavigate, onLogout }) => {
         </div>
 
       </div>
-      <BottomNav activeTab="more" onTabChange={(tab) => onNavigate(tab)} isDoctor={true} />
+      <BottomNav activeTab="more" onTabChange={(tab) => {
+        if (tab === 'home') onNavigate('home');
+        if (tab === 'patients') onNavigate('patients');
+        if (tab === 'agenda') onNavigate('agenda');
+        if (tab === 'ai') onNavigate('copilot');
+        if (tab === 'more') onNavigate('more');
+      }} isDoctor={true} />
     </div>
   );
 };

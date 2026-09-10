@@ -115,7 +115,7 @@ export const fr = {
     you_can_upload_photo_or_pdf: "Vous pouvez télécharger une photo (.jpg, .png) ou un PDF",
     upload_image: "Télécharger l'image",
     upload_pdf: "Télécharger le PDF",
-    file_formats_and_size_limit: "PDF, JPG, PNG, WEBP, HEIC · Max. 50 Mo",
+    file_formats_and_size_limit: "PDF, JPG, PNG, WEBP, HEIC · Max. 10 Mo",
     reports: "Rapports",
     x_rays: "Radiographies",
     prescriptions: "Ordonnances",

@@ -5,7 +5,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 const TriageWizard = ({ onBack, onStartChat }) => {
   const [symptoms, setSymptoms] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   React.useEffect(() => {
     const shouldAutoStart = localStorage.getItem('autoStartMic') === 'true';
@@ -27,7 +27,8 @@ const TriageWizard = ({ onBack, onStartChat }) => {
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
+    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
+    recognition.lang = langCodeMap[language] || 'es-ES';
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -126,6 +127,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
               placeholder={t('start_typing_here')}
+              maxLength={1000}
               className="w-full h-32 resize-none outline-none text-sm text-gray-700 placeholder-gray-400"
             />
             <div className="absolute bottom-2 right-2 text-[10px] text-gray-400">

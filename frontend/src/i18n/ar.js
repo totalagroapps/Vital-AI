@@ -115,7 +115,7 @@ export const ar = {
     you_can_upload_photo_or_pdf: "يمكنك تحميل صورة (.jpg، .png) أو PDF",
     upload_image: "تحميل الصورة",
     upload_pdf: "تحميل PDF",
-    file_formats_and_size_limit: "PDF، JPG، PNG، WEBP، HEIC · الحد الأقصى 50 ميغابايت",
+    file_formats_and_size_limit: "PDF، JPG، PNG، WEBP، HEIC · الحد الأقصى 10 ميغابايت",
     reports: "تقارير",
     x_rays: "الأشعة السينية",
     prescriptions: "الوصفات الطبية",

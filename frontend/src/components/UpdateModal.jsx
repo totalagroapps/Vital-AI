@@ -89,6 +89,23 @@ export function UpdateModal({ t, apiUrl }) {
     };
   }, [apiUrl]);
 
+  // Cierre por Escape y scroll lock (Punto 17 Auditoría R3)
+  useEffect(() => {
+    if (!isVisible) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && !updateInfo?.forceUpdate && downloadState !== 'downloading') {
+        setIsVisible(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isVisible, updateInfo?.forceUpdate, downloadState]);
+
   function isNewerVersion(latest, current) {
     if (!latest || !current) return false;
     const cleanLatest = String(latest).replace(/^v/i, '').trim();
@@ -135,8 +152,18 @@ export function UpdateModal({ t, apiUrl }) {
   if (!isVisible || !updateInfo) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-slate-900 border border-teal-500/30 rounded-3xl max-w-sm w-full p-6 text-slate-100 shadow-2xl relative overflow-hidden">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in"
+      onClick={() => {
+        if (!updateInfo?.forceUpdate && downloadState !== 'downloading') {
+          setIsVisible(false);
+        }
+      }}
+    >
+      <div 
+        className="bg-slate-900 border border-teal-500/30 rounded-3xl max-w-sm w-full p-6 text-slate-100 shadow-2xl relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Glow effect */}
         <div className="absolute -top-20 -right-20 w-40 h-40 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
         

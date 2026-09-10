@@ -178,9 +178,20 @@ os.makedirs(DOWNLOADS_DIR, exist_ok=True)
 
 @app.get('/download/{filename}')
 async def download_apk_file(filename: str):
-    file_path = os.path.join(DOWNLOADS_DIR, filename)
-    if os.path.exists(file_path):
-        return FileResponse(file_path, filename=filename, media_type="application/vnd.android.package-archive")
+    # Prevención estricta de Path Traversal (Punto 1 Auditoría R3)
+    clean_filename = os.path.basename(filename)
+    if not clean_filename or clean_filename != filename or ".." in filename or "/" in filename or "\\" in filename or "\x00" in filename:
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
+    downloads_real_dir = os.path.realpath(DOWNLOADS_DIR)
+    resolved_path = os.path.realpath(os.path.join(downloads_real_dir, clean_filename))
+
+    if not resolved_path.startswith(downloads_real_dir + os.path.sep):
+        raise HTTPException(status_code=404, detail="Archivo no encontrado")
+
+    if os.path.isfile(resolved_path):
+        return FileResponse(resolved_path, filename=clean_filename, media_type="application/vnd.android.package-archive")
+
     github_release_url = "https://github.com/totalagroapps/Vital-AI/releases/latest/download/app-release.apk"
     return RedirectResponse(url=github_release_url, status_code=302)
 
@@ -215,7 +226,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def scrub_phi(text: str) -> tuple[(str, bool)]:
-    '\n    HIPAA/RGPD mock anonymization engine.\n    '
+    """
+    Motor DEMO/MOCK de enmascaramiento básico de PHI (Protected Health Information).
+
+    ADVERTENCIA DE SEGURIDAD / COMPLIANCE (Punto 14 Auditoría R3):
+    Esta función utiliza únicamente expresiones regulares rudimentarias (SSN/cédula)
+    y una lista fija de nombres simulados. NO constituye una anonimización completa,
+    ni cumple con los estándares Safe Harbor de HIPAA ni con los requisitos de
+    seudonimización/de-identificación médica de RGPD/GDPR para datos clínicos reales.
+    Para despliegues productivos con historiales clínicos confidenciales, debe reemplazarse
+    por una solución de de-identificación biomédica basada en NER/NLP clínico certificado
+    (ej. AWS Comprehend Medical, GCP Healthcare De-identification API, o modelos spaCy clínicos).
+    """
     phi_detected = False
     patterns = [('\\b\\d{3}-\\d{2}-\\d{4}\\b', '[SSN_ENMASCARADO]'), ('\\b\\d{1,3}\\.\\d{3}\\.\\d{3}\\b', '[CEDULA_ENMASCARADA]')]
     for (pattern, replacement) in patterns:

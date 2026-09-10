@@ -143,7 +143,7 @@ export const en = {
     you_can_upload_photo_or_pdf: "You can upload a photo (.jpg, .png) or a PDF",
     upload_image: "Upload Image",
     upload_pdf: "Upload PDF",
-    file_formats_and_size_limit: "PDF, JPG, PNG, WEBP, HEIC · Max. 50 MB",
+    file_formats_and_size_limit: "PDF, JPG, PNG, WEBP, HEIC · Max. 10 MB",
     reports: "Reports",
     x_rays: "X-rays",
     prescriptions: "Prescriptions",

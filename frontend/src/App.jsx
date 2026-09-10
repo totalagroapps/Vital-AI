@@ -674,7 +674,37 @@ ${text}`], {type: 'text/plain'});
         })
       });
 
-      if (!response.ok) throw new Error("Error en red");
+      if (response.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (response.status === 403) {
+        let detail = "No tienes permiso para acceder a esta sesión.";
+        try {
+          const errData = await response.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      if (response.status === 429) {
+        const retryAfter = response.headers.get("Retry-After");
+        let detail = retryAfter 
+          ? `Demasiadas solicitudes. Por favor, espera ${retryAfter} segundos.`
+          : "Demasiadas solicitudes, por favor espera un momento.";
+        try {
+          const errData = await response.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      if (!response.ok) {
+        let detail = "Error en red";
+        try {
+          const errData = await response.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
 
       const returnedSessionId = response.headers.get("X-Session-ID");
       if (returnedSessionId && returnedSessionId !== currentSessionId) {
@@ -702,7 +732,7 @@ ${text}`], {type: 'text/plain'});
       fetchSessions();
     } catch (e) {
       console.error(e);
-      setMessages(prev => [...prev, { type: "ai", text: "Error de conexión." }]);
+      setMessages(prev => [...prev, { type: "ai", text: e?.message ? `⚠️ ${e.message}` : "Error de conexión." }]);
     } finally {
       setIsLoading(false);
     }
@@ -832,7 +862,33 @@ ${text}`], {type: 'text/plain'});
         handleLogout();
         return;
       }
-      if (!res.ok) throw new Error('Error en el servidor backend');
+      if (res.status === 403) {
+        let detail = "No tienes permiso para acceder a esta sesión.";
+        try {
+          const errData = await res.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      if (res.status === 429) {
+        const retryAfter = res.headers.get("Retry-After");
+        let detail = retryAfter 
+          ? `Demasiadas solicitudes. Por favor, espera ${retryAfter} segundos antes de volver a consultar.`
+          : "Demasiadas solicitudes, por favor espera un momento.";
+        try {
+          const errData = await res.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
+      if (!res.ok) {
+        let detail = "Error en el servidor backend";
+        try {
+          const errData = await res.json();
+          if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
+        } catch (_) {}
+        throw new Error(detail);
+      }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
