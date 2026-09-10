@@ -17,7 +17,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientHome = ({ onNavigate, onLogout }) => {
+const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
   const { t } = useLanguage();
 
   return (
@@ -242,9 +242,14 @@ const PatientHome = ({ onNavigate, onLogout }) => {
 
       </div>
 
-      {/* ================= VISTA ESCRITORIO (PRESERVADA) ================= */}
+      {/* ================= VISTA ESCRITORIO (RÉPLICA OFICIAL) ================= */}
       <div className="hidden lg:block">
-        <PatientHomeDesktop onNavigate={onNavigate} onLogout={onLogout} />
+        <PatientHomeDesktop 
+          onNavigate={onNavigate} 
+          onLogout={onLogout} 
+          userProfile={userProfile}
+          username={username}
+        />
       </div>
     </>
   );

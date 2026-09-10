@@ -1028,6 +1028,8 @@ ${text}`], {type: 'text/plain'});
         <PatientHome 
           onLogout={handleLogout}
           onNavigate={handleNavigate} 
+          userProfile={patientProfile}
+          username={username}
         />
         {GlobalDoctorDirectoryModal}
         {GlobalBottomNav}
@@ -1056,6 +1058,8 @@ ${text}`], {type: 'text/plain'});
         <PatientHome 
           onLogout={handleLogout}
           onNavigate={handleNavigate} 
+          userProfile={patientProfile}
+          username={username}
         />
         {GlobalBottomNav}
       </>
@@ -1085,6 +1089,8 @@ ${text}`], {type: 'text/plain'});
         <PatientHome 
           onLogout={handleLogout}
           onNavigate={handleNavigate} 
+          userProfile={patientProfile}
+          username={username}
         />
         <MedicalSearchModal isOpen={true} onClose={() => navigate('/paciente')} token={token} apiUrl={API_URL} userProfile={patientProfile} />
         {GlobalBottomNav}
