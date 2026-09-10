@@ -988,11 +988,13 @@ ${text}`], {type: 'text/plain'});
     />
   );
 
-  // The GlobalBottomNav is fixed, so it always floats above all route content
+  // The GlobalBottomNav is fixed, so it always floats above all route content on mobile only
   const GlobalBottomNav = (
     <>
       {GlobalDoctorDirectoryModal}
-      <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
+      <div className="lg:hidden">
+        <BottomNav activeTab={activeTab} onTabChange={handleBottomNav} />
+      </div>
     </>
   );
 

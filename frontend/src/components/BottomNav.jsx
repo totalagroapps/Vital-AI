@@ -9,7 +9,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
     const activeColor = 'text-brand-blue';
     const activeFill = 'fill-brand-blue/20';
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2 pb-6 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2 pb-6 z-50 lg:hidden">
         <div className="max-w-md mx-auto flex justify-between items-center relative">
           <button 
             type="button"
@@ -61,7 +61,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
   const isTreatmentsActive = activeTab === 'treatments' || activeTab === 'agenda';
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3.5 z-50 select-none">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3.5 z-50 select-none lg:hidden">
       <div className="max-w-md mx-auto grid grid-cols-5 items-center text-center">
         
         {/* 1. Inicio */}
