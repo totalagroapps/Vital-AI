@@ -50,7 +50,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   }, [showAboutModal, showContactModal, showSecurityModal]);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between font-sans select-none overflow-x-hidden">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans select-none overflow-x-hidden">
       
       {/* 1. TOP NAVBAR */}
       <header className="w-full px-6 sm:px-10 lg:px-14 xl:px-16 py-3 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
@@ -270,7 +270,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
       </header>
 
       {/* 2. HERO SECTION */}
-      <main className="flex-1 flex flex-col justify-between py-2 lg:py-4 xl:py-5">
+      <main className="flex-1 flex flex-col justify-center gap-6 lg:gap-8 py-2 lg:py-4 xl:py-5">
         
         <section 
           className="w-full px-6 sm:px-8 lg:px-12 xl:px-14 py-2 lg:py-4 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10 relative"
