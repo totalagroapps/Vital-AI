@@ -90,33 +90,34 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
           </div>
 
-          {/* User Profile Avatar & "Mi cuenta" Button with Dropdown */}
+          {/* Unified Profile Button with Dropdown (Opción 1) */}
           <div className="relative">
-            <div className="flex items-center gap-2.5">
-              {/* User Profile Avatar */}
-              <button 
-                type="button"
-                onClick={() => setShowUserMenu(prev => !prev)}
-                className="w-8 h-8 lg:w-9 lg:h-9 rounded-full overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-[#1d63ed]/40 transition-all cursor-pointer focus:outline-none"
-                title={userProfile?.full_name || username || "Mi cuenta"}
-              >
+            <button 
+              type="button"
+              onClick={() => setShowUserMenu(prev => !prev)}
+              className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white pl-1.5 pr-3.5 py-1.5 rounded-full shadow-xs flex items-center gap-2 transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#1d63ed]/30"
+              title={userProfile?.full_name || username || "Mi cuenta"}
+            >
+              {/* Avatar integrado */}
+              <div className="w-7 h-7 lg:w-7.5 lg:h-7.5 rounded-full overflow-hidden border border-white/80 shadow-2xs shrink-0">
                 <img 
                   src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
                   alt="Perfil" 
                   className="w-full h-full object-cover" 
                 />
-              </button>
+              </div>
 
-              {/* "Mi cuenta" Button */}
-              <button 
-                type="button"
-                onClick={() => setShowUserMenu(prev => !prev)}
-                className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full shadow-xs flex items-center gap-1.5 transition-all cursor-pointer select-none"
-              >
-                <span>Mi cuenta</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
+              {/* Texto Mi cuenta */}
+              <span className="font-bold text-xs sm:text-sm tracking-tight">
+                Mi cuenta
+              </span>
+
+              {/* Chevron animado */}
+              <ChevronDown 
+                size={14} 
+                className={`text-white/90 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} 
+              />
+            </button>
 
             {/* Dropdown Menu */}
             {showUserMenu && (
