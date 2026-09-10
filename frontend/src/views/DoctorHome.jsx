@@ -110,7 +110,10 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
         </div>
 
         {/* Prominent Doctor Profile Card */}
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-soft border border-gray-100 flex items-center gap-4">
+        <div 
+          onClick={() => onNavigate('profile')} 
+          className="bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-soft border border-gray-100 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
+        >
           <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-md shrink-0 border border-gray-200 bg-slate-100">
             <img 
               src={doctorPhoto} 

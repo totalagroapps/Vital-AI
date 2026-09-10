@@ -102,6 +102,24 @@ async def get_current_user(
         )
     return user
 
+async def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: AsyncSession = Depends(database.get_db)
+) -> Optional[models.User]:
+    """
+    Recupera el usuario si el token está presente y es válido, o None si no se proporcionó token.
+    """
+    if not token:
+        return None
+    try:
+        user_id = await get_optional_current_user_id(token)
+        if not user_id:
+            return None
+        result = await db.execute(select(models.User).where(models.User.id == user_id))
+        return result.scalars().first()
+    except Exception:
+        return None
+
 def require_role(*allowed_roles: str):
     """
     Dependencia reutilizable para control de acceso basado en roles (RBAC).

@@ -179,10 +179,10 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                     <p className="text-[11px] text-gray-500 truncate">{doctorProfile?.license_number || 'Colegiado'}</p>
                   </div>
                   <button 
-                    onClick={() => { setShowProfileMenu(false); onNavigate('more'); }}
+                    onClick={() => { setShowProfileMenu(false); onNavigate('profile'); }}
                     className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors"
                   >
-                    Ver Perfil y Configuración
+                    {t('view_doctor_profile', 'Ver Perfil Médico')}
                   </button>
                   <button 
                     onClick={onLogout}

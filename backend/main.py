@@ -408,3 +408,9 @@ from routers.medications import router as medications_router
 app.include_router(medications_router)
 from routers.medical import router as medical_router
 app.include_router(medical_router)
+from routers.doctor_profile import router as doctor_profile_router
+app.include_router(doctor_profile_router, prefix="/api")
+app.include_router(doctor_profile_router)
+from routers.doctor_verification import router as doctor_verification_router
+app.include_router(doctor_verification_router, prefix="/api")
+app.include_router(doctor_verification_router)

@@ -1,10 +1,11 @@
 from database import Base
-from sqlalchemy import Column, Boolean, Integer, String, DateTime, func, ForeignKey, Enum, Text
+from sqlalchemy import Column, Boolean, Integer, String, DateTime, func, ForeignKey, Enum, Text, Float, UniqueConstraint, CheckConstraint
 import enum
 import uuid
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import JSON
+from services.encryption import EncryptedString, EncryptedText
 
 class DocumentMetadata(Base):
     """
@@ -27,8 +28,10 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String, unique=True, index=True) # or email
     hashed_password = Column(String)
-    role = Column(String, default="patient") # patient, doctor, admin
+    role = Column(String, default="patient") # patient, doctor, admin, verifier
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    doctor = relationship("Doctor", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 
 class TriageSession(Base):
@@ -198,4 +201,153 @@ class Appointment(Base):
     triage_category = Column(String, default="Verde") # Rojo | Amarillo | Verde
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ==========================================================
+# MÓDULOS DE DOCTOR Y VERIFICACIÓN (DAHIANA INTEGRATION)
+# ==========================================================
+
+class Specialty(Base):
+    __tablename__ = "specialties"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), unique=True, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor_specialties = relationship("DoctorSpecialty", back_populates="specialty", cascade="all, delete-orphan")
+
+
+class Doctor(Base):
+    __tablename__ = "doctors"
+
+    __table_args__ = (
+        CheckConstraint("latitude IS NULL OR (latitude >= -90 AND latitude <= 90)", name="ck_doctors_latitude_range"),
+        CheckConstraint("longitude IS NULL OR (longitude >= -180 AND longitude <= 180)", name="ck_doctors_longitude_range"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+
+    # Datos personales (Cifrados con AES-256)
+    first_name = Column(EncryptedString(100), nullable=False)
+    last_name = Column(EncryptedString(100), nullable=False)
+    date_of_birth = Column(String, nullable=True)
+    residence_country = Column(String(100), nullable=True)
+    phone = Column(EncryptedString(30), nullable=True)
+
+    # Estado de la cuenta y verificación
+    is_active = Column(Boolean, default=True, nullable=False)
+    verification_status = Column(String(20), default="pending", nullable=False, index=True)
+
+    # Información y licencias profesionales
+    medical_license = Column(String(100), unique=True, nullable=False, index=True)
+    professional_registration_number = Column(String(100), nullable=True)
+    professional_college = Column(String(150), nullable=True)
+    college_country = Column(String(100), nullable=True)
+    specialty = Column(String(150), nullable=False, index=True)
+    subspecialties = Column(String(255), nullable=True)
+    years_of_experience = Column(Integer, nullable=True)
+    professional_description = Column(EncryptedText, nullable=True)
+    experience = Column(EncryptedText, nullable=True)
+    language = Column(String(10), default="es", nullable=False)
+
+    # Ubicación y contacto
+    consultation_phone = Column(EncryptedString(30), nullable=True)
+    website = Column(String(255), nullable=True)
+    address = Column(EncryptedString(255), nullable=True)
+    city = Column(String(100), nullable=True, index=True)
+    country = Column(String(100), nullable=True)
+    postal_code = Column(String(20), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
+
+    # URLs de documentos e identidad
+    identity_document_url = Column(EncryptedString(500), nullable=True)
+    professional_registration_certificate_url = Column(EncryptedString(500), nullable=True)
+    profile_picture_url = Column(EncryptedString(500), nullable=True)
+    presentation_video_url = Column(EncryptedString(500), nullable=True)
+
+    # Términos y políticas
+    data_policy_accepted = Column(Boolean, default=False, nullable=False)
+    data_policy_accepted_at = Column(DateTime(timezone=True), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relaciones
+    user = relationship("User", back_populates="doctor")
+    educations = relationship("DoctorEducation", back_populates="doctor", cascade="all, delete-orphan")
+    media = relationship("DoctorMedia", back_populates="doctor", cascade="all, delete-orphan")
+    doctor_specialties = relationship("DoctorSpecialty", back_populates="doctor", cascade="all, delete-orphan")
+    medical_verifications = relationship("MedicalVerification", back_populates="doctor", cascade="all, delete-orphan")
+
+
+class DoctorSpecialty(Base):
+    __tablename__ = "doctor_specialties"
+
+    __table_args__ = (
+        UniqueConstraint("doctor_id", "specialty_id", name="uq_doctor_specialty"),
+    )
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False, index=True)
+    specialty_id = Column(Integer, ForeignKey("specialties.id", ondelete="CASCADE"), nullable=False, index=True)
+    is_primary = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("Doctor", back_populates="doctor_specialties")
+    specialty = relationship("Specialty", back_populates="doctor_specialties")
+
+
+class DoctorEducation(Base):
+    __tablename__ = "doctor_educations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False, index=True)
+    institution = Column(EncryptedString(255), nullable=False)
+    degree = Column(EncryptedString(150), nullable=False)
+    field_of_study = Column(EncryptedString(150), nullable=True)
+    education_type = Column(String(50), nullable=True)
+    start_year = Column(Integer, nullable=True)
+    end_year = Column(Integer, nullable=True)
+    description = Column(EncryptedText, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("Doctor", back_populates="educations")
+
+
+class DoctorMedia(Base):
+    __tablename__ = "doctor_media"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False, index=True)
+    media_type = Column(String(50), nullable=False) # profile_picture, certificate, additional_document, gallery, video
+    file_url = Column(EncryptedString(500), nullable=False)
+    file_name = Column(EncryptedString(255), nullable=True)
+    mime_type = Column(String(100), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("Doctor", back_populates="media")
+
+
+class MedicalVerification(Base):
+    __tablename__ = "medical_verifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id", ondelete="CASCADE"), nullable=False, index=True)
+    verifier_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    notes = Column(Text, nullable=True)
+    status = Column(String(20), default="pending", nullable=False, index=True) # pending, verified, rejected
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("Doctor", back_populates="medical_verifications")
+    verifier = relationship("User", foreign_keys=[verifier_id])
 

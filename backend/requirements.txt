@@ -42,3 +42,5 @@ PyMuPDF==1.28.2
 reportlab==5.0.1
 alembic==1.19.1
 Mako==1.4.1
+cryptography==44.0.1
+cloudinary==1.42.2

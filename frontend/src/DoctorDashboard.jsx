@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
+import DoctorProfile from './views/DoctorProfile';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
 import MedicalSearchModal from './MedicalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
@@ -341,6 +342,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       />
     );
   }
+  if (doctorScreen === 'profile') {
+    return (
+      <DoctorProfile 
+        onBack={() => setDoctorScreen('home')} 
+        apiUrl={apiUrl} 
+        authHeaders={authHeaders} 
+        doctorProfile={doctorProfile} 
+      />
+    );
+  }
   if (doctorScreen === 'home') {
     return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
@@ -365,6 +376,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           </button>
           <button onClick={() => setDoctorScreen('agenda')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'agenda' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Mi Agenda">
             <Calendar className="w-6 h-6" />
+          </button>
+          <button onClick={() => setDoctorScreen('profile')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'profile' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('my_profile') || 'Mi Perfil'}>
+            <User className="w-6 h-6" />
           </button>
         </div>
 

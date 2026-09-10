@@ -16,6 +16,9 @@ import PatientChat from './views/PatientChat';
 import MedicalHistory from './views/MedicalHistory';
 import BottomNav from './components/BottomNav';
 import DoctorOnboarding from './views/DoctorOnboarding';
+import DoctorCreate from './views/DoctorCreate';
+import DoctorProfile from './views/DoctorProfile';
+import DoctorVerificationDetail from './views/VerificationDetail';
 import EmergencyPassportView from './views/EmergencyPassportView';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
@@ -944,7 +947,25 @@ ${text}`], {type: 'text/plain'});
   if (path === '/registro/medico') {
     return (
       <>
-        <DoctorOnboarding onNavigateLogin={() => navigate('/login')} />
+        <DoctorCreate apiUrl={API_URL} onNavigateLogin={() => navigate('/login')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
+  }
+
+  if (path === '/verificador' || path.startsWith('/verificacion')) {
+    return (
+      <>
+        <DoctorVerificationDetail apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </>
+    );
+  }
+
+  if (path === '/doctor/profile' || path === '/medico/perfil') {
+    return (
+      <>
+        <DoctorProfile apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(-1)} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
