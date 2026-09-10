@@ -21,8 +21,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Ensure entrypoint script has Unix line endings and is executable
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
 # Expose the port Railway will use (defaults to 8000 but Railway uses PORT env var)
 EXPOSE 8000
+ENV PORT=8000
 
-# Start Gunicorn with Uvicorn workers (Max 2 workers for Hobby Plan limits)
-CMD exec gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000} --timeout 60
+# Start Gunicorn with Uvicorn workers via entrypoint script
+CMD ["/bin/sh", "entrypoint.sh"]
