@@ -1048,6 +1048,7 @@ ${text}`], {type: 'text/plain'});
           savePatientProfile={savePatientProfile}
           sessions={sessions}
           onBack={() => navigate('/paciente')}
+          onLogout={handleLogout}
         />
         {GlobalBottomNav}
       </>

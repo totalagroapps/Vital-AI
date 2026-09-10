@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { 
   ShieldCheck, 
   ChevronRight, 
+  ChevronDown,
   ArrowRight, 
   Bell, 
   X,
-  MessageCircle,
-  Mail,
-  CheckCircle2,
-  Lock
+  MessageCircle, 
+  Mail, 
+  CheckCircle2, 
+  Lock,
+  LogOut,
+  User,
+  FileText
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -18,6 +22,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col justify-between font-sans select-none overflow-x-hidden">
@@ -85,27 +90,156 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
           </div>
 
-          {/* User Profile Avatar */}
-          <div 
-            onClick={() => onNavigate('history')}
-            className="w-8 h-8 lg:w-9 lg:h-9 rounded-full overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-[#1d63ed]/30 transition-all cursor-pointer"
-            title={userProfile?.full_name || username || "Mi cuenta"}
-          >
-            <img 
-              src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
-              alt="Perfil" 
-              className="w-full h-full object-cover" 
-            />
-          </div>
+          {/* User Profile Avatar & "Mi cuenta" Button with Dropdown */}
+          <div className="relative">
+            <div className="flex items-center gap-2.5">
+              {/* User Profile Avatar */}
+              <button 
+                type="button"
+                onClick={() => setShowUserMenu(prev => !prev)}
+                className="w-8 h-8 lg:w-9 lg:h-9 rounded-full overflow-hidden border border-slate-200 shadow-2xs hover:ring-2 hover:ring-[#1d63ed]/40 transition-all cursor-pointer focus:outline-none"
+                title={userProfile?.full_name || username || "Mi cuenta"}
+              >
+                <img 
+                  src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
+                  alt="Perfil" 
+                  className="w-full h-full object-cover" 
+                />
+              </button>
 
-          {/* "Mi cuenta" Button */}
-          <button 
-            onClick={() => onNavigate('history')}
-            className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-full shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <span>Mi cuenta</span>
-            <ArrowRight size={14} />
-          </button>
+              {/* "Mi cuenta" Button */}
+              <button 
+                type="button"
+                onClick={() => setShowUserMenu(prev => !prev)}
+                className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full shadow-xs flex items-center gap-1.5 transition-all cursor-pointer select-none"
+              >
+                <span>Mi cuenta</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <>
+                {/* Backdrop invisible para cerrar al hacer clic fuera */}
+                <div 
+                  className="fixed inset-0 z-40 cursor-default" 
+                  onClick={() => setShowUserMenu(false)} 
+                />
+
+                <div className="absolute right-0 top-full mt-2.5 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  {/* Tarjeta de Usuario */}
+                  <div className="p-3 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 rounded-xl border border-blue-100/60 mb-1.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0">
+                        <img 
+                          src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
+                          alt="Perfil" 
+                          className="w-full h-full object-cover" 
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                          {userProfile?.full_name || username || "Mi cuenta"}
+                        </p>
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {userProfile?.email || "Paciente"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Acciones de Cuenta */}
+                  <div className="space-y-0.5">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onNavigate('history');
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1d63ed] flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <User size={15} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Mi historial de salud</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">Ficha médica y antecedentes</span>
+                      </div>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        onNavigate('documents');
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <FileText size={15} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Mis pruebas y documentos</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">Informes y análisis con IA</span>
+                      </div>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowSecurityModal(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <ShieldCheck size={15} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Seguridad y privacidad</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">Cifrado y protección de datos</span>
+                      </div>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        setShowContactModal(true);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <MessageCircle size={15} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">Contacto y soporte</span>
+                        <span className="block text-[10px] text-slate-400 font-normal">Atención 24/7</span>
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Separador y Botón de Cerrar Sesión */}
+                  <div className="pt-2 mt-1.5 border-t border-slate-100">
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        if (onLogout) onLogout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200/60 transition-all text-left group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
+                        <LogOut size={15} />
+                      </div>
+                      <span>Cerrar sesión</span>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 

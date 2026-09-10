@@ -2,7 +2,8 @@ import React, { useState, useMemo } from "react";
 import { 
   ArrowLeft, ShieldCheck, ShieldAlert, Activity, Edit3, QrCode, 
   Droplet, Heart, Scale, Ruler, Pill, AlertTriangle, 
-  Calendar, Phone, Save, X, FileText, Share2, HeartHandshake, Shield
+  Calendar, Phone, Save, X, FileText, Share2, HeartHandshake, Shield,
+  LogOut
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
@@ -13,7 +14,8 @@ const MedicalHistory = ({
   setPatientProfile,
   savePatientProfile,
   onBack,
-  sessions
+  sessions,
+  onLogout
 }) => {
   const { t } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
@@ -579,6 +581,20 @@ const MedicalHistory = ({
                 <p className="text-sm text-gray-500">{t("no_previous_triages")}</p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Botón de Cerrar Sesión al final de la ficha médica */}
+        {onLogout && (
+          <div className="mt-8 pt-6 border-t border-slate-200/80 max-w-md mx-auto w-full">
+            <button 
+              type="button"
+              onClick={onLogout}
+              className="w-full py-3 px-4 rounded-2xl border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs hover:shadow-sm transition-all cursor-pointer"
+            >
+              <LogOut size={16} />
+              <span>{t("logout") || "Cerrar sesión"}</span>
+            </button>
           </div>
         )}
 
