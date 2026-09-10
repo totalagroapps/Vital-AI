@@ -254,6 +254,8 @@ export const en = {
     centralize_your_medical_information_and_have_everything_at_hand: "Centralize your medical information and have everything at hand.",
     medical_library_rag: "Medical Library RAG",
     search_in_clinical_studies_and_scientific_literature_with_ai: "Search in clinical studies and scientific literature with AI.",
+    latest_medical_advances: "Latest Medical Advances",
+    latest_medical_advances_desc: "Search the latest medical advances and evidence on any disease or treatment.",
     ask_vitalai: "Ask MIVOR.ai",
     ask_about_your_health_or_discover_the_latest_medical_and_scientific_advancements_on_any_disease: "Ask about your health or discover the latest medical and scientific advancements on any disease.",
     example_why_do_i_have_a_headache: "Ex.: why do I have a headache?",

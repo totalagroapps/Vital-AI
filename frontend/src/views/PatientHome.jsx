@@ -20,9 +20,6 @@ import {
   MessageCircle, 
   Mail, 
   LogOut, 
-  FileText, 
-  Clock, 
-  Pill, 
   Lock 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';

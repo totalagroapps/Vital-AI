@@ -126,68 +126,36 @@ async def on_startup():
     try:
         async with database.engine.begin() as conn:
             await conn.run_sync(models.Base.metadata.create_all)
-
-            # Auto-migración de columnas para PostgreSQL en producción (Railway)
-            needed_cols = [
-                ("license_number", "VARCHAR"),
-                ("experience_years", "INTEGER DEFAULT 0"),
-                ("city", "VARCHAR"),
-                ("location", "VARCHAR"),
-                ("languages", "VARCHAR"),
-                ("bio", "TEXT"),
-                ("verified", "BOOLEAN DEFAULT FALSE"),
-                ("is_verified", "BOOLEAN DEFAULT FALSE"),
-                ("availability_schedule", "JSON"),
-                ("photo_url", "VARCHAR"),
-                ("diploma_url", "VARCHAR"),
-                ("profile_pic_url", "VARCHAR"),
-                ("created_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP"),
-                ("updated_at", "TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP")
-            ]
-            is_sqlite = "sqlite" in str(database.POSTGRES_URL).lower()
-            for col_name, col_type in needed_cols:
-                try:
-                    sql = f"ALTER TABLE specialist_profiles ADD COLUMN {col_name} {col_type};" if is_sqlite else f"ALTER TABLE specialist_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"
-                    await conn.execute(text(sql))
-                except Exception as col_err:
-                    logger.debug(f"Col {col_name} migration note: {col_err}")
-
-            # Auto-migración para patient_profiles (Fila 3: Donante de órganos, notas críticas y seguro)
-            patient_cols = [
-                ("organ_donor", "VARCHAR DEFAULT 'No especificado'"),
-                ("medical_notes", "TEXT"),
-                ("insurance_provider", "VARCHAR")
-            ]
-            for col_name, col_type in patient_cols:
-                try:
-                    sql = f"ALTER TABLE patient_profiles ADD COLUMN {col_name} {col_type};" if is_sqlite else f"ALTER TABLE patient_profiles ADD COLUMN IF NOT EXISTS {col_name} {col_type};"
-                    await conn.execute(text(sql))
-                except Exception as col_err:
-                    logger.debug(f"Col {col_name} migration note: {col_err}")
-
         logger.info("Base metadata and tables verified.")
     except Exception as e:
         logger.warning(f"Error initializing DB tables on startup: {e}")
 
-    try:
-        from scripts.seed_demo_doctor import seed_data
-        async with database.AsyncSessionLocal() as session:
-            check_doc = await session.execute(select(models.User).where(models.User.username == 'doctor@mivor.ai'))
-            has_doc = check_doc.scalars().first() is not None
+    # Gating del seed de demo: solo en desarrollo o con flag explícito ENABLE_DEMO_SEED=true (Punto 2 & Punto 8)
+    env = os.environ.get("ENVIRONMENT", os.environ.get("RAILWAY_ENVIRONMENT", "development")).lower()
+    enable_demo_seed = os.environ.get("ENABLE_DEMO_SEED", "false").lower() in ("true", "1")
 
-            check_appts = await session.execute(select(models.Appointment))
-            appts_count = len(check_appts.scalars().all())
+    if env == "development" or enable_demo_seed:
+        try:
+            from scripts.seed_demo_doctor import seed_data
+            async with database.AsyncSessionLocal() as session:
+                check_doc = await session.execute(select(models.User).where(models.User.username == 'doctor@mivor.ai'))
+                has_doc = check_doc.scalars().first() is not None
 
-            check_patients = await session.execute(select(models.PatientProfile))
-            patients_count = len(check_patients.scalars().all())
+                check_appts = await session.execute(select(models.Appointment))
+                appts_count = len(check_appts.scalars().all())
 
-            logger.info(f"Startup DB state: doctor_exists={has_doc}, appointments={appts_count}, patient_profiles={patients_count}")
+                check_patients = await session.execute(select(models.PatientProfile))
+                patients_count = len(check_patients.scalars().all())
 
-            if not has_doc or appts_count < 5 or patients_count < 15:
-                logger.info("Demo data missing or incomplete, seeding demo doctor, patients and calendar...")
-                await seed_data()
-    except Exception as e:
-        logger.warning(f"Error seeding demo data on startup: {e}")
+                logger.info(f"Startup DB state: doctor_exists={has_doc}, appointments={appts_count}, patient_profiles={patients_count}")
+
+                if not has_doc or appts_count < 5 or patients_count < 15:
+                    logger.info("Demo data missing or incomplete, seeding demo doctor, patients and calendar...")
+                    await seed_data()
+        except Exception as e:
+            logger.warning(f"Error seeding demo data on startup: {e}")
+    else:
+        logger.info("Production environment: automatic demo seeding is disabled.")
 
 @app.get('/health')
 def health_check():
@@ -217,8 +185,26 @@ async def download_apk_file(filename: str):
     return RedirectResponse(url=github_release_url, status_code=302)
 
 
+# Lista explícita de orígenes permitidos para CORS (Punto 10)
+DEFAULT_ALLOWED_ORIGINS = [
+    "https://vitalai.up.railway.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "capacitor://localhost",
+    "https://localhost",
+    "http://localhost"
+]
+origins_env = os.getenv("ALLOWED_ORIGINS")
+allowed_origins = [o.strip() for o in origins_env.split(",") if o.strip()] if origins_env else DEFAULT_ALLOWED_ORIGINS
 
-app.add_middleware(CORSMiddleware, allow_origins=(os.getenv('ALLOWED_ORIGINS', '').split(',') if os.getenv('ALLOWED_ORIGINS') else ['*']), allow_credentials=False, allow_methods=['*'], allow_headers=['*'])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*']
+)
 
 
 from database import get_db

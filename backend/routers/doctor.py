@@ -1,154 +1,35 @@
 
-from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger
-
-
-from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
-
-
-from services.medical_search_service import MedicalSearchService
-
-
-from services.pubmed_service import PubMedService
-
-
-from services.clinical_trials_service import ClinicalTrialsService
-
-
-from services.cochrane_service import CochraneService
-
-
-import base64
-
-
-import io
-
-
-import logging
-
-
 import os
-
-
+import io
 import re
-
-
-import traceback
-
-
-from typing import Optional, List
-
-
-import asyncio
-
-
-from openai import AsyncOpenAI
-
-
-from PIL import Image
-
-
-import PyPDF2
-
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-
-
-from fastapi.responses import StreamingResponse
-
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-from pydantic import BaseModel
-
-
-import ollama
-
-
-from sqlalchemy import text
-
-
-import database
-
-
-import models
-
-
-import boto3
-
-
-from botocore.config import Config
-
-
-from botocore.exceptions import ClientError
-
-
+import json
+import logging
 import uuid
-
-
-from sqlalchemy import select, update
-
-
-from fastapi import Form
-
-
-from database import get_db
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from fastapi.security import OAuth2PasswordRequestForm
-
-
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-
-
-from sqlalchemy.future import select
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from database import get_db
-
-
-from sqlalchemy.future import select
-
-
-import qrcode
-
-
-import base64
-
-
-from io import BytesIO
-
-
-from pydantic import BaseModel
-
-
-from sqlalchemy.future import select
-
-
+from typing import Optional, List
 from datetime import datetime
 
-
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update
-from typing import List, Optional
-import os
-import base64
-import uuid
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from sqlalchemy.future import select
+from sqlalchemy import text, or_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import database
 import models
 import security
 from database import get_db
+from security import get_current_user, require_role, get_current_user_id
+
+from main import (
+    RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, 
+    TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate,
+    s3_client, R2_BUCKET_NAME, logger
+)
+from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
 
 router = APIRouter()
+
 
 
 @router.get('/api/doctor/me')
@@ -186,8 +67,8 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
                 Params={'Bucket': R2_BUCKET_NAME, 'Key': photo},
                 ExpiresIn=86400
             )
-        except Exception:
-            pass
+        except Exception as err:
+            logger.warning(f"Error generating presigned url for doctor profile: {err}")
 
     return {
         "user_id": profile.user_id,
@@ -204,35 +85,64 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
 
 
 @router.get('/api/doctor/patients')
-async def get_all_patients(db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
-    from sqlalchemy.future import select
-    result = (await db.execute(select(models.PatientProfile)))
+async def get_all_patients(
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(require_role("doctor", "admin"))
+):
+    """
+    Lista todos los pacientes y su triaje más reciente para el portal médico.
+    Restringido a rol doctor o admin. Solución a N+1 mediante consulta agrupada.
+    """
+    result = await db.execute(select(models.PatientProfile))
     patients = result.scalars().all()
+    if not patients:
+        return []
+
+    user_ids = [p.user_id for p in patients if p.user_id]
+    
+    # Solución al N+1: Consulta única de triajes para todos los pacientes
+    all_triages = []
+    if user_ids:
+        triage_stmt = select(models.TriageSession).where(
+            models.TriageSession.user_id.in_(user_ids)
+        ).order_by(models.TriageSession.created_at.desc())
+        triage_res = await db.execute(triage_stmt)
+        all_triages = triage_res.scalars().all()
+
+    # Mapeo en memoria del triaje más reciente por user_id
+    latest_triages = {}
+    for t in all_triages:
+        if t.user_id not in latest_triages:
+            latest_triages[t.user_id] = t
+
     response = []
     for p in patients:
-        triage_res = (await db.execute(select(models.TriageSession).where((models.TriageSession.user_id == p.user_id)).order_by(models.TriageSession.created_at.desc())))
-        latest_triage = triage_res.scalars().first()
+        latest_triage = latest_triages.get(p.user_id)
         category = 'Ninguno'
-        if (latest_triage and latest_triage.category):
+        if latest_triage and latest_triage.category:
             cat = latest_triage.category.lower()
-            if (('rojo' in cat) or ('emergencia' in cat) or ('resucitacion' in cat) or ('1' in cat) or ('2' in cat)):
+            if any(w in cat for w in ('rojo', 'emergencia', 'resucitacion', '1', '2')):
                 category = 'Rojo'
-            elif (('amarillo' in cat) or ('urgencia' in cat) or ('3' in cat)):
+            elif any(w in cat for w in ('amarillo', 'urgencia', '3')):
                 category = 'Amarillo'
-            elif (('verde' in cat) or ('azul' in cat) or ('4' in cat) or ('5' in cat)):
+            elif any(w in cat for w in ('verde', 'azul', '4', '5')):
                 category = 'Verde'
             else:
                 category = 'Amarillo'
-        response.append({'user_id': p.user_id, 'full_name': p.full_name, 'date_of_birth': p.date_of_birth, 'gender': p.gender, 'triage_category': category, 'triage_status': (latest_triage.status if latest_triage else 'Ninguno')})
+        response.append({
+            'user_id': p.user_id,
+            'full_name': p.full_name,
+            'date_of_birth': p.date_of_birth,
+            'gender': p.gender,
+            'triage_category': category,
+            'triage_status': latest_triage.status if latest_triage else 'Ninguno'
+        })
 
     def sort_key(p):
         cat = p['triage_category']
-        if (cat == 'Rojo'):
-            return 0
-        if (cat == 'Amarillo'):
-            return 1
-        if (cat == 'Verde'):
-            return 2
+        if cat == 'Rojo': return 0
+        if cat == 'Amarillo': return 1
+        if cat == 'Verde': return 2
         return 3
     response.sort(key=sort_key)
     return response
@@ -257,10 +167,10 @@ class AppointmentStatusUpdate(BaseModel):
     status: str
 
 @router.api_route('/api/doctor/seed-demo', methods=['GET', 'POST'])
-async def trigger_seed_demo():
+async def trigger_seed_demo(current_user: models.User = Depends(require_role("admin"))):
     """
-    Endpoint para poblar o actualizar la base de datos con el médico demo,
-    sus 15 pacientes completos con triajes y las 14 citas de la agenda médica.
+    Endpoint de administración para poblar la base de datos con datos demo.
+    Restringido estrictamente a administradores autenticados.
     """
     try:
         from scripts.seed_demo_doctor import seed_data
@@ -274,19 +184,20 @@ async def trigger_seed_demo():
 async def get_doctor_appointments(
     date: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
-    current_user_id: str = Depends(get_current_user_id)
+    current_user: models.User = Depends(require_role("doctor", "admin"))
 ):
-    from sqlalchemy.future import select
-    from sqlalchemy import or_
+    """
+    Lista las citas médicas. Los administradores pueden ver todas las citas;
+    los médicos únicamente ven las citas asignadas a su identificador o username.
+    """
+    stmt = select(models.Appointment)
+    if current_user.role != "admin":
+        allowed_doc_ids = [current_user.id, current_user.username]
+        # Compatibilidad con doctor demo oficial
+        if current_user.username in ("doctor@mivor.ai", "dr.mivor") or current_user.id in ("doc-alejandro-ruiz", "doc-alejandro-alias"):
+            allowed_doc_ids.extend(["doc-alejandro-ruiz", "doc-alejandro-alias", "doctor@mivor.ai", "all"])
+        stmt = stmt.where(models.Appointment.doctor_id.in_(allowed_doc_ids))
 
-    stmt = select(models.Appointment).where(
-        or_(
-            models.Appointment.doctor_id == current_user_id,
-            models.Appointment.doctor_id == 'doc-alejandro-ruiz',
-            models.Appointment.doctor_id == 'doctor@mivor.ai',
-            models.Appointment.doctor_id == 'all'
-        )
-    )
     if date:
         stmt = stmt.where(models.Appointment.appointment_date == date)
     stmt = stmt.order_by(models.Appointment.appointment_date.asc(), models.Appointment.appointment_time.asc())
@@ -320,10 +231,10 @@ async def get_doctor_appointments(
 async def create_doctor_appointment(
     req: AppointmentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user_id: str = Depends(get_current_user_id)
+    current_user: models.User = Depends(require_role("doctor", "admin"))
 ):
     appt = models.Appointment(
-        doctor_id=current_user_id,
+        doctor_id=current_user.id,
         patient_id=req.patient_id,
         patient_name=req.patient_name,
         patient_age=req.patient_age,
@@ -357,13 +268,21 @@ async def update_appointment_status(
     appointment_id: int,
     req: AppointmentStatusUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user_id: str = Depends(get_current_user_id)
+    current_user: models.User = Depends(require_role("doctor", "admin"))
 ):
-    from sqlalchemy.future import select
     result = await db.execute(select(models.Appointment).where(models.Appointment.id == appointment_id))
     appt = result.scalars().first()
     if not appt:
         raise HTTPException(status_code=404, detail="Cita no encontrada")
+
+    # Verificación estricta de propiedad/ownership de la cita
+    if current_user.role != "admin":
+        allowed_doc_ids = [current_user.id, current_user.username]
+        if current_user.username in ("doctor@mivor.ai", "dr.mivor") or current_user.id in ("doc-alejandro-ruiz", "doc-alejandro-alias"):
+            allowed_doc_ids.extend(["doc-alejandro-ruiz", "doc-alejandro-alias", "doctor@mivor.ai", "all"])
+        if appt.doctor_id not in allowed_doc_ids:
+            raise HTTPException(status_code=403, detail="No tienes autorización para modificar el estado de una cita ajena.")
+
     appt.status = req.status
     await db.commit()
     await db.refresh(appt)
@@ -404,11 +323,16 @@ async def match_referral(req: SmartReferralRequest, db: AsyncSession=Depends(get
     }
 
 @router.post('/api/doctor/ask')
-async def ask_doctor_copilot(request: DoctorQueryRequest, db: AsyncSession=Depends(get_db)):
+async def ask_doctor_copilot(
+    request: DoctorQueryRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(require_role("doctor", "admin"))
+):
     """
     Copiloto Clínico IA para Doctores (Fila 23).
     Responde preguntas sobre el paciente cruzando historial, triajes, medicamentos activos
     y analíticas/documentos con sus valores alterados.
+    Requiere autenticación y rol médico o administrador.
     """
     import json
     from sqlalchemy.future import select
@@ -512,7 +436,8 @@ Perfil Demográfico y Vitales:
                         else:
                             context_text += f'''  - Contenido: {d.extracted_text[:1200]}
 '''
-                    except Exception:
+                    except Exception as err:
+                        logger.warning(f"Error parsing document extracted_text JSON in copilot: {err}")
                         context_text += f'''  - Contenido: {d.extracted_text[:1200]}
 '''
         else:
@@ -578,8 +503,8 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
                     Params={'Bucket': R2_BUCKET_NAME, 'Key': photo},
                     ExpiresIn=86400
                 )
-            except Exception:
-                pass
+            except Exception as err:
+                logger.warning(f"Error generating presigned url for specialist directory: {err}")
 
         output.append({
             'id': s.id,

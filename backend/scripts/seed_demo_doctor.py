@@ -13,7 +13,13 @@ from security import get_password_hash
 from sqlalchemy.future import select
 
 async def seed_data():
-    print("[START] Iniciando creación de tablas y población de usuario médico demo MIVOR.ai...")
+    env = os.environ.get("ENVIRONMENT", os.environ.get("RAILWAY_ENVIRONMENT", "development")).lower()
+    enable_seed = os.environ.get("ENABLE_DEMO_SEED", "false").lower() in ("true", "1")
+    if env in ("production", "prod") and not enable_seed:
+        print("[SKIP] Demo seeding is disabled in production. Set ENABLE_DEMO_SEED=true to run.")
+        return
+
+    print("[START] Iniciando verificación y población de usuario médico demo MIVOR.ai...")
 
     # 1. Asegurar tablas creadas y columnas migradas
     async with database.engine.begin() as conn:
@@ -70,9 +76,9 @@ async def seed_data():
                 session.add(new_doc)
                 print(f"[DOCTOR] Usuario médico creado: {d_info['username']} (Password: {doctor_password})")
             else:
-                existing_doc.hashed_password = hashed_pw
                 existing_doc.role = "doctor"
-                print(f"[DOCTOR] Usuario médico actualizado: {d_info['username']}")
+                # SEGURIDAD (Punto 8): No sobreescribir la contraseña si el usuario ya existe
+                print(f"[DOCTOR] Usuario médico existente verificado: {d_info['username']} (password conservada)")
 
         await session.commit()
 

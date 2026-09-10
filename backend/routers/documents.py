@@ -1,154 +1,31 @@
-
-from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extract_text_from_pdf, scrub_phi
-
-
-from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
-from services.clinical_pdf_service import generate_clinical_pdf
-
-
-from services.medical_search_service import MedicalSearchService
-
-
-from services.pubmed_service import PubMedService
-
-
-from services.clinical_trials_service import ClinicalTrialsService
-
-
-from services.cochrane_service import CochraneService
-
-
 import base64
 import json
 import io
-
-
 import logging
-
-
 import os
-
-
 import re
-
-
-import traceback
-
-
+import uuid
 from typing import Optional, List
 
-
-import asyncio
-
-
-from openai import AsyncOpenAI
-
-
-from PIL import Image
-
-
 import PyPDF2
-
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-
-
-from fastapi.responses import StreamingResponse
-
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-from pydantic import BaseModel
-
-
-import ollama
-
-
-from sqlalchemy import text
-
-
-import database
-
-
-import models
-
-
-import boto3
-
-
-from botocore.config import Config
-
-
+from PIL import Image
 from botocore.exceptions import ClientError
-
-
-import uuid
-
-
-from sqlalchemy import select, update
-
-
-from fastapi import Form
-
-
-from database import get_db
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from fastapi.security import OAuth2PasswordRequestForm
-
-
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-
-
-from sqlalchemy.future import select
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from database import get_db
-
-
-from sqlalchemy.future import select
-
-
-import qrcode
-
-
-import base64
-
-
-from io import BytesIO
-
-
-from pydantic import BaseModel
-
-
-from sqlalchemy.future import select
-
-
-from datetime import datetime
-
-
+from openai import AsyncOpenAI
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-from typing import List, Optional
-import os
-import base64
-import uuid
 
 import database
 import models
 import security
 from database import get_db
+from security import get_current_user_id
+from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extract_text_from_pdf, scrub_phi
+from services.clinical_pdf_service import generate_clinical_pdf
 
 router = APIRouter()
+
 
 
 @router.post('/api/documents/upload')
@@ -630,7 +507,8 @@ Texto:
         payload_data = {}
         try:
             payload_data = json.loads(extracted_insights)
-        except:
+        except Exception as err:
+            logger.warning(f"Could not parse extracted_insights as JSON: {err}")
             payload_data = {'raw_insights': extracted_insights}
         new_event = models.HealthEvent(patient_id=patient.id, type=models.HealthEventType.document, payload=payload_data, source_ref_id=str(new_doc.id))
         db.add(new_event)
@@ -696,7 +574,8 @@ async def get_document_summary(document_id: str, db: AsyncSession=Depends(get_db
     if doc.extracted_text:
         try:
             payload_data = json.loads(doc.extracted_text)
-        except:
+        except Exception as err:
+            logger.warning(f"Could not parse doc.extracted_text as JSON: {err}")
             payload_data = {'resumen': doc.extracted_text}
     return {'id': doc.id, 'type': (doc.document_type.value if doc.document_type else 'otro'), 'filename': doc.original_filename, 'date': (doc.uploaded_at.isoformat() if doc.uploaded_at else None), 'summary': payload_data}
 
@@ -784,7 +663,8 @@ async def download_document_pdf(document_id: str, db: AsyncSession=Depends(get_d
                 if doc_med.extracted_text:
                     try:
                         payload = json.loads(doc_med.extracted_text)
-                    except Exception:
+                    except Exception as err:
+                        logger.warning(f"Could not parse doc_med.extracted_text as JSON in export_single_document_pdf: {err}")
                         payload = {"resumen": doc_med.extracted_text}
                 pdf_bytes = generate_clinical_pdf(payload, filename=doc_med.original_filename or "documento.pdf")
                 safe_fn = re.sub(r'[^a-zA-Z0-9_\.-]', '_', doc_med.original_filename or f"informe_{document_id}")
@@ -804,7 +684,8 @@ async def download_document_pdf(document_id: str, db: AsyncSession=Depends(get_d
     if doc.analysis_result:
         try:
             data = json.loads(doc.analysis_result)
-        except Exception:
+        except Exception as err:
+            logger.warning(f"Could not parse doc.analysis_result as JSON in export_single_document_pdf: {err}")
             data = {"resumen": doc.extracted_text or "Informe clínico procesado."}
     else:
         data = {"resumen": doc.extracted_text or "Informe clínico procesado."}

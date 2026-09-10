@@ -1,177 +1,64 @@
 
-from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger
-
-
-from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
-
-
-from services.medical_search_service import MedicalSearchService
-
-
-from services.pubmed_service import PubMedService
-
-
-from services.clinical_trials_service import ClinicalTrialsService
-
-
-from services.cochrane_service import CochraneService
-
-
-import base64
-
-
-import io
-
-
-import logging
-
-
 import os
-
-
-import re
-
-
-import traceback
-
-
+import io
+import time
+import base64
+import logging
+from collections import defaultdict
+from io import BytesIO
 from typing import Optional, List
 
-
-import asyncio
-
-
-from openai import AsyncOpenAI
-
-
-from PIL import Image
-
-
-import PyPDF2
-
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-
-
-from fastapi.responses import StreamingResponse
-
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-from pydantic import BaseModel
-
-
-import ollama
-
-
-from sqlalchemy import text
-
-
-import database
-
-
-import models
-
-
-import boto3
-
-
-from botocore.config import Config
-
-
-from botocore.exceptions import ClientError
-
-
-import uuid
-
-
-from sqlalchemy import select, update
-
-
-from fastapi import Form
-
-
-from database import get_db
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from fastapi.security import OAuth2PasswordRequestForm
-
-
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-
-
-from sqlalchemy.future import select
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from database import get_db
-
-
-from sqlalchemy.future import select
-
-
 import qrcode
-
-
-import base64
-
-
-from io import BytesIO
-
-
-from pydantic import BaseModel
-
-
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.future import select
-
-
-from datetime import datetime
-
-
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update
-from typing import List, Optional
-import os
-import base64
-import uuid
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import database
 import models
 import security
 from database import get_db
+from security import get_current_user, require_role, get_current_user_id
+from main import PatientProfileSchema, logger
 
 router = APIRouter()
 
+# Rate limiting en memoria por IP para la ficha pública de emergencia (Punto 6)
+_emergency_rate_limit_store = defaultdict(list)
+RATE_LIMIT_WINDOW_SECONDS = 60
+RATE_LIMIT_MAX_REQUESTS = 15
+
+def apply_emergency_rate_limit(client_ip: str):
+    now = time.time()
+    _emergency_rate_limit_store[client_ip] = [
+        t for t in _emergency_rate_limit_store[client_ip] if now - t < RATE_LIMIT_WINDOW_SECONDS
+    ]
+    if len(_emergency_rate_limit_store[client_ip]) >= RATE_LIMIT_MAX_REQUESTS:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Límite de solicitudes alcanzado para la ficha pública de emergencia. Por favor, espere 60 segundos.",
+            headers={"Retry-After": str(RATE_LIMIT_WINDOW_SECONDS)}
+        )
+    _emergency_rate_limit_store[client_ip].append(now)
+
 
 @router.get('/api/public/emergency/{patient_id}')
-async def get_public_emergency_profile(patient_id: str, db: AsyncSession = Depends(get_db)):
+async def get_public_emergency_profile(
+    patient_id: str,
+    request: Request,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Endpoint PÚBLICO para emergencias médicas, paramédicos y servicios de urgencia.
     Accesible escaneando la 'Chapa Militar' o Pasaporte QR de Salud MIVOR.ai.
-    No requiere autenticación.
+    Protegido con rate limiting por IP y consulta estricta por user_id (UUID) para evitar enumeración.
     """
-    from sqlalchemy.future import select
-    # 1. Búsqueda por user_id directo
+    client_ip = request.client.host if request.client else "unknown"
+    apply_emergency_rate_limit(client_ip)
+
+    # 1. Búsqueda estricta por user_id (UUID) sin permitir scraping por IDs secuenciales ni nombres
     stmt = select(models.PatientProfile).where(models.PatientProfile.user_id == patient_id)
     res = await db.execute(stmt)
     profile = res.scalars().first()
-
-    if not profile:
-        # Fallback a id numérico o por full_name
-        if patient_id.isdigit():
-            res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id)))
-            profile = res.scalars().first()
-        if not profile:
-            res = await db.execute(select(models.PatientProfile).where(models.PatientProfile.full_name == patient_id))
-            profile = res.scalars().first()
 
     if not profile:
         raise HTTPException(status_code=404, detail="Ficha médica de emergencia no encontrada.")
@@ -301,7 +188,11 @@ async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSe
 
 
 @router.get('/api/doctor/patients/{patient_id}')
-async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
+async def get_patient_detail(
+    patient_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(require_role("doctor", "admin"))
+):
     import json
     from sqlalchemy.future import select
     from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
@@ -484,18 +375,40 @@ async def get_patient_detail(patient_id: str, db: AsyncSession=Depends(get_db), 
 
 
 @router.get('/api/patients/{patient_id}/history')
-async def get_patient_history(patient_id: str, db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
-    actual_patient_id = (current_user_id if ((patient_id == 'me') or (patient_id == 'mock_user')) else patient_id)
-    stmt = select(models.PatientProfile).where(((models.PatientProfile.id == int(actual_patient_id)) if actual_patient_id.isdigit() else (models.PatientProfile.user_id == actual_patient_id)))
-    result = (await db.execute(stmt))
+async def get_patient_history(
+    patient_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    actual_patient_id = current_user.id if patient_id in ('me', 'mock_user') else patient_id
+    stmt = select(models.PatientProfile).where(
+        (models.PatientProfile.id == int(actual_patient_id)) if actual_patient_id.isdigit() else (models.PatientProfile.user_id == actual_patient_id)
+    )
+    result = await db.execute(stmt)
     patient = result.scalar_one_or_none()
-    if (not patient):
+    if not patient:
         raise HTTPException(status_code=404, detail='Patient not found.')
-    events_stmt = select(models.HealthEvent).where((models.HealthEvent.patient_id == patient.id)).order_by(models.HealthEvent.created_at.desc())
-    events_result = (await db.execute(events_stmt))
+
+    # Control de Autorización estricto (Prevención de IDOR / BOLA):
+    # Un paciente solo puede ver su propio historial clínico.
+    # Los médicos y administradores pueden acceder al historial de pacientes.
+    if current_user.role not in ("doctor", "admin") and patient.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso denegado: No tienes autorización para consultar el historial médico de otro paciente."
+        )
+
+    events_stmt = select(models.HealthEvent).where(models.HealthEvent.patient_id == patient.id).order_by(models.HealthEvent.created_at.desc())
+    events_result = await db.execute(events_stmt)
     events = events_result.scalars().all()
     response = []
     for event in events:
-        response.append({'id': event.id, 'type': event.type.value, 'created_at': (event.created_at.isoformat() if event.created_at else None), 'payload': (event.payload or {}), 'source_ref_id': event.source_ref_id})
+        response.append({
+            'id': event.id,
+            'type': event.type.value if hasattr(event.type, 'value') else str(event.type),
+            'created_at': event.created_at.isoformat() if event.created_at else None,
+            'payload': event.payload or {},
+            'source_ref_id': event.source_ref_id
+        })
     return response
 

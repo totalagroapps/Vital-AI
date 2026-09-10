@@ -1,154 +1,22 @@
-
-from main import RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate
-from main import s3_client, R2_BUCKET_NAME, logger
-
-
-from schemas_medical import MedicalSearchRequest, MedicalSearchResponse
-
-
-from services.medical_search_service import MedicalSearchService
-
-
-from services.pubmed_service import PubMedService
-
-
-from services.clinical_trials_service import ClinicalTrialsService
-
-
-from services.cochrane_service import CochraneService
-
-
-import base64
-
-
-import io
-
-
-import logging
-
-
 import os
-
-
 import re
-
-
-import traceback
-
-
+import uuid
+import logging
 from typing import Optional, List
 
-
-import asyncio
-
-
-from openai import AsyncOpenAI
-
-
-from PIL import Image
-
-
-import PyPDF2
-
-
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends
-
-
-from fastapi.responses import StreamingResponse
-
-
-from fastapi.middleware.cors import CORSMiddleware
-
-
-from pydantic import BaseModel
-
-
-import ollama
-
-
-from sqlalchemy import text
-
-
-import database
-
-
-import models
-
-
-import boto3
-
-
-from botocore.config import Config
-
-
-from botocore.exceptions import ClientError
-
-
-import uuid
-
-
-from sqlalchemy import select, update
-
-
-from fastapi import Form
-
-
-from database import get_db
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from fastapi.security import OAuth2PasswordRequestForm
-
-
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-
-
-from sqlalchemy.future import select
-
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-
-from database import get_db
-
-
-from sqlalchemy.future import select
-
-
-import qrcode
-
-
-import base64
-
-
-from io import BytesIO
-
-
-from pydantic import BaseModel
-
-
-from sqlalchemy.future import select
-
-
-from datetime import datetime
-
-
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from sqlalchemy.orm import Session
-from sqlalchemy import select, update
-from typing import List, Optional
-import os
-import base64
-import uuid
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 import database
 import models
-import security
 from database import get_db
+from security import verify_password, get_password_hash, create_access_token, get_current_user_id
+from main import RegisterRequest, s3_client, R2_BUCKET_NAME, logger
 
 router = APIRouter()
+
 
 
 @router.post('/api/auth/register')
@@ -191,8 +59,8 @@ async def register_doctor(
     
     try:
         exp_val = int(experience_years)
-    except:
-        import re
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Could not convert experience_years directly to int ('{experience_years}'): {e}")
         nums = re.findall(r'\d+', str(experience_years))
         exp_val = int(nums[0]) if nums else 0
 
