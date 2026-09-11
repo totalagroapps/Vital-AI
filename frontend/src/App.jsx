@@ -957,8 +957,13 @@ ${text}`], {type: 'text/plain'});
   if (path === '/verificador' || path.startsWith('/verificacion')) {
     if (!token) return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : '/')}>
-        <DoctorVerificationDetail apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(viewMode === 'doctor' ? '/medico' : '/')} />
+      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/verificador' : '/paciente'))}>
+        <DoctorVerificationDetail 
+          apiUrl={API_URL} 
+          authHeaders={authHeaders} 
+          onBack={() => navigate(viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/medico' : '/paciente'))} 
+          onLogout={handleLogout}
+        />
         <UpdateModal t={t} apiUrl={API_URL} />
       </ErrorBoundary>
     );
@@ -988,7 +993,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/login') {
-    if (token) return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
+    if (token) return <Navigate to={viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/verificador' : '/paciente')} />;
     return (
       <>
         <Auth 
@@ -998,7 +1003,7 @@ ${text}`], {type: 'text/plain'});
             if(role) { 
               setViewMode(role); 
               localStorage.setItem('med_role', role); 
-              navigate(role === 'doctor' ? '/medico' : '/paciente');
+              navigate(role === 'doctor' ? '/medico' : (role === 'verifier' ? '/verificador' : '/paciente'));
             } else {
               navigate('/paciente');
             }
@@ -1012,7 +1017,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path.startsWith('/medico')) {
-    if (viewMode !== 'doctor') return <Navigate to="/paciente" />;
+    if (viewMode !== 'doctor' && viewMode !== 'verifier') return <Navigate to="/paciente" />;
     return (
       <ErrorBoundary title="Portal Médico MIVOR.ai" onGoHome={() => navigate('/medico')}>
         <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />
@@ -1023,6 +1028,7 @@ ${text}`], {type: 'text/plain'});
 
   // If we reach here, we are in a patient route
   if (viewMode === 'doctor') return <Navigate to="/medico" />;
+  if (viewMode === 'verifier') return <Navigate to="/verificador" />;
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
     : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'treatments'

@@ -39,12 +39,21 @@ export const LanguageProvider = ({ children }) => {
     }
   };
 
-  const t = (key, params) => {
-    let str = translations[language]?.[key] || translations['es']?.[key] || key;
-    if (params && typeof str === 'string') {
-      Object.keys(params).forEach(k => {
-        str = str.replace(new RegExp(`{${k}}`, 'g'), params[k]);
-      });
+  const t = (key, paramsOrDefault) => {
+    const isDefaultString = typeof paramsOrDefault === 'string';
+    const fallback = isDefaultString ? paramsOrDefault : key;
+    let str = translations[language]?.[key] ?? translations['es']?.[key] ?? fallback;
+
+    if (!isDefaultString && paramsOrDefault && typeof paramsOrDefault === 'object' && typeof str === 'string') {
+      if (Array.isArray(paramsOrDefault)) {
+        paramsOrDefault.forEach((val, idx) => {
+          str = str.split(`{${idx}}`).join(val !== undefined && val !== null ? String(val) : '');
+        });
+      } else {
+        Object.keys(paramsOrDefault).forEach(k => {
+          str = str.split(`{${k}}`).join(paramsOrDefault[k] !== undefined && paramsOrDefault[k] !== null ? String(paramsOrDefault[k]) : '');
+        });
+      }
     }
     return str;
   };

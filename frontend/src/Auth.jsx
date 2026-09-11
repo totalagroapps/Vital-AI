@@ -1,11 +1,11 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
-import { Stethoscope, Lock, User, ArrowRight, HeartPulse, ChevronLeft, Sparkles, Activity } from 'lucide-react';
+import { Stethoscope, Lock, User, ArrowRight, HeartPulse, ChevronLeft, Sparkles, Activity, ShieldCheck } from 'lucide-react';
 
 export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
   const { t } = useLanguage();
-  const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | null
+  const [selectedRole, setSelectedRole] = useState(null); // 'doctor' | 'patient' | 'verifier' | null
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
@@ -20,7 +20,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
     try {
       let res;
       if (isRegistering) {
-        const payload = { username, password, role: selectedRole === 'doctor' ? 'doctor' : 'patient' };
+        const payload = { username, password, role: selectedRole === 'doctor' ? 'doctor' : (selectedRole === 'verifier' ? 'verifier' : 'patient') };
         res = await fetch(`${apiUrl}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -40,7 +40,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
       const data = await res.json();
 
       if (res.ok) {
-        const finalRole = (selectedRole === 'doctor' || selectedRole === 'patient') ? selectedRole : (data.role || 'patient');
+        const finalRole = selectedRole === 'verifier' ? 'verifier' : (data.role || selectedRole || 'patient');
         onLogin(data.token ? data.token : data.access_token, finalRole);
       } else {
         const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : t("auth_error"));
@@ -62,7 +62,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-brand-teal/20 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-brand-purple/20 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="w-full max-w-4xl relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="w-full max-w-5xl relative z-10 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="text-center mb-8 flex flex-col items-center">
             <div className="mb-4">
               <img 
@@ -81,18 +81,18 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             <p className="text-gray-500 mt-3 font-medium text-sm">{t("portal_select")}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-3xl px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl px-4">
             {/* Patient Card */}
             <button 
               onClick={() => setSelectedRole('patient')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-[32px] glass-card border border-white/60 bg-white/60 shadow-soft overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-brand-purple/30"
+              className="group relative flex flex-col items-center justify-center p-8 sm:p-10 rounded-[32px] glass-card border border-white/60 bg-white/60 shadow-soft overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-brand-purple/30"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-brand-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="w-20 h-20 rounded-3xl bg-brand-purple/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                 <HeartPulse className="w-10 h-10 text-brand-purple" />
               </div>
               <h2 className="text-2xl font-bold text-brand-dark mb-3">{t("i_am_patient")}</h2>
-              <p className="text-gray-500 text-sm text-center max-w-[250px] leading-relaxed">
+              <p className="text-gray-500 text-sm text-center max-w-[240px] leading-relaxed">
                 {t("patient_desc")}
               </p>
             </button>
@@ -100,15 +100,30 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             {/* Doctor Card */}
             <button 
               onClick={() => setSelectedRole('doctor')}
-              className="group relative flex flex-col items-center justify-center p-10 rounded-[32px] glass-card border border-white/60 bg-white/60 shadow-soft overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-brand-blue/30"
+              className="group relative flex flex-col items-center justify-center p-8 sm:p-10 rounded-[32px] glass-card border border-white/60 bg-white/60 shadow-soft overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-brand-blue/30"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="w-20 h-20 rounded-3xl bg-brand-blue/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
                 <Stethoscope className="w-10 h-10 text-brand-blue" />
               </div>
               <h2 className="text-2xl font-bold text-brand-dark mb-3">{t("i_am_doctor")}</h2>
-              <p className="text-gray-500 text-sm text-center max-w-[250px] leading-relaxed">
+              <p className="text-gray-500 text-sm text-center max-w-[240px] leading-relaxed">
                 {t("doctor_desc")}
+              </p>
+            </button>
+
+            {/* Verifier / Auditor Card */}
+            <button 
+              onClick={() => setSelectedRole('verifier')}
+              className="group relative flex flex-col items-center justify-center p-8 sm:p-10 rounded-[32px] glass-card border border-white/60 bg-white/60 shadow-soft overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:border-teal-500/30"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="w-20 h-20 rounded-3xl bg-teal-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                <ShieldCheck className="w-10 h-10 text-teal-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-brand-dark mb-3">{t("i_am_verifier", "Soy Verificador")}</h2>
+              <p className="text-gray-500 text-sm text-center max-w-[240px] leading-relaxed">
+                {t("verifier_desc", "Auditoría de credenciales y validación oficial de médicos.")}
               </p>
             </button>
           </div>
@@ -119,15 +134,17 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
 
   // 2. LOGIN / REGISTER SCREEN
   const isDoc = selectedRole === 'doctor';
+  const isVerifier = selectedRole === 'verifier';
   const theme = {
-    bgGradient: isDoc ? 'bg-brand-blue/10' : 'bg-brand-purple/10',
-    iconBg: isDoc ? 'bg-brand-blue/10 text-brand-blue' : 'bg-brand-purple/10 text-brand-purple',
-    iconGradient: isDoc ? 'from-brand-blue to-blue-500' : 'from-brand-purple to-brand-purpleLight',
-    shadow: isDoc ? 'shadow-blue-500/30' : 'shadow-glow',
-    focusRing: isDoc ? 'focus:border-brand-blue focus:ring-brand-blue/20' : 'focus:border-brand-purple focus:ring-brand-purple/20',
-    buttonClass: isDoc ? 'bg-brand-blue hover:bg-blue-600 text-white' : 'bg-brand-purple hover:bg-purple-600 text-white',
-    title: isDoc ? t("doctor_login_title") : t("patient_portal_title"),
-    Icon: isDoc ? Stethoscope : HeartPulse
+    bgGradient: isVerifier ? 'bg-teal-500/10' : (isDoc ? 'bg-brand-blue/10' : 'bg-brand-purple/10'),
+    iconBg: isVerifier ? 'bg-teal-500/10 text-teal-600' : (isDoc ? 'bg-brand-blue/10 text-brand-blue' : 'bg-brand-purple/10 text-brand-purple'),
+    iconGradient: isVerifier ? 'from-teal-600 to-emerald-500' : (isDoc ? 'from-brand-blue to-blue-500' : 'from-brand-purple to-brand-purpleLight'),
+    shadow: isVerifier ? 'shadow-teal-500/30' : (isDoc ? 'shadow-blue-500/30' : 'shadow-glow'),
+    focusRing: isVerifier ? 'focus:border-teal-600 focus:ring-teal-500/20' : (isDoc ? 'focus:border-brand-blue focus:ring-brand-blue/20' : 'focus:border-brand-purple focus:ring-brand-purple/20'),
+    buttonClass: isVerifier ? 'bg-teal-600 hover:bg-teal-700 text-white' : (isDoc ? 'bg-brand-blue hover:bg-blue-600 text-white' : 'bg-brand-purple hover:bg-purple-600 text-white'),
+    title: isVerifier ? t("verifier_login_title", "Portal de Verificación y Auditoría") : (isDoc ? t("doctor_login_title") : t("patient_portal_title")),
+    Icon: isVerifier ? ShieldCheck : (isDoc ? Stethoscope : HeartPulse),
+    placeholder: isVerifier ? t("verifier_placeholder", "ej. auditor_medico") : (isDoc ? t("doctor_placeholder") : t("patient_placeholder"))
   };
 
   return (
@@ -183,7 +200,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className={`w-full bg-white/80 border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-brand-dark font-medium focus:outline-none focus:ring-2 focus:bg-white transition-all placeholder:text-gray-400 placeholder:font-normal shadow-inner ${theme.focusRing}`}
-                  placeholder={isDoc ? t("doctor_placeholder") : t("patient_placeholder")}
+                  placeholder={theme.placeholder}
                 />
               </div>
             </div>
@@ -225,7 +242,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               onClick={() => {
                 if (isDoc && !isRegistering) { onNavigateDoctorRegister(); } else { setIsRegistering(!isRegistering); setError(''); }
               }}
-              className={`text-sm font-semibold transition-colors ${isDoc ? 'text-brand-blue hover:text-blue-700' : 'text-brand-purple hover:text-purple-700'}`}
+              className={`text-sm font-semibold transition-colors ${isDoc ? 'text-brand-blue hover:text-blue-700' : (isVerifier ? 'text-teal-600 hover:text-teal-700' : 'text-brand-purple hover:text-purple-700')}`}
             >
               {isRegistering 
                 ? t("already_have_account")

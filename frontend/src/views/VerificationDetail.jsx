@@ -18,12 +18,13 @@ import {
   Check,
   X,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }) {
+export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, onLogout }) {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRtl = language === 'ar';
@@ -60,79 +61,80 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
       const response = await fetch(`${baseApi}/doctor-verification/doctors?include_all=${showAll}`, {
         headers: getHeaders()
       });
-      if (!response.ok) {
-        throw new Error(t('could_not_load_data', 'Error al cargar la lista de médicos para verificación'));
-      }
-      const data = await response.json();
-      setDoctors(data || []);
-      if (data && data.length > 0) {
-        setSelectedDoctorId(data[0].id);
+      if (response.ok) {
+        const data = await response.json();
+        setDoctors(data);
+        if (data.length > 0 && !selectedDoctorId) {
+          setSelectedDoctorId(data[0].id);
+        }
       } else {
-        setSelectedDoctorId(null);
+        const err = await response.json().catch(() => ({}));
+        setError(err.detail || 'Error al cargar los médicos');
       }
     } catch (err) {
       console.error('Error fetching doctors for verification:', err);
-      setError(err.message);
+      setError('Error de conexión al obtener médicos');
     } finally {
       setLoading(false);
     }
   };
 
-  const doctor = (doctors || []).find((d) => d.id === selectedDoctorId) || doctors[0] || null;
+  const doctor = doctors.find((d) => d.id === selectedDoctorId) || doctors[0] || null;
 
-  const handleUpdateStatus = async (newStatus) => {
+  // Actualizar estado de verificación
+  const handleUpdateStatus = async (newStatus, notes = '') => {
     if (!doctor) return;
     setUpdating(true);
     try {
       const response = await fetch(`${baseApi}/doctor-verification/doctors/${doctor.id}/status`, {
         method: 'PATCH',
         headers: getHeaders(),
-        body: JSON.stringify({ verification_status: newStatus }),
+        body: JSON.stringify({
+          verification_status: newStatus,
+          verification_notes: notes || `Estado actualizado a ${newStatus} desde el panel oficial.`
+        })
       });
 
-      if (!response.ok) {
-        throw new Error(t('status_update_err', 'Error al actualizar el estado de verificación'));
+      if (response.ok) {
+        setDoctors((prev) =>
+          prev.map((d) => (d.id === doctor.id ? { ...d, verification_status: newStatus } : d))
+        );
+      } else {
+        const err = await response.json().catch(() => ({}));
+        alert(err.detail || 'Error al actualizar el estado del médico.');
       }
-
-      await response.json();
-      
-      // Actualizar estado local
-      setDoctors((prev) =>
-        prev.map((d) =>
-          d.id === doctor.id ? { ...d, verification_status: newStatus } : d
-        )
-      );
-
-      alert(t('status_updated_msg', 'El estado del médico se ha actualizado correctamente.'));
     } catch (err) {
-      console.error('Error al actualizar estado:', err);
-      alert(t('status_update_err', 'Error al actualizar el estado de verificación.'));
+      console.error('Error updating doctor status:', err);
+      alert('Error de conexión al actualizar el estado.');
     } finally {
       setUpdating(false);
     }
   };
 
   const getStatusBadge = (status) => {
-    const s = (status || '').toLowerCase();
-    if (s === 'verified' || s === 'verificado') {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-100">
-          <Check size={12} /> {t('status_verified', 'Verificado')}
-        </span>
-      );
+    switch (status) {
+      case 'verified':
+        return (
+          <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200">
+            <CheckCircle2 size={13} className="text-emerald-500" />
+            {t('status_verified', 'Verificado')}
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 border border-rose-200">
+            <XCircle size={13} className="text-rose-500" />
+            {t('status_rejected', 'Rechazado')}
+          </span>
+        );
+      default:
+        return (
+          <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 border border-amber-200">
+            <Clock size={13} className="text-amber-500" />
+            {t('status_pending', 'Pendiente de Revisión')}
+          </span>
+        );
     }
-    if (s === 'rejected' || s === 'rechazado') {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 border border-red-100">
-          <X size={12} /> {t('status_rejected', 'Rechazado')}
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-100">
-        <Clock size={12} /> {t('status_pending', 'Pendiente')}
-      </span>
-    );
   };
 
   const handleGoBack = () => {
@@ -176,33 +178,56 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
     );
   }
 
-  if (!loading && (!doctors || doctors.length === 0)) {
+  // Estado vacío amigable cuando no hay médicos
+  if (!loading && doctors.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-slate-600 gap-4 text-center" dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs border border-blue-100">
-          <ShieldCheck size={32} />
-        </div>
-        <h2 className="text-xl font-bold text-slate-800">{t('no_doctors_pending', 'No hay médicos para verificar')}</h2>
-        <p className="text-xs text-slate-500 max-w-md">
-          {includeAll 
-            ? 'Actualmente no hay médicos registrados en la base de datos.' 
-            : 'No hay médicos con solicitudes de verificación pendientes.'}
-        </p>
-        <div className="flex flex-wrap gap-3 mt-2">
-          {!includeAll && (
-            <button
-              onClick={() => setIncludeAll(true)}
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:bg-blue-700 transition-all cursor-pointer"
-            >
-              Ver todos los médicos
-            </button>
-          )}
-          <button
-            onClick={handleGoBack}
-            className="border border-slate-200 bg-white text-slate-700 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all cursor-pointer"
-          >
-            {t('return_home', 'Volver al inicio')}
-          </button>
+      <div className="min-h-screen bg-slate-50/50 pb-28 text-slate-800 font-sans antialiased" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <span className="font-semibold text-slate-600">{t('doctor_verification_title', 'Verificación de Médico')}</span>
+              <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
+              <span className="text-blue-600 font-semibold">{t('verification_panel', 'Panel de Verificación')}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <LanguageSelector />
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-1.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-xs font-semibold flex items-center gap-1 shadow-sm"
+                  title="Cerrar sesión"
+                >
+                  <LogOut size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-lg mx-auto mt-12">
+            <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck size={32} />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mb-2">No hay médicos para verificar</h2>
+            <p className="text-xs text-slate-500 mb-6">
+              Actualmente no se han encontrado solicitudes de verificación pendientes. Si deseas ver todos los registros registrados en la plataforma, puedes recargar la lista completa.
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={() => fetchDoctors(true)}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all"
+              >
+                Recargar todos los médicos
+              </button>
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all"
+                >
+                  Volver
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -235,13 +260,24 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
         
         {/* BREADCRUMBS, IDIOMA Y SELECTOR DE MÉDICO */}
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <nav className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="font-semibold text-slate-600">{t('doctor_verification_title', 'Verificación de Médico')}</span>
-            <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
-            <span>{t('verification_panel', 'Panel de Verificación')}</span>
-            <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
-            <span className="text-blue-600 font-semibold">{doctor ? `${doctor.first_name} ${doctor.last_name}` : t('details', 'Detalle')}</span>
-          </nav>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+              >
+                <ArrowLeft size={14} className={isRtl ? 'rotate-180' : ''} />
+                <span>{t('back', 'Volver')}</span>
+              </button>
+            )}
+            <nav className="flex items-center gap-2 text-xs text-slate-400">
+              <span className="font-semibold text-slate-600">{t('doctor_verification_title', 'Verificación de Médico')}</span>
+              <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
+              <span>{t('verification_panel', 'Panel de Verificación')}</span>
+              <ChevronRight size={12} className={isRtl ? 'rotate-180' : ''} />
+              <span className="text-blue-600 font-semibold">{doctor ? `${doctor.first_name} ${doctor.last_name}` : t('details', 'Detalle')}</span>
+            </nav>
+          </div>
 
           <div className="flex items-center gap-3">
             {/* Selector de Médico */}
@@ -262,6 +298,15 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
               </div>
             )}
             <LanguageSelector />
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="p-1.5 rounded-xl border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors text-xs font-semibold flex items-center gap-1 shadow-sm"
+                title="Cerrar sesión"
+              >
+                <LogOut size={14} />
+              </button>
+            )}
           </div>
         </div>
 
