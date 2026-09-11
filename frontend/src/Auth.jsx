@@ -40,7 +40,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
       const data = await res.json();
 
       if (res.ok) {
-        const finalRole = selectedRole === 'verifier' ? 'verifier' : (data.role || selectedRole || 'patient');
+        const finalRole = selectedRole || data.role || 'patient';
         onLogin(data.token ? data.token : data.access_token, finalRole);
       } else {
         const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : t("auth_error"));

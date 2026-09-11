@@ -345,6 +345,27 @@ export default function App() {
   }, [showDocuments]);
 
   const [viewMode, setViewMode] = useState(localStorage.getItem('med_role') || 'patient');
+
+  useEffect(() => {
+    const curPath = location.pathname;
+    if (curPath.startsWith('/medico')) {
+      if (viewMode !== 'doctor') {
+        setViewMode('doctor');
+        localStorage.setItem('med_role', 'doctor');
+      }
+    } else if (curPath.startsWith('/verificador')) {
+      if (viewMode !== 'verifier') {
+        setViewMode('verifier');
+        localStorage.setItem('med_role', 'verifier');
+      }
+    } else if (curPath.startsWith('/paciente')) {
+      if (viewMode !== 'patient') {
+        setViewMode('patient');
+        localStorage.setItem('med_role', 'patient');
+      }
+    }
+  }, [location.pathname]);
+
   const [showDoctorOnboarding, setShowDoctorOnboarding] = useState(false);
   const [patientProfile, setPatientProfile] = useState({
     full_name: '', date_of_birth: '', gender: '', blood_type: '', height: '', weight: '',
@@ -1022,7 +1043,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path.startsWith('/medico')) {
-    if (viewMode !== 'doctor') return <Navigate to="/login" />;
+    if (!token) return <Navigate to="/login" />;
     return (
       <ErrorBoundary title="Portal Médico MIVOR.ai" onGoHome={() => navigate('/medico')}>
         <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />
@@ -1032,8 +1053,6 @@ ${text}`], {type: 'text/plain'});
   }
 
   // If we reach here, we are in a patient route
-  if (viewMode === 'doctor') return <Navigate to="/medico" />;
-  if (viewMode === 'verifier') return <Navigate to="/verificador" />;
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
     : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'treatments'
