@@ -20,6 +20,7 @@ import DoctorCreate from './views/DoctorCreate';
 import DoctorProfile from './views/DoctorProfile';
 import DoctorVerificationDetail from './views/VerificationDetail';
 import EmergencyPassportView from './views/EmergencyPassportView';
+import ErrorBoundary from './components/ErrorBoundary';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
 import DoctorDirectoryModal from './components/DoctorDirectoryModal';
@@ -954,20 +955,22 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/verificador' || path.startsWith('/verificacion')) {
+    if (!token) return <Navigate to="/login" />;
     return (
-      <>
-        <DoctorVerificationDetail apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/')} />
+      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : '/')}>
+        <DoctorVerificationDetail apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(viewMode === 'doctor' ? '/medico' : '/')} />
         <UpdateModal t={t} apiUrl={API_URL} />
-      </>
+      </ErrorBoundary>
     );
   }
 
   if (path === '/doctor/profile' || path === '/medico/perfil') {
+    if (!token) return <Navigate to="/login" />;
     return (
-      <>
+      <ErrorBoundary title="Perfil Profesional Médico" onGoHome={() => navigate('/medico')}>
         <DoctorProfile apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(-1)} />
         <UpdateModal t={t} apiUrl={API_URL} />
-      </>
+      </ErrorBoundary>
     );
   }
 
@@ -1011,10 +1014,10 @@ ${text}`], {type: 'text/plain'});
   if (path.startsWith('/medico')) {
     if (viewMode !== 'doctor') return <Navigate to="/paciente" />;
     return (
-      <>
+      <ErrorBoundary title="Portal Médico MIVOR.ai" onGoHome={() => navigate('/medico')}>
         <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />
         <UpdateModal t={t} apiUrl={API_URL} />
-      </>
+      </ErrorBoundary>
     );
   }
 

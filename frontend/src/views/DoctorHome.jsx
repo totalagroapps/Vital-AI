@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight } from 'lucide-react';
+import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -207,6 +207,25 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
             </p>
           </div>
           <div className="w-6 h-6 rounded-full bg-brand-teal text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <ArrowRight size={14} />
+          </div>
+        </button>
+
+        {/* Card 6: Verificador de Médicos y Auditoría */}
+        <button onClick={() => onNavigate('verifier')} className="w-full bg-gradient-to-r from-teal-50/80 to-emerald-50/80 rounded-3xl p-5 text-left shadow-soft border border-teal-100/80 flex items-center hover:shadow-md transition-shadow group gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+            <ShieldCheck size={24} />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h3 className="font-bold text-gray-900 text-sm">{t("doctor_verification_title", "Verificación Médica")}</h3>
+              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 uppercase tracking-wide">Auditoría</span>
+            </div>
+            <p className="text-[10px] text-gray-600 leading-relaxed">
+              Validar credenciales profesionales, licencias médicas y colegiados oficiales.
+            </p>
+          </div>
+          <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <ArrowRight size={14} />
           </div>
         </button>

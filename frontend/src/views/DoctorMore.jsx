@@ -18,6 +18,7 @@ const DoctorMore = ({ onNavigate, onLogout }) => {
       title: t('my_medical_practice'),
       items: [
         { icon: <Stethoscope size={20} />, title: t('my_office'), desc: t('manage_professional_info'), action: () => onNavigate('profile'), color: 'text-blue-500', bg: 'bg-blue-50' },
+        { icon: <ShieldCheck size={20} />, title: 'Verificación Médica y Auditoría', desc: 'Panel de validación de colegiados y credenciales', action: () => onNavigate('verifier'), color: 'text-teal-600', bg: 'bg-teal-50' },
         { icon: <Activity size={20} />, title: t('clinical_statistics'), desc: t('performance_and_reports'), action: () => handleFeature(t('clinical_statistics')), color: 'text-green-500', bg: 'bg-green-50' }
       ]
     },

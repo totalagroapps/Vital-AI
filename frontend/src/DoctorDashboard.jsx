@@ -3,6 +3,7 @@ import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
 import DoctorProfile from './views/DoctorProfile';
+import DoctorVerificationDetail from './views/VerificationDetail';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
 import MedicalSearchModal from './MedicalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
@@ -352,6 +353,15 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       />
     );
   }
+  if (doctorScreen === 'verifier') {
+    return (
+      <DoctorVerificationDetail 
+        apiUrl={apiUrl} 
+        authHeaders={authHeaders} 
+        onBack={() => setDoctorScreen('home')} 
+      />
+    );
+  }
   if (doctorScreen === 'home') {
     return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
@@ -379,6 +389,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           </button>
           <button onClick={() => setDoctorScreen('profile')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'profile' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('my_profile') || 'Mi Perfil'}>
             <User className="w-6 h-6" />
+          </button>
+          <button onClick={() => setDoctorScreen('verifier')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'verifier' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Verificación Médica y Auditoría">
+            <ShieldCheck className="w-6 h-6" />
           </button>
         </div>
 
@@ -430,12 +443,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               >
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ` + 
                   (selectedPatient?.user_id === p.user_id ? 'bg-white/20 text-white' : 'bg-brand-teal/10 text-brand-teal')}>
-                  {(p.full_name || 'P').charAt(0).toUpperCase()}
+                  {String(p.full_name || 'P').charAt(0).toUpperCase()}
                 </div>
                 <div className="overflow-hidden flex-1">
                   <div className="font-semibold text-sm truncate">{p.full_name || 'Paciente'}</div>
                   <div className={`text-[11px] truncate ` + (selectedPatient?.user_id === p.user_id ? 'text-teal-100' : 'text-gray-400')}>
-                    ID: {(p.user_id || '').split('-')[0]}
+                    ID: {String(p.user_id || '').split('-')[0]}
                   </div>
                 </div>
               </button>
@@ -547,13 +560,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     </div>
 
                     <span className={`self-start sm:self-auto px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${
-                      patientDetail.smart_referral.urgency === 'alta'
+                      patientDetail.smart_referral?.urgency === 'alta'
                         ? 'bg-red-100 text-red-700 border-red-200 animate-pulse'
-                        : patientDetail.smart_referral.urgency === 'media'
+                        : patientDetail.smart_referral?.urgency === 'media'
                         ? 'bg-amber-100 text-amber-800 border-amber-200'
                         : 'bg-teal-100 text-teal-700 border-teal-200'
                     }`}>
-                      Prioridad {patientDetail.smart_referral.urgency}
+                      Prioridad {patientDetail.smart_referral?.urgency || 'Normal'}
                     </span>
                   </div>
 
@@ -563,13 +576,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                       Especialidad Sugerida:
                     </div>
                     <div className="text-lg font-extrabold text-brand-dark mb-2">
-                      {patientDetail.smart_referral.recommended_specialty}
+                      {patientDetail.smart_referral?.recommended_specialty || 'Especialidad'}
                     </div>
                     <p className="text-xs text-gray-700 leading-relaxed">
-                      {patientDetail.smart_referral.reason}
+                      {patientDetail.smart_referral?.reason || ''}
                     </p>
 
-                    {patientDetail.smart_referral.matched_keywords?.length > 0 && (
+                    {patientDetail.smart_referral?.matched_keywords?.length > 0 && (
                       <div className="mt-3 pt-2.5 border-t border-gray-100 flex flex-wrap items-center gap-1.5">
                         <span className="text-[11px] font-semibold text-gray-400">Marcadores detectados:</span>
                         {patientDetail.smart_referral.matched_keywords.map((kw, i) => (
@@ -582,26 +595,26 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   </div>
 
                   {/* Available Specialists in Clinic */}
-                  {patientDetail.smart_referral.available_specialists?.length > 0 && (
+                  {patientDetail.smart_referral?.available_specialists?.length > 0 && (
                     <div>
                       <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-brand-teal" />
                         Especialistas Disponibles en Cuadro Médico:
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {patientDetail.smart_referral.available_specialists.map(spec => (
-                          <div key={spec.id} className="bg-white rounded-2xl p-3.5 border border-teal-100 shadow-xs flex items-center justify-between gap-3">
+                        {patientDetail.smart_referral.available_specialists.map((spec, idx) => (
+                          <div key={spec.id || idx} className="bg-white rounded-2xl p-3.5 border border-teal-100 shadow-xs flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
                                 <img 
-                                  src={spec.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(spec.full_name)}&background=0D8ABC&color=fff`} 
-                                  alt={spec.full_name}
+                                  src={spec.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(spec.full_name || 'Especialista')}&background=0D8ABC&color=fff`} 
+                                  alt={spec.full_name || 'Especialista'}
                                   className="w-full h-full object-cover" 
                                 />
                               </div>
                               <div className="overflow-hidden">
-                                <h5 className="text-xs font-bold text-gray-900 truncate">{spec.full_name}</h5>
-                                <p className="text-[11px] text-brand-teal font-medium truncate">{spec.specialty}</p>
+                                <h5 className="text-xs font-bold text-gray-900 truncate">{spec.full_name || 'Especialista'}</h5>
+                                <p className="text-[11px] text-brand-teal font-medium truncate">{spec.specialty || 'Especialidad'}</p>
                                 {spec.city && <p className="text-[10px] text-gray-400 truncate">{spec.city}</p>}
                               </div>
                             </div>
@@ -630,18 +643,18 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     Tratamiento Farmacológico Activo
                   </h3>
                   <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-brand-teal border border-teal-100">
-                    {(patientDetail?.medications || []).length} pautados
+                    {(Array.isArray(patientDetail?.medications) ? patientDetail.medications : []).length} pautados
                   </span>
                 </div>
 
-                {(patientDetail?.medications || []).length === 0 ? (
+                {(!Array.isArray(patientDetail?.medications) || patientDetail.medications.length === 0) ? (
                   <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-sm text-gray-500 shadow-xs">
                     El paciente no tiene recordatorios o tratamientos farmacológicos activos registrados en la plataforma.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {patientDetail.medications.map(med => (
-                      <div key={med.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                    {patientDetail.medications.map((med, idx) => (
+                      <div key={med.id || idx} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                         <div>
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="w-8 h-8 rounded-xl bg-teal-50 text-brand-teal flex items-center justify-center shrink-0">
@@ -651,7 +664,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               {med.is_active ? 'Activo' : 'Pausado'}
                             </span>
                           </div>
-                          <h4 className="font-bold text-gray-900 text-sm mb-1">{med.medication_name}</h4>
+                          <h4 className="font-bold text-gray-900 text-sm mb-1">{med.medication_name || 'Medicamento'}</h4>
                           <p className="text-xs text-gray-600">
                             <strong>Dosis:</strong> {med.dosage || 'No especificada'}
                           </p>
@@ -700,7 +713,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                             </span>
                           </div>
                           <div className="prose prose-sm max-w-none prose-p:leading-relaxed text-gray-700 prose-strong:text-gray-900">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{triageItem.final_report || t('incomplete_triage')}</ReactMarkdown>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{String(triageItem.final_report || t('incomplete_triage') || '')}</ReactMarkdown>
                           </div>
                         </div>
                       ))
@@ -849,7 +862,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm'
                 }`}>
                   <div className={`prose prose-sm max-w-none prose-p:leading-relaxed ${msg.role === 'user' ? 'text-white' : 'text-gray-700'}`}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{String(msg.content || '')}</ReactMarkdown>
                   </div>
                 </div>
               </div>

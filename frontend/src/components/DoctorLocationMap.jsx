@@ -6,6 +6,7 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import { MapPin, Navigation, Search, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import ErrorBoundary from './ErrorBoundary';
 
 // Configuración de iconos de Leaflet para evitar problemas de assets en Vite
 const customMarkerIcon = L.icon({
@@ -37,7 +38,13 @@ function MapViewUpdater({ center, zoom }) {
   useEffect(() => {
     // Invalidate size para asegurar que Leaflet dibuje correctamente las tiles
     const timer = setTimeout(() => {
-      map.invalidateSize();
+      try {
+        if (map && typeof map.invalidateSize === 'function') {
+          map.invalidateSize();
+        }
+      } catch (e) {
+        console.warn('Leaflet invalidateSize error:', e);
+      }
     }, 150);
 
     return () => clearTimeout(timer);
@@ -45,7 +52,14 @@ function MapViewUpdater({ center, zoom }) {
 
   useEffect(() => {
     if (center && !isNaN(center[0]) && !isNaN(center[1])) {
-      map.flyTo(center, zoom || map.getZoom(), { duration: 1.0 });
+      try {
+        if (map && typeof map.flyTo === 'function') {
+          const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : 13;
+          map.flyTo(center, zoom || currentZoom, { duration: 1.0 });
+        }
+      } catch (e) {
+        console.warn('Leaflet flyTo error:', e);
+      }
     }
   }, [center, zoom, map]);
 
@@ -76,10 +90,11 @@ export default function DoctorLocationMap({
 
   // Centro por defecto según país
   const defaultCenter = useMemo(() => {
-    if (country?.toLowerCase().includes('españa') || country?.toLowerCase().includes('spain')) {
+    const c = typeof country === 'string' ? country.toLowerCase() : '';
+    if (c.includes('españa') || c.includes('spain')) {
       return [40.4168, -3.7038]; // Madrid
     }
-    if (country?.toLowerCase().includes('méxico') || country?.toLowerCase().includes('mexico')) {
+    if (c.includes('méxico') || c.includes('mexico')) {
       return [19.4326, -99.1332]; // CDMX
     }
     return [4.7110, -74.0721]; // Bogotá
@@ -317,44 +332,61 @@ export default function DoctorLocationMap({
 
       {/* Contenedor del Mapa Leaflet */}
       <div className="relative w-full" style={{ height, minHeight: '260px' }}>
-        <MapContainer
-          center={mapCenter}
-          zoom={mapZoom}
-          scrollWheelZoom={!readOnly}
-          style={{ height: '100%', width: '100%', zIndex: 10 }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          <MapViewUpdater center={mapCenter} zoom={hasCoordinates ? 15 : 12} />
-
-          <MapClickHandler onLocationSelect={handleMapClick} disabled={readOnly} />
-
-          {hasCoordinates && (
-            <Marker
-              ref={markerRef}
-              position={[currentLat, currentLng]}
-              icon={customMarkerIcon}
-              draggable={!readOnly}
-              eventHandlers={{
-                dragend: handleMarkerDragEnd
-              }}
+        <ErrorBoundary fallback={(err, reset) => (
+          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 p-4 text-center rounded-xl border border-slate-200">
+            <AlertCircle size={24} className="text-amber-500 mb-2" />
+            <p className="text-xs font-bold text-slate-700">No se pudo cargar el mapa interactivo</p>
+            <p className="text-[11px] text-slate-500 mt-1 max-w-xs">
+              {hasCoordinates ? `Coordenadas: Lat ${currentLat?.toFixed(4)}, Lng ${currentLng?.toFixed(4)}` : 'Dirección guardada correctamente.'}
+            </p>
+            <button
+              type="button"
+              onClick={reset}
+              className="mt-3 px-3 py-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs"
             >
-              <Popup>
-                <div className="text-xs space-y-1">
-                  <p className="font-bold text-slate-800">
-                    {address || city ? `${address} ${city ? `(${city})` : ''}` : 'Ubicación del Consultorio'}
-                  </p>
-                  <p className="text-[10px] text-slate-500">
-                    Lat: {currentLat.toFixed(5)}, Lng: {currentLng.toFixed(5)}
-                  </p>
-                </div>
-              </Popup>
-            </Marker>
-          )}
-        </MapContainer>
+              Reintentar mapa
+            </button>
+          </div>
+        )}>
+          <MapContainer
+            center={mapCenter}
+            zoom={mapZoom}
+            scrollWheelZoom={!readOnly}
+            style={{ height: '100%', width: '100%', zIndex: 10 }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            <MapViewUpdater center={mapCenter} zoom={hasCoordinates ? 15 : 12} />
+
+            <MapClickHandler onLocationSelect={handleMapClick} disabled={readOnly} />
+
+            {hasCoordinates && (
+              <Marker
+                ref={markerRef}
+                position={[currentLat, currentLng]}
+                icon={customMarkerIcon}
+                draggable={!readOnly}
+                eventHandlers={{
+                  dragend: handleMarkerDragEnd
+                }}
+              >
+                <Popup>
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-slate-800">
+                      {address || city ? `${address} ${city ? `(${city})` : ''}` : 'Ubicación del Consultorio'}
+                    </p>
+                    <p className="text-[10px] text-slate-500">
+                      Lat: {currentLat.toFixed(5)}, Lng: {currentLng.toFixed(5)}
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            )}
+          </MapContainer>
+        </ErrorBoundary>
 
         {/* Loading overlay cuando se busca */}
         {searching && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Calendar, Sparkles, BookOpen, Search, Mic, ArrowRight, 
-  Bell, ChevronDown, LogOut 
+  Bell, ChevronDown, LogOut, ShieldCheck 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -124,6 +124,14 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             Últimos Avances
           </button>
           <button 
+            onClick={() => onNavigate('verifier')} 
+            className="text-gray-600 hover:text-brand-purple transition-colors pb-1 flex items-center gap-1"
+            title="Panel de Verificación Médica y Auditoría"
+          >
+            <ShieldCheck size={14} className="text-teal-600" />
+            Verificador
+          </button>
+          <button 
             onClick={() => onNavigate('more')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1 flex items-center gap-1"
           >
@@ -183,6 +191,13 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                     className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors"
                   >
                     {t('view_doctor_profile', 'Ver Perfil Médico')}
+                  </button>
+                  <button 
+                    onClick={() => { setShowProfileMenu(false); onNavigate('verifier'); }}
+                    className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                  >
+                    <ShieldCheck size={13} className="text-teal-600" />
+                    {t('doctor_verification_title', 'Verificación Médica')}
                   </button>
                   <button 
                     onClick={onLogout}

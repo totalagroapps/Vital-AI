@@ -36,7 +36,9 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
 
-  const API_URL = apiUrl || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
+  const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? window.location.origin : 'https://vitalai.up.railway.app');
+  const cleanApiUrl = effectiveApiUrl.replace(/\/$/, '');
+  const baseApi = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;
 
   const getHeaders = () => {
     const token = localStorage.getItem('med_token') || localStorage.getItem('token');
@@ -55,15 +57,15 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/doctor-verification/doctors?include_all=${showAll}`, {
+      const response = await fetch(`${baseApi}/doctor-verification/doctors?include_all=${showAll}`, {
         headers: getHeaders()
       });
       if (!response.ok) {
         throw new Error(t('could_not_load_data', 'Error al cargar la lista de médicos para verificación'));
       }
       const data = await response.json();
-      setDoctors(data);
-      if (data.length > 0) {
+      setDoctors(data || []);
+      if (data && data.length > 0) {
         setSelectedDoctorId(data[0].id);
       } else {
         setSelectedDoctorId(null);
@@ -76,13 +78,13 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
     }
   };
 
-  const doctor = doctors.find((d) => d.id === selectedDoctorId) || doctors[0];
+  const doctor = (doctors || []).find((d) => d.id === selectedDoctorId) || doctors[0] || null;
 
   const handleUpdateStatus = async (newStatus) => {
     if (!doctor) return;
     setUpdating(true);
     try {
-      const response = await fetch(`${API_URL}/doctor-verification/doctors/${doctor.id}/status`, {
+      const response = await fetch(`${baseApi}/doctor-verification/doctors/${doctor.id}/status`, {
         method: 'PATCH',
         headers: getHeaders(),
         body: JSON.stringify({ verification_status: newStatus }),
@@ -137,7 +139,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
     if (onBack) {
       onBack();
     } else {
-      navigate('/');
+      navigate('/medico');
     }
   };
 
@@ -163,6 +165,38 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack }
           >
             {t('retry', 'Reintentar')}
           </button>
+          <button
+            onClick={handleGoBack}
+            className="border border-slate-200 bg-white text-slate-700 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all cursor-pointer"
+          >
+            {t('return_home', 'Volver al inicio')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && (!doctors || doctors.length === 0)) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-slate-600 gap-4 text-center" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="w-16 h-16 rounded-3xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs border border-blue-100">
+          <ShieldCheck size={32} />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800">{t('no_doctors_pending', 'No hay médicos para verificar')}</h2>
+        <p className="text-xs text-slate-500 max-w-md">
+          {includeAll 
+            ? 'Actualmente no hay médicos registrados en la base de datos.' 
+            : 'No hay médicos con solicitudes de verificación pendientes.'}
+        </p>
+        <div className="flex flex-wrap gap-3 mt-2">
+          {!includeAll && (
+            <button
+              onClick={() => setIncludeAll(true)}
+              className="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md hover:bg-blue-700 transition-all cursor-pointer"
+            >
+              Ver todos los médicos
+            </button>
+          )}
           <button
             onClick={handleGoBack}
             className="border border-slate-200 bg-white text-slate-700 px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all cursor-pointer"
