@@ -58,7 +58,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
       
       {/* 1. TOP NAVBAR */}
       <header className="w-full shrink-0 border-b border-slate-100/90 bg-white/95 backdrop-blur-xs z-40">
-        <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex items-center justify-between">
+        <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-28 py-2.5 lg:py-3.5 flex items-center justify-between">
           {/* Brand Logo */}
           <div 
             className="flex items-center cursor-pointer group shrink-0" 
@@ -67,17 +67,17 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <img 
               src="/images/mivor_nav_logo.png" 
               alt="MIVOR.ai - Better Health. Brighter Lives." 
-              className="h-7 lg:h-8 w-auto object-contain transition-transform" 
+              className="h-7 sm:h-7.5 lg:h-8 xl:h-8.5 w-auto object-contain transition-transform" 
               onError={(e) => { e.target.src = '/logo.png'; }}
             />
           </div>
 
           {/* Center Nav Links: Inicio, Sobre MIVOR.ai, Cómo funciona, Contacto */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-9">
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-10">
             {/* Inicio con barra indicadora activa */}
             <button 
               onClick={() => onNavigate('home')} 
-              className="text-xs lg:text-[13px] font-semibold text-[#005dff] transition-colors py-1 cursor-pointer relative flex flex-col items-center"
+              className="text-xs lg:text-[13.5px] xl:text-[14.5px] font-semibold text-[#005dff] transition-colors py-1 cursor-pointer relative flex flex-col items-center"
             >
               <span>{t('patient_nav_home') || 'Inicio'}</span>
               <span className="absolute -bottom-1 w-full h-[2.2px] bg-[#005dff] rounded-full" />
@@ -85,21 +85,21 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             
             <button 
               onClick={() => setShowAboutModal(true)} 
-              className="text-xs lg:text-[13px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
+              className="text-xs lg:text-[13.5px] xl:text-[14.5px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
             >
               {t('patient_nav_about') || 'Sobre MIVOR.ai'}
             </button>
             
             <button 
               onClick={() => setShowHowModal(true)} 
-              className="text-xs lg:text-[13px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
+              className="text-xs lg:text-[13.5px] xl:text-[14.5px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
             >
               {t('patient_nav_how') || 'Cómo funciona'}
             </button>
 
             <button 
               onClick={() => setShowContactModal(true)} 
-              className="text-xs lg:text-[13px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
+              className="text-xs lg:text-[13.5px] xl:text-[14.5px] font-medium text-slate-800 hover:text-[#005dff] transition-colors py-1 cursor-pointer"
             >
               {t('patient_nav_contact') || 'Contacto'}
             </button>
@@ -265,11 +265,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           }}
         />
 
-        <div className="max-w-[1120px] mx-auto w-full px-5 lg:px-8 flex items-center justify-between gap-4 relative z-10">
+        <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-28 flex items-center justify-between gap-6 lg:gap-10 xl:gap-14 2xl:gap-20 relative z-10">
           
           {/* Columna Izquierda: Titular H1 + Tarjeta de Confianza */}
-          <div className="w-[36%] max-w-[360px] flex flex-col justify-center">
-            <h1 className="text-[26px] sm:text-[28px] lg:text-[32px] xl:text-[35px] font-black text-slate-950 leading-[1.08] tracking-tight mb-2.5 lg:mb-3">
+          <div className="w-[34%] max-w-[420px] lg:max-w-[480px] xl:max-w-[540px] flex flex-col justify-center shrink-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-[46px] 2xl:text-[54px] font-black text-slate-950 leading-[1.08] tracking-tight mb-3 lg:mb-4 xl:mb-5">
               {t('hero_title_p1') || 'Tu salud,'}<br />
               {t('hero_title_p2') || 'en manos de la'}<br />
               <span className="text-[#005dff]">
@@ -281,16 +281,16 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             {/* Tarjeta de Confianza */}
             <div 
               onClick={() => setShowSecurityModal(true)}
-              className="bg-[#edf5fe] hover:bg-[#e2effd] border border-blue-100/50 rounded-2xl p-2.5 px-3 flex items-center gap-2.5 max-w-[360px] shadow-2xs transition-all cursor-pointer group"
+              className="bg-[#edf5fe] hover:bg-[#e2effd] border border-blue-100/60 rounded-2xl p-3 sm:p-3.5 xl:p-4 flex items-center gap-3 lg:gap-3.5 max-w-[420px] xl:max-w-[480px] shadow-2xs transition-all cursor-pointer group"
             >
-              <div className="w-9 h-9 rounded-xl bg-blue-100/80 text-[#005dff] flex items-center justify-center shrink-0">
-                <ShieldCheck size={21} className="stroke-[2.2]" />
+              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-12 xl:h-12 rounded-xl bg-blue-100/80 text-[#005dff] flex items-center justify-center shrink-0">
+                <ShieldCheck size={23} className="stroke-[2.2]" />
               </div>
               <div>
-                <h4 className="text-[11.5px] font-bold text-slate-900 leading-tight group-hover:text-[#005dff] transition-colors">
+                <h4 className="text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[14.5px] font-bold text-slate-900 leading-tight group-hover:text-[#005dff] transition-colors">
                   {t('hero_security_title') || 'Tus datos están protegidos'}
                 </h4>
-                <p className="text-[8.8px] text-slate-500 leading-snug mt-0.5">
+                <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] text-slate-500 leading-snug mt-1">
                   {t('hero_security_desc') || 'Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).'}
                 </p>
               </div>
@@ -298,20 +298,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           </div>
 
           {/* Columna Centro: Emblema Circular con Aura Suave */}
-          <div className="flex-1 flex items-center justify-center relative">
+          <div className="flex-1 flex items-center justify-center relative min-w-0">
             <img 
               src="/images/mivor_hero_feathered.png" 
               alt="MIVOR.ai" 
-              className="w-full max-w-[235px] sm:max-w-[260px] lg:max-w-[285px] xl:max-w-[310px] h-auto object-contain relative z-10 select-none pointer-events-none" 
+              className="w-full max-w-[280px] sm:max-w-[340px] lg:max-w-[420px] xl:max-w-[480px] 2xl:max-w-[540px] max-h-[min(52vh,540px)] h-auto object-contain relative z-10 select-none pointer-events-none drop-shadow-sm" 
             />
           </div>
 
           {/* Columna Derecha: Los 3 Pilares */}
-          <div className="flex flex-col justify-center gap-2.5 lg:gap-3.5 w-[28%] max-w-[280px] shrink-0">
+          <div className="flex flex-col justify-center gap-3.5 lg:gap-4.5 xl:gap-6 2xl:gap-7 w-[30%] max-w-[360px] lg:max-w-[400px] xl:max-w-[440px] shrink-0">
             {/* Pilar 1: TECNOLOGÍA QUE CUIDA */}
-            <div className="flex items-center gap-2.5 lg:gap-3 group cursor-default">
-              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[#dbeefe] text-[#0284c7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-4.5 h-4.5 text-[#0284c7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-13 xl:h-13 rounded-full bg-[#dbeefe] text-[#0284c7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#0284c7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -319,38 +319,38 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[10.5px] lg:text-[11px] text-slate-900 tracking-wide uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-wide uppercase leading-tight">
                   {t('pillar_tech_line1') || 'TECNOLOGÍA'}<br />
                   {t('pillar_tech_line2') || 'QUE CUIDA'}
                 </h4>
-                <p className="text-[8.8px] lg:text-[9.2px] text-slate-500 leading-snug mt-0.5">
+                <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[12.5px] text-slate-500 leading-snug mt-0.5">
                   Inteligencia artificial al servicio de tu salud.
                 </p>
               </div>
             </div>
 
             {/* Pilar 2: PERSONAS QUE IMPORTAN */}
-            <div className="flex items-center gap-2.5 lg:gap-3 group cursor-default">
-              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[#ccfbf1] text-[#0d9488] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-4.5 h-4.5 text-[#0d9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-13 xl:h-13 rounded-full bg-[#ccfbf1] text-[#0d9488] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#0d9488]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[10.5px] lg:text-[11px] text-slate-900 tracking-wide uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-wide uppercase leading-tight">
                   {t('pillar_people_line1') || 'PERSONAS'}<br />
                   {t('pillar_people_line2') || 'QUE IMPORTAN'}
                 </h4>
-                <p className="text-[8.8px] lg:text-[9.2px] text-slate-500 leading-snug mt-0.5">
+                <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[12.5px] text-slate-500 leading-snug mt-0.5">
                   Una atención más humana, cercana y personalizada.
                 </p>
               </div>
             </div>
 
             {/* Pilar 3: UN FUTURO MÁS SALUDABLE */}
-            <div className="flex items-center gap-2.5 lg:gap-3 group cursor-default">
-              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-[#f3e8ff] text-[#9333ea] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-4.5 h-4.5 text-[#9333ea]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-13 xl:h-13 rounded-full bg-[#f3e8ff] text-[#9333ea] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#9333ea]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="13" width="4" height="8" rx="1" />
                   <rect x="8" y="9" width="4" height="12" rx="1" />
                   <rect x="14" y="5" width="4" height="16" rx="1" />
@@ -359,11 +359,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[10.5px] lg:text-[11px] text-slate-900 tracking-wide uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-wide uppercase leading-tight">
                   {t('pillar_future_line1') || 'UN FUTURO'}<br />
                   {t('pillar_future_line2') || 'MÁS SALUDABLE'}
                 </h4>
-                <p className="text-[8.8px] lg:text-[9.2px] text-slate-500 leading-snug mt-0.5">
+                <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[12.5px] text-slate-500 leading-snug mt-0.5">
                   Innovación hoy, para una vida mejor mañana.
                 </p>
               </div>
@@ -374,38 +374,38 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
       </section>
 
       {/* 3. CINCO TARJETAS COMPACTAS (100% visibles sin scroll y sin truncar texto) */}
-      <section className="w-full shrink-0 pb-3 pt-0.5">
-        <div className="max-w-[1140px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 lg:gap-3">
+      <section className="w-full shrink-0 pb-3.5 lg:pb-4.5 xl:pb-5 2xl:pb-6 pt-1">
+        <div className="w-full px-6 sm:px-10 lg:px-14 xl:px-20 2xl:px-28 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4 xl:gap-5 2xl:gap-6">
           
           {/* Tarjeta 1: Pregunta a MIVOR.ai (Pastel Lavender #f5f2fd) */}
           <div 
             onClick={() => onNavigate('general_chat')}
-            className="bg-[#f5f2fd] hover:bg-[#ede9fc] rounded-2xl p-3 lg:p-3.5 flex flex-col justify-between h-[174px] sm:h-[178px] lg:h-[182px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#f5f2fd] hover:bg-[#ede9fc] rounded-2xl xl:rounded-3xl p-3.5 sm:p-4 lg:p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[185px] sm:h-[195px] lg:h-[215px] xl:h-[235px] 2xl:h-[260px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-8 h-8 rounded-full bg-[#ece6fb] flex items-center justify-center text-[#7012ff] mb-1.5 group-hover:scale-105 transition-transform shrink-0">
-                <Brain size={18} className="stroke-[2.1]" />
+              <div className="w-8.5 h-8.5 lg:w-9.5 lg:h-9.5 xl:w-11 xl:h-11 rounded-full bg-[#ece6fb] flex items-center justify-center text-[#7012ff] mb-2 lg:mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Brain size={19} className="stroke-[2.1] lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
               </div>
-              <h3 className="font-bold text-[12px] lg:text-[12.5px] text-slate-900 mb-1 leading-snug">
+              <h3 className="font-bold text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16.5px] text-slate-900 mb-1 lg:mb-1.5 leading-snug">
                 {t('card_ask_title') || 'Pregunta a MIVOR.ai'}
               </h3>
-              <p className="text-[8.8px] lg:text-[9.2px] text-slate-600 leading-[1.34] font-normal">
+              <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[13px] text-slate-600 leading-[1.38] 2xl:leading-[1.42] font-normal">
                 {t('card_ask_desc') || 'Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica con la ayuda de una IA médica avanzada.'}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-[#5d05f8] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={13} className="stroke-[2.5]" />
+            <div className="w-7.5 h-7.5 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-9.5 2xl:h-9.5 rounded-full bg-[#5d05f8] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.5] xl:w-4 xl:h-4" />
             </div>
           </div>
 
           {/* Tarjeta 2: Analiza tus pruebas médicas (Pastel Sky Blue #ebf6fe) */}
           <div 
             onClick={() => onNavigate('documents')}
-            className="bg-[#ebf6fe] hover:bg-[#ddf1fe] rounded-2xl p-3 lg:p-3.5 flex flex-col justify-between h-[174px] sm:h-[178px] lg:h-[182px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#ebf6fe] hover:bg-[#ddf1fe] rounded-2xl xl:rounded-3xl p-3.5 sm:p-4 lg:p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[185px] sm:h-[195px] lg:h-[215px] xl:h-[235px] 2xl:h-[260px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-8 h-8 rounded-full bg-[#dcf1fd] flex items-center justify-center text-[#005dff] mb-1.5 group-hover:scale-105 transition-transform shrink-0">
-                <svg className="w-4 h-4 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-8.5 h-8.5 lg:w-9.5 lg:h-9.5 xl:w-11 xl:h-11 rounded-full bg-[#dcf1fd] flex items-center justify-center text-[#005dff] mb-2 lg:mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 xl:w-5.5 xl:h-5.5 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                   <line x1="16" y1="13" x2="8" y2="13" />
@@ -413,83 +413,83 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                   <polyline points="13 18 15 16 17 18" />
                 </svg>
               </div>
-              <h3 className="font-bold text-[12px] lg:text-[12.5px] text-slate-900 mb-1 leading-snug">
+              <h3 className="font-bold text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16.5px] text-slate-900 mb-1 lg:mb-1.5 leading-snug">
                 {t('card_analyze_title') || 'Analiza tus pruebas médicas'}
               </h3>
-              <p className="text-[8.8px] lg:text-[9.2px] text-slate-600 leading-[1.34] font-normal">
+              <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[13px] text-slate-600 leading-[1.38] 2xl:leading-[1.42] font-normal">
                 {t('card_analyze_desc') || 'Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.'}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-[#005dff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={13} className="stroke-[2.5]" />
+            <div className="w-7.5 h-7.5 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-9.5 2xl:h-9.5 rounded-full bg-[#005dff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.5] xl:w-4 xl:h-4" />
             </div>
           </div>
 
           {/* Tarjeta 3: Organiza tu historial de salud (Pastel Mint #e8f9f4) */}
           <div 
             onClick={() => onNavigate('history')}
-            className="bg-[#e8f9f4] hover:bg-[#daf8f0] rounded-2xl p-3 lg:p-3.5 flex flex-col justify-between h-[174px] sm:h-[178px] lg:h-[182px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#e8f9f4] hover:bg-[#daf8f0] rounded-2xl xl:rounded-3xl p-3.5 sm:p-4 lg:p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[185px] sm:h-[195px] lg:h-[215px] xl:h-[235px] 2xl:h-[260px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-8 h-8 rounded-full bg-[#d6f5ec] flex items-center justify-center text-[#01c6af] mb-1.5 group-hover:scale-105 transition-transform shrink-0">
-                <Folder size={18} className="stroke-[2.1]" />
+              <div className="w-8.5 h-8.5 lg:w-9.5 lg:h-9.5 xl:w-11 xl:h-11 rounded-full bg-[#d6f5ec] flex items-center justify-center text-[#01c6af] mb-2 lg:mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Folder size={19} className="stroke-[2.1] lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
               </div>
-              <h3 className="font-bold text-[12px] lg:text-[12.5px] text-slate-900 mb-1 leading-snug">
+              <h3 className="font-bold text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16.5px] text-slate-900 mb-1 lg:mb-1.5 leading-snug">
                 {t('card_history_title') || 'Organiza tu historial de salud'}
               </h3>
-              <p className="text-[8.8px] lg:text-[9.2px] text-slate-600 leading-[1.34] font-normal">
+              <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[13px] text-slate-600 leading-[1.38] 2xl:leading-[1.42] font-normal">
                 {t('card_history_desc') || 'Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.'}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-[#01c6af] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={13} className="stroke-[2.5]" />
+            <div className="w-7.5 h-7.5 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-9.5 2xl:h-9.5 rounded-full bg-[#01c6af] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.5] xl:w-4 xl:h-4" />
             </div>
           </div>
 
           {/* Tarjeta 4: Últimos avances médicos (Pastel Warm Peach #fef6f0) */}
           <div 
             onClick={() => onNavigate('search')}
-            className="bg-[#fef6f0] hover:bg-[#fdeee3] rounded-2xl p-3 lg:p-3.5 flex flex-col justify-between h-[174px] sm:h-[178px] lg:h-[182px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#fef6f0] hover:bg-[#fdeee3] rounded-2xl xl:rounded-3xl p-3.5 sm:p-4 lg:p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[185px] sm:h-[195px] lg:h-[215px] xl:h-[235px] 2xl:h-[260px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-8 h-8 rounded-full bg-[#fde9dc] flex items-center justify-center text-[#fd7727] mb-1.5 group-hover:scale-105 transition-transform shrink-0">
-                <Lightbulb size={18} className="stroke-[2.1]" />
+              <div className="w-8.5 h-8.5 lg:w-9.5 lg:h-9.5 xl:w-11 xl:h-11 rounded-full bg-[#fde9dc] flex items-center justify-center text-[#fd7727] mb-2 lg:mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Lightbulb size={19} className="stroke-[2.1] lg:w-5 lg:h-5 xl:w-6 xl:h-6" />
               </div>
-              <h3 className="font-bold text-[12px] lg:text-[12.5px] text-slate-900 mb-1 leading-snug">
+              <h3 className="font-bold text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16.5px] text-slate-900 mb-1 lg:mb-1.5 leading-snug">
                 {t('card_advances_title') || 'Últimos avances médicos'}
               </h3>
-              <p className="text-[8.8px] lg:text-[9.2px] text-slate-600 leading-[1.34] font-normal">
+              <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[13px] text-slate-600 leading-[1.38] 2xl:leading-[1.42] font-normal">
                 {t('card_advances_desc') || 'Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.'}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-[#fd7727] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={13} className="stroke-[2.5]" />
+            <div className="w-7.5 h-7.5 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-9.5 2xl:h-9.5 rounded-full bg-[#fd7727] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.5] xl:w-4 xl:h-4" />
             </div>
           </div>
 
           {/* Tarjeta 5: Encuentra tu médico (Pastel Violet #f5f2fd) */}
           <div 
             onClick={() => onNavigate('doctors')}
-            className="bg-[#f5f2fd] hover:bg-[#eae6fc] rounded-2xl p-3 lg:p-3.5 flex flex-col justify-between h-[174px] sm:h-[178px] lg:h-[182px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#f5f2fd] hover:bg-[#eae6fc] rounded-2xl xl:rounded-3xl p-3.5 sm:p-4 lg:p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[185px] sm:h-[195px] lg:h-[215px] xl:h-[235px] 2xl:h-[260px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-8 h-8 rounded-full bg-[#ece6fb] flex items-center justify-center text-[#5803f6] mb-1.5 group-hover:scale-105 transition-transform shrink-0">
-                <svg className="w-4 h-4 text-[#5803f6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-8.5 h-8.5 lg:w-9.5 lg:h-9.5 xl:w-11 xl:h-11 rounded-full bg-[#ece6fb] flex items-center justify-center text-[#5803f6] mb-2 lg:mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <svg className="w-4.5 h-4.5 lg:w-5 lg:h-5 xl:w-5.5 xl:h-5.5 text-[#5803f6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
                   <path d="M10 13.5v2" />
                   <path d="M14 13.5v2" />
                 </svg>
               </div>
-              <h3 className="font-bold text-[12px] lg:text-[12.5px] text-slate-900 mb-1 leading-snug">
+              <h3 className="font-bold text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[15px] 2xl:text-[16.5px] text-slate-900 mb-1 lg:mb-1.5 leading-snug">
                 {t('card_doctors_title') || 'Encuentra tu médico'}
               </h3>
-              <p className="text-[8.8px] lg:text-[9.2px] text-slate-600 leading-[1.34] font-normal">
+              <p className="text-[9.5px] sm:text-[10px] lg:text-[11px] xl:text-[12px] 2xl:text-[13px] text-slate-600 leading-[1.38] 2xl:leading-[1.42] font-normal">
                 {t('card_doctors_desc') || 'Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.'}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-full bg-[#5803f6] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={13} className="stroke-[2.5]" />
+            <div className="w-7.5 h-7.5 lg:w-8 lg:h-8 xl:w-9 xl:h-9 2xl:w-9.5 2xl:h-9.5 rounded-full bg-[#5803f6] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.5] xl:w-4 xl:h-4" />
             </div>
           </div>
 
