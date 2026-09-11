@@ -1145,7 +1145,6 @@ ${text}`], {type: 'text/plain'});
           userProfile={patientProfile}
           username={username}
         />
-        {GlobalDoctorDirectoryModal}
         {GlobalBottomNav}
       </>
     );
@@ -1176,7 +1175,7 @@ ${text}`], {type: 'text/plain'});
           userProfile={patientProfile}
           username={username}
         />
-        <UpdateModal t={t} apiUrl={API_URL} />
+        {GlobalBottomNav}
       </>
     );
   }

@@ -11,7 +11,7 @@
     "copy:apk": "node copy-apk.cjs",
     "build:apk": "npm run android:sync && node copy-apk.cjs",
     "start": "serve -s dist -l $PORT",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
