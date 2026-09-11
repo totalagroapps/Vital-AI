@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
   ChevronRight, 
-  ChevronDown, 
   ArrowRight, 
   Bell, 
   X, 
@@ -13,7 +12,8 @@ import {
   LogOut, 
   User, 
   FileText, 
-  Heart 
+  Heart,
+  Sparkles
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -21,6 +21,8 @@ import LanguageSelector from '../components/LanguageSelector';
 const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => {
   const { t } = useLanguage();
   const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showHowModal, setShowHowModal] = useState(false);
+  const [showPatientsModal, setShowPatientsModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -29,6 +31,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setShowAboutModal(false);
+        setShowHowModal(false);
+        setShowPatientsModal(false);
         setShowContactModal(false);
         setShowSecurityModal(false);
         setShowUserMenu(false);
@@ -39,7 +43,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   }, []);
 
   useEffect(() => {
-    const isModalOpen = showAboutModal || showContactModal || showSecurityModal;
+    const isModalOpen = showAboutModal || showHowModal || showPatientsModal || showContactModal || showSecurityModal;
     if (isModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -47,13 +51,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [showAboutModal, showContactModal, showSecurityModal]);
+  }, [showAboutModal, showHowModal, showPatientsModal, showContactModal, showSecurityModal]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col font-sans select-none overflow-x-hidden">
       
       {/* 1. TOP NAVBAR */}
-      <header className="w-full px-6 sm:px-10 lg:px-14 xl:px-16 py-3 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
+      <header className="w-full px-6 sm:px-8 lg:px-10 xl:px-14 py-3 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
         {/* Brand Logo */}
         <div 
           className="flex items-center cursor-pointer group" 
@@ -68,86 +72,97 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         </div>
 
         {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-7 lg:gap-9 xl:gap-11">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-10">
+          {/* Inicio (Pill activa con barrita subrayada) */}
           <button 
             onClick={() => onNavigate('home')} 
-            className="relative text-sm font-bold text-[#1d63ed] transition-colors py-1 cursor-pointer"
+            className="relative px-4 py-1.5 rounded-full bg-[#eaf2fd] text-[#1a65eb] font-semibold text-xs sm:text-sm tracking-tight cursor-pointer transition-all flex flex-col items-center"
           >
-            {t('patient_nav_home') || 'Inicio'}
-            <span className="absolute -bottom-1.5 left-0 right-0 h-[2.5px] bg-[#1d63ed] rounded-full" />
+            <span>{t('patient_nav_home') || 'Inicio'}</span>
+            <span className="absolute -bottom-1.5 w-6 h-[2.5px] bg-[#1a65eb] rounded-full" />
           </button>
           
           <button 
             onClick={() => setShowAboutModal(true)} 
-            className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-slate-700 hover:text-[#1a65eb] transition-colors py-1 cursor-pointer"
           >
             {t('patient_nav_about') || 'Sobre MIVOR.ai'}
           </button>
           
           <button 
-            onClick={() => onNavigate('triage')} 
-            className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
+            onClick={() => setShowHowModal(true)} 
+            className="text-xs sm:text-sm font-medium text-slate-700 hover:text-[#1a65eb] transition-colors py-1 cursor-pointer"
           >
-            {t('patient_how_it_works') || 'Cómo funciona'}
+            {t('patient_nav_how') || 'Cómo funciona'}
           </button>
+
+          <button 
+            onClick={() => setShowPatientsModal(true)} 
+            className="text-xs sm:text-sm font-medium text-slate-700 hover:text-[#1a65eb] transition-colors py-1 cursor-pointer"
+          >
+            {t('patient_nav_for_patients') || 'Para pacientes'}
+          </button>
+
+          <a 
+            href="/registro/medico" 
+            className="text-xs sm:text-sm font-medium text-slate-700 hover:text-[#1a65eb] transition-colors py-1 cursor-pointer"
+          >
+            {t('patient_nav_for_doctors') || 'Para médicos'}
+          </a>
           
           <button 
             onClick={() => setShowContactModal(true)} 
-            className="text-sm font-medium text-slate-600 hover:text-[#1d63ed] transition-colors py-1 cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-slate-700 hover:text-[#1a65eb] transition-colors py-1 cursor-pointer"
           >
             {t('patient_nav_contact') || 'Contacto'}
           </button>
         </nav>
 
         {/* Right Nav Controls */}
-        <div className="flex items-center gap-3.5 sm:gap-4">
-          <LanguageSelector />
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
+          <LanguageSelector variant="pill" />
           
           {/* Notifications Bell */}
           <div className="relative">
             <button 
               onClick={() => onNavigate('search')} 
-              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
-              title="Notificaciones de salud y avances"
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-white hover:bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+              title="Notificaciones de salud y novedades"
             >
               <Bell size={16} />
             </button>
             <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
           </div>
 
-          {/* Unified Profile Button with Dropdown (Opción 1) */}
+          {/* User Avatar Circle */}
+          <div 
+            onClick={() => setShowUserMenu(prev => !prev)}
+            className="w-8 h-8 lg:w-9 lg:h-9 rounded-full overflow-hidden border border-slate-200 shadow-2xs cursor-pointer hover:ring-2 hover:ring-[#1a65eb]/40 transition-all shrink-0"
+            title={userProfile?.full_name || username || "Mi cuenta"}
+          >
+            <img 
+              src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
+              alt="Perfil" 
+              className="w-full h-full object-cover" 
+              onError={(e) => { e.target.src = '/logo.png'; }}
+            />
+          </div>
+
+          {/* Mi cuenta Button with Arrow & Dropdown */}
           <div className="relative">
             <button 
               type="button"
               onClick={() => setShowUserMenu(prev => !prev)}
-              className="bg-[#1d63ed] hover:bg-blue-700 active:scale-95 text-white pl-1.5 pr-3.5 py-1.5 rounded-full shadow-xs flex items-center gap-2 transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#1d63ed]/30"
-              title={userProfile?.full_name || username || t('patient_nav_my_account') || "Mi cuenta"}
+              className="bg-[#1a65eb] hover:bg-[#1554c7] active:scale-95 text-white font-semibold text-xs sm:text-sm px-4 lg:px-5 py-2 rounded-full shadow-xs flex items-center gap-2 transition-all cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[#1a65eb]/30"
+              title={userProfile?.full_name || username || "Mi cuenta"}
             >
-              {/* Avatar integrado */}
-              <div className="w-7 h-7 lg:w-7.5 lg:h-7.5 rounded-full overflow-hidden border border-white/80 shadow-2xs shrink-0">
-                <img 
-                  src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
-                  alt="Perfil" 
-                  className="w-full h-full object-cover" 
-                />
-              </div>
-
-              {/* Texto Mi cuenta */}
-              <span className="font-bold text-xs sm:text-sm tracking-tight">
-                {t('patient_nav_my_account') || 'Mi cuenta'}
-              </span>
-
-              {/* Chevron animado */}
-              <ChevronDown 
-                size={14} 
-                className={`text-white/90 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} 
-              />
+              <span>{t('patient_nav_my_account') || 'Mi cuenta'}</span>
+              <ArrowRight size={15} className="stroke-[2.2]" />
             </button>
 
             {/* Dropdown Menu */}
             {showUserMenu && (
               <>
-                {/* Backdrop invisible para cerrar al hacer clic fuera */}
                 <div 
                   className="fixed inset-0 z-40 cursor-default" 
                   onClick={() => setShowUserMenu(false)} 
@@ -155,13 +170,14 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
                 <div className="absolute right-0 top-full mt-2.5 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                   {/* Tarjeta de Usuario */}
-                  <div className="p-3 bg-gradient-to-br from-blue-50/70 to-indigo-50/40 rounded-xl border border-blue-100/60 mb-1.5">
+                  <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0">
                         <img 
                           src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
                           alt="Perfil" 
                           className="w-full h-full object-cover" 
+                          onError={(e) => { e.target.src = '/logo.png'; }}
                         />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -183,13 +199,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         setShowUserMenu(false);
                         onNavigate('history');
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1a65eb] transition-colors text-left group cursor-pointer"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1d63ed] flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#1a65eb] flex items-center justify-center group-hover:scale-105 transition-transform">
                         <User size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
+                        <span className="block text-slate-800 group-hover:text-[#1a65eb]">{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
                         <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_history_desc') || 'Ficha médica y antecedentes'}</span>
                       </div>
                     </button>
@@ -200,13 +216,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         setShowUserMenu(false);
                         onNavigate('documents');
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1a65eb] transition-colors text-left group cursor-pointer"
                     >
                       <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <FileText size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
+                        <span className="block text-slate-800 group-hover:text-[#1a65eb]">{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
                         <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_docs_desc') || 'Estudios y pruebas médicas'}</span>
                       </div>
                     </button>
@@ -217,13 +233,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         setShowUserMenu(false);
                         setShowSecurityModal(true);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1a65eb] transition-colors text-left group cursor-pointer"
                     >
                       <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <ShieldCheck size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_data_protected') || 'Seguridad y privacidad'}</span>
+                        <span className="block text-slate-800 group-hover:text-[#1a65eb]">{t('patient_data_protected') || 'Seguridad y privacidad'}</span>
                         <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_meds_desc') || 'Cifrado y protección de datos'}</span>
                       </div>
                     </button>
@@ -234,13 +250,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                         setShowUserMenu(false);
                         setShowContactModal(true);
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left group cursor-pointer"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1a65eb] transition-colors text-left group cursor-pointer"
                     >
                       <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
                         <MessageCircle size={15} />
                       </div>
                       <div className="flex-1">
-                        <span className="block text-slate-800 group-hover:text-[#1d63ed]">{t('patient_contact_support') || 'Contacto y soporte'}</span>
+                        <span className="block text-slate-800 group-hover:text-[#1a65eb]">{t('patient_contact_support') || 'Contacto y soporte'}</span>
                         <span className="block text-[10px] text-slate-400 font-normal">Atención 24/7</span>
                       </div>
                     </button>
@@ -270,147 +286,251 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
       </header>
 
       {/* 2. HERO SECTION */}
-      <main className="flex-1 flex flex-col justify-center gap-6 lg:gap-8 py-2 lg:py-4 xl:py-5">
+      <main className="flex-1 flex flex-col justify-center gap-4 lg:gap-6 py-2 lg:py-3">
         
         <section 
-          className="w-full px-6 sm:px-8 lg:px-12 xl:px-14 py-2 lg:py-4 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10 relative"
+          className="w-full px-6 sm:px-8 lg:px-10 xl:px-14 py-2 lg:py-4 flex flex-col lg:flex-row items-center justify-between gap-6 relative"
           style={{
-            backgroundImage: 'radial-gradient(ellipse 75% 65% at 65% 42%, rgba(186, 230, 253, 0.55) 0%, rgba(224, 242, 254, 0.35) 45%, rgba(240, 249, 255, 0.15) 70%, rgba(255, 255, 255, 0) 100%)'
+            backgroundImage: 'radial-gradient(ellipse 70% 60% at 55% 45%, rgba(186, 230, 253, 0.5) 0%, rgba(224, 242, 254, 0.28) 45%, rgba(240, 249, 255, 0.1) 75%, rgba(255, 255, 255, 0) 100%)'
           }}
         >
-          {/* Left Column: Headline, Subtitle, Trust Card */}
-          <div className="w-full lg:w-[44%] xl:w-[40%] flex flex-col justify-center animate-fade-in-left">
-            <h1 className="text-4xl sm:text-5xl lg:text-[46px] xl:text-[54px] 2xl:text-[62px] font-extrabold text-slate-900 leading-[1.05] tracking-tight mb-3 sm:mb-4">
-              Tu salud,<br />
-              en manos de la<br />
-              <span className="text-[#1d63ed]">IA más avanzada<br />en medicina.</span>
+          {/* Columna Izquierda: Titular + Subtítulo + Tarjeta de Confianza */}
+          <div className="w-full lg:w-[38%] xl:w-[36%] flex flex-col justify-center animate-fade-in-left">
+            <h1 className="text-3xl sm:text-4xl lg:text-[40px] xl:text-[48px] 2xl:text-[54px] font-extrabold text-slate-950 leading-[1.06] tracking-tight mb-3 sm:mb-4">
+              {t('hero_title_p1') || 'Tu salud,'}<br />
+              {t('hero_title_p2') || 'en manos de la'}<br />
+              <span className="text-[#1a65eb]">
+                {t('hero_title_p3') || 'IA más avanzada'}<br />
+                {t('hero_title_p4') || 'en medicina.'}
+              </span>
             </h1>
             
-            <p className="text-slate-500 text-sm lg:text-[15px] xl:text-[16px] 2xl:text-[17px] leading-relaxed mb-5 max-w-[480px] xl:max-w-[520px] font-normal">
-              Entiende, gestiona y mejora tu bienestar con información médica fiable, personalizada y siempre disponible.
+            <p className="text-slate-600 text-xs sm:text-sm lg:text-[14px] xl:text-[15.5px] leading-relaxed mb-4 lg:mb-5 max-w-[440px] font-normal">
+              {t('hero_subtitle') || 'Entiende, gestiona y mejora tu bienestar con información médica fiable, personalizada y siempre disponible.'}
             </p>
 
-            {/* Trust Security Card */}
+            {/* Tarjeta de Confianza */}
             <div 
               onClick={() => setShowSecurityModal(true)}
-              className="bg-[#f0f7ff] hover:bg-[#e4f0ff] border border-blue-100/90 rounded-2xl p-3.5 px-4.5 sm:px-5 flex items-center justify-between gap-4 max-w-[480px] xl:max-w-[520px] shadow-2xs transition-all cursor-pointer group"
+              className="bg-[#f0f7fe] hover:bg-[#e4f1fd] border border-blue-100 rounded-2xl p-3 px-4 lg:p-3.5 lg:px-4.5 flex items-center justify-between gap-3.5 max-w-[450px] shadow-2xs transition-all cursor-pointer group"
             >
-              <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-2xl bg-blue-100/80 text-[#1d63ed] flex items-center justify-center shrink-0">
-                <ShieldCheck size={24} className="stroke-[2.2]" />
+              <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-2xl bg-blue-100/90 text-[#1a65eb] flex items-center justify-center shrink-0">
+                <ShieldCheck size={22} className="stroke-[2.2]" />
               </div>
               <div className="flex-1 pr-1">
-                <h4 className="text-sm lg:text-[15px] xl:text-[16px] font-bold text-slate-900 leading-snug group-hover:text-[#1d63ed] transition-colors">
-                  Tus datos están protegidos
+                <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug group-hover:text-[#1a65eb] transition-colors">
+                  {t('hero_security_title') || 'Tus datos están protegidos'}
                 </h4>
-                <p className="text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-tight mt-0.5">
-                  Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).
+                <p className="text-[10.5px] sm:text-[11px] xl:text-[11.5px] text-slate-500 leading-tight mt-0.5">
+                  {t('hero_security_desc') || 'Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).'}
                 </p>
               </div>
               <ChevronRight size={18} className="text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
             </div>
           </div>
 
-          {/* Right Column: AI Emblem + Cursive Slogan */}
-          <div className="w-full lg:w-[56%] xl:w-[60%] flex items-center justify-center lg:justify-end relative pr-0 lg:pr-2 xl:pr-6">
+          {/* Columna Centro: Emblema IA + Lema Cursivo */}
+          <div className="w-full lg:w-[48%] xl:w-[49%] flex items-center justify-center relative">
             <img 
               src="/images/mivor_hero_right_perfect_clean.png" 
               alt="MIVOR.ai Innovación Médica" 
-              className="w-full max-w-[580px] lg:max-w-[660px] xl:max-w-[760px] 2xl:max-w-[840px] h-auto object-contain select-none pointer-events-none drop-shadow-xs" 
+              className="w-full max-w-[500px] lg:max-w-[580px] xl:max-w-[660px] 2xl:max-w-[720px] h-auto object-contain select-none pointer-events-none drop-shadow-xs" 
             />
+          </div>
+
+          {/* Columna Derecha: Los 3 Pilares Verticales */}
+          <div className="hidden lg:flex flex-col items-center justify-center gap-7 xl:gap-8 w-[14%] xl:w-[15%] shrink-0 pr-1 xl:pr-4">
+            {/* Pilar 1 */}
+            <div className="flex flex-col items-center text-center group cursor-default">
+              <div className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center text-[#1b2559] transition-transform group-hover:scale-110 mb-1">
+                <svg className="w-9 h-9 text-[#1b2559]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <span className="text-[11px] xl:text-[12px] font-extrabold text-[#1b2559] tracking-wider leading-tight uppercase">
+                {t('pillar_tech_line1') || 'TECNOLOGÍA'}<br />
+                {t('pillar_tech_line2') || 'QUE CUIDA'}
+              </span>
+            </div>
+
+            {/* Pilar 2 */}
+            <div className="flex flex-col items-center text-center group cursor-default">
+              <div className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center text-[#1b2559] transition-transform group-hover:scale-110 mb-1">
+                <svg className="w-9 h-9 text-[#1b2559]" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M24 16 C20 9, 11 9, 11 18 C11 25, 24 33, 24 33 C24 33, 37 25, 37 18 C37 9, 28 9, 24 16 Z" />
+                  <path d="M9 29 C9 35, 17 38, 24 38 C31 38, 39 35, 39 29" />
+                </svg>
+              </div>
+              <span className="text-[11px] xl:text-[12px] font-extrabold text-[#1b2559] tracking-wider leading-tight uppercase">
+                {t('pillar_people_line1') || 'PERSONAS'}<br />
+                {t('pillar_people_line2') || 'QUE IMPORTAN'}
+              </span>
+            </div>
+
+            {/* Pilar 3 */}
+            <div className="flex flex-col items-center text-center group cursor-default">
+              <div className="w-10 h-10 xl:w-11 xl:h-11 flex items-center justify-center text-[#1b2559] transition-transform group-hover:scale-110 mb-1">
+                <svg className="w-9 h-9 text-[#1b2559]" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="8" y="26" width="7" height="14" rx="2" />
+                  <rect x="20" y="20" width="7" height="20" rx="2" />
+                  <rect x="32" y="14" width="7" height="26" rx="2" />
+                  <path d="M8 20 C18 16, 26 14, 38 7" />
+                  <path d="M30 7 L38 7 L38 15" />
+                </svg>
+              </div>
+              <span className="text-[11px] xl:text-[12px] font-extrabold text-[#1b2559] tracking-wider leading-tight uppercase">
+                {t('pillar_future_line1') || 'UN FUTURO'}<br />
+                {t('pillar_future_line2') || 'MÁS SALUDABLE'}
+              </span>
+            </div>
           </div>
         </section>
 
         {/* 3. FIVE ACTION CARDS */}
-        <section className="w-full px-6 sm:px-8 lg:px-12 xl:px-14 mt-3 mb-4 lg:mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 lg:gap-4 xl:gap-5">
+        <section className="w-full px-6 sm:px-8 lg:px-10 xl:px-14 mb-3 lg:mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 xl:gap-4.5">
             
             {/* Card 1: Pregunta a MIVOR.ai */}
             <div 
               onClick={() => onNavigate('general_chat')}
-              className="bg-[#f8f6fe] hover:bg-[#f2edfd] border border-purple-100/80 rounded-3xl p-5 lg:p-5 xl:p-6 flex flex-col justify-between min-h-[210px] lg:min-h-[225px] xl:min-h-[245px] 2xl:min-h-[265px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+              className="bg-[#f8f6fe] hover:bg-[#f2edfc] border border-purple-100/90 rounded-3xl p-4.5 xl:p-5 flex flex-col justify-between min-h-[210px] xl:min-h-[235px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
             >
               <div>
-                <h3 className="font-bold text-[16px] lg:text-[17px] xl:text-[19px] 2xl:text-[21px] text-slate-900 mb-2.5 leading-snug">
-                  Pregunta a<br />MIVOR.ai
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-full bg-[#eee4fc] flex items-center justify-center text-[#6700f5] mb-3 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-[#6700f5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    <circle cx="8" cy="11.5" r="0.8" fill="currentColor" />
+                    <circle cx="12" cy="11.5" r="0.8" fill="currentColor" />
+                    <circle cx="16" cy="11.5" r="0.8" fill="currentColor" />
+                  </svg>
+                </div>
+
+                <h3 className="font-bold text-[15.5px] xl:text-[17px] text-slate-900 mb-1.5 leading-snug">
+                  {t('card_ask_title') || 'Pregunta a MIVOR.ai'}
                 </h3>
-                <p className="text-[12px] lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] text-slate-600 leading-relaxed font-normal">
-                  Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica y científica con la ayuda de una IA médica avanzada.
+                <p className="text-[11.5px] xl:text-[12.5px] text-slate-600 leading-relaxed font-normal">
+                  {t('card_ask_desc') || 'Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica con la ayuda de una IA médica avanzada.'}
                 </p>
               </div>
-              <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[#6700f5] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-4">
-                <ArrowRight size={17} />
+              <div className="w-9 h-9 rounded-full bg-[#5e24b8] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-3">
+                <ArrowRight size={16} />
               </div>
             </div>
 
             {/* Card 2: Analiza tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#f0f8ff] hover:bg-[#e2f0fe] border border-blue-100/80 rounded-3xl p-5 lg:p-5 xl:p-6 flex flex-col justify-between min-h-[210px] lg:min-h-[225px] xl:min-h-[245px] 2xl:min-h-[265px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+              className="bg-[#f0f7fe] hover:bg-[#e4f1fd] border border-blue-100/90 rounded-3xl p-4.5 xl:p-5 flex flex-col justify-between min-h-[210px] xl:min-h-[235px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
             >
               <div>
-                <h3 className="font-bold text-[16px] lg:text-[17px] xl:text-[19px] 2xl:text-[21px] text-slate-900 mb-2.5 leading-snug">
-                  Analiza tus<br />pruebas médicas
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-xl bg-[#dbeefe] flex items-center justify-center text-[#0066ff] mb-3 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-[#0066ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                </div>
+
+                <h3 className="font-bold text-[15.5px] xl:text-[17px] text-slate-900 mb-1.5 leading-snug">
+                  {t('card_analyze_title') || 'Analiza tus pruebas médicas'}
                 </h3>
-                <p className="text-[12px] lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] text-slate-600 leading-relaxed font-normal">
-                  Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.
+                <p className="text-[11.5px] xl:text-[12.5px] text-slate-600 leading-relaxed font-normal">
+                  {t('card_analyze_desc') || 'Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.'}
                 </p>
               </div>
-              <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[#0066ff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-4">
-                <ArrowRight size={17} />
+              <div className="w-9 h-9 rounded-full bg-[#0066ff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-3">
+                <ArrowRight size={16} />
               </div>
             </div>
 
             {/* Card 3: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#f0fbf7] hover:bg-[#def7ee] border border-emerald-100/80 rounded-3xl p-5 lg:p-5 xl:p-6 flex flex-col justify-between min-h-[210px] lg:min-h-[225px] xl:min-h-[245px] 2xl:min-h-[265px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+              className="bg-[#eefaf6] hover:bg-[#def7ee] border border-emerald-100/90 rounded-3xl p-4.5 xl:p-5 flex flex-col justify-between min-h-[210px] xl:min-h-[235px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
             >
               <div>
-                <h3 className="font-bold text-[16px] lg:text-[17px] xl:text-[19px] 2xl:text-[21px] text-slate-900 mb-2.5 leading-snug">
-                  Organiza tu<br />historial de salud
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-xl bg-[#cef2e4] flex items-center justify-center text-[#00b087] mb-3 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-[#00b087]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    <line x1="7" y1="13" x2="17" y2="13" />
+                    <line x1="7" y1="16" x2="13" y2="16" />
+                  </svg>
+                </div>
+
+                <h3 className="font-bold text-[15.5px] xl:text-[17px] text-slate-900 mb-1.5 leading-snug">
+                  {t('card_history_title') || 'Organiza tu historial de salud'}
                 </h3>
-                <p className="text-[12px] lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] text-slate-600 leading-relaxed font-normal">
-                  Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.
+                <p className="text-[11.5px] xl:text-[12.5px] text-slate-600 leading-relaxed font-normal">
+                  {t('card_history_desc') || 'Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.'}
                 </p>
               </div>
-              <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[#00b087] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-4">
-                <ArrowRight size={17} />
+              <div className="w-9 h-9 rounded-full bg-[#00a87e] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-3">
+                <ArrowRight size={16} />
               </div>
             </div>
 
             {/* Card 4: Últimos avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#fff8f0] hover:bg-[#ffeed8] border border-orange-100/80 rounded-3xl p-5 lg:p-5 xl:p-6 flex flex-col justify-between min-h-[210px] lg:min-h-[225px] xl:min-h-[245px] 2xl:min-h-[265px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+              className="bg-[#fff6ef] hover:bg-[#ffeedb] border border-orange-100/90 rounded-3xl p-4.5 xl:p-5 flex flex-col justify-between min-h-[210px] xl:min-h-[235px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
             >
               <div>
-                <h3 className="font-bold text-[16px] lg:text-[17px] xl:text-[19px] 2xl:text-[21px] text-slate-900 mb-2.5 leading-snug">
-                  Últimos avances<br />médicos
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-full bg-[#ffeedb] flex items-center justify-center text-[#ff5500] mb-3 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-[#ff5500]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                    <path d="M9 18h6" />
+                    <path d="M10 22h4" />
+                    <line x1="12" y1="2" x2="12" y2="4" />
+                    <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
+                    <line x1="19.07" y1="4.93" x2="17.66" y2="6.34" />
+                  </svg>
+                </div>
+
+                <h3 className="font-bold text-[15.5px] xl:text-[17px] text-slate-900 mb-1.5 leading-snug">
+                  {t('card_advances_title') || 'Últimos avances médicos'}
                 </h3>
-                <p className="text-[12px] lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] text-slate-600 leading-relaxed font-normal">
-                  Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.
+                <p className="text-[11.5px] xl:text-[12.5px] text-slate-600 leading-relaxed font-normal">
+                  {t('card_advances_desc') || 'Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.'}
                 </p>
               </div>
-              <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[#ff5500] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-4">
-                <ArrowRight size={17} />
+              <div className="w-9 h-9 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-3">
+                <ArrowRight size={16} />
               </div>
             </div>
 
             {/* Card 5: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#f8f5ff] hover:bg-[#ede5ff] border border-purple-100/80 rounded-3xl p-5 lg:p-5 xl:p-6 flex flex-col justify-between min-h-[210px] lg:min-h-[225px] xl:min-h-[245px] 2xl:min-h-[265px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+              className="bg-[#f7f2fe] hover:bg-[#efe6fe] border border-purple-100/90 rounded-3xl p-4.5 xl:p-5 flex flex-col justify-between min-h-[210px] xl:min-h-[235px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
             >
               <div>
-                <h3 className="font-bold text-[16px] lg:text-[17px] xl:text-[19px] 2xl:text-[21px] text-slate-900 mb-2.5 leading-snug">
-                  Encuentra tu médico
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-full bg-[#ebdcfc] flex items-center justify-center text-[#7012ff] mb-3 group-hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5 text-[#7012ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
+                    <path d="M10 14.5v1.5a2 2 0 0 0 4 0v-1.5" />
+                  </svg>
+                </div>
+
+                <h3 className="font-bold text-[15.5px] xl:text-[17px] text-slate-900 mb-1.5 leading-snug">
+                  {t('card_doctors_title') || 'Encuentra tu médico'}
                 </h3>
-                <p className="text-[12px] lg:text-[12.5px] xl:text-[13.5px] 2xl:text-[14px] text-slate-600 leading-relaxed font-normal">
-                  Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.
+                <p className="text-[11.5px] xl:text-[12.5px] text-slate-600 leading-relaxed font-normal">
+                  {t('card_doctors_desc') || 'Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.'}
                 </p>
               </div>
-              <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-[#7012ff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-4">
-                <ArrowRight size={17} />
+              <div className="w-9 h-9 rounded-full bg-[#7012ff] text-white flex items-center justify-center shadow-xs group-hover:scale-110 active:scale-95 transition-transform self-end mt-3">
+                <ArrowRight size={16} />
               </div>
             </div>
 
@@ -433,7 +553,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
                   <CheckCircle2 size={20} />
                 </div>
-                <h3 className="font-bold text-lg text-slate-900">{t('patient_about_title') || 'Sobre MIVOR.ai'}</h3>
+                <h3 className="font-bold text-lg text-slate-900">{t('patient_nav_about') || 'Sobre MIVOR.ai'}</h3>
               </div>
               <button 
                 onClick={() => setShowAboutModal(false)}
@@ -465,7 +585,134 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="pt-2 flex justify-end">
               <button 
                 onClick={() => setShowAboutModal(false)}
-                className="bg-[#1d63ed] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                className="bg-[#1a65eb] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+              >
+                {t('patient_understood') || 'Entendido'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: CÓMO FUNCIONA */}
+      {showHowModal && (
+        <div 
+          onClick={() => setShowHowModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#1a65eb] flex items-center justify-center">
+                  <Sparkles size={20} />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">{t('patient_how_title') || 'Cómo funciona MIVOR.ai'}</h3>
+              </div>
+              <button 
+                onClick={() => setShowHowModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-3.5 text-sm text-slate-600 leading-relaxed">
+              <p>
+                {t('patient_how_desc') || 'MIVOR.ai integra IA clínica avanzada entrenada con literatura médica validada para ofrecerte orientación y soporte continuo.'}
+              </p>
+              
+              <div className="space-y-2.5">
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="w-6 h-6 rounded-full bg-blue-100 text-[#1a65eb] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
+                  <div>
+                    <h5 className="font-bold text-xs text-slate-900">Consulta y Triaje Inteligente</h5>
+                    <p className="text-[11px] text-slate-500">Expresa tus síntomas y recibe una evaluación guiada de prioridad y recomendaciones clínicas iniciales.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</div>
+                  <div>
+                    <h5 className="font-bold text-xs text-slate-900">Interpretación de Pruebas</h5>
+                    <p className="text-[11px] text-slate-500">Sube analíticas, recetas e informes en PDF o foto para comprender los valores y términos clínicos.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
+                  <div>
+                    <h5 className="font-bold text-xs text-slate-900">Historial y Directorio Médico</h5>
+                    <p className="text-[11px] text-slate-500">Todo tu historial consolidado y conexión directa con especialistas médicos verificados.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button 
+                onClick={() => setShowHowModal(false)}
+                className="bg-[#1a65eb] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+              >
+                {t('patient_understood') || 'Entendido'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: PARA PACIENTES */}
+      {showPatientsModal && (
+        <div 
+          onClick={() => setShowPatientsModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-purple-50 text-[#6700f5] flex items-center justify-center">
+                  <Heart size={20} />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">{t('patient_for_patients_title') || 'Portal para Pacientes'}</h3>
+              </div>
+              <button 
+                onClick={() => setShowPatientsModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-3.5 text-sm text-slate-600 leading-relaxed">
+              <p>
+                {t('patient_for_patients_desc') || 'Accede a tus análisis, consultas inteligentes e historial clínico en un entorno seguro y confidencial.'}
+              </p>
+              
+              <div className="space-y-2.5">
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5">
+                  <CheckCircle2 size={17} className="text-teal-600 shrink-0 mt-0.5" />
+                  <span className="text-xs text-slate-700">Respuestas claras y sin tecnicismos confusos sobre cualquier patología o síntoma.</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5">
+                  <CheckCircle2 size={17} className="text-teal-600 shrink-0 mt-0.5" />
+                  <span className="text-xs text-slate-700">Centralización de estudios de laboratorio, recetas y antecedentes para compartir con tu médico.</span>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-2.5">
+                  <CheckCircle2 size={17} className="text-teal-600 shrink-0 mt-0.5" />
+                  <span className="text-xs text-slate-700">Acceso 24 horas al día, los 7 días de la semana, desde tu ordenador o teléfono móvil.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button 
+                onClick={() => setShowPatientsModal(false)}
+                className="bg-[#1a65eb] hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
                 {t('patient_understood') || 'Entendido'}
               </button>

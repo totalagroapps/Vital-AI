@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Globe, ChevronDown } from 'lucide-react';
 
@@ -28,11 +28,15 @@ export default function LanguageSelector({ variant = 'default' }) {
     ? "absolute top-6 right-6 z-50" 
     : "relative z-40";
 
+  const buttonClass = variant === 'pill'
+    ? "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs text-xs sm:text-sm font-medium cursor-pointer"
+    : "flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium cursor-pointer";
+
   return (
     <div className={containerClass} ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm text-sm font-medium"
+        className={buttonClass}
         title="Cambiar idioma"
       >
         <Globe className="w-4 h-4 text-brand" />
