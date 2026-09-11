@@ -955,13 +955,18 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/verificador' || path.startsWith('/verificacion')) {
-    if (!token) return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/verificador' : '/paciente'))}>
+      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : '/login')}>
         <DoctorVerificationDetail 
           apiUrl={API_URL} 
           authHeaders={authHeaders} 
-          onBack={() => navigate(viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/medico' : '/paciente'))} 
+          onBack={() => {
+            if (viewMode === 'doctor') {
+              navigate('/medico');
+            } else {
+              handleLogout();
+            }
+          }} 
           onLogout={handleLogout}
         />
         <UpdateModal t={t} apiUrl={API_URL} />
@@ -970,7 +975,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/doctor/profile' || path === '/medico/perfil') {
-    if (!token) return <Navigate to="/login" />;
+    if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
     return (
       <ErrorBoundary title="Perfil Profesional Médico" onGoHome={() => navigate('/medico')}>
         <DoctorProfile apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(-1)} />
@@ -1017,7 +1022,7 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path.startsWith('/medico')) {
-    if (viewMode !== 'doctor' && viewMode !== 'verifier') return <Navigate to="/paciente" />;
+    if (viewMode !== 'doctor') return <Navigate to="/login" />;
     return (
       <ErrorBoundary title="Portal Médico MIVOR.ai" onGoHome={() => navigate('/medico')}>
         <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />

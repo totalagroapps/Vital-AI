@@ -141,7 +141,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
     if (onBack) {
       onBack();
     } else {
-      navigate('/medico');
+      navigate('/login');
     }
   };
 

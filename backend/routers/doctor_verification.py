@@ -44,7 +44,9 @@ async def get_all_doctors_for_verification(
     doctors = res.scalars().all()
 
     results = []
+    existing_user_ids = set()
     for doc in doctors:
+        existing_user_ids.add(doc.user_id)
         email = doc.user.username if doc.user else ""
         results.append(
             DoctorVerificationDetailResponse(
@@ -72,6 +74,54 @@ async def get_all_doctors_for_verification(
                 professional_registration_certificate_url=doc.professional_registration_certificate_url,
             )
         )
+
+    # También incluir médicos registrados en SpecialistProfile
+    stmt_sp = select(SpecialistProfile)
+    if not include_all:
+        stmt_sp = stmt_sp.where(
+            or_(
+                SpecialistProfile.is_verified == False,
+                SpecialistProfile.verified == False,
+                SpecialistProfile.is_verified.is_(None),
+            )
+        )
+    res_sp = await db.execute(stmt_sp)
+    specialists = res_sp.scalars().all()
+    for sp in specialists:
+        if sp.user_id in existing_user_ids:
+            continue
+        user_res = await db.execute(select(User).where(User.id == sp.user_id))
+        user_obj = user_res.scalars().first()
+        email = user_obj.username if user_obj else ""
+        name_parts = (sp.full_name or "Doctor").strip().split(" ", 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+        results.append(
+            DoctorVerificationDetailResponse(
+                id=sp.id,
+                user_id=sp.user_id,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                phone="",
+                residence_country=sp.location or "España",
+                medical_license=sp.license_number or f"COL-{sp.id:04d}",
+                professional_registration_number=sp.license_number,
+                professional_college="Colegio Oficial de Médicos",
+                college_country=sp.location or "España",
+                specialty=sp.specialty or "Medicina General",
+                years_of_experience=sp.experience_years or 0,
+                professional_description=sp.bio or "",
+                address="",
+                city=sp.city or sp.location or "",
+                country=sp.location or "España",
+                verification_status="verified" if (sp.is_verified or sp.verified) else "pending",
+                is_active=True,
+                created_at=sp.created_at,
+                identity_document_url=sp.id_doc_url,
+                professional_registration_certificate_url=sp.diploma_url,
+            )
+        )
     return results
 
 
@@ -91,9 +141,52 @@ async def update_doctor_verification_status(
     doctor = res.scalar_one_or_none()
 
     if not doctor:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Médico no encontrado",
+        stmt_sp = select(SpecialistProfile).where(SpecialistProfile.id == doctor_id)
+        res_sp = await db.execute(stmt_sp)
+        sp = res_sp.scalar_one_or_none()
+        if not sp:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Médico no encontrado",
+            )
+        new_status = data.verification_status.lower().strip()
+        if new_status not in ["verified", "rejected", "pending"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Estado inválido. Debe ser 'verified', 'rejected' o 'pending'",
+            )
+        sp.is_verified = (new_status == "verified")
+        sp.verified = (new_status == "verified")
+        await db.commit()
+        name_parts = (sp.full_name or "Doctor").strip().split(" ", 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+        user_res = await db.execute(select(User).where(User.id == sp.user_id))
+        user_obj = user_res.scalars().first()
+        email = user_obj.username if user_obj else ""
+        return DoctorVerificationDetailResponse(
+            id=sp.id,
+            user_id=sp.user_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone="",
+            residence_country=sp.location or "España",
+            medical_license=sp.license_number or f"COL-{sp.id:04d}",
+            professional_registration_number=sp.license_number,
+            professional_college="Colegio Oficial de Médicos",
+            college_country=sp.location or "España",
+            specialty=sp.specialty or "Medicina General",
+            years_of_experience=sp.experience_years or 0,
+            professional_description=sp.bio or "",
+            address="",
+            city=sp.city or sp.location or "",
+            country=sp.location or "España",
+            verification_status=new_status,
+            is_active=True,
+            created_at=sp.created_at,
+            identity_document_url=sp.id_doc_url,
+            professional_registration_certificate_url=sp.diploma_url,
         )
 
     new_status = data.verification_status.lower().strip()
