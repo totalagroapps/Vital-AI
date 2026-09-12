@@ -67,7 +67,8 @@ const PatientChat = ({
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedConversationId, setSelectedConversationId] = useState(currentSessionId || 'c1');
+  const [isNewConsultation, setIsNewConsultation] = useState(true);
+  const [selectedConversationId, setSelectedConversationId] = useState(currentSessionId || null);
 
   const { t, language } = useLanguage();
   const internalImageRef = useRef(null);
@@ -140,6 +141,7 @@ const PatientChat = ({
 
   const handleSelectConversation = (item) => {
     setSelectedConversationId(item.id);
+    setIsNewConsultation(false);
     if (loadSession) {
       loadSession(item.id);
     } else {
@@ -150,6 +152,7 @@ const PatientChat = ({
 
   const handleStartNew = () => {
     setSelectedConversationId(null);
+    setIsNewConsultation(true);
     if (startNewSession) startNewSession();
   };
 
@@ -488,136 +491,135 @@ const PatientChat = ({
           </div>
 
           {/* Messages Area OR Welcome Cards */}
-          <div className="flex-1 overflow-y-auto relative z-10 flex flex-col">
+          <div className="flex-1 overflow-y-auto relative z-10 flex flex-col justify-between w-full">
             
-            {messages.length === 0 ? (
-              /* WELCOME STATE: EXACT 1:1 REPLICA OF media_1789226126171.png */
-              <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+            {(isNewConsultation || messages.length === 0) ? (
+              /* WELCOME STATE: EXACT 1:1 REPLICA OF media_1789226126171.png (FULL 100% WIDTH) */
+              <div className="flex-1 flex flex-col justify-between w-full px-6 sm:px-10 lg:px-12 xl:px-14 py-4 sm:py-6">
                 
-                {/* Central Emblem & Brand */}
-                <div className="flex flex-col items-center select-none pointer-events-none mb-1">
+                {/* Central Emblem & Brand + Greeting */}
+                <div className="flex flex-col items-center select-none pointer-events-none text-center pt-1 sm:pt-2">
                   <img 
                     src="/images/mivor_hero_feathered.png" 
                     alt="MIVOR.ai" 
-                    className="w-28 sm:w-32 lg:w-36 h-auto object-contain drop-shadow-sm" 
+                    className="w-20 sm:w-24 lg:w-32 xl:w-40 h-auto object-contain drop-shadow-sm" 
                   />
-                  <h2 className="text-2xl sm:text-[28px] font-black text-slate-950 tracking-tight flex items-center justify-center gap-0.5 mt-2">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight flex items-center justify-center gap-1 mt-1.5 sm:mt-2">
                     MIVOR<span className="text-[#005dff]">.ai</span>
                   </h2>
-                  <p className="text-[9px] sm:text-[9.5px] font-extrabold tracking-[0.22em] text-slate-400 uppercase text-center mt-0.5">
+                  <p className="text-[9px] sm:text-[10.5px] font-extrabold tracking-[0.25em] text-slate-400 uppercase mt-0.5">
                     BETTER HEALTH. BRIGHTER LIVES.
                   </p>
-                </div>
-
-                {/* Greeting */}
-                <div className="text-center mt-3 sm:mt-4">
-                  <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-950 tracking-tight">
+                  
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-950 tracking-tight mt-2 sm:mt-3">
                     Hola, <span className="text-[#005dff]">{firstName}</span>
                   </h1>
-                  <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-800 mt-1">
+                  <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">
                     ¿En qué puedo ayudarte hoy?
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
                     Tu asistente de salud con inteligencia artificial avanzada.
                   </p>
                 </div>
 
-                {/* 4 Quick Action Cards (Expanded Width matching reference) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1380px] px-4 sm:px-6 lg:px-8 mt-7 mb-4">
-                  
-                  {/* Card 1: ¿Qué puede significar este resultado? */}
-                  <div 
-                    onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
-                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-purple-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                        <Brain size={22} className="stroke-[2.1]" />
+                {/* 4 Quick Action Cards (FULL 100% WIDTH OF CANVAS) */}
+                <div className="w-full my-2 sm:my-3 lg:my-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 xl:gap-5 w-full">
+                    
+                    {/* Card 1: ¿Qué puede significar este resultado? */}
+                    <div 
+                      onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
+                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-purple-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                    >
+                      <div>
+                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                          <Brain size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        </div>
+                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                          ¿Qué puede significar este resultado?
+                        </h3>
+                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                          Te ayudo a interpretar tus análisis, pruebas e informes médicos.
+                        </p>
                       </div>
-                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
-                        ¿Qué puede significar este resultado?
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                        Te ayudo a interpretar tus análisis, pruebas e informes médicos.
-                      </p>
-                    </div>
-                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
-                      <ArrowRight size={12} className="stroke-[2.5]" />
-                    </div>
-                  </div>
-
-                  {/* Card 2: ¿Cuáles pueden ser las causas de este síntoma? */}
-                  <div 
-                    onClick={() => setInputMessage('Tengo los siguientes síntomas y quisiera saber las posibles causas:')}
-                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                        <Search size={22} className="stroke-[2.1]" />
+                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
+                        <ArrowRight size={13} className="stroke-[2.5]" />
                       </div>
-                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
-                        ¿Cuáles pueden ser las causas de este síntoma?
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                        Analizo tus síntomas y te explico las posibles causas y próximos pasos.
-                      </p>
                     </div>
-                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
-                      <ArrowRight size={12} className="stroke-[2.5]" />
-                    </div>
-                  </div>
 
-                  {/* Card 3: Explícame este informe médico */}
-                  <div 
-                    onClick={() => {
-                      setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
-                      actualPdfRef.current?.click();
-                    }}
-                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-teal-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                        <FileText size={22} className="stroke-[2.1]" />
+                    {/* Card 2: ¿Cuáles pueden ser las causas de este síntoma? */}
+                    <div 
+                      onClick={() => setInputMessage('Tengo los siguientes síntomas y quisiera saber las posibles causas:')}
+                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                    >
+                      <div>
+                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                          <Search size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        </div>
+                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                          ¿Cuáles pueden ser las causas de este síntoma?
+                        </h3>
+                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                          Analizo tus síntomas y te explico las posibles causas y próximos pasos.
+                        </p>
                       </div>
-                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
-                        Explícame este informe médico
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                        Te ayudo a entender tus informes médicos de forma clara y sencilla.
-                      </p>
-                    </div>
-                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
-                      <ArrowRight size={12} className="stroke-[2.5]" />
-                    </div>
-                  </div>
-
-                  {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
-                  <div 
-                    onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
-                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-orange-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                        <Pill size={22} className="stroke-[2.1]" />
+                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
+                        <ArrowRight size={13} className="stroke-[2.5]" />
                       </div>
-                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
-                        ¿Qué tratamientos existen para esta enfermedad?
-                      </h3>
-                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                        Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
-                      </p>
                     </div>
-                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
-                      <ArrowRight size={12} className="stroke-[2.5]" />
-                    </div>
-                  </div>
 
+                    {/* Card 3: Explícame este informe médico */}
+                    <div 
+                      onClick={() => {
+                        setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
+                        actualPdfRef.current?.click();
+                      }}
+                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-teal-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                    >
+                      <div>
+                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                          <FileText size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        </div>
+                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                          Explícame este informe médico
+                        </h3>
+                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                          Te ayudo a entender tus informes médicos de forma clara y sencilla.
+                        </p>
+                      </div>
+                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
+                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      </div>
+                    </div>
+
+                    {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
+                    <div 
+                      onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
+                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-orange-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                    >
+                      <div>
+                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                          <Pill size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        </div>
+                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                          ¿Qué tratamientos existen para esta enfermedad?
+                        </h3>
+                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                          Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
+                        </p>
+                      </div>
+                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
+                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
 
               </div>
             ) : (
               /* CONVERSATION THREAD */
-              <div className="flex-1 px-4 sm:px-8 py-6 space-y-5 max-w-4xl w-full mx-auto">
+              <div className="flex-1 px-4 sm:px-8 py-6 space-y-5 max-w-5xl xl:max-w-6xl w-full mx-auto">
                 {messages.map((msg, idx) => {
                   const isUser = msg.type === "user";
                   return (
@@ -722,15 +724,15 @@ const PatientChat = ({
 
           </div>
 
-          {/* 3. BOTTOM CHAT INPUT CAPSULE (EXACT TO REFERENCE) */}
-          <div className="w-full max-w-5xl xl:max-w-6xl px-4 sm:px-6 pb-3 pt-1 mx-auto relative z-20 shrink-0">
+          {/* 3. BOTTOM CHAT INPUT CAPSULE (MATCHING FULL 100% WIDTH) */}
+          <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-14 pb-3 pt-1 relative z-20 shrink-0">
             
             {/* Attachment preview if exists */}
             {(selectedImagePreview || selectedPdfName) && (
-              <div className="mb-2 p-2 px-3 bg-blue-50/90 border border-blue-200 rounded-xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
-                <div className="flex items-center gap-2 truncate">
-                  {selectedImagePreview && <ImageIcon size={15} className="text-[#005dff]" />}
-                  {selectedPdfName && <FileText size={15} className="text-[#005dff]" />}
+              <div className="mb-2 p-2.5 px-4 bg-blue-50/90 border border-blue-200 rounded-2xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
+                <div className="flex items-center gap-2.5 truncate">
+                  {selectedImagePreview && <ImageIcon size={16} className="text-[#005dff]" />}
+                  {selectedPdfName && <FileText size={16} className="text-[#005dff]" />}
                   <span className="truncate font-semibold">{selectedPdfName || 'Imagen adjunta'}</span>
                 </div>
                 <button 
@@ -738,7 +740,7 @@ const PatientChat = ({
                   onClick={onClearAttachment} 
                   className="p-1 hover:bg-blue-100 rounded-full text-blue-700 cursor-pointer"
                 >
-                  <X size={14} />
+                  <X size={15} />
                 </button>
               </div>
             )}
@@ -748,30 +750,31 @@ const PatientChat = ({
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!isLoading && (inputMessage.trim() || selectedImagePreview || selectedPdfName)) {
+                  setIsNewConsultation(false);
                   handleSend();
                 }
               }}
-              className="bg-white rounded-full border border-slate-200 shadow-sm p-1.5 pl-4 pr-2 flex items-center gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
+              className="w-full bg-white rounded-full border border-slate-200/90 shadow-sm py-2 px-4 sm:px-5 flex items-center gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
             >
               {/* Paperclip button */}
               <div className="relative">
                 <button 
                   type="button" 
                   onClick={() => setShowAttachMenu(prev => !prev)} 
-                  className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
                   title="Adjuntar archivo o imagen médica"
                 >
-                  <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
+                  <Paperclip size={19} className="stroke-[2.2] -rotate-45" />
                 </button>
 
                 {showAttachMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowAttachMenu(false)} />
-                    <div className="absolute left-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50 animate-in fade-in zoom-in-95">
+                    <div className="absolute left-0 bottom-full mb-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50 animate-in fade-in zoom-in-95">
                       <button 
                         type="button" 
                         onClick={() => { setShowAttachMenu(false); actualImageRef.current?.click(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
                       >
                         <ImageIcon size={16} className="text-[#005dff]" />
                         <span>Adjuntar imagen</span>
@@ -779,7 +782,7 @@ const PatientChat = ({
                       <button 
                         type="button" 
                         onClick={() => { setShowAttachMenu(false); actualPdfRef.current?.click(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
                       >
                         <FileText size={16} className="text-teal-600" />
                         <span>Adjuntar PDF / Informe</span>
@@ -796,34 +799,34 @@ const PatientChat = ({
                 onChange={(e) => setInputMessage(e.target.value)} 
                 placeholder="Escribe tu mensaje aquí..." 
                 disabled={isLoading}
-                className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
+                className="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
               />
 
               {/* Voice Mic Button (Light-blue circle matching reference) */}
               <button 
                 type="button" 
                 onClick={toggleListening}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   isListening 
                     ? 'bg-red-500 text-white animate-pulse shadow-xs' 
                     : 'bg-[#edf5fe] text-[#005dff] hover:bg-blue-100'
                 }`}
                 title={isListening ? "Detener dictado" : "Dictar por voz"}
               >
-                <Mic size={18} className="stroke-[2.2]" />
+                <Mic size={19} className="stroke-[2.2]" />
               </button>
 
               {/* Send Button (Vibrant blue circle with arrow) */}
               <button 
                 type="submit" 
                 disabled={isLoading || (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName)}
-                className="w-9 h-9 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
+                className="w-10 h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
                 title="Enviar mensaje"
               >
                 {isLoading ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={18} className="animate-spin" />
                 ) : (
-                  <Send size={15} className="stroke-[2.4] ml-0.5" />
+                  <Send size={16} className="stroke-[2.4] ml-0.5" />
                 )}
               </button>
 
@@ -832,14 +835,15 @@ const PatientChat = ({
             </form>
 
             {/* Bottom Security Note */}
-            <div className="py-2 text-center text-[10.5px] sm:text-[11px] text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
-              <Lock size={12} className="text-slate-600" />
+            <div className="py-2 text-center text-[11px] sm:text-xs text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
+              <Lock size={13} className="text-slate-500" />
               <span>Tus datos están protegidos. Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR).</span>
             </div>
           </div>
 
         </main>
       </div>
+
       {showHelpModal && (
         <div 
           onClick={() => setShowHelpModal(false)}

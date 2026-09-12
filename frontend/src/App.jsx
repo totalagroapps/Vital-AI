@@ -102,6 +102,11 @@ export default function App() {
       'doctors': '/paciente/medicos'
     };
     if (screen === 'triage') startTriageSession();
+    if (screen === 'general_chat') {
+      startNewSession();
+      navigate('/paciente/chat');
+      return;
+    }
     if (screen === 'history') {
       fetchPatientProfile();
       fetchHistory();
@@ -1074,7 +1079,10 @@ ${text}`], {type: 'text/plain'});
       navigate('/paciente/tratamientos');
     }
     if (tab === 'more') navigate('/paciente/mas');
-    if (tab === 'general_chat') navigate('/paciente/chat');
+    if (tab === 'general_chat') {
+      startNewSession();
+      navigate('/paciente/chat');
+    }
     if (tab === 'documents') navigate('/paciente/documentos');
     if (tab === 'search') navigate('/paciente/biblioteca');
     if (tab === 'doctors') {
