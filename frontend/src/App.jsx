@@ -1257,6 +1257,9 @@ ${text}`], {type: 'text/plain'});
             setDoctorDirectorySpecialty(spec || '');
             setShowDoctorDirectory(true);
           }}
+          onNavigate={handleNavigate}
+          onLogout={handleLogout}
+          username={username}
         />
         {GlobalBottomNav}
       </>
@@ -1292,6 +1295,9 @@ ${text}`], {type: 'text/plain'});
             setDoctorDirectorySpecialty(spec || '');
             setShowDoctorDirectory(true);
           }}
+          onNavigate={handleNavigate}
+          onLogout={handleLogout}
+          username={username}
         />
         {GlobalBottomNav}
       </>

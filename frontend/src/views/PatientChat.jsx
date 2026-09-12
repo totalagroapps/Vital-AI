@@ -1,12 +1,44 @@
 import React, { useRef, useEffect, useState } from "react";
-import { ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, Shield, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare, MessageCircle } from "lucide-react";
+import { 
+  ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, 
+  ShieldCheck, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare, 
+  MessageCircle, Search, HelpCircle, Bell, ChevronDown, Brain, Pill, Clock, 
+  User, LogOut, ArrowRight, CheckCircle2, Menu, UploadCloud, Lock
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
+const DEFAULT_CONVERSATIONS = [
+  {
+    group: 'Hoy',
+    items: [
+      { id: 'c1', title: 'Resultados análisis de sangre', time: '10:24', preview: 'Aquí tienes un resumen de tus resul...' },
+      { id: 'c2', title: 'Dolor abdominal', time: '09:15', preview: 'Las posibles causas pueden ser...' },
+      { id: 'c3', title: 'Interpretación TAC', time: '08:47', preview: 'He analizado la imagen y...' }
+    ]
+  },
+  {
+    group: 'Ayer',
+    items: [
+      { id: 'c4', title: 'Tratamientos para la hipertensión', time: '18:32', preview: 'Existen varias opciones que...' },
+      { id: 'c5', title: 'Informe médico', time: '16:20', preview: 'Te explico los resultados...' },
+      { id: 'c6', title: 'Segunda opinión', time: '12:14', preview: 'En base a la información...' }
+    ]
+  },
+  {
+    group: 'Esta semana',
+    items: [
+      { id: 'c7', title: 'Síntomas y recomendaciones', time: '09/09', preview: 'Según los síntomas que describes...' },
+      { id: 'c8', title: 'Vacunas para viajar', time: '08/09', preview: 'Estas son las vacunas recomendadas...' },
+      { id: 'c9', title: 'Control de diabetes', time: '07/09', preview: 'Te indico cómo monitorizar...' }
+    ]
+  }
+];
+
 const PatientChat = ({
-  messages,
+  messages = [],
   inputMessage,
   setInputMessage,
   handleSend,
@@ -24,17 +56,34 @@ const PatientChat = ({
   loadSession,
   startNewSession,
   currentSessionId,
-  onOpenDoctorDirectory
+  onOpenDoctorDirectory,
+  onNavigate,
+  onLogout,
+  username
 }) => {
   const [isListening, setIsListening] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedConversationId, setSelectedConversationId] = useState(currentSessionId || 'c1');
+
   const { t, language } = useLanguage();
   const internalImageRef = useRef(null);
   const internalPdfRef = useRef(null);
   const recognitionRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
   const actualImageRef = imageInputRef || internalImageRef;
   const actualPdfRef = pdfInputRef || internalPdfRef;
+
+  const displayName = patientProfile?.full_name || username || "Antonio Villena";
+  const firstName = displayName.split(' ')[0] || "Antonio";
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -89,430 +138,758 @@ const PatientChat = ({
     return 'Medicina General';
   };
 
-  const messagesEndRef = useRef(null);
+  const handleSelectConversation = (item) => {
+    setSelectedConversationId(item.id);
+    if (loadSession) {
+      loadSession(item.id);
+    } else {
+      setInputMessage(`Tengo una consulta sobre: ${item.title}`);
+    }
+    setMobileSidebarOpen(false);
+  };
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  const handleStartNew = () => {
+    setSelectedConversationId(null);
+    if (startNewSession) startNewSession();
+  };
+
+  // Filtered conversations
+  const filteredGroups = DEFAULT_CONVERSATIONS.map(group => ({
+    ...group,
+    items: group.items.filter(it => 
+      !searchQuery.trim() || 
+      it.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      it.preview.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(g => g.items.length > 0);
 
   return (
-    <div className="flex h-[100dvh] bg-base font-sans overflow-hidden relative">
-      <div className="flex-1 flex flex-col h-full relative border-r border-gray-200">
-      {/* Header */}
-      <div className="flex-none bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between z-20 shadow-sm">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
-            <ArrowLeft className="text-gray-700" size={22} />
-          </button>
-          <button 
-            type="button" 
-            onClick={startNewSession} 
-            className="px-2.5 py-1.5 rounded-xl bg-brand-purple/10 hover:bg-brand-purple/20 text-brand-purple font-bold text-xs flex items-center gap-1 transition-all active:scale-95 border border-brand-purple/20"
-            title={t('new_consultation') || 'Nueva Consulta'}
-          >
-            <Plus size={14} />
-            <span className="hidden sm:inline">{t('new_consultation') || 'Nueva Consulta'}</span>
-          </button>
-          {sessions && sessions.length > 0 && (
+    <div className="h-screen w-full bg-white text-slate-900 flex flex-col font-sans select-none overflow-hidden">
+      
+      {/* 1. TOP NAVBAR */}
+      <header className="w-full shrink-0 border-b border-slate-100/90 bg-white/95 backdrop-blur-xs z-40">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+          
+          {/* Brand Logo */}
+          <div className="flex items-center gap-3">
+            {/* Mobile menu hamburger toggle */}
             <button 
-              type="button" 
-              onClick={() => setShowHistoryModal(true)} 
-              className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1 transition-all active:scale-95 border border-slate-200 lg:hidden"
-              title="Historial de consultas"
+              type="button"
+              onClick={() => setMobileSidebarOpen(prev => !prev)}
+              className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+              title="Abrir conversaciones"
             >
-              <History size={14} />
-              <span>{sessions.length}</span>
+              <Menu size={20} />
             </button>
-          )}
-          <button 
-            type="button" 
-            onClick={() => onOpenDoctorDirectory?.()} 
-            className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-brand-purple font-semibold text-xs flex items-center gap-1 transition-all active:scale-95 border border-purple-200"
-            title="Directorio de Especialistas"
-          >
-            <Stethoscope size={14} />
-            <span className="hidden sm:inline">Especialistas</span>
-          </button>
-        </div>
 
-        <div className="flex items-center gap-1.5">
-          <img 
-            src="/images/mivor_logo.png" 
-            alt="MIVOR.ai" 
-            className="w-6 h-6 object-contain" 
-            onError={(e) => { e.target.src = '/logo.png'; }}
-          />
-          <div className="flex flex-col">
-            <h2 className="text-sm font-black text-slate-900 flex items-center leading-tight">
-              MIVOR<span className="text-teal-600">.ai</span>
-            </h2>
-            <span className="text-[9px] text-teal-600 font-bold flex items-center gap-1 leading-none">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {t('online')}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-end">
-          <LanguageSelector />
-        </div>
-      </div>
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 z-10 scroll-smooth">
-        {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center opacity-50">
-            <div className="w-16 h-16 bg-brand-purple/10 rounded-full flex items-center justify-center mb-4">
-              <Sparkles className="text-brand-purple" size={32} />
+            <div 
+              className="flex items-center cursor-pointer group shrink-0" 
+              onClick={() => onBack ? onBack() : onNavigate?.('home')}
+            >
+              <img 
+                src="/images/mivor_nav_logo.png" 
+                alt="MIVOR.ai - Better Health. Brighter Lives." 
+                className="h-7 sm:h-7.5 lg:h-8 w-auto object-contain transition-transform" 
+                onError={(e) => { e.target.src = '/logo.png'; }}
+              />
             </div>
-            <p className="text-sm font-medium text-gray-600">{t('how_can_i_help')}</p>
           </div>
-        )}
 
-        {messages.map((msg, idx) => {
-          const isUser = msg.type === "user";
-          return (
-            <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl p-4 shadow-sm ${
-                isUser 
-                  ? "bg-brand-purple text-white rounded-br-sm" 
-                  : "bg-white text-gray-800 border border-gray-100 rounded-bl-sm"
-              }`}>
-                {/* Imágen adjunta si existe */}
-                {msg.image && (
-                  <img src={msg.image} alt={t('attachment')} className="w-full max-w-[200px] h-auto rounded-lg mb-2 object-cover border border-white/20" />
-                )}
-                {/* PDF adjunto si existe */}
-                {msg.pdf && (
-                  <div className="flex items-center gap-2 bg-black/10 p-2 rounded-lg mb-2">
-                    <FileText size={16} />
-                    <span className="text-xs font-medium truncate">{t('attached_document')}</span>
-                  </div>
-                )}
-                
-                {/* Texto del mensaje */}
-                {isUser ? (
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.text || msg.content}</p>
-                ) : (
-                  <div>
-                    <div className="text-sm prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-gray-50 prose-pre:text-gray-800">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.text || msg.content}
-                      </ReactMarkdown>
+          {/* Center Navigation Tabs (EXCLUDING VIDEOCONFERENCIA PER USER REQUEST) */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-10">
+            {/* Tab 1: Nueva consulta (Activo) */}
+            <button 
+              type="button"
+              onClick={handleStartNew}
+              className="relative flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-semibold text-[#005dff] transition-colors cursor-pointer group"
+            >
+              <MessageSquare size={16} className="stroke-[2.2]" />
+              <span>Nueva consulta</span>
+              <span className="absolute -bottom-2.5 left-0 right-0 h-[2.5px] bg-[#005dff] rounded-full" />
+            </button>
+
+            {/* Tab 2: Subir análisis */}
+            <button 
+              type="button"
+              onClick={() => onNavigate ? onNavigate('documents') : actualPdfRef.current?.click()}
+              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+            >
+              <FileText size={16} className="stroke-[2]" />
+              <span>Subir análisis</span>
+            </button>
+
+            {/* Tab 3: Encontrar médico */}
+            <button 
+              type="button"
+              onClick={() => onOpenDoctorDirectory ? onOpenDoctorDirectory() : onNavigate?.('doctors')}
+              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+            >
+              <User size={16} className="stroke-[2]" />
+              <span>Encontrar médico</span>
+            </button>
+
+            {/* Tab 4: Mi historial */}
+            <button 
+              type="button"
+              onClick={() => onNavigate ? onNavigate('history') : onNavigate?.('patients')}
+              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+            >
+              <Clock size={16} className="stroke-[2]" />
+              <span>Mi historial</span>
+            </button>
+          </nav>
+
+          {/* Right Controls: Idioma, Help, Bell, User profile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <LanguageSelector variant="pill" />
+
+            {/* Help Button */}
+            <button 
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+              title="Ayuda y soporte"
+            >
+              <HelpCircle size={15} className="text-slate-700" />
+            </button>
+
+            {/* Notifications Bell */}
+            <div className="relative">
+              <button 
+                type="button"
+                onClick={() => onNavigate ? onNavigate('search') : null} 
+                className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+                title="Notificaciones"
+              >
+                <Bell size={15} className="text-slate-700" />
+              </button>
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
+            </div>
+
+            {/* User Profile Capsule Badge */}
+            <div className="relative">
+              <div 
+                onClick={() => setShowUserMenu(prev => !prev)}
+                className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
+              >
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
+                  <img 
+                    src={patientProfile?.photo_url || "/images/mivor_avatar_default.png"} 
+                    alt="Perfil" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => { e.target.src = '/logo.png'; }}
+                  />
+                </div>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[120px]">
+                    {displayName}
+                  </span>
+                  <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 leading-none mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                    Identidad verificada
+                  </span>
+                </div>
+                <ChevronDown size={14} className="text-slate-400" />
+              </div>
+
+              {/* User Dropdown Menu */}
+              {showUserMenu && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40 cursor-default" 
+                    onClick={() => setShowUserMenu(false)} 
+                  />
+
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
+                      <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{patientProfile?.email || "Paciente verificado"}</p>
                     </div>
 
-                    {/* Detección de reporte final de triaje para ofrecer cita médica y WhatsApp */}
-                    {Boolean(
-                      (msg.text || msg.content) && (
-                        (msg.text || msg.content).includes("Informe de Prediagnóstico") ||
-                        (msg.text || msg.content).includes("Prediagnóstico y Triaje") ||
-                        (msg.text || msg.content).includes("Especialidad a la que debería acudir") ||
-                        (msg.text || msg.content).includes("Nivel de urgencia")
-                      )
-                    ) && (
-                      <div className="mt-4 pt-3 border-t border-purple-100 bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-blue-50/80 rounded-2xl p-4 border border-purple-200/80 shadow-xs">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="w-7 h-7 rounded-xl bg-brand-purple text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                            <Sparkles size={15} />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-slate-800 block">
-                              Orientación de Triaje Finalizada
-                            </span>
-                            <span className="text-[10px] font-semibold text-brand-purple">
-                              Especialidad sugerida: {extractSpecialty(msg.text || msg.content)}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
-                          Puedes conectar de inmediato con especialistas certificados para recibir diagnóstico formal o agendar una consulta médica.
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => onOpenDoctorDirectory?.(extractSpecialty(msg.text || msg.content))}
-                            className="px-3.5 py-2 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                          >
-                            <Stethoscope size={14} />
-                            <span>Ver Especialistas ({extractSpecialty(msg.text || msg.content)})</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const spec = extractSpecialty(msg.text || msg.content);
-                              const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica preliminar en MIVOR.ai con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
-                              window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
-                            }}
-                            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all cursor-pointer"
-                          >
-                            <MessageCircle size={14} />
-                            <span>WhatsApp Inmediato</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                    <button 
+                      type="button"
+                      onClick={() => { setShowUserMenu(false); onNavigate ? onNavigate('history') : null; }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                    >
+                      <User size={15} className="text-[#005dff]" />
+                      <span>{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => { setShowUserMenu(false); onNavigate ? onNavigate('documents') : null; }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                    >
+                      <FileText size={15} className="text-teal-600" />
+                      <span>{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
+                    </button>
+
+                    <div className="pt-1.5 mt-1 border-t border-slate-100">
+                      <button 
+                        type="button"
+                        onClick={() => { setShowUserMenu(false); if (onLogout) onLogout(); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut size={15} className="text-rose-600" />
+                        <span>{t('patient_menu_logout_title') || 'Cerrar sesión'}</span>
+                      </button>
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-        
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-sm p-4 shadow-sm flex items-center gap-2 text-brand-purple">
-              <Loader2 className="animate-spin" size={20} />
-              <span className="text-xs font-medium">{t('thinking')}</span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input Area */}
-      <div className="flex-none bg-white border-t border-gray-100 px-4 py-3 pb-24 z-20 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
-        
-        {/* Vista previa de adjuntos */}
-        {(selectedImagePreview || selectedPdfName) && (
-          <div className="mb-3 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-200">
-            {selectedImagePreview ? (
-              <img src={selectedImagePreview} alt={t('preview')} className="w-10 h-10 rounded object-cover" />
-            ) : (
-              <div className="w-10 h-10 rounded bg-brand-green/10 text-brand-green flex items-center justify-center">
-                <FileText size={20} />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-gray-700 truncate">
-                {selectedPdfName || t('selected_image')}
-              </p>
-            </div>
-            <button onClick={onClearAttachment} className="p-1.5 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200 transition-colors">
-              <X size={16} />
-            </button>
-          </div>
-        )}
-
-        <form onSubmit={handleSend} className="flex items-center gap-2 relative">
-          
-          {/* Clip (Adjuntar) a la izquierda */}
-          <div className="relative shrink-0">
-            <button 
-              type="button" 
-              onClick={() => setShowAttachMenu(!showAttachMenu)} 
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 border ${showAttachMenu ? 'bg-teal-600 text-white border-teal-700 shadow-md' : 'bg-gray-100 text-gray-600 hover:text-teal-700 hover:bg-teal-50 border-gray-200'}`}
-              title="Adjuntar archivo o imagen"
-            >
-              <Paperclip size={19} className={showAttachMenu ? "rotate-45 transition-transform duration-200" : "transition-transform duration-200"} />
-            </button>
-
-            {/* Menu Popover flotante para adjuntos */}
-            {showAttachMenu && (
-              <div className="absolute bottom-12 left-0 bg-white rounded-2xl shadow-xl border border-gray-100 p-1.5 flex flex-col gap-1 min-w-[170px] z-30 animate-in fade-in zoom-in-95 duration-150">
-                <button
-                  type="button"
-                  onClick={() => {
-                    actualImageRef.current?.click();
-                    setShowAttachMenu(false);
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-teal-50 hover:text-teal-700 rounded-xl transition-colors text-left"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
-                    <ImageIcon size={15} />
-                  </div>
-                  <span>Subir Imagen</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    actualPdfRef.current?.click();
-                    setShowAttachMenu(false);
-                  }}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors text-left"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-                    <FileText size={15} />
-                  </div>
-                  <span>Subir PDF</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Campo de texto en el medio */}
-          <div className="flex-1 bg-gray-100 rounded-3xl flex items-center px-4 py-1 min-h-[44px] focus-within:ring-2 focus-within:ring-teal-500/30 focus-within:bg-white transition-all border border-transparent focus-within:border-teal-500/40">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder={t('type_your_message')}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 text-gray-800 placeholder-gray-400 w-full outline-none"
-              disabled={isLoading}
-            />
-          </div>
-
-          {/* Micrófono y Enviar a la derecha */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button 
-              type="button" 
-              onClick={toggleListening}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'}`}
-              title={isListening ? "Detener dictado" : "Dictar por voz"}
-            >
-              <Mic size={20} />
-            </button>
-
-            {(inputMessage.trim() || selectedImagePreview || selectedPdfName) && (
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-10 h-10 bg-teal-600 hover:bg-teal-700 rounded-full flex items-center justify-center text-white shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:shadow-none"
-                title="Enviar mensaje"
-              >
-                <Send size={18} className="ml-0.5" />
-              </button>
-            )}
-          </div>
-
-          {/* Hidden Inputs */}
-          <input type="file" ref={actualImageRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />
-          <input type="file" ref={actualPdfRef} onChange={handlePdfChange} accept="application/pdf" className="hidden" />
-        </form>
-      </div>
-
-      </div>
-      
-      {/* Medical Context Sidebar - desktop only */}
-      {patientProfile && (
-        <div className="hidden lg:flex lg:flex-col w-80 bg-white shadow-xl z-20 overflow-y-auto shrink-0">
-           <div className="p-5 border-b border-gray-100 bg-slate-50/50">
-             <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2 mb-4">
-               <Shield size={14} className="text-brand-purple" /> {t('active_clinical_context')}
-             </h3>
-             
-             <div className="flex items-center gap-3 mb-4">
-               <div className="w-10 h-10 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple font-bold">
-                 {patientProfile.full_name?.charAt(0) || 'P'}
-               </div>
-               <div>
-                 <p className="font-bold text-sm text-gray-900 truncate max-w-[180px]">{patientProfile.full_name || t('patient')}</p>
-                 <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span> {t('identity_verified')}
-                 </p>
-               </div>
-             </div>
-
-             <div className="grid grid-cols-2 gap-2 text-xs">
-               <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                 <p className="text-gray-400 mb-0.5 text-[10px]">{t('blood_type')}</p>
-                 <p className="font-bold text-red-500">{patientProfile.blood_type || '--'}</p>
-               </div>
-               <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                 <p className="text-gray-400 mb-0.5 text-[10px]">{t('age')}</p>
-                 <p className="font-bold text-gray-800">{patientProfile.date_of_birth ? new Date().getFullYear() - new Date(patientProfile.date_of_birth).getFullYear() : '--'} {t('years')}</p>
-               </div>
-             </div>
-           </div>
-
-           <div className="p-5 flex-1 flex flex-col gap-4">
-              <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><AlertCircle size={14} className="text-brand-orange"/> {t('registered_allergies')}</h4>
-                <p className="text-xs text-gray-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100">{patientProfile.allergies || t('none_registered')}</p>
-              </div>
-              
-              <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Activity size={14} className="text-blue-500"/> {t('chronic_conditions')}</h4>
-                <p className="text-xs text-gray-600 bg-blue-50 p-2.5 rounded-lg border border-blue-100">{patientProfile.chronic_conditions || t('none_registered')}</p>
-              </div>
-              
-              <div>
-                <h4 className="text-[11px] font-bold text-gray-900 flex items-center gap-1.5 mb-2"><Stethoscope size={14} className="text-brand-green"/> {t('current_medication')}</h4>
-                <p className="text-xs text-gray-600 bg-green-50 p-2.5 rounded-lg border border-green-100">{patientProfile.current_medications || t('none_registered')}</p>
-              </div>
-           </div>
-           
-           {sessions && sessions.length > 0 && (
-             <div className="p-5 border-t border-gray-100">
-               <div className="flex items-center justify-between mb-3">
-                 <h4 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">{t('recent_history') || 'Consultas Recientes'}</h4>
-                 <button 
-                   type="button" 
-                   onClick={startNewSession} 
-                   className="text-[10px] font-bold text-brand-purple hover:underline"
-                 >
-                   + {t('new_consultation') || 'Nueva'}
-                 </button>
-               </div>
-               <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-                 {sessions.map((s) => (
-                   <button 
-                     key={s.id} 
-                     type="button"
-                     onClick={() => loadSession && loadSession(s.id)}
-                     className={`w-full text-left p-2.5 rounded-xl border transition-all truncate block ${
-                       s.id === currentSessionId 
-                         ? 'border-brand-purple bg-brand-purple/10 text-brand-purple font-bold shadow-xs' 
-                         : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
-                     }`}
-                     title={s.title || 'Consulta'}
-                   >
-                     <div className="text-xs font-semibold truncate">{s.title || 'Consulta'}</div>
-                     <div className="text-[9px] text-gray-400 mt-0.5">{new Date(s.created_at).toLocaleDateString()}</div>
-                   </button>
-                 ))}
-               </div>
-             </div>
-           )}
-        </div>
-      )}
-
-      {/* Mobile History Modal */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 flex flex-col max-h-[80vh]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900 text-sm flex items-center gap-2">
-                <History size={16} className="text-brand-purple" />
-                <span>{t('recent_history') || 'Consultas Previas'}</span>
-              </h3>
-              <button onClick={() => setShowHistoryModal(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500">
-                <X size={18} />
-              </button>
-            </div>
-
-            <button 
-              type="button" 
-              onClick={() => { startNewSession && startNewSession(); setShowHistoryModal(false); }}
-              className="w-full py-2.5 px-4 mb-4 rounded-xl bg-brand-purple text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Plus size={16} />
-              <span>{t('new_consultation') || 'Nueva Consulta'}</span>
-            </button>
-
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {sessions && sessions.length > 0 ? (
-                sessions.map((s) => (
-                  <button 
-                    key={s.id} 
-                    type="button"
-                    onClick={() => { loadSession && loadSession(s.id); setShowHistoryModal(false); }}
-                    className={`w-full text-left p-3 rounded-xl border transition-all truncate block ${
-                      s.id === currentSessionId 
-                        ? 'border-brand-purple bg-brand-purple/10 text-brand-purple font-bold' 
-                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="text-xs font-semibold truncate">{s.title || 'Consulta'}</div>
-                    <div className="text-[10px] text-gray-400 mt-1">{new Date(s.created_at).toLocaleString()}</div>
-                  </button>
-                ))
-              ) : (
-                <p className="text-xs text-center text-gray-400 py-6">{t('no_previous_consultations') || 'No hay consultas previas.'}</p>
+                </>
               )}
             </div>
           </div>
         </div>
+      </header>
+
+      {/* 2. BODY CONTAINER: SIDEBAR + MAIN CHAT CANVAS */}
+      <div className="flex-1 flex overflow-hidden relative">
+
+        {/* Backdrop for mobile sidebar */}
+        {mobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/40 z-30 lg:hidden backdrop-blur-xs" 
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
+
+        {/* LEFT SIDEBAR ("Últimas conversaciones") */}
+        <aside className={`
+          fixed lg:static top-[57px] bottom-0 left-0 z-30
+          w-72 xl:w-80 bg-white border-r border-slate-200/80 flex flex-col shrink-0
+          transition-transform duration-200 ease-in-out
+          ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          {/* Sidebar Header */}
+          <div className="px-4 pt-4 pb-2">
+            <h3 className="text-xs xl:text-[13.5px] font-bold text-slate-900 tracking-tight">
+              Últimas conversaciones
+            </h3>
+          </div>
+
+          {/* Search Box */}
+          <div className="px-4 pb-3">
+            <div className="relative">
+              <input 
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar conversaciones..."
+                className="w-full bg-[#f8fafc] border border-slate-200/90 rounded-xl px-3.5 py-2 pr-9 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#005dff] transition-all"
+              />
+              <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Conversations Grouped List */}
+          <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-3.5">
+            {filteredGroups.length === 0 ? (
+              <p className="text-xs text-center text-slate-400 py-6">No se encontraron conversaciones.</p>
+            ) : (
+              filteredGroups.map((group) => (
+                <div key={group.group}>
+                  <div className="px-2 pb-1 text-xs font-semibold text-slate-500">
+                    {group.group}
+                  </div>
+                  <div className="space-y-1">
+                    {group.items.map((item) => {
+                      const isActive = selectedConversationId === item.id;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => handleSelectConversation(item)}
+                          className={`
+                            p-2.5 rounded-xl cursor-pointer transition-all flex items-start gap-2.5
+                            ${isActive 
+                              ? 'bg-[#edf5fe] border border-blue-100/90 shadow-2xs' 
+                              : 'hover:bg-slate-50 border border-transparent'
+                            }
+                          `}
+                        >
+                          <div className={`
+                            w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5
+                            ${isActive ? 'bg-[#005dff] text-white shadow-2xs' : 'text-slate-400 hover:text-slate-600'}
+                          `}>
+                            <MessageSquare size={14} className={isActive ? "stroke-[2.2]" : "stroke-[1.8]"} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <h4 className="text-xs font-bold text-slate-900 truncate">
+                                {item.title}
+                              </h4>
+                              <span className="text-[10px] text-slate-400 shrink-0 font-medium">
+                                {item.time}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 truncate leading-snug mt-0.5">
+                              {item.preview}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </aside>
+
+        {/* MAIN CHAT CANVAS */}
+        <main className="flex-1 flex flex-col h-full relative overflow-hidden bg-white">
+          
+          {/* Fluid ethereal background waves (1:1 with reference) */}
+          <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
+            <svg 
+              className="w-full h-full object-cover opacity-80" 
+              viewBox="0 0 1440 900" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+            >
+              <path 
+                d="M-100 420 C 320 220, 640 520, 1050 260 C 1260 140, 1420 210, 1600 230 L 1600 0 L -100 0 Z" 
+                fill="url(#wave-grad-soft)" 
+              />
+              <path 
+                d="M-50 320 C 380 470, 780 200, 1180 370 C 1380 460, 1530 410, 1650 380" 
+                stroke="url(#wave-accent-1)" 
+                strokeWidth="70" 
+                strokeLinecap="round" 
+                filter="blur(45px)" 
+                opacity="0.35" 
+              />
+              <path 
+                d="M-100 500 C 350 360, 750 540, 1200 310 C 1380 210, 1520 270, 1600 290" 
+                stroke="url(#wave-accent-2)" 
+                strokeWidth="50" 
+                strokeLinecap="round" 
+                filter="blur(35px)" 
+                opacity="0.3" 
+              />
+              <defs>
+                <linearGradient id="wave-grad-soft" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.5" />
+                  <stop offset="60%" stopColor="#bae6fd" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="wave-accent-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#bae6fd" />
+                  <stop offset="50%" stopColor="#7dd3fc" />
+                  <stop offset="100%" stopColor="#38bdf8" />
+                </linearGradient>
+                <linearGradient id="wave-accent-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="50%" stopColor="#60a5fa" />
+                  <stop offset="100%" stopColor="#93c5fd" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          {/* Messages Area OR Welcome Cards */}
+          <div className="flex-1 overflow-y-auto relative z-10 flex flex-col">
+            
+            {messages.length === 0 ? (
+              /* WELCOME STATE: EXACT 1:1 REPLICA OF media_1789226126171.png */
+              <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 my-auto">
+                
+                {/* Central Emblem & Brand */}
+                <div className="flex flex-col items-center select-none pointer-events-none mb-1">
+                  <img 
+                    src="/images/mivor_hero_feathered.png" 
+                    alt="MIVOR.ai" 
+                    className="w-28 sm:w-32 lg:w-36 h-auto object-contain drop-shadow-sm" 
+                  />
+                  <h2 className="text-2xl sm:text-[28px] font-black text-slate-950 tracking-tight flex items-center justify-center gap-0.5 mt-2">
+                    MIVOR<span className="text-[#005dff]">.ai</span>
+                  </h2>
+                  <p className="text-[9px] sm:text-[9.5px] font-extrabold tracking-[0.22em] text-slate-400 uppercase text-center mt-0.5">
+                    BETTER HEALTH. BRIGHTER LIVES.
+                  </p>
+                </div>
+
+                {/* Greeting */}
+                <div className="text-center mt-3 sm:mt-4">
+                  <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-950 tracking-tight">
+                    Hola, <span className="text-[#005dff]">{firstName}</span>
+                  </h1>
+                  <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-800 mt-1">
+                    ¿En qué puedo ayudarte hoy?
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-500 font-normal mt-0.5">
+                    Tu asistente de salud con inteligencia artificial avanzada.
+                  </p>
+                </div>
+
+                {/* 4 Quick Action Cards (Expanded Width matching reference) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-5 w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1380px] px-4 sm:px-6 lg:px-8 mt-7 mb-4">
+                  
+                  {/* Card 1: ¿Qué puede significar este resultado? */}
+                  <div 
+                    onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
+                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-purple-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                        <Brain size={22} className="stroke-[2.1]" />
+                      </div>
+                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
+                        ¿Qué puede significar este resultado?
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
+                        Te ayudo a interpretar tus análisis, pruebas e informes médicos.
+                      </p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
+                      <ArrowRight size={12} className="stroke-[2.5]" />
+                    </div>
+                  </div>
+
+                  {/* Card 2: ¿Cuáles pueden ser las causas de este síntoma? */}
+                  <div 
+                    onClick={() => setInputMessage('Tengo los siguientes síntomas y quisiera saber las posibles causas:')}
+                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                        <Search size={22} className="stroke-[2.1]" />
+                      </div>
+                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
+                        ¿Cuáles pueden ser las causas de este síntoma?
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
+                        Analizo tus síntomas y te explico las posibles causas y próximos pasos.
+                      </p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
+                      <ArrowRight size={12} className="stroke-[2.5]" />
+                    </div>
+                  </div>
+
+                  {/* Card 3: Explícame este informe médico */}
+                  <div 
+                    onClick={() => {
+                      setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
+                      actualPdfRef.current?.click();
+                    }}
+                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-teal-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                        <FileText size={22} className="stroke-[2.1]" />
+                      </div>
+                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
+                        Explícame este informe médico
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
+                        Te ayudo a entender tus informes médicos de forma clara y sencilla.
+                      </p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
+                      <ArrowRight size={12} className="stroke-[2.5]" />
+                    </div>
+                  </div>
+
+                  {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
+                  <div 
+                    onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
+                    className="bg-white rounded-3xl border border-slate-200/90 hover:border-orange-300/80 p-5 xl:p-6 flex flex-col justify-between min-h-[195px] xl:min-h-[210px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:shadow-md transition-all cursor-pointer group"
+                  >
+                    <div>
+                      <div className="w-10 h-10 rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                        <Pill size={22} className="stroke-[2.1]" />
+                      </div>
+                      <h3 className="font-bold text-xs sm:text-[13.5px] text-slate-900 mb-1.5 leading-snug">
+                        ¿Qué tratamientos existen para esta enfermedad?
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
+                        Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
+                      </p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-4 transition-all">
+                      <ArrowRight size={12} className="stroke-[2.5]" />
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            ) : (
+              /* CONVERSATION THREAD */
+              <div className="flex-1 px-4 sm:px-8 py-6 space-y-5 max-w-4xl w-full mx-auto">
+                {messages.map((msg, idx) => {
+                  const isUser = msg.type === "user";
+                  return (
+                    <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in duration-150`}>
+                      <div className={`max-w-[85%] sm:max-w-[78%] rounded-2xl p-4 shadow-sm ${
+                        isUser 
+                          ? "bg-[#005dff] text-white rounded-br-xs" 
+                          : "bg-white text-slate-900 border border-slate-200/90 rounded-bl-xs"
+                      }`}>
+                        {/* Imágen adjunta */}
+                        {msg.image && (
+                          <img src={msg.image} alt={t('attachment')} className="w-full max-w-[240px] h-auto rounded-xl mb-2.5 object-cover border border-white/20" />
+                        )}
+                        {/* PDF adjunto */}
+                        {msg.pdf && (
+                          <div className="flex items-center gap-2 bg-black/10 p-2.5 rounded-xl mb-2.5">
+                            <FileText size={16} />
+                            <span className="text-xs font-medium truncate">{t('attached_document')}</span>
+                          </div>
+                        )}
+                        
+                        {/* Texto */}
+                        {isUser ? (
+                          <p className="text-xs sm:text-[13.5px] whitespace-pre-wrap leading-relaxed">{msg.text || msg.content}</p>
+                        ) : (
+                          <div>
+                            <div className="text-xs sm:text-[13.5px] prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-slate-50 prose-pre:text-slate-800">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                {msg.text || msg.content}
+                              </ReactMarkdown>
+                            </div>
+
+                            {/* Alerta de derivación médica si aplica */}
+                            {Boolean(
+                              (msg.text || msg.content) && (
+                                (msg.text || msg.content).includes("Informe de Prediagnóstico") ||
+                                (msg.text || msg.content).includes("Prediagnóstico y Triaje") ||
+                                (msg.text || msg.content).includes("Especialidad a la que debería acudir") ||
+                                (msg.text || msg.content).includes("Nivel de urgencia")
+                              )
+                            ) && (
+                              <div className="mt-4 pt-3 border-t border-purple-100 bg-gradient-to-br from-purple-50/90 via-indigo-50/80 to-blue-50/80 rounded-2xl p-4 border border-purple-200/80 shadow-xs">
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  <div className="w-7 h-7 rounded-xl bg-[#005dff] text-white flex items-center justify-center shrink-0 shadow-xs">
+                                    <Sparkles size={14} />
+                                  </div>
+                                  <div>
+                                    <span className="text-xs font-bold text-slate-900 block">
+                                      Orientación de Triaje Finalizada
+                                    </span>
+                                    <span className="text-[10.5px] font-semibold text-[#005dff]">
+                                      Especialidad sugerida: {extractSpecialty(msg.text || msg.content)}
+                                    </span>
+                                  </div>
+                                </div>
+                                <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
+                                  Puedes conectar de inmediato con especialistas certificados para recibir diagnóstico formal o agendar una consulta médica.
+                                </p>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => onOpenDoctorDirectory ? onOpenDoctorDirectory(extractSpecialty(msg.text || msg.content)) : onNavigate?.('doctors')}
+                                    className="px-3.5 py-2 rounded-xl bg-[#005dff] hover:bg-[#0052e0] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                                  >
+                                    <Stethoscope size={14} />
+                                    <span>Ver Especialistas ({extractSpecialty(msg.text || msg.content)})</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const spec = extractSpecialty(msg.text || msg.content);
+                                      const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica en MIVOR.ai con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
+                                      window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
+                                    }}
+                                    className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
+                                  >
+                                    <MessageCircle size={14} />
+                                    <span>WhatsApp Inmediato</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-2 text-slate-500">
+                      <Loader2 size={16} className="animate-spin text-[#005dff]" />
+                      <span className="text-xs font-semibold">MIVOR.ai está analizando tu consulta...</span>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+
+          </div>
+
+          {/* 3. BOTTOM CHAT INPUT CAPSULE (EXACT TO REFERENCE) */}
+          <div className="w-full max-w-5xl xl:max-w-6xl px-4 sm:px-6 pb-3 pt-1 mx-auto relative z-20 shrink-0">
+            
+            {/* Attachment preview if exists */}
+            {(selectedImagePreview || selectedPdfName) && (
+              <div className="mb-2 p-2 px-3 bg-blue-50/90 border border-blue-200 rounded-xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
+                <div className="flex items-center gap-2 truncate">
+                  {selectedImagePreview && <ImageIcon size={15} className="text-[#005dff]" />}
+                  {selectedPdfName && <FileText size={15} className="text-[#005dff]" />}
+                  <span className="truncate font-semibold">{selectedPdfName || 'Imagen adjunta'}</span>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={onClearAttachment} 
+                  className="p-1 hover:bg-blue-100 rounded-full text-blue-700 cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            {/* Input Capsule */}
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!isLoading && (inputMessage.trim() || selectedImagePreview || selectedPdfName)) {
+                  handleSend();
+                }
+              }}
+              className="bg-white rounded-full border border-slate-200 shadow-sm p-1.5 pl-4 pr-2 flex items-center gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
+            >
+              {/* Paperclip button */}
+              <div className="relative">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAttachMenu(prev => !prev)} 
+                  className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                  title="Adjuntar archivo o imagen médica"
+                >
+                  <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
+                </button>
+
+                {showAttachMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowAttachMenu(false)} />
+                    <div className="absolute left-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50 animate-in fade-in zoom-in-95">
+                      <button 
+                        type="button" 
+                        onClick={() => { setShowAttachMenu(false); actualImageRef.current?.click(); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                      >
+                        <ImageIcon size={16} className="text-[#005dff]" />
+                        <span>Adjuntar imagen</span>
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => { setShowAttachMenu(false); actualPdfRef.current?.click(); }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
+                      >
+                        <FileText size={16} className="text-teal-600" />
+                        <span>Adjuntar PDF / Informe</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Text Input */}
+              <input 
+                type="text" 
+                value={inputMessage} 
+                onChange={(e) => setInputMessage(e.target.value)} 
+                placeholder="Escribe tu mensaje aquí..." 
+                disabled={isLoading}
+                className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
+              />
+
+              {/* Voice Mic Button (Light-blue circle matching reference) */}
+              <button 
+                type="button" 
+                onClick={toggleListening}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                  isListening 
+                    ? 'bg-red-500 text-white animate-pulse shadow-xs' 
+                    : 'bg-[#edf5fe] text-[#005dff] hover:bg-blue-100'
+                }`}
+                title={isListening ? "Detener dictado" : "Dictar por voz"}
+              >
+                <Mic size={18} className="stroke-[2.2]" />
+              </button>
+
+              {/* Send Button (Vibrant blue circle with arrow) */}
+              <button 
+                type="submit" 
+                disabled={isLoading || (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName)}
+                className="w-9 h-9 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
+                title="Enviar mensaje"
+              >
+                {isLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Send size={15} className="stroke-[2.4] ml-0.5" />
+                )}
+              </button>
+
+              <input type="file" ref={actualImageRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />
+              <input type="file" ref={actualPdfRef} onChange={handlePdfChange} accept="application/pdf" className="hidden" />
+            </form>
+
+            {/* Bottom Security Note */}
+            <div className="py-2 text-center text-[10.5px] sm:text-[11px] text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
+              <Lock size={12} className="text-slate-600" />
+              <span>Tus datos están protegidos. Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR).</span>
+            </div>
+          </div>
+
+        </main>
+      </div>
+      {showHelpModal && (
+        <div 
+          onClick={() => setShowHelpModal(false)}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#005dff] flex items-center justify-center">
+                  <HelpCircle size={20} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900">¿Cómo funciona MIVOR.ai?</h3>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="py-4 space-y-3 text-xs text-slate-600 leading-relaxed">
+              <p>
+                <strong>MIVOR.ai</strong> es tu asistente médico impulsado por inteligencia artificial clínica avanzada.
+              </p>
+              <ul className="space-y-2 list-disc list-inside text-slate-600">
+                <li>Puedes consultar dudas sobre síntomas, analíticas, informes o tratamientos.</li>
+                <li>Adjunta imágenes o informes en PDF usando el icono de clip.</li>
+                <li>Dicta por voz con el botón de micrófono en cualquier momento.</li>
+                <li>Tus consultas están protegidas con cifrado de grado médico y privacidad estricta.</li>
+              </ul>
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/60 text-[11px] text-amber-800">
+                <strong>Aviso clínico:</strong> MIVOR.ai ofrece orientación clínica informativa. En caso de emergencia médica real, contacta inmediatamente al 112 o al centro de urgencias más cercano.
+              </div>
+            </div>
+
+            <button 
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className="w-full py-2.5 bg-[#005dff] hover:bg-[#0052e0] text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer mt-2"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
       )}
+
     </div>
   );
 };
