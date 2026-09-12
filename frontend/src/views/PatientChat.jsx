@@ -4,7 +4,7 @@ import {
   ShieldCheck, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare, 
   MessageCircle, Search, HelpCircle, Bell, ChevronDown, Brain, Pill, Clock, 
   User, LogOut, ArrowRight, CheckCircle2, Menu, UploadCloud, Lock,
-  ThumbsUp, ThumbsDown, CheckCheck
+  ThumbsUp, ThumbsDown, CheckCheck, Trash2
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -160,6 +160,7 @@ const PatientChat = ({
   patientProfile,
   sessions,
   loadSession,
+  deleteSession,
   startNewSession,
   currentSessionId,
   onOpenDoctorDirectory,
@@ -593,7 +594,7 @@ const PatientChat = ({
                     key={item.id}
                     onClick={() => handleSelectConversation(item)}
                     className={`
-                      p-3 rounded-xl sm:rounded-2xl cursor-pointer transition-all flex items-start gap-3
+                      p-3 rounded-xl sm:rounded-2xl cursor-pointer transition-all flex items-start gap-3 group/item relative
                       ${isActive 
                         ? 'bg-[#edf5fe] border border-blue-100/90 shadow-2xs' 
                         : 'hover:bg-slate-50 border border-transparent'
@@ -611,9 +612,26 @@ const PatientChat = ({
                         <h4 className={`text-xs sm:text-sm truncate ${isActive ? 'font-bold text-slate-950' : 'font-semibold text-slate-800'}`}>
                           {item.title}
                         </h4>
-                        <span className="text-[10.5px] sm:text-xs text-slate-400 shrink-0 font-medium">
-                          {item.time}
-                        </span>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {item.isReal && deleteSession && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('¿Deseas eliminar esta consulta del historial?')) {
+                                  deleteSession(item.id);
+                                }
+                              }}
+                              className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-rose-50 hover:text-rose-600 text-slate-400 rounded-md transition-all cursor-pointer"
+                              title="Eliminar conversación"
+                            >
+                              <Trash2 size={13.5} />
+                            </button>
+                          )}
+                          <span className="text-[10.5px] sm:text-xs text-slate-400 font-medium">
+                            {item.time}
+                          </span>
+                        </div>
                       </div>
                       <p className="text-[11.5px] sm:text-xs text-slate-500 truncate leading-snug mt-0.5">
                         {item.preview}

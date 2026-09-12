@@ -8,6 +8,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from openai import AsyncOpenAI
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -96,10 +97,11 @@ async def get_sessions(user_id: str = Depends(get_current_user_id), db: AsyncSes
         select(models.ChatSession)
         .where(models.ChatSession.user_id == user_id)
         .order_by(models.ChatSession.created_at.desc())
-        .limit(50)
+        .limit(80)
     )
     sessions = result.scalars().all()
     session_list = []
+    seen = set()
     for s in sessions:
         last_msg_res = await db.execute(
             select(models.ChatMessage)
@@ -108,11 +110,20 @@ async def get_sessions(user_id: str = Depends(get_current_user_id), db: AsyncSes
             .limit(1)
         )
         last_msg = last_msg_res.scalars().first()
-        preview = "Consulta con MIVOR.ai"
-        if last_msg and last_msg.content:
-            clean_content = last_msg.content.strip()
-            preview = (clean_content[:45] + '...') if len(clean_content) > 45 else clean_content
-            
+        if not last_msg or not last_msg.content:
+            # Omit empty sessions
+            continue
+
+        clean_content = last_msg.content.strip()
+        preview = (clean_content[:45] + '...') if len(clean_content) > 45 else clean_content
+        
+        # Deduplicate identical test sessions created on the same day with same title/preview
+        date_str = s.created_at.strftime('%Y-%m-%d') if s.created_at else ''
+        key = ((s.title or '').strip().lower(), preview.strip().lower(), date_str)
+        if key in seen:
+            continue
+        seen.add(key)
+
         session_list.append({
             'id': s.id,
             'title': s.title or 'Consulta Médica',
@@ -120,6 +131,27 @@ async def get_sessions(user_id: str = Depends(get_current_user_id), db: AsyncSes
             'preview': preview
         })
     return session_list
+
+
+@router.delete('/api/sessions/{session_id}')
+async def delete_session(session_id: str, db: AsyncSession = Depends(get_db), user_id: str = Depends(get_current_user_id)):
+    """Elimina una conversación específica y todos sus mensajes asociados."""
+    res = await db.execute(
+        select(models.ChatSession).where(
+            models.ChatSession.id == session_id,
+            models.ChatSession.user_id == user_id
+        )
+    )
+    session = res.scalars().first()
+    if not session:
+        raise HTTPException(status_code=404, detail='Sesión no encontrada')
+    
+    await db.execute(
+        delete(models.ChatMessage).where(models.ChatMessage.session_id == session_id)
+    )
+    await db.delete(session)
+    await db.commit()
+    return {'ok': True, 'deleted_id': session_id}
 
 
 @router.post('/api/chat/start')

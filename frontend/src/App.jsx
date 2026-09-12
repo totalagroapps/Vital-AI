@@ -612,6 +612,23 @@ ${text}`], {type: 'text/plain'});
     }
   };
 
+  const deleteSession = async (sessionId) => {
+    try {
+      const res = await fetch(`${API_URL}/api/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: authHeaders
+      });
+      if (res.ok) {
+        setSessions(prev => prev.filter(s => s.id !== sessionId));
+        if (currentSessionId === sessionId) {
+          startNewSession();
+        }
+      }
+    } catch (e) {
+      console.error('Error deleting session:', e);
+    }
+  };
+
   const startNewSession = () => {
     setCurrentSessionId(null);
     setTriageSessionId(null);
@@ -1266,6 +1283,7 @@ ${text}`], {type: 'text/plain'});
             setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
           }}
           loadSession={loadSession}
+          deleteSession={deleteSession}
           startNewSession={startNewSession}
           currentSessionId={currentSessionId}
           onOpenDoctorDirectory={(spec) => {
@@ -1305,6 +1323,7 @@ ${text}`], {type: 'text/plain'});
             setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
           }}
           loadSession={loadSession}
+          deleteSession={deleteSession}
           startNewSession={startNewSession}
           currentSessionId={currentSessionId}
           onOpenDoctorDirectory={(spec) => {
