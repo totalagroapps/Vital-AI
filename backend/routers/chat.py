@@ -96,9 +96,30 @@ async def get_sessions(user_id: str = Depends(get_current_user_id), db: AsyncSes
         select(models.ChatSession)
         .where(models.ChatSession.user_id == user_id)
         .order_by(models.ChatSession.created_at.desc())
+        .limit(50)
     )
     sessions = result.scalars().all()
-    return [{'id': s.id, 'title': s.title, 'created_at': s.created_at.isoformat()} for s in sessions]
+    session_list = []
+    for s in sessions:
+        last_msg_res = await db.execute(
+            select(models.ChatMessage)
+            .where(models.ChatMessage.session_id == s.id)
+            .order_by(models.ChatMessage.created_at.desc())
+            .limit(1)
+        )
+        last_msg = last_msg_res.scalars().first()
+        preview = "Consulta con MIVOR.ai"
+        if last_msg and last_msg.content:
+            clean_content = last_msg.content.strip()
+            preview = (clean_content[:45] + '...') if len(clean_content) > 45 else clean_content
+            
+        session_list.append({
+            'id': s.id,
+            'title': s.title or 'Consulta Médica',
+            'created_at': s.created_at.isoformat() if s.created_at else None,
+            'preview': preview
+        })
+    return session_list
 
 
 @router.post('/api/chat/start')

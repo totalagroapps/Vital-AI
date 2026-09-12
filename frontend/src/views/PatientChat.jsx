@@ -42,6 +42,104 @@ const DEMO_CONVERSATIONS_MESSAGES = {
       text: 'El dolor comenzó hace 3 días, es intermitente y se siente más al final del día. También tengo algo de hinchazón. No tengo fiebre.',
       time: '10:26'
     }
+  ],
+  'c2': [
+    {
+      id: 'm2_1',
+      type: 'user',
+      text: 'Hola MIVOR, me acaban de entregar los resultados de mi análisis de sangre. ¿Podrías ayudarme a interpretarlos?',
+      time: '09:15'
+    },
+    {
+      id: 'm2_2',
+      type: 'assistant',
+      text: '¡Hola Antonio! Con gusto te ayudo a interpretar tu analítica sanguínea.\n\nPuedes indicarme o adjuntar los valores principales que llamen tu atención (como glucosa, colesterol, hemoglobina, leucocitos o transaminasas) junto con sus rangos de referencia para darte una explicación clara y orientativa paso a paso.',
+      time: '09:16'
+    }
+  ],
+  'c3': [
+    {
+      id: 'm3_1',
+      type: 'user',
+      text: 'Tengo dudas sobre cómo tomar el omeprazol. ¿Debe ser antes o después del desayuno?',
+      time: '08:47'
+    },
+    {
+      id: 'm3_2',
+      type: 'assistant',
+      text: 'Hola Antonio.\n\nPor regla general, el **omeprazol** se recomienda tomar en ayunas, aproximadamente **30 a 60 minutos antes del desayuno** con un vaso de agua.\n\n* De esta manera, el fármaco se absorbe adecuadamente antes de que las células del estómago comiencen a producir ácido con la comida.\n* Evita masticar o triturar las cápsulas.\n* Si tienes otra pauta prescrita por tu médico de cabecera, siempre sigue prioritariamente su indicación.',
+      time: '08:48'
+    }
+  ],
+  'c4': [
+    {
+      id: 'm4_1',
+      type: 'user',
+      text: 'Te adjunto el informe de mi TAC abdominal. En la conclusión indica: "Sin hallazgos de significación patológica aguda". ¿Qué significa?',
+      time: '18:32'
+    },
+    {
+      id: 'm4_2',
+      type: 'assistant',
+      text: 'Hola Antonio.\n\nEsa conclusión es **muy tranquilizadora**:\n\n* Significa que en las imágenes no se observan inflamaciones agudas, hemorragias, perforaciones ni lesiones de urgencia en los órganos examinados.\n* Es el equivalente a que el examen no detectó problemas médicos urgentes.\n* Tu médico tratante correlacionará este resultado con tus síntomas para darte el alta o el seguimiento adecuado.',
+      time: '18:34'
+    }
+  ],
+  'c5': [
+    {
+      id: 'm5_1',
+      type: 'user',
+      text: 'Mis últimas mediciones de tensión han sido 138/88 mmHg. ¿Se considera hipertensión?',
+      time: '16:20'
+    },
+    {
+      id: 'm5_2',
+      type: 'assistant',
+      text: 'Hola Antonio.\n\nValores de 138/88 mmHg se clasifican como **presión arterial normal-alta** (o prehipertensión):\n\n* Una sola toma no confirma diagnóstico; la tensión varía con estrés, café o cansancio.\n* Se aconseja registrar mediciones durante 5 a 7 días, por la mañana y por la tarde en reposo.\n* Moderar la sal, mantenerte activo y comentar el registro con tu médico te ayudará a prevenir elevaciones futuras.',
+      time: '16:22'
+    }
+  ],
+  'c6': [
+    {
+      id: 'm6_1',
+      type: 'user',
+      text: 'Voy a viajar a Tailandia el próximo mes. ¿Qué vacunas o precauciones sanitarias son recomendables?',
+      time: '12:14'
+    },
+    {
+      id: 'm6_2',
+      type: 'assistant',
+      text: '¡Hola Antonio! Excelente destino. Para viajar a Tailandia se suele recomendar:\n\n* Actualizar vacunas del calendario general (tétanos/difteria, triple vírica).\n* Vacunas específicas para viajes: **Hepatitis A** y en ocasiones **Fiebre Tifoidea**.\n* Protección estricta contra mosquitos (repelente con DEET) para prevenir dengue.\n* Beber siempre agua embotellada y consultar a un Centro de Vacunación Internacional 4 semanas antes.',
+      time: '12:16'
+    }
+  ],
+  'c7': [
+    {
+      id: 'm7_1',
+      type: 'user',
+      text: '¿Qué pruebas médicas son las más recomendadas para un chequeo de rutina preventivo?',
+      time: '09:09'
+    },
+    {
+      id: 'm7_2',
+      type: 'assistant',
+      text: 'Hola Antonio.\n\nPara un chequeo médico preventivo anual en adultos se suele pautar:\n\n* **Analítica general de sangre:** hemograma, glucosa, perfil lipídico (colesterol total, HDL, LDL, triglicéridos), función renal y hepática.\n* **Análisis de orina:** descartar infecciones o proteinuria.\n* **Examen físico:** control de tensión arterial, peso e índice de masa corporal.\n* Pruebas complementarias según edad y antecedentes (ej. electrocardiograma o cribado colorrectal).',
+      time: '09:11'
+    }
+  ],
+  'c8': [
+    {
+      id: 'm8_1',
+      type: 'user',
+      text: 'Tengo el colesterol LDL algo alto (145 mg/dL). ¿Cómo puedo mejorarlo de forma natural?',
+      time: '07/09'
+    },
+    {
+      id: 'm8_2',
+      type: 'assistant',
+      text: 'Hola Antonio.\n\nUn valor de LDL en 145 mg/dL puede responder muy favorablemente a cambios en el estilo de vida:\n\n* **Aumenta fibra soluble:** avena, lentejas, manzanas y semillas de chía ayudan a atrapar el colesterol en el intestino.\n* **Prioriza grasas saludables:** aceite de oliva virgen extra, frutos secos y pescado azul (rico en omega-3).\n* **Reduce ultraprocesados:** bollería, fritos y embutidos.\n* **Ejercicio aeróbico:** al menos 150 minutos semanales de caminata rápida o bicicleta.',
+      time: '07/09'
+    }
   ]
 };
 
@@ -169,18 +267,68 @@ const PatientChat = ({
     return 'Medicina General';
   };
 
+  const formatSessionTime = (isoString) => {
+    if (!isoString) return '';
+    try {
+      const d = new Date(isoString);
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      if (isToday) {
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Sync selectedConversationId with currentSessionId from App
+  useEffect(() => {
+    if (currentSessionId) {
+      setSelectedConversationId(currentSessionId);
+      setIsNewConsultation(false);
+    }
+  }, [currentSessionId]);
+
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      setIsNewConsultation(false);
+    }
+  }, [messages]);
+
+  // Determine conversation items to display in sidebar: real sessions if available, or demo items
+  const hasRealSessions = Array.isArray(sessions) && sessions.length > 0;
+  const conversationList = hasRealSessions
+    ? sessions.map(s => ({
+        id: s.id,
+        title: s.title || 'Consulta Médica',
+        time: formatSessionTime(s.created_at),
+        preview: s.preview || 'Consulta con MIVOR.ai',
+        isReal: true
+      }))
+    : DEFAULT_CONVERSATIONS.map(d => ({ ...d, isReal: false }));
+
   const handleSelectConversation = (item) => {
     setSelectedConversationId(item.id);
     setIsNewConsultation(false);
-    if (DEMO_CONVERSATIONS_MESSAGES[item.id]) {
-      setLocalMessages(DEMO_CONVERSATIONS_MESSAGES[item.id]);
-    } else {
+
+    if (item.isReal) {
       setLocalMessages([]);
-    }
-    if (loadSession) {
-      loadSession(item.id);
+      if (loadSession) {
+        loadSession(item.id);
+      }
     } else {
-      setInputMessage(`Tengo una consulta sobre: ${item.title}`);
+      // Demo item: reset global messages so demo localMessages takes over
+      if (startNewSession) startNewSession();
+      setTimeout(() => {
+        setSelectedConversationId(item.id);
+        setIsNewConsultation(false);
+        if (DEMO_CONVERSATIONS_MESSAGES[item.id]) {
+          setLocalMessages(DEMO_CONVERSATIONS_MESSAGES[item.id]);
+        } else {
+          setLocalMessages([]);
+        }
+      }, 30);
     }
     setMobileSidebarOpen(false);
   };
@@ -193,7 +341,7 @@ const PatientChat = ({
   };
 
   // Filtered conversations
-  const filteredConversations = DEFAULT_CONVERSATIONS.filter(it => 
+  const filteredConversations = conversationList.filter(it => 
     !searchQuery.trim() || 
     it.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
     it.preview.toLowerCase().includes(searchQuery.toLowerCase())

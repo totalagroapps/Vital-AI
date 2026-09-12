@@ -593,6 +593,8 @@ ${text}`], {type: 'text/plain'});
   const loadSession = async (sessionId) => {
     setCurrentSessionId(sessionId);
     setIsSidebarOpen(false);
+    setMessages([]);
+    setIsLoading(true);
     try {
       const res = await fetch(`${API_URL}/api/sessions/${sessionId}/messages`, { headers: authHeaders });
       if (res.ok) {
@@ -600,9 +602,13 @@ ${text}`], {type: 'text/plain'});
         setMessages(data);
       } else if (res.status === 401) {
         handleLogout();
+      } else {
+        console.error('Error loading session messages, status:', res.status);
       }
     } catch (e) {
       console.error('Error loading session messages:', e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
