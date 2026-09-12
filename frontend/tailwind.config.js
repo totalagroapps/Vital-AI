@@ -1,4 +1,4 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -7,7 +7,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        base: '#F4F7FB',
         surface: '#FFFFFF',
         brand: {
           DEFAULT: '#1A6B72',
@@ -34,6 +33,9 @@ export default {
           warning: { text: '#9A3412', bg: '#FFEDD5' },
           danger: { text: '#991B1B', bg: '#FEE2E2' },
         }
+      },
+      backgroundColor: {
+        base: '#F4F7FB',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

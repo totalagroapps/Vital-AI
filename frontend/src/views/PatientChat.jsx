@@ -3,7 +3,8 @@ import {
   ArrowLeft, Send, Paperclip, Mic, Image as ImageIcon, FileText, Loader2, Sparkles, X, 
   ShieldCheck, AlertCircle, Activity, Stethoscope, Plus, History, MessageSquare, 
   MessageCircle, Search, HelpCircle, Bell, ChevronDown, Brain, Pill, Clock, 
-  User, LogOut, ArrowRight, CheckCircle2, Menu, UploadCloud, Lock
+  User, LogOut, ArrowRight, CheckCircle2, Menu, UploadCloud, Lock,
+  ThumbsUp, ThumbsDown, CheckCheck
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -11,31 +12,38 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
 const DEFAULT_CONVERSATIONS = [
-  {
-    group: 'Hoy',
-    items: [
-      { id: 'c1', title: 'Resultados análisis de sangre', time: '10:24', preview: 'Aquí tienes un resumen de tus resul...' },
-      { id: 'c2', title: 'Dolor abdominal', time: '09:15', preview: 'Las posibles causas pueden ser...' },
-      { id: 'c3', title: 'Interpretación TAC', time: '08:47', preview: 'He analizado la imagen y...' }
-    ]
-  },
-  {
-    group: 'Ayer',
-    items: [
-      { id: 'c4', title: 'Tratamientos para la hipertensión', time: '18:32', preview: 'Existen varias opciones que...' },
-      { id: 'c5', title: 'Informe médico', time: '16:20', preview: 'Te explico los resultados...' },
-      { id: 'c6', title: 'Segunda opinión', time: '12:14', preview: 'En base a la información...' }
-    ]
-  },
-  {
-    group: 'Esta semana',
-    items: [
-      { id: 'c7', title: 'Síntomas y recomendaciones', time: '09/09', preview: 'Según los síntomas que describes...' },
-      { id: 'c8', title: 'Vacunas para viajar', time: '08/09', preview: 'Estas son las vacunas recomendadas...' },
-      { id: 'c9', title: 'Control de diabetes', time: '07/09', preview: 'Te indico cómo monitorizar...' }
-    ]
-  }
+  { id: 'c1', title: 'Dolor abdominal', time: '10:24', preview: 'He tenido dolor en la parte..' },
+  { id: 'c2', title: 'Resultados analítica', time: '09/09', preview: '¿Puedes explicarme estos...' },
+  { id: 'c3', title: 'Dudas medicación', time: '08/09', preview: '¿Es seguro tomar...' },
+  { id: 'c4', title: 'Informe TAC', time: '06/09', preview: 'Te adjunto el informe...' },
+  { id: 'c5', title: 'Control de tensión', time: '04/09', preview: 'Mis últimas mediciones son...' },
+  { id: 'c6', title: 'Vacunas para viajar', time: '02/09', preview: '¿Qué vacunas necesito...' },
+  { id: 'c7', title: 'Chequeo general', time: '01/09', preview: '¿Qué pruebas me recomiendas...' },
+  { id: 'c8', title: 'Colesterol', time: '28/08', preview: '¿Cómo puedo mejorarlo...' }
 ];
+
+const DEMO_CONVERSATIONS_MESSAGES = {
+  'c1': [
+    {
+      id: 'm1',
+      type: 'user',
+      text: 'Hola, llevo unos días con dolor en la parte baja del abdomen.\n¿A qué puede deberse?',
+      time: '10:24'
+    },
+    {
+      id: 'm2',
+      type: 'assistant',
+      text: 'Hola Antonio,\n\nEl dolor en la parte baja del abdomen puede tener varias causas, y para orientarte mejor necesito conocer algunos detalles. Puede estar relacionado con problemas digestivos, urinarios, musculares o, en algunos casos, con otras condiciones médicas.\n\nPara ayudarte de forma más precisa, ¿podrías indicarme:\n\n* Desde cuándo tienes el dolor?\n* Cómo describirías el dolor (punzante, continuo, intermitente, leve o intenso)?\n* ¿Se acompaña de otros síntomas como fiebre, náuseas, cambios en el hábito intestinal o al orinar?\n* ¿Hay alguna situación que lo empeore o lo alivie?\n\nCon esta información podré darte una orientación más completa.',
+      time: '10:25'
+    },
+    {
+      id: 'm3',
+      type: 'user',
+      text: 'El dolor comenzó hace 3 días, es intermitente y se siente más al final del día. También tengo algo de hinchazón. No tengo fiebre.',
+      time: '10:26'
+    }
+  ]
+};
 
 const PatientChat = ({
   messages = [],
@@ -69,6 +77,8 @@ const PatientChat = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [isNewConsultation, setIsNewConsultation] = useState(true);
   const [selectedConversationId, setSelectedConversationId] = useState(currentSessionId || null);
+  const [feedbacks, setFeedbacks] = useState({});
+  const [localMessages, setLocalMessages] = useState([]);
 
   const { t, language } = useLanguage();
   const internalImageRef = useRef(null);
@@ -84,7 +94,27 @@ const PatientChat = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, localMessages, isLoading]);
+
+  const handleFeedback = (idx, type) => {
+    setFeedbacks(prev => ({
+      ...prev,
+      [idx]: prev[idx] === type ? null : type
+    }));
+  };
+
+  const formatMsgTime = (msg) => {
+    if (msg.time) return msg.time;
+    if (msg.created_at) {
+      try {
+        const d = new Date(msg.created_at);
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch (e) {
+        return '10:24';
+      }
+    }
+    return '10:24';
+  };
 
   const toggleListening = () => {
     if (isListening) {
@@ -142,6 +172,11 @@ const PatientChat = ({
   const handleSelectConversation = (item) => {
     setSelectedConversationId(item.id);
     setIsNewConsultation(false);
+    if (DEMO_CONVERSATIONS_MESSAGES[item.id]) {
+      setLocalMessages(DEMO_CONVERSATIONS_MESSAGES[item.id]);
+    } else {
+      setLocalMessages([]);
+    }
     if (loadSession) {
       loadSession(item.id);
     } else {
@@ -153,18 +188,20 @@ const PatientChat = ({
   const handleStartNew = () => {
     setSelectedConversationId(null);
     setIsNewConsultation(true);
+    setLocalMessages([]);
     if (startNewSession) startNewSession();
   };
 
   // Filtered conversations
-  const filteredGroups = DEFAULT_CONVERSATIONS.map(group => ({
-    ...group,
-    items: group.items.filter(it => 
-      !searchQuery.trim() || 
-      it.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      it.preview.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  })).filter(g => g.items.length > 0);
+  const filteredConversations = DEFAULT_CONVERSATIONS.filter(it => 
+    !searchQuery.trim() || 
+    it.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    it.preview.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const activeMessages = (messages && messages.length > 0)
+    ? messages
+    : localMessages;
 
   return (
     <div className="h-screen w-full bg-white text-slate-900 flex flex-col font-sans select-none overflow-hidden">
@@ -359,81 +396,84 @@ const PatientChat = ({
         {/* LEFT SIDEBAR ("Últimas conversaciones") */}
         <aside className={`
           fixed lg:static top-[52px] bottom-0 left-0 z-30
-          w-60 lg:w-64 xl:w-72 bg-white border-r border-slate-200/80 flex flex-col shrink-0
+          w-64 lg:w-72 xl:w-80 bg-white border-r border-slate-200/80 flex flex-col shrink-0
           transition-transform duration-200 ease-in-out
           ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
         `}>
+          {/* Nueva consulta button */}
+          <div className="p-3.5 sm:p-4 pb-2">
+            <button 
+              type="button"
+              onClick={handleStartNew}
+              className="w-full bg-[#005dff] hover:bg-[#0052e0] active:scale-[0.99] text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 shadow-xs transition-all cursor-pointer"
+            >
+              <Plus size={18} className="stroke-[2.5]" />
+              <span>Nueva consulta</span>
+            </button>
+          </div>
+
           {/* Sidebar Header */}
-          <div className="px-3.5 pt-3 pb-1.5">
-            <h3 className="text-xs xl:text-[13px] font-bold text-slate-900 tracking-tight">
+          <div className="px-4 sm:px-5 pt-1.5 pb-2">
+            <h3 className="text-xs sm:text-sm xl:text-[14.5px] font-bold text-slate-900 tracking-tight">
               Últimas conversaciones
             </h3>
           </div>
 
           {/* Search Box */}
-          <div className="px-4 pb-3">
+          <div className="px-3.5 sm:px-4 pb-3">
             <div className="relative">
               <input 
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar conversaciones..."
-                className="w-full bg-[#f8fafc] border border-slate-200/90 rounded-xl px-3.5 py-2 pr-9 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#005dff] transition-all"
+                className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 sm:px-4 py-2.5 pr-9 text-xs sm:text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#005dff] focus:ring-1 focus:ring-[#005dff] transition-all"
               />
-              <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <Search size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
-          {/* Conversations Grouped List */}
-          <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-3.5">
-            {filteredGroups.length === 0 ? (
-              <p className="text-xs text-center text-slate-400 py-6">No se encontraron conversaciones.</p>
+          {/* Conversations Flat List */}
+          <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 pb-4 space-y-1 sm:space-y-1.5">
+            {filteredConversations.length === 0 ? (
+              <p className="text-xs sm:text-sm text-center text-slate-400 py-6">No se encontraron conversaciones.</p>
             ) : (
-              filteredGroups.map((group) => (
-                <div key={group.group}>
-                  <div className="px-2 pb-1 text-xs font-semibold text-slate-500">
-                    {group.group}
+              filteredConversations.map((item) => {
+                const isActive = selectedConversationId === item.id;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => handleSelectConversation(item)}
+                    className={`
+                      p-3 rounded-xl sm:rounded-2xl cursor-pointer transition-all flex items-start gap-3
+                      ${isActive 
+                        ? 'bg-[#edf5fe] border border-blue-100/90 shadow-2xs' 
+                        : 'hover:bg-slate-50 border border-transparent'
+                      }
+                    `}
+                  >
+                    <div className={`
+                      w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5
+                      ${isActive ? 'text-[#005dff]' : 'text-slate-400'}
+                    `}>
+                      <MessageSquare size={18} className={isActive ? "stroke-[2.2]" : "stroke-[1.8]"} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <h4 className={`text-xs sm:text-sm truncate ${isActive ? 'font-bold text-slate-950' : 'font-semibold text-slate-800'}`}>
+                          {item.title}
+                        </h4>
+                        <span className="text-[10.5px] sm:text-xs text-slate-400 shrink-0 font-medium">
+                          {item.time}
+                        </span>
+                      </div>
+                      <p className="text-[11.5px] sm:text-xs text-slate-500 truncate leading-snug mt-0.5">
+                        {item.preview}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      const isActive = selectedConversationId === item.id;
-                      return (
-                        <div
-                          key={item.id}
-                          onClick={() => handleSelectConversation(item)}
-                          className={`
-                            p-2.5 rounded-xl cursor-pointer transition-all flex items-start gap-2.5
-                            ${isActive 
-                              ? 'bg-[#edf5fe] border border-blue-100/90 shadow-2xs' 
-                              : 'hover:bg-slate-50 border border-transparent'
-                            }
-                          `}
-                        >
-                          <div className={`
-                            w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5
-                            ${isActive ? 'bg-[#005dff] text-white shadow-2xs' : 'text-slate-400 hover:text-slate-600'}
-                          `}>
-                            <MessageSquare size={14} className={isActive ? "stroke-[2.2]" : "stroke-[1.8]"} />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-1">
-                              <h4 className="text-xs font-bold text-slate-900 truncate">
-                                {item.title}
-                              </h4>
-                              <span className="text-[10px] text-slate-400 shrink-0 font-medium">
-                                {item.time}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-500 truncate leading-snug mt-0.5">
-                              {item.preview}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </aside>
@@ -493,57 +533,57 @@ const PatientChat = ({
           {/* Messages Area OR Welcome Cards */}
           <div className="flex-1 overflow-y-auto min-h-0 relative z-10 flex flex-col justify-between w-full">
             
-            {(isNewConsultation || messages.length === 0) ? (
+            {(isNewConsultation || activeMessages.length === 0) ? (
               /* WELCOME STATE: EXACT 1:1 REPLICA OF media_1789226126171.png (FULL 100% WIDTH) */
-              <div className="flex-1 min-h-0 flex flex-col justify-between w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-1.5 sm:py-2.5 lg:py-3.5 max-w-[1700px] mx-auto">
+              <div className="flex-1 min-h-0 flex flex-col justify-between w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-14 py-2 sm:py-3 lg:py-4 max-w-[1650px] mx-auto overflow-y-auto">
                 
                 {/* Central Emblem & Brand + Greeting */}
-                <div className="flex flex-col items-center select-none pointer-events-none text-center pt-0.5 shrink-0">
+                <div className="flex flex-col items-center select-none pointer-events-none text-center pt-1 shrink-0">
                   <img 
                     src="/images/mivor_hero_feathered.png" 
                     alt="MIVOR.ai" 
-                    className="w-16 sm:w-20 lg:w-24 xl:w-28 h-auto object-contain drop-shadow-sm transition-all" 
+                    className="w-20 sm:w-24 md:w-28 lg:w-32 xl:w-36 h-auto object-contain drop-shadow-md transition-all" 
                   />
-                  <h2 className="text-[17px] sm:text-[19px] lg:text-[22px] xl:text-[26px] font-black text-[#0f172a] tracking-tight flex items-center justify-center gap-1 mt-1">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-[32px] font-black text-[#0f172a] tracking-tight flex items-center justify-center gap-1 mt-1 sm:mt-1.5">
                     MIVOR<span className="text-[#005dff]">.ai</span>
                   </h2>
-                  <p className="text-[8px] sm:text-[8.5px] lg:text-[9.5px] xl:text-[10.5px] font-extrabold tracking-[0.25em] text-slate-400 uppercase mt-0.5">
+                  <p className="text-[9px] sm:text-[10px] md:text-[11px] font-extrabold tracking-[0.25em] sm:tracking-[0.28em] text-slate-400 uppercase mt-0.5 sm:mt-1">
                     BETTER HEALTH. BRIGHTER LIVES.
                   </p>
                   
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-[#0f172a] tracking-tight mt-1 sm:mt-1.5">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-[#0f172a] tracking-tight mt-1 sm:mt-2">
                     Hola, <span className="text-[#005dff]">{firstName}</span>
                   </h1>
-                  <p className="text-[13px] sm:text-[14px] lg:text-[16px] xl:text-[18px] font-bold text-[#0f172a] mt-0.5">
+                  <p className="text-[17px] sm:text-[19px] md:text-[21px] lg:text-[23px] font-bold text-[#0f172a] mt-0.5">
                     ¿En qué puedo ayudarte hoy?
                   </p>
-                  <p className="text-[10.5px] sm:text-xs lg:text-[13px] text-slate-500 font-medium mt-0.5">
+                  <p className="text-xs sm:text-[13px] md:text-sm lg:text-[15px] text-slate-500 font-medium mt-0.5">
                     Tu asistente de salud con inteligencia artificial avanzada.
                   </p>
                 </div>
 
                 {/* 4 Quick Action Cards (FULL 100% WIDTH OF CANVAS) */}
-                <div className="w-full my-auto py-1 sm:py-2 shrink-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-3.5 xl:gap-4.5 w-full">
+                <div className="w-full my-auto py-2 shrink-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 w-full">
                     
                     {/* Card 1: ¿Qué puede significar este resultado? */}
                     <div 
                       onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
-                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-purple-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-purple-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
-                          <Brain size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Brain className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
                           ¿Qué puede significar este resultado?
                         </h3>
-                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
+                        <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
                           Te ayudo a interpretar tus análisis, pruebas e informes médicos.
                         </p>
                       </div>
-                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
-                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
                       </div>
                     </div>
 
@@ -556,21 +596,21 @@ const PatientChat = ({
                           : 'Hola MIVOR, quiero evaluar unos síntomas que tengo para saber las posibles causas y qué debo hacer (iniciar triaje clínico).';
                         handleSend(null, prompt);
                       }}
-                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-blue-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
-                          <Search size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Search className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
                           ¿Cuáles pueden ser las causas de este síntoma?
                         </h3>
-                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
+                        <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
                           Analizo tus síntomas y te explico las posibles causas y próximos pasos.
                         </p>
                       </div>
-                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
-                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
                       </div>
                     </div>
 
@@ -580,42 +620,42 @@ const PatientChat = ({
                         setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
                         actualPdfRef.current?.click();
                       }}
-                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-teal-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-teal-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
-                          <FileText size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <FileText className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
                           Explícame este informe médico
                         </h3>
-                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
+                        <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
                           Te ayudo a entender tus informes médicos de forma clara y sencilla.
                         </p>
                       </div>
-                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
-                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
                       </div>
                     </div>
 
                     {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
                     <div 
                       onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
-                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-orange-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-orange-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
-                          <Pill size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Pill className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
                           ¿Qué tratamientos existen para esta enfermedad?
                         </h3>
-                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
+                        <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
                           Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
                         </p>
                       </div>
-                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
-                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
+                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
                       </div>
                     </div>
 
@@ -624,36 +664,79 @@ const PatientChat = ({
 
               </div>
             ) : (
-              /* CONVERSATION THREAD */
-              <div className="flex-1 px-4 sm:px-8 py-6 space-y-5 max-w-5xl xl:max-w-6xl w-full mx-auto">
-                {messages.map((msg, idx) => {
+              /* CONVERSATION THREAD: 1:1 REPLICA OF media_1789234006984.png */
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-4 sm:py-6 space-y-4 sm:space-y-5 w-full max-w-[1700px] mx-auto">
+                {activeMessages.map((msg, idx) => {
                   const isUser = msg.type === "user";
                   return (
-                    <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in duration-150`}>
-                      <div className={`max-w-[85%] sm:max-w-[78%] rounded-2xl p-4 shadow-sm ${
-                        isUser 
-                          ? "bg-[#005dff] text-white rounded-br-xs" 
-                          : "bg-white text-slate-900 border border-slate-200/90 rounded-bl-xs"
-                      }`}>
-                        {/* Imágen adjunta */}
-                        {msg.image && (
-                          <img src={msg.image} alt={t('attachment')} className="w-full max-w-[240px] h-auto rounded-xl mb-2.5 object-cover border border-white/20" />
-                        )}
-                        {/* PDF adjunto */}
-                        {msg.pdf && (
-                          <div className="flex items-center gap-2 bg-black/10 p-2.5 rounded-xl mb-2.5">
-                            <FileText size={16} />
-                            <span className="text-xs font-medium truncate">{t('attached_document')}</span>
+                    <div key={msg.id || idx} className="animate-in fade-in duration-150">
+                      {isUser ? (
+                        /* USER MESSAGE: Light ice-blue bubble aligned right + Patient Avatar */
+                        <div className="flex justify-end items-start gap-2.5 sm:gap-3 my-2 sm:my-3 group">
+                          <div className="bg-[#edf5fe] text-slate-900 rounded-2xl rounded-tr-xs px-4 sm:px-5 lg:px-6 py-3 sm:py-4 max-w-[85%] sm:max-w-[70%] lg:max-w-[62%] xl:max-w-[55%] shadow-2xs border border-blue-100/50">
+                            {/* Attached Image if any */}
+                            {msg.image && (
+                              <img src={msg.image} alt={t('attachment')} className="w-full max-w-[240px] h-auto rounded-xl mb-2 object-cover border border-slate-200" />
+                            )}
+                            {/* Attached PDF if any */}
+                            {msg.pdf && (
+                              <div className="flex items-center gap-2 bg-blue-100/60 p-2.5 rounded-xl mb-2 text-blue-900 text-xs font-medium">
+                                <FileText size={16} />
+                                <span className="truncate">{t('attached_document')}</span>
+                              </div>
+                            )}
+                            <p className="text-xs sm:text-sm lg:text-[15px] leading-relaxed whitespace-pre-wrap font-normal text-slate-800">
+                              {msg.text || msg.content}
+                            </p>
+                            <div className="flex items-center justify-end gap-1.5 mt-1.5 text-[11px] sm:text-xs text-slate-400 select-none">
+                              <span>{formatMsgTime(msg)}</span>
+                              <CheckCheck size={14} className="text-[#005dff] stroke-[2.2]" />
+                            </div>
                           </div>
-                        )}
-                        
-                        {/* Texto */}
-                        {isUser ? (
-                          <p className="text-xs sm:text-[13.5px] whitespace-pre-wrap leading-relaxed">{msg.text || msg.content}</p>
-                        ) : (
-                          <div>
-                            <div className="text-xs sm:text-[13.5px] prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-slate-50 prose-pre:text-slate-800">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {/* User Avatar */}
+                          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border border-slate-200 shrink-0 shadow-2xs mt-0.5">
+                            <img 
+                              src={patientProfile?.photo_url || "/images/mivor_avatar_default.png"} 
+                              alt={displayName} 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => { e.target.src = '/images/mivor_avatar_default.png'; }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        /* ASSISTANT (MIVOR.ai) MESSAGE: Circular 3D Avatar + White Card + Blue Bullets + Feedback */
+                        <div className="flex justify-start items-start gap-2.5 sm:gap-3.5 my-2 sm:my-3 group">
+                          {/* MIVOR Avatar */}
+                          <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border border-blue-100/90 bg-white shadow-2xs shrink-0 mt-0.5">
+                            <img 
+                              src="/images/mivor_hero_circle_clean.png" 
+                              alt="MIVOR.ai" 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => { e.target.src = '/logo.png'; }}
+                            />
+                          </div>
+                          {/* White Card */}
+                          <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-7 max-w-[92%] sm:max-w-[82%] lg:max-w-[75%] xl:max-w-[68%] shadow-xs">
+                            <h4 className="font-bold text-[15px] sm:text-[16px] text-slate-900 mb-2">
+                              MIVOR<span className="text-[#005dff]">.ai</span>
+                            </h4>
+                            
+                            <div className="text-xs sm:text-sm lg:text-[15px] text-slate-700 leading-relaxed font-normal">
+                              <ReactMarkdown 
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  p: ({node, ...props}) => <p className="mb-2 leading-relaxed text-slate-700" {...props} />,
+                                  ul: ({node, ...props}) => <ul className="space-y-1.5 my-2.5 pl-0" {...props} />,
+                                  li: ({node, ...props}) => (
+                                    <li className="flex items-start gap-2 text-slate-700 leading-relaxed font-normal">
+                                      <span className="text-[#005dff] text-[18px] leading-none select-none font-bold mt-0.5 shrink-0">•</span>
+                                      <span className="flex-1">{props.children}</span>
+                                    </li>
+                                  ),
+                                  ol: ({node, ...props}) => <ol className="list-decimal pl-5 space-y-1 my-2 text-slate-700" {...props} />,
+                                  strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />
+                                }}
+                              >
                                 {msg.text || msg.content}
                               </ReactMarkdown>
                             </div>
@@ -708,18 +791,42 @@ const PatientChat = ({
                                 </div>
                               </div>
                             )}
+
+                            {/* Card Footer: Timestamp + ThumbsUp / ThumbsDown buttons */}
+                            <div className="flex items-center justify-end gap-2 sm:gap-2.5 mt-3 pt-1 text-[10px] sm:text-[11px] text-slate-400 select-none">
+                              <span>{formatMsgTime(msg)}</span>
+                              <button 
+                                type="button" 
+                                onClick={() => handleFeedback(idx, 'up')}
+                                className={`p-1 rounded-md transition-colors cursor-pointer ${feedbacks[idx] === 'up' ? 'text-[#005dff] bg-blue-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                title="Respuesta útil"
+                              >
+                                <ThumbsUp size={13.5} className="stroke-[1.8]" />
+                              </button>
+                              <button 
+                                type="button" 
+                                onClick={() => handleFeedback(idx, 'down')}
+                                className={`p-1 rounded-md transition-colors cursor-pointer ${feedbacks[idx] === 'down' ? 'text-rose-500 bg-rose-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                                title="Respuesta no útil"
+                              >
+                                <ThumbsDown size={13.5} className="stroke-[1.8]" />
+                              </button>
+                            </div>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
 
                 {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm flex items-center gap-2 text-slate-500">
+                  <div className="flex justify-start items-start gap-2.5 sm:gap-3.5 my-2">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-blue-100 bg-white p-1 shrink-0 shadow-2xs mt-0.5">
+                      <img src="/images/mivor_hero_feathered.png" alt="MIVOR.ai" className="w-full h-full object-contain" />
+                    </div>
+                    <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex items-center gap-2.5 text-slate-500">
                       <Loader2 size={16} className="animate-spin text-[#005dff]" />
-                      <span className="text-xs font-semibold">MIVOR.ai está analizando tu consulta...</span>
+                      <span className="text-xs font-semibold text-slate-600">MIVOR.ai está analizando tu consulta...</span>
                     </div>
                   </div>
                 )}
@@ -731,7 +838,7 @@ const PatientChat = ({
           </div>
 
           {/* 3. BOTTOM CHAT INPUT CAPSULE (MATCHING FULL 100% WIDTH) */}
-          <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pb-2 pt-0.5 relative z-20 shrink-0">
+          <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pb-2 pt-0.5 relative z-20 shrink-0 max-w-[1700px] mx-auto">
             
             {/* Attachment preview if exists */}
             {(selectedImagePreview || selectedPdfName) && (
@@ -767,7 +874,7 @@ const PatientChat = ({
                 <button 
                   type="button" 
                   onClick={() => setShowAttachMenu(prev => !prev)} 
-                  className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full bg-slate-100/90 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
                   title="Adjuntar archivo o imagen médica"
                 >
                   <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
@@ -805,7 +912,7 @@ const PatientChat = ({
                 onChange={(e) => setInputMessage(e.target.value)} 
                 placeholder="Escribe tu mensaje aquí..." 
                 disabled={isLoading}
-                className="w-full bg-transparent text-xs sm:text-sm xl:text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
+                className="w-full bg-transparent text-xs sm:text-sm xl:text-[14.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
               />
 
               {/* Voice Mic Button (Light-blue circle matching reference) */}
@@ -815,18 +922,18 @@ const PatientChat = ({
                 className={`w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   isListening 
                     ? 'bg-red-500 text-white animate-pulse shadow-xs' 
-                    : 'bg-[#edf5fe] text-[#005dff] hover:bg-blue-100'
+                    : 'text-[#005dff] hover:bg-blue-50'
                 }`}
                 title={isListening ? "Detener dictado" : "Dictar por voz"}
               >
-                <Mic size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
+                <Mic size={18} className="stroke-[2.2] xl:w-5 xl:h-5" />
               </button>
 
               {/* Send Button (Vibrant blue circle with arrow) */}
               <button 
                 type="submit" 
                 disabled={isLoading || (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName)}
-                className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
+                className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:pointer-events-none cursor-pointer shrink-0"
                 title="Enviar mensaje"
               >
                 {isLoading ? (
