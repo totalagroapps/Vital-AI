@@ -1270,7 +1270,8 @@ ${text}`], {type: 'text/plain'});
           onLogout={handleLogout}
           username={username}
         />
-        {GlobalBottomNav}
+        {GlobalDoctorDirectoryModal}
+        <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
   }
@@ -1308,7 +1309,8 @@ ${text}`], {type: 'text/plain'});
           onLogout={handleLogout}
           username={username}
         />
-        {GlobalBottomNav}
+        {GlobalDoctorDirectoryModal}
+        <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
   }

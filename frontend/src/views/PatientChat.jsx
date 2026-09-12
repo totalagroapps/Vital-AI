@@ -171,10 +171,10 @@ const PatientChat = ({
       
       {/* 1. TOP NAVBAR */}
       <header className="w-full shrink-0 border-b border-slate-100/90 bg-white/95 backdrop-blur-xs z-40">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between">
+        <div className="w-full px-3 sm:px-5 lg:px-7 py-2 flex items-center justify-between">
           
           {/* Brand Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* Mobile menu hamburger toggle */}
             <button 
               type="button"
@@ -182,7 +182,7 @@ const PatientChat = ({
               className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
               title="Abrir conversaciones"
             >
-              <Menu size={20} />
+              <Menu size={18} />
             </button>
 
             <div 
@@ -192,32 +192,32 @@ const PatientChat = ({
               <img 
                 src="/images/mivor_nav_logo.png" 
                 alt="MIVOR.ai - Better Health. Brighter Lives." 
-                className="h-7 sm:h-7.5 lg:h-8 w-auto object-contain transition-transform" 
+                className="h-6 sm:h-7 lg:h-7.5 w-auto object-contain transition-transform" 
                 onError={(e) => { e.target.src = '/logo.png'; }}
               />
             </div>
           </div>
 
           {/* Center Navigation Tabs (EXCLUDING VIDEOCONFERENCIA PER USER REQUEST) */}
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8 xl:gap-10">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-6 2xl:gap-8">
             {/* Tab 1: Nueva consulta (Activo) */}
             <button 
               type="button"
               onClick={handleStartNew}
-              className="relative flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-semibold text-[#005dff] transition-colors cursor-pointer group"
+              className="relative flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-semibold text-[#005dff] transition-colors cursor-pointer group whitespace-nowrap shrink-0"
             >
-              <MessageSquare size={16} className="stroke-[2.2]" />
+              <MessageSquare size={15} className="stroke-[2.2]" />
               <span>Nueva consulta</span>
-              <span className="absolute -bottom-2.5 left-0 right-0 h-[2.5px] bg-[#005dff] rounded-full" />
+              <span className="absolute -bottom-2.5 left-0 right-0 h-[2px] bg-[#005dff] rounded-full" />
             </button>
 
             {/* Tab 2: Subir análisis */}
             <button 
               type="button"
               onClick={() => onNavigate ? onNavigate('documents') : actualPdfRef.current?.click()}
-              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
-              <FileText size={16} className="stroke-[2]" />
+              <FileText size={15} className="stroke-[2]" />
               <span>Subir análisis</span>
             </button>
 
@@ -225,9 +225,9 @@ const PatientChat = ({
             <button 
               type="button"
               onClick={() => onOpenDoctorDirectory ? onOpenDoctorDirectory() : onNavigate?.('doctors')}
-              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
-              <User size={16} className="stroke-[2]" />
+              <User size={15} className="stroke-[2]" />
               <span>Encontrar médico</span>
             </button>
 
@@ -235,25 +235,25 @@ const PatientChat = ({
             <button 
               type="button"
               onClick={() => onNavigate ? onNavigate('history') : onNavigate?.('patients')}
-              className="flex items-center gap-2 py-1.5 text-xs sm:text-[13.5px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Clock size={16} className="stroke-[2]" />
+              <Clock size={15} className="stroke-[2]" />
               <span>Mi historial</span>
             </button>
           </nav>
 
           {/* Right Controls: Idioma, Help, Bell, User profile */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <LanguageSelector variant="pill" />
 
             {/* Help Button */}
             <button 
               type="button"
               onClick={() => setShowHelpModal(true)}
-              className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+              className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
               title="Ayuda y soporte"
             >
-              <HelpCircle size={15} className="text-slate-700" />
+              <HelpCircle size={14} className="text-slate-700" />
             </button>
 
             {/* Notifications Bell */}
@@ -261,10 +261,10 @@ const PatientChat = ({
               <button 
                 type="button"
                 onClick={() => onNavigate ? onNavigate('search') : null} 
-                className="w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+                className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
                 title="Notificaciones"
               >
-                <Bell size={15} className="text-slate-700" />
+                <Bell size={14} className="text-slate-700" />
               </button>
               <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
             </div>
@@ -273,9 +273,9 @@ const PatientChat = ({
             <div className="relative">
               <div 
                 onClick={() => setShowUserMenu(prev => !prev)}
-                className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
+                className="flex items-center gap-1.5 sm:gap-2 pl-1 pr-2 py-0.5 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
               >
-                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
+                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
                   <img 
                     src={patientProfile?.photo_url || "/images/mivor_avatar_default.png"} 
                     alt="Perfil" 
@@ -284,15 +284,15 @@ const PatientChat = ({
                   />
                 </div>
                 <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[120px]">
+                  <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[95px] xl:max-w-[130px]">
                     {displayName}
                   </span>
-                  <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 leading-none mt-0.5">
+                  <span className="text-[9.5px] text-emerald-600 font-semibold flex items-center gap-1 leading-none mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                     Identidad verificada
                   </span>
                 </div>
-                <ChevronDown size={14} className="text-slate-400" />
+                <ChevronDown size={13} className="text-slate-400" />
               </div>
 
               {/* User Dropdown Menu */}
@@ -358,14 +358,14 @@ const PatientChat = ({
 
         {/* LEFT SIDEBAR ("Últimas conversaciones") */}
         <aside className={`
-          fixed lg:static top-[57px] bottom-0 left-0 z-30
-          w-72 xl:w-80 bg-white border-r border-slate-200/80 flex flex-col shrink-0
+          fixed lg:static top-[52px] bottom-0 left-0 z-30
+          w-60 lg:w-64 xl:w-72 bg-white border-r border-slate-200/80 flex flex-col shrink-0
           transition-transform duration-200 ease-in-out
           ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
         `}>
           {/* Sidebar Header */}
-          <div className="px-4 pt-4 pb-2">
-            <h3 className="text-xs xl:text-[13.5px] font-bold text-slate-900 tracking-tight">
+          <div className="px-3.5 pt-3 pb-1.5">
+            <h3 className="text-xs xl:text-[13px] font-bold text-slate-900 tracking-tight">
               Últimas conversaciones
             </h3>
           </div>
@@ -491,59 +491,59 @@ const PatientChat = ({
           </div>
 
           {/* Messages Area OR Welcome Cards */}
-          <div className="flex-1 overflow-y-auto relative z-10 flex flex-col justify-between w-full">
+          <div className="flex-1 overflow-y-auto min-h-0 relative z-10 flex flex-col justify-between w-full">
             
             {(isNewConsultation || messages.length === 0) ? (
               /* WELCOME STATE: EXACT 1:1 REPLICA OF media_1789226126171.png (FULL 100% WIDTH) */
-              <div className="flex-1 flex flex-col justify-between w-full px-6 sm:px-10 lg:px-12 xl:px-14 py-4 sm:py-6">
+              <div className="flex-1 min-h-0 flex flex-col justify-between w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 py-1.5 sm:py-2.5 lg:py-3.5 max-w-[1700px] mx-auto">
                 
                 {/* Central Emblem & Brand + Greeting */}
-                <div className="flex flex-col items-center select-none pointer-events-none text-center pt-1 sm:pt-2">
+                <div className="flex flex-col items-center select-none pointer-events-none text-center pt-0.5 shrink-0">
                   <img 
                     src="/images/mivor_hero_feathered.png" 
                     alt="MIVOR.ai" 
-                    className="w-20 sm:w-24 lg:w-32 xl:w-40 h-auto object-contain drop-shadow-sm" 
+                    className="w-16 sm:w-20 lg:w-24 xl:w-28 h-auto object-contain drop-shadow-sm transition-all" 
                   />
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-950 tracking-tight flex items-center justify-center gap-1 mt-1.5 sm:mt-2">
+                  <h2 className="text-[17px] sm:text-[19px] lg:text-[22px] xl:text-[26px] font-black text-[#0f172a] tracking-tight flex items-center justify-center gap-1 mt-1">
                     MIVOR<span className="text-[#005dff]">.ai</span>
                   </h2>
-                  <p className="text-[9px] sm:text-[10.5px] font-extrabold tracking-[0.25em] text-slate-400 uppercase mt-0.5">
+                  <p className="text-[8px] sm:text-[8.5px] lg:text-[9.5px] xl:text-[10.5px] font-extrabold tracking-[0.25em] text-slate-400 uppercase mt-0.5">
                     BETTER HEALTH. BRIGHTER LIVES.
                   </p>
                   
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-950 tracking-tight mt-2 sm:mt-3">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-black text-[#0f172a] tracking-tight mt-1 sm:mt-1.5">
                     Hola, <span className="text-[#005dff]">{firstName}</span>
                   </h1>
-                  <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">
+                  <p className="text-[13px] sm:text-[14px] lg:text-[16px] xl:text-[18px] font-bold text-[#0f172a] mt-0.5">
                     ¿En qué puedo ayudarte hoy?
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                  <p className="text-[10.5px] sm:text-xs lg:text-[13px] text-slate-500 font-medium mt-0.5">
                     Tu asistente de salud con inteligencia artificial avanzada.
                   </p>
                 </div>
 
                 {/* 4 Quick Action Cards (FULL 100% WIDTH OF CANVAS) */}
-                <div className="w-full my-2 sm:my-3 lg:my-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 xl:gap-5 w-full">
+                <div className="w-full my-auto py-1 sm:py-2 shrink-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 lg:gap-3.5 xl:gap-4.5 w-full">
                     
                     {/* Card 1: ¿Qué puede significar este resultado? */}
                     <div 
                       onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
-                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-purple-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-purple-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
-                          <Brain size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#f5efff] text-[#8e44ad] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Brain size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
                           ¿Qué puede significar este resultado?
                         </h3>
-                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
                           Te ayudo a interpretar tus análisis, pruebas e informes médicos.
                         </p>
                       </div>
-                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
-                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
+                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
                       </div>
                     </div>
 
@@ -556,21 +556,21 @@ const PatientChat = ({
                           : 'Hola MIVOR, quiero evaluar unos síntomas que tengo para saber las posibles causas y qué debo hacer (iniciar triaje clínico).';
                         handleSend(null, prompt);
                       }}
-                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-blue-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
-                          <Search size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#eaf4fe] text-[#005dff] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Search size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
                           ¿Cuáles pueden ser las causas de este síntoma?
                         </h3>
-                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
                           Analizo tus síntomas y te explico las posibles causas y próximos pasos.
                         </p>
                       </div>
-                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
-                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
+                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
                       </div>
                     </div>
 
@@ -580,42 +580,42 @@ const PatientChat = ({
                         setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
                         actualPdfRef.current?.click();
                       }}
-                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-teal-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-teal-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
-                          <FileText size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#e6fbf5] text-[#00b074] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <FileText size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
                           Explícame este informe médico
                         </h3>
-                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
                           Te ayudo a entender tus informes médicos de forma clara y sencilla.
                         </p>
                       </div>
-                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
-                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
+                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
                       </div>
                     </div>
 
                     {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
                     <div 
                       onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
-                      className="bg-white rounded-3xl border border-slate-200/90 hover:border-orange-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
+                      className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-orange-300 p-3 sm:p-3.5 lg:p-4 xl:p-5 flex flex-col justify-between min-h-[130px] sm:min-h-[140px] lg:min-h-[155px] xl:min-h-[190px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
                     >
                       <div>
-                        <div className="w-10 h-10 xl:w-12 xl:h-12 rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-2.5 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
-                          <Pill size={22} className="stroke-[2.2] xl:w-6 xl:h-6" />
+                        <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 lg:w-9 lg:h-9 xl:w-11 xl:h-11 rounded-xl xl:rounded-2xl bg-[#fff2e8] text-[#f76a1a] flex items-center justify-center mb-1.5 sm:mb-2 xl:mb-2.5 group-hover:scale-105 transition-transform shrink-0">
+                          <Pill size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
                         </div>
-                        <h3 className="font-bold text-xs sm:text-[13.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
+                        <h3 className="font-bold text-xs sm:text-[12.5px] lg:text-[13px] xl:text-[14.5px] text-slate-900 mb-0.5 sm:mb-1 leading-snug">
                           ¿Qué tratamientos existen para esta enfermedad?
                         </h3>
-                        <p className="text-[11px] sm:text-xs xl:text-[13px] text-slate-500 leading-relaxed font-normal">
+                        <p className="text-[10.5px] sm:text-[11px] lg:text-[11.5px] xl:text-[12.5px] text-slate-500 leading-relaxed font-normal line-clamp-2 sm:line-clamp-3">
                           Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
                         </p>
                       </div>
-                      <div className="w-7 h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-2 xl:mt-3 transition-all shrink-0">
-                        <ArrowRight size={13} className="stroke-[2.5]" />
+                      <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 xl:w-8 xl:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-1 sm:mt-1.5 xl:mt-2.5 transition-all shrink-0">
+                        <ArrowRight size={12} className="stroke-[2.5] xl:w-3.5 xl:h-3.5" />
                       </div>
                     </div>
 
@@ -731,14 +731,14 @@ const PatientChat = ({
           </div>
 
           {/* 3. BOTTOM CHAT INPUT CAPSULE (MATCHING FULL 100% WIDTH) */}
-          <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-14 pb-3 pt-1 relative z-20 shrink-0">
+          <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pb-2 pt-0.5 relative z-20 shrink-0">
             
             {/* Attachment preview if exists */}
             {(selectedImagePreview || selectedPdfName) && (
-              <div className="mb-2 p-2.5 px-4 bg-blue-50/90 border border-blue-200 rounded-2xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
-                <div className="flex items-center gap-2.5 truncate">
-                  {selectedImagePreview && <ImageIcon size={16} className="text-[#005dff]" />}
-                  {selectedPdfName && <FileText size={16} className="text-[#005dff]" />}
+              <div className="mb-1.5 p-2 px-3.5 bg-blue-50/90 border border-blue-200 rounded-2xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
+                <div className="flex items-center gap-2 truncate">
+                  {selectedImagePreview && <ImageIcon size={15} className="text-[#005dff]" />}
+                  {selectedPdfName && <FileText size={15} className="text-[#005dff]" />}
                   <span className="truncate font-semibold">{selectedPdfName || 'Imagen adjunta'}</span>
                 </div>
                 <button 
@@ -746,7 +746,7 @@ const PatientChat = ({
                   onClick={onClearAttachment} 
                   className="p-1 hover:bg-blue-100 rounded-full text-blue-700 cursor-pointer"
                 >
-                  <X size={15} />
+                  <X size={14} />
                 </button>
               </div>
             )}
@@ -760,17 +760,17 @@ const PatientChat = ({
                   handleSend();
                 }
               }}
-              className="w-full bg-white rounded-full border border-slate-200/90 shadow-sm py-2 px-4 sm:px-5 flex items-center gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
+              className="w-full bg-white rounded-full border border-slate-200/90 shadow-sm py-1.5 sm:py-2 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
             >
               {/* Paperclip button */}
               <div className="relative">
                 <button 
                   type="button" 
                   onClick={() => setShowAttachMenu(prev => !prev)} 
-                  className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
                   title="Adjuntar archivo o imagen médica"
                 >
-                  <Paperclip size={19} className="stroke-[2.2] -rotate-45" />
+                  <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
                 </button>
 
                 {showAttachMenu && (
@@ -805,34 +805,34 @@ const PatientChat = ({
                 onChange={(e) => setInputMessage(e.target.value)} 
                 placeholder="Escribe tu mensaje aquí..." 
                 disabled={isLoading}
-                className="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
+                className="w-full bg-transparent text-xs sm:text-sm xl:text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
               />
 
               {/* Voice Mic Button (Light-blue circle matching reference) */}
               <button 
                 type="button" 
                 onClick={toggleListening}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                className={`w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   isListening 
                     ? 'bg-red-500 text-white animate-pulse shadow-xs' 
                     : 'bg-[#edf5fe] text-[#005dff] hover:bg-blue-100'
                 }`}
                 title={isListening ? "Detener dictado" : "Dictar por voz"}
               >
-                <Mic size={19} className="stroke-[2.2]" />
+                <Mic size={17} className="stroke-[2.2] xl:w-5 xl:h-5" />
               </button>
 
               {/* Send Button (Vibrant blue circle with arrow) */}
               <button 
                 type="submit" 
                 disabled={isLoading || (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName)}
-                className="w-10 h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
+                className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0"
                 title="Enviar mensaje"
               >
                 {isLoading ? (
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 size={16} className="animate-spin" />
                 ) : (
-                  <Send size={16} className="stroke-[2.4] ml-0.5" />
+                  <Send size={15} className="stroke-[2.4] ml-0.5 xl:w-4 xl:h-4" />
                 )}
               </button>
 
@@ -841,8 +841,8 @@ const PatientChat = ({
             </form>
 
             {/* Bottom Security Note */}
-            <div className="py-2 text-center text-[11px] sm:text-xs text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
-              <Lock size={13} className="text-slate-500" />
+            <div className="py-1 text-center text-[10px] sm:text-[11px] text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
+              <Lock size={12} className="text-slate-500 shrink-0" />
               <span>Tus datos están protegidos. Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR).</span>
             </div>
           </div>
