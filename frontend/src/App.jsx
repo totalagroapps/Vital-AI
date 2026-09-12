@@ -673,13 +673,14 @@ ${text}`], {type: 'text/plain'});
   };
 
 
-  const handleSendGeneral = async (e) => {
-    e.preventDefault();
-    if (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName) return;
+  const handleSendGeneral = async (e, customText = null) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const textToSend = (customText !== null && customText !== undefined) ? customText : inputMessage;
+    if (!textToSend.trim() && !selectedImagePreview && !selectedPdfName) return;
 
     const userMsg = { 
       type: "user", 
-      text: inputMessage,
+      text: textToSend,
       image: selectedImagePreview,
       pdf: selectedPdfName
     };

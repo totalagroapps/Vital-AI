@@ -549,7 +549,13 @@ const PatientChat = ({
 
                     {/* Card 2: ¿Cuáles pueden ser las causas de este síntoma? */}
                     <div 
-                      onClick={() => setInputMessage('Tengo los siguientes síntomas y quisiera saber las posibles causas:')}
+                      onClick={() => {
+                        setIsNewConsultation(false);
+                        const prompt = inputMessage.trim() 
+                          ? `Hola MIVOR, quiero evaluar estos síntomas para triaje clínico: ${inputMessage.trim()}`
+                          : 'Hola MIVOR, quiero evaluar unos síntomas que tengo para saber las posibles causas y qué debo hacer (iniciar triaje clínico).';
+                        handleSend(null, prompt);
+                      }}
                       className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4.5 sm:p-5 xl:p-6 flex flex-col justify-between min-h-[175px] sm:min-h-[195px] xl:min-h-[235px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group w-full"
                     >
                       <div>
