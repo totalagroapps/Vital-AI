@@ -353,8 +353,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         <div className="w-full px-[clamp(1.25rem,3.2vw,6rem)] flex items-center justify-between gap-[clamp(1rem,2vw,3.5rem)] relative z-10">
           
           {/* Columna Izquierda: Titular H1 + Tarjeta de Confianza */}
-          <div className="w-[33%] max-w-[360px] xl:max-w-[490px] flex flex-col justify-center shrink-0 mivor-fade-up" style={{ animationDelay: '0.05s' }}>
-            <h1 className="text-[clamp(30px,4.2vw,76px)] font-black text-slate-950 leading-[0.98] tracking-[-0.03em] mb-[clamp(0.6rem,1vw,1.75rem)]">
+          <div className="w-[33%] max-w-[360px] xl:max-w-[560px] flex flex-col justify-center shrink-0 mivor-fade-up" style={{ animationDelay: '0.05s' }}>
+            <h1 className="text-[clamp(28px,2.6vw,56px)] font-black text-slate-950 leading-[1.02] tracking-[-0.02em] mb-[clamp(0.6rem,1vw,1.75rem)]">
               {(t('hero_title_p1') || 'Tu salud,').trim().replace(/\s+,/g, ',')}<br />
               {t('hero_title_p2') || 'en manos de la'}<br />
               <span className="text-[#005dff]">
@@ -393,7 +393,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <img 
               src="/images/mivor_hero_feathered.png" 
               alt="MIVOR.ai" 
-              className="mivor-float w-[clamp(280px,34vw,760px)] max-h-[min(62vh,660px)] h-auto object-contain relative z-10 select-none pointer-events-none drop-shadow-lg" 
+              className="mivor-float w-[clamp(280px,34vw,760px)] max-w-full max-h-[min(62vh,660px)] h-auto object-contain relative z-10 select-none pointer-events-none drop-shadow-lg" 
             />
           </div>
 

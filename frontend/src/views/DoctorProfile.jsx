@@ -3,11 +3,25 @@ import {
   User, Briefcase, ShieldCheck, Lock, Edit3, CheckCircle2, 
   Mail, Phone, Clock, Stethoscope, Award, Building2, Globe, 
   Plus, Trash2, UploadCloud, FileText, Camera, Loader2, Check, AlertCircle, Info,
-  ArrowLeft
+  ArrowLeft, Video, Film, Play, ExternalLink
 } from 'lucide-react';
 import DoctorLocationMap from '../components/DoctorLocationMap';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
+
+export const getVideoEmbedUrl = (url) => {
+  if (!url) return null;
+  const str = url.trim();
+  const ytMatch = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch) {
+    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+  }
+  const vimeoMatch = str.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  return str;
+};
 
 export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfile, onLogout }) {
   const { t, language } = useLanguage();
@@ -46,7 +60,9 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
     professional_college: '',
     subspecialties: '',
     languages: 'Español (nativo)',
-    bio: ''
+    bio: '',
+    presentation_video_url: '',
+    clinic_video_url: ''
   });
 
   // Formulario de Educación
@@ -89,7 +105,9 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
       professional_college: data.professional_college || '',
       subspecialties: data.subspecialties || '',
       languages: data.languages || data.language || 'Español (nativo)',
-      bio: data.bio || data.professional_description || ''
+      bio: data.bio || data.professional_description || '',
+      presentation_video_url: data.presentation_video_url || '',
+      clinic_video_url: data.clinic_video_url || ''
     });
   };
 
@@ -610,6 +628,175 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('professional_college_label', 'Colegio profesional')}</label>
                         <p className="text-xs font-bold text-slate-800">{formData.professional_college || 'Sin especificar'}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sección de Vídeos Profesionales (Fila 20 MVP) */}
+                <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                        <Video size={20} />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900">
+                          Vídeo de Presentación y de la Clínica
+                        </h3>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Muestra tu trayectoria y las instalaciones de tu consultorio a los pacientes.
+                        </p>
+                      </div>
+                    </div>
+                    {isEditing && (
+                      <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                        YouTube / Vimeo / MP4
+                      </span>
+                    )}
+                  </div>
+
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                        <label className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                          <Film size={14} className="text-indigo-600" />
+                          Vídeo de Presentación Personal (URL)
+                        </label>
+                        <input
+                          type="url"
+                          name="presentation_video_url"
+                          value={formData.presentation_video_url}
+                          onChange={handleChange}
+                          placeholder="https://www.youtube.com/watch?v=... o Vimeo"
+                          className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        />
+                        <p className="text-[11px] text-slate-500">
+                          Preséntate a tus pacientes, explica tu filosofía médica y tus áreas de especialización.
+                        </p>
+                        {formData.presentation_video_url && (
+                          <div className="mt-3 aspect-video max-w-md rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                            {getVideoEmbedUrl(formData.presentation_video_url)?.includes('embed') ? (
+                              <iframe
+                                src={getVideoEmbedUrl(formData.presentation_video_url)}
+                                title="Vista previa vídeo de presentación"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            ) : (
+                              <video src={formData.presentation_video_url} controls className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                        <label className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                          <Building2 size={14} className="text-teal-600" />
+                          Vídeo de la Clínica / Instalaciones (URL)
+                        </label>
+                        <input
+                          type="url"
+                          name="clinic_video_url"
+                          value={formData.clinic_video_url}
+                          onChange={handleChange}
+                          placeholder="https://www.youtube.com/watch?v=... o Vimeo"
+                          className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+                        />
+                        <p className="text-[11px] text-slate-500">
+                          Recorrido virtual por tus consultorios, tecnología diagnóstica o salas de atención.
+                        </p>
+                        {formData.clinic_video_url && (
+                          <div className="mt-3 aspect-video max-w-md rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+                            {getVideoEmbedUrl(formData.clinic_video_url)?.includes('embed') ? (
+                              <iframe
+                                src={getVideoEmbedUrl(formData.clinic_video_url)}
+                                title="Vista previa vídeo de la clínica"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            ) : (
+                              <video src={formData.clinic_video_url} controls className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={saving}
+                          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-2"
+                        >
+                          {saving && <Loader2 size={14} className="animate-spin" />} Guardar vídeos
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Vista previa / visualización Vídeo Presentación */}
+                      <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                              <Film size={13} />
+                            </span>
+                            <h4 className="text-xs font-bold text-slate-800">Vídeo de Presentación</h4>
+                          </div>
+                          {formData.presentation_video_url ? (
+                            <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 mt-2 shadow-xs">
+                              {getVideoEmbedUrl(formData.presentation_video_url)?.includes('embed') ? (
+                                <iframe
+                                  src={getVideoEmbedUrl(formData.presentation_video_url)}
+                                  title="Vídeo de presentación"
+                                  className="w-full h-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              ) : (
+                                <video src={formData.presentation_video_url} controls className="w-full h-full object-cover" />
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-400 italic mt-3 py-4 text-center">
+                              No has añadido aún un vídeo de presentación.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vista previa / visualización Vídeo Clínica */}
+                      <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">
+                              <Building2 size={13} />
+                            </span>
+                            <h4 className="text-xs font-bold text-slate-800">Vídeo de la Clínica</h4>
+                          </div>
+                          {formData.clinic_video_url ? (
+                            <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 mt-2 shadow-xs">
+                              {getVideoEmbedUrl(formData.clinic_video_url)?.includes('embed') ? (
+                                <iframe
+                                  src={getVideoEmbedUrl(formData.clinic_video_url)}
+                                  title="Vídeo de la clínica"
+                                  className="w-full h-full"
+                                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                  allowFullScreen
+                                />
+                              ) : (
+                                <video src={formData.clinic_video_url} controls className="w-full h-full object-cover" />
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-slate-400 italic mt-3 py-4 text-center">
+                              No has añadido aún un vídeo de la clínica o instalaciones.
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
