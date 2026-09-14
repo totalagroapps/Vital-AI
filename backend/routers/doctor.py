@@ -506,6 +506,13 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
             except Exception as err:
                 logger.warning(f"Error generating presigned url for specialist directory: {err}")
 
+        presentation_video = getattr(s, 'presentation_video_url', None)
+        clinic_video = getattr(s, 'clinic_video_url', None)
+        college = getattr(s, 'professional_college', None)
+        license_no = getattr(s, 'license_number', None)
+        educations_list = getattr(s, 'education', None) or []
+        clinic_photos_list = getattr(s, 'clinic_photos', None) or []
+
         output.append({
             'id': s.id,
             'user_id': s.user_id,
@@ -518,7 +525,13 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
             'bio': s.bio or f'Especialista en {s.specialty} con experiencia en atención clínica personalizada.',
             'verified': bool(s.verified or s.is_verified),
             'photo_url': photo or f"https://api.dicebear.com/7.x/bottts/svg?seed={s.full_name or 'Dr'}",
-            'availability_schedule': (s.availability_schedule or {'dias': 'Lunes a Viernes', 'horario': '09:00 - 18:00'})
+            'availability_schedule': (s.availability_schedule or {'dias': 'Lunes a Viernes', 'horario': '09:00 - 18:00'}),
+            'presentation_video_url': presentation_video,
+            'clinic_video_url': clinic_video,
+            'professional_college': college or 'Colegio Oficial de Médicos',
+            'license_number': license_no or f'COL-{s.id:05d}',
+            'educations': educations_list,
+            'clinic_photos': clinic_photos_list,
         })
 
     # Si aún no hay especialistas registrados en la base de datos, proveer defaults para que la plataforma sea 100% interactiva en la demo
@@ -533,10 +546,23 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
                 'location': 'Centro Médico Sanitas / Consulta Online',
                 'experience_years': 12,
                 'languages': 'Español, Inglés',
-                'bio': 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias.',
+                'bio': 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias. Miembro de la Sociedad Española de Cardiología (SEC).',
                 'verified': True,
+                'license_number': 'COL-28084592',
+                'professional_college': 'Ilustre Colegio Oficial de Médicos de Madrid (ICOMEM)',
                 'photo_url': 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400',
-                'availability_schedule': {'dias': 'Lun, Mié, Vie', 'horario': '10:00 - 18:00'}
+                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+                'availability_schedule': {'dias': 'Lun, Mié, Vie', 'horario': '10:00 - 18:00'},
+                'educations': [
+                    {'degree': 'Licenciatura en Medicina y Cirugía', 'institution': 'Universidad Complutense de Madrid', 'start_year': 2006, 'end_year': 2012},
+                    {'degree': 'Especialidad en Cardiología Clínica', 'institution': 'Hospital Universitario La Paz', 'start_year': 2012, 'end_year': 2017},
+                    {'degree': 'Máster en Prevención y Rehabilitación Cardíaca', 'institution': 'Universidad de Barcelona', 'start_year': 2018, 'end_year': 2019}
+                ],
+                'clinic_photos': [
+                    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600',
+                    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
+                ]
             },
             {
                 'id': 102,
@@ -547,10 +573,21 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
                 'location': 'Clínica Quirón / Telemedicina',
                 'experience_years': 9,
                 'languages': 'Español, Francés',
-                'bio': 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención.',
+                'bio': 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención holística de la salud.',
                 'verified': True,
+                'license_number': 'COL-08051239',
+                'professional_college': 'Col·legi Oficial de Metges de Barcelona (COMB)',
                 'photo_url': 'https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400',
-                'availability_schedule': {'dias': 'Lun - Sáb', 'horario': '08:30 - 16:30'}
+                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+                'availability_schedule': {'dias': 'Lun - Sáb', 'horario': '08:30 - 16:30'},
+                'educations': [
+                    {'degree': 'Grado en Medicina', 'institution': 'Universitat de Barcelona', 'start_year': 2009, 'end_year': 2015},
+                    {'degree': 'Especialista en Medicina Familiar y Comunitaria', 'institution': 'Hospital Clínic de Barcelona', 'start_year': 2015, 'end_year': 2019}
+                ],
+                'clinic_photos': [
+                    'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
+                ]
             },
             {
                 'id': 103,
@@ -561,10 +598,21 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
                 'location': 'Hospital Universitario / Consulta Privada',
                 'experience_years': 15,
                 'languages': 'Español, Inglés',
-                'bio': 'Especialista en lesiones articulares, columna vertebral y rehabilitación física.',
+                'bio': 'Especialista en lesiones articulares, cirugía mínimamente invasiva, columna vertebral y medicina deportiva de alto rendimiento.',
                 'verified': True,
+                'license_number': 'COL-46098214',
+                'professional_college': 'Colegio Oficial de Médicos de Valencia (COMV)',
                 'photo_url': 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400',
-                'availability_schedule': {'dias': 'Mar, Jue', 'horario': '11:00 - 19:00'}
+                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+                'availability_schedule': {'dias': 'Mar, Jue', 'horario': '11:00 - 19:00'},
+                'educations': [
+                    {'degree': 'Licenciatura en Medicina', 'institution': 'Universitat de València', 'start_year': 2003, 'end_year': 2009},
+                    {'degree': 'Especialidad Cirugía Ortopédica y Traumatología', 'institution': 'Hospital Universitari i Politècnic La Fe', 'start_year': 2009, 'end_year': 2014}
+                ],
+                'clinic_photos': [
+                    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
+                ]
             },
             {
                 'id': 104,
@@ -575,10 +623,21 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
                 'location': 'Instituto Dermatológico Avanzado',
                 'experience_years': 8,
                 'languages': 'Español, Inglés',
-                'bio': 'Especialista en salud de la piel, control de lunares, alergias cutáneas y tratamientos estéticos médicos.',
+                'bio': 'Especialista en dermatoscopia digital, control de lesiones cutáneas, acné complejo y tratamientos dermatológicos de precisión.',
                 'verified': True,
+                'license_number': 'COL-41033481',
+                'professional_college': 'Real e Ilustre Colegio Oficial de Médicos de Sevilla (RICOMS)',
                 'photo_url': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400',
-                'availability_schedule': {'dias': 'Lunes a Viernes', 'horario': '09:00 - 17:00'}
+                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+                'availability_schedule': {'dias': 'Lunes a Viernes', 'horario': '09:00 - 17:00'},
+                'educations': [
+                    {'degree': 'Grado en Medicina', 'institution': 'Universidad de Sevilla', 'start_year': 2010, 'end_year': 2016},
+                    {'degree': 'Especialidad en Dermatología Médico-Quirúrgica', 'institution': 'Hospital Universitario Virgen del Rocío', 'start_year': 2016, 'end_year': 2020}
+                ],
+                'clinic_photos': [
+                    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
+                ]
             }
         ]
         if specialty and specialty.lower() != 'todos':

@@ -201,6 +201,8 @@ async def register_doctor(
         longitude=new_doctor.longitude,
         consultation_phone=new_doctor.consultation_phone,
         website=new_doctor.website,
+        presentation_video_url=new_doctor.presentation_video_url,
+        clinic_video_url=new_doctor.clinic_video_url,
         verification_status=new_doctor.verification_status,
         data_policy_accepted=new_doctor.data_policy_accepted,
         data_policy_accepted_at=new_doctor.data_policy_accepted_at,
@@ -313,6 +315,8 @@ async def get_doctor_profile(
         longitude=doctor.longitude,
         consultation_phone=doctor.consultation_phone,
         website=doctor.website,
+        presentation_video_url=doctor.presentation_video_url,
+        clinic_video_url=doctor.clinic_video_url,
         verification_status=doctor.verification_status,
         data_policy_accepted=doctor.data_policy_accepted,
         data_policy_accepted_at=doctor.data_policy_accepted_at,
@@ -360,6 +364,35 @@ async def update_doctor_profile(
             setattr(doctor, field, val)
 
     doctor.updated_at = datetime.utcnow()
+
+    # Sincronizar con SpecialistProfile si existe para que el directorio refleje los cambios al instante
+    try:
+        stmt_sp = select(SpecialistProfile).where(SpecialistProfile.user_id == current_user.id)
+        res_sp = await db.execute(stmt_sp)
+        sp_record = res_sp.scalar_one_or_none()
+        if sp_record:
+            if doctor.presentation_video_url is not None:
+                sp_record.presentation_video_url = doctor.presentation_video_url
+            if doctor.clinic_video_url is not None:
+                sp_record.clinic_video_url = doctor.clinic_video_url
+            if doctor.professional_college is not None:
+                sp_record.professional_college = doctor.professional_college
+            if doctor.medical_license is not None:
+                sp_record.license_number = doctor.medical_license
+            if doctor.first_name and doctor.last_name:
+                sp_record.full_name = f"{doctor.first_name.strip()} {doctor.last_name.strip()}"
+            if doctor.specialty:
+                sp_record.specialty = doctor.specialty
+            if doctor.years_of_experience is not None:
+                sp_record.experience_years = doctor.years_of_experience
+            if doctor.city:
+                sp_record.city = doctor.city
+                sp_record.location = f"{doctor.city}, {doctor.country or 'Colombia'}"
+            if doctor.professional_description:
+                sp_record.bio = doctor.professional_description
+    except Exception as e:
+        pass
+
     await db.commit()
     await db.refresh(doctor)
 

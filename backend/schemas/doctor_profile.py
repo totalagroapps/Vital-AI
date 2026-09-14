@@ -88,6 +88,8 @@ class DoctorProfileUpdate(BaseModel):
     longitude: Optional[float] = Field(default=None, ge=-180, le=180)
     consultation_phone: Optional[str] = Field(default=None, max_length=30)
     website: Optional[str] = Field(default=None, max_length=500)
+    presentation_video_url: Optional[str] = Field(default=None, max_length=500)
+    clinic_video_url: Optional[str] = Field(default=None, max_length=500)
     language: Optional[str] = Field(default="es", max_length=10)
     data_policy_accepted: Optional[bool] = None
     data_policy_accepted_at: Optional[datetime] = None
@@ -127,6 +129,8 @@ class DoctorProfileResponse(BaseModel):
     longitude: Optional[float] = None
     consultation_phone: Optional[str] = None
     website: Optional[str] = None
+    presentation_video_url: Optional[str] = None
+    clinic_video_url: Optional[str] = None
     verification_status: Optional[str] = "pending"
     data_policy_accepted: bool = False
     data_policy_accepted_at: Optional[datetime] = None

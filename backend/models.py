@@ -154,6 +154,11 @@ class SpecialistProfile(Base):
     diploma_url = Column(String, nullable=True)
     profile_pic_url = Column(String, nullable=True)
     id_doc_url = Column(String, nullable=True)
+    presentation_video_url = Column(String, nullable=True)
+    clinic_video_url = Column(String, nullable=True)
+    professional_college = Column(String, nullable=True)
+    education = Column(JSON, nullable=True)
+    clinic_photos = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -269,6 +274,7 @@ class Doctor(Base):
     professional_registration_certificate_url = Column(EncryptedString(500), nullable=True)
     profile_picture_url = Column(EncryptedString(500), nullable=True)
     presentation_video_url = Column(EncryptedString(500), nullable=True)
+    clinic_video_url = Column(EncryptedString(500), nullable=True)
 
     # Términos y políticas
     data_policy_accepted = Column(Boolean, default=False, nullable=False)

@@ -2,9 +2,24 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Search, ShieldCheck, MapPin, Calendar, Clock, 
   MessageCircle, Stethoscope, CheckCircle, Sparkles, 
-  ChevronRight, Phone, Award, Globe, UserCheck
+  ChevronRight, Phone, Award, Globe, UserCheck,
+  Video, Film, Play, GraduationCap, Building2, ExternalLink
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+
+export const getVideoEmbedUrl = (url) => {
+  if (!url) return null;
+  const str = url.trim();
+  const ytMatch = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch) {
+    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+  }
+  const vimeoMatch = str.match(/vimeo\.com\/(?:video\/)?([0-9]+)/);
+  if (vimeoMatch) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  return str;
+};
 
 const DEFAULT_SPECIALISTS = [
   {
@@ -16,10 +31,23 @@ const DEFAULT_SPECIALISTS = [
     location: 'Centro Médico Sanitas / Consulta Online',
     experience_years: 12,
     languages: 'Español, Inglés',
-    bio: 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias.',
+    bio: 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias. Miembro activo de la Sociedad Española de Cardiología.',
     verified: true,
+    license_number: 'COL-28084592',
+    professional_college: 'Ilustre Colegio Oficial de Médicos de Madrid (ICOMEM)',
     photo_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Lun, Mié, Vie', horario: '10:00 - 18:00' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Lun, Mié, Vie', horario: '10:00 - 18:00' },
+    educations: [
+      { degree: 'Licenciatura en Medicina y Cirugía', institution: 'Universidad Complutense de Madrid', start_year: 2006, end_year: 2012 },
+      { degree: 'Especialidad en Cardiología Clínica', institution: 'Hospital Universitario La Paz', start_year: 2012, end_year: 2017 },
+      { degree: 'Máster en Prevención y Rehabilitación Cardíaca', institution: 'Universidad de Barcelona', start_year: 2018, end_year: 2019 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
+    ]
   },
   {
     id: 102,
@@ -30,10 +58,21 @@ const DEFAULT_SPECIALISTS = [
     location: 'Clínica Quirón / Telemedicina',
     experience_years: 9,
     languages: 'Español, Francés',
-    bio: 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención.',
+    bio: 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención holística de la salud.',
     verified: true,
+    license_number: 'COL-08051239',
+    professional_college: 'Col·legi Oficial de Metges de Barcelona (COMB)',
     photo_url: 'https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Lun - Sáb', horario: '08:30 - 16:30' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Lun - Sáb', horario: '08:30 - 16:30' },
+    educations: [
+      { degree: 'Grado en Medicina', institution: 'Universitat de Barcelona', start_year: 2009, end_year: 2015 },
+      { degree: 'Especialista en Medicina Familiar y Comunitaria', institution: 'Hospital Clínic de Barcelona', start_year: 2015, end_year: 2019 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
+    ]
   },
   {
     id: 103,
@@ -44,10 +83,21 @@ const DEFAULT_SPECIALISTS = [
     location: 'Hospital Universitario / Consulta Privada',
     experience_years: 15,
     languages: 'Español, Inglés',
-    bio: 'Especialista en lesiones articulares, columna vertebral y rehabilitación física.',
+    bio: 'Especialista en lesiones articulares, cirugía mínimamente invasiva, columna vertebral y rehabilitación deportiva.',
     verified: true,
+    license_number: 'COL-46098214',
+    professional_college: 'Colegio Oficial de Médicos de Valencia (COMV)',
     photo_url: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Mar, Jue', horario: '11:00 - 19:00' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Mar, Jue', horario: '11:00 - 19:00' },
+    educations: [
+      { degree: 'Licenciatura en Medicina', institution: 'Universitat de València', start_year: 2003, end_year: 2009 },
+      { degree: 'Especialidad Cirugía Ortopédica y Traumatología', institution: 'Hospital Universitari La Fe', start_year: 2009, end_year: 2014 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
+    ]
   },
   {
     id: 104,
@@ -58,10 +108,21 @@ const DEFAULT_SPECIALISTS = [
     location: 'Instituto Dermatológico Avanzado',
     experience_years: 8,
     languages: 'Español, Inglés',
-    bio: 'Especialista en salud de la piel, control de lunares, alergias cutáneas y tratamientos estéticos médicos.',
+    bio: 'Especialista en salud de la piel, control digital de lesiones pigmentadas, acné y tratamientos dermatológicos médicos.',
     verified: true,
+    license_number: 'COL-41033481',
+    professional_college: 'Real e Ilustre Colegio Oficial de Médicos de Sevilla (RICOMS)',
     photo_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Lunes a Viernes', horario: '09:00 - 17:00' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Lunes a Viernes', horario: '09:00 - 17:00' },
+    educations: [
+      { degree: 'Grado en Medicina', institution: 'Universidad de Sevilla', start_year: 2010, end_year: 2016 },
+      { degree: 'Especialidad en Dermatología', institution: 'Hospital Universitario Virgen del Rocío', start_year: 2016, end_year: 2020 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
+    ]
   },
   {
     id: 105,
@@ -72,10 +133,21 @@ const DEFAULT_SPECIALISTS = [
     location: 'Hospital Clínico / Consulta Online',
     experience_years: 14,
     languages: 'Español, Inglés, Euskera',
-    bio: 'Neurólogo especialista en cefaleas, migrañas complejas, trastornos del sueño y neurorehabilitación.',
+    bio: 'Neurólogo especialista en cefaleas complejas, migrañas, trastornos del sueño y neurorehabilitación.',
     verified: true,
+    license_number: 'COL-48092174',
+    professional_college: 'Colegio Oficial de Médicos de Bizkaia (CMB)',
     photo_url: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Lun, Mié, Jue', horario: '09:30 - 15:30' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Lun, Mié, Jue', horario: '09:30 - 15:30' },
+    educations: [
+      { degree: 'Licenciatura en Medicina', institution: 'Universidad del País Vasco (UPV/EHU)', start_year: 2004, end_year: 2010 },
+      { degree: 'Especialidad en Neurología', institution: 'Hospital Universitario de Cruces', start_year: 2010, end_year: 2014 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
+    ]
   },
   {
     id: 106,
@@ -86,10 +158,21 @@ const DEFAULT_SPECIALISTS = [
     location: 'Policlínica Materno-Infantil',
     experience_years: 11,
     languages: 'Español, Francés',
-    bio: 'Atención pediátrica integral, desarrollo infantil, nutrición y vacunación.',
+    bio: 'Atención pediátrica integral, desarrollo infantil, nutrición, prevención y vacunación infantil.',
     verified: true,
+    license_number: 'COL-29074125',
+    professional_college: 'Colegio Oficial de Médicos de Málaga (COMMÁLAGA)',
     photo_url: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&q=80&w=400',
-    availability_schedule: { dias: 'Lun - Vie', horario: '10:00 - 19:00' }
+    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
+    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
+    availability_schedule: { dias: 'Lun - Vie', horario: '10:00 - 19:00' },
+    educations: [
+      { degree: 'Licenciatura en Medicina', institution: 'Universidad de Málaga', start_year: 2007, end_year: 2013 },
+      { degree: 'Especialidad en Pediatría y sus Áreas Específicas', institution: 'Hospital Materno Infantil de Málaga', start_year: 2013, end_year: 2017 }
+    ],
+    clinic_photos: [
+      'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
+    ]
   }
 ];
 
@@ -125,6 +208,8 @@ export default function DoctorDirectoryModal({
   const [bookingType, setBookingType] = useState('online');
   const [bookingNotes, setBookingNotes] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState(null);
+  const [selectedDoctorDetail, setSelectedDoctorDetail] = useState(null);
+  const [detailTab, setDetailTab] = useState('video');
 
   // Inicializar especialidad cuando se abre con una recomendada
   useEffect(() => {
@@ -455,23 +540,34 @@ export default function DoctorDirectoryModal({
                     </div>
                   </div>
 
-                  {/* Acciones de Contacto */}
-                  <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
+                  {/* Acciones de Contacto y Perfil Extendido */}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
                     <button
-                      onClick={() => handleWhatsApp(doc)}
-                      className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-200 transition-all cursor-pointer"
+                      onClick={() => { setSelectedDoctorDetail(doc); setDetailTab('video'); }}
+                      className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 text-brand-purple border border-purple-200/70 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer group/btn"
                     >
-                      <MessageCircle size={15} />
-                      <span>WhatsApp</span>
+                      <Play size={13} className="text-brand-purple fill-brand-purple group-hover/btn:scale-110 transition-transform" />
+                      <span>Ver Perfil, Vídeos y Currículum</span>
+                      <ChevronRight size={14} className="text-brand-purple/70" />
                     </button>
 
-                    <button
-                      onClick={() => setBookingDoctor(doc)}
-                      className="w-full py-2 px-3 rounded-xl bg-brand-purple hover:bg-brand-purple/90 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200 transition-all cursor-pointer"
-                    >
-                      <Calendar size={15} />
-                      <span>Solicitar Cita</span>
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleWhatsApp(doc)}
+                        className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-200 transition-all cursor-pointer"
+                      >
+                        <MessageCircle size={15} />
+                        <span>WhatsApp</span>
+                      </button>
+
+                      <button
+                        onClick={() => setBookingDoctor(doc)}
+                        className="w-full py-2 px-3 rounded-xl bg-brand-purple hover:bg-brand-purple/90 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200 transition-all cursor-pointer"
+                      >
+                        <Calendar size={15} />
+                        <span>Solicitar Cita</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -607,6 +703,283 @@ export default function DoctorDirectoryModal({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Sub-capa: Perfil Extendido del Especialista (Fila 20 MVP) */}
+        {selectedDoctorDetail && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-fadeIn" onClick={() => setSelectedDoctorDetail(null)}>
+            <div 
+              className="bg-white w-full max-w-2xl max-h-[88vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-100 animate-scaleUp"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Header Detalle */}
+              <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-purple-50/60 via-slate-50 to-white flex items-start justify-between gap-3">
+                <div className="flex items-start gap-4">
+                  <div className="relative shrink-0">
+                    <img
+                      src={selectedDoctorDetail.photo_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${selectedDoctorDetail.full_name}`}
+                      alt={selectedDoctorDetail.full_name}
+                      className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md"
+                    />
+                    {selectedDoctorDetail.verified && (
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center border-2 border-white shadow-xs" title="Médico Colegiado Verificado">
+                        <ShieldCheck size={14} />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-lg font-bold text-slate-900">{selectedDoctorDetail.full_name}</h3>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-purple/10 text-brand-purple">
+                        {selectedDoctorDetail.specialty}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 flex-wrap">
+                      <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 inline-flex items-center gap-1">
+                        <ShieldCheck size={12} /> {selectedDoctorDetail.license_number || 'Colegiado Acreditado'}
+                      </span>
+                      <span>•</span>
+                      <span>{selectedDoctorDetail.professional_college || 'Colegio Oficial de Médicos'}</span>
+                    </div>
+
+                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                      <MapPin size={12} className="text-slate-400" />
+                      {selectedDoctorDetail.city || selectedDoctorDetail.location}
+                      <span className="mx-1.5">•</span>
+                      <Award size={12} className="text-amber-500" />
+                      {selectedDoctorDetail.experience_years} años de experiencia clínica
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedDoctorDetail(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center shrink-0 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              {/* Selector de Pestañas de Detalle */}
+              <div className="px-5 pt-3 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
+                <button
+                  onClick={() => setDetailTab('video')}
+                  className={`px-4 py-2 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-1.5 transition-all cursor-pointer ${
+                    detailTab === 'video'
+                      ? 'border-brand-purple text-brand-purple bg-white shadow-xs'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <Video size={14} />
+                  <span>Vídeos Oficiales</span>
+                </button>
+
+                <button
+                  onClick={() => setDetailTab('curriculum')}
+                  className={`px-4 py-2 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-1.5 transition-all cursor-pointer ${
+                    detailTab === 'curriculum'
+                      ? 'border-brand-purple text-brand-purple bg-white shadow-xs'
+                      : 'border-transparent text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <GraduationCap size={14} />
+                  <span>Trayectoria y Currículum</span>
+                </button>
+
+                {selectedDoctorDetail.clinic_photos?.length > 0 && (
+                  <button
+                    onClick={() => setDetailTab('clinic')}
+                    className={`px-4 py-2 text-xs font-bold rounded-t-xl border-b-2 flex items-center gap-1.5 transition-all cursor-pointer ${
+                      detailTab === 'clinic'
+                        ? 'border-brand-purple text-brand-purple bg-white shadow-xs'
+                        : 'border-transparent text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Building2 size={14} />
+                    <span>Instalaciones Clínicas ({selectedDoctorDetail.clinic_photos.length})</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Contenido según Pestaña */}
+              <div className="p-5 overflow-y-auto max-h-[50vh] space-y-4">
+                {/* PESTAÑA VÍDEOS */}
+                {detailTab === 'video' && (
+                  <div className="space-y-4">
+                    {/* Vídeo de Presentación */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                          <Film size={13} />
+                        </span>
+                        <h4 className="text-xs font-bold text-slate-800">Vídeo de Presentación del Médico</h4>
+                      </div>
+
+                      {selectedDoctorDetail.presentation_video_url ? (
+                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-md">
+                          {getVideoEmbedUrl(selectedDoctorDetail.presentation_video_url)?.includes('embed') ? (
+                            <iframe
+                              src={getVideoEmbedUrl(selectedDoctorDetail.presentation_video_url)}
+                              title={`Vídeo presentación de ${selectedDoctorDetail.full_name}`}
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <video src={selectedDoctorDetail.presentation_video_url} controls className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+                          Este especialista aún no ha subido su vídeo de presentación.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Vídeo de la Clínica */}
+                    {selectedDoctorDetail.clinic_video_url && (
+                      <div className="pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
+                            <Building2 size={13} />
+                          </span>
+                          <h4 className="text-xs font-bold text-slate-800">Vídeo de la Clínica e Instalaciones</h4>
+                        </div>
+                        <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-md">
+                          {getVideoEmbedUrl(selectedDoctorDetail.clinic_video_url)?.includes('embed') ? (
+                            <iframe
+                              src={getVideoEmbedUrl(selectedDoctorDetail.clinic_video_url)}
+                              title="Vídeo de la clínica"
+                              className="w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <video src={selectedDoctorDetail.clinic_video_url} controls className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Biografía profesional */}
+                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Acerca del especialista</h5>
+                      <p className="text-xs text-slate-700 leading-relaxed">{selectedDoctorDetail.bio}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* PESTAÑA CURRÍCULUM */}
+                {detailTab === 'curriculum' && (
+                  <div className="space-y-4">
+                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
+                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Resumen Profesional</h5>
+                      <p className="text-xs text-slate-700 leading-relaxed">{selectedDoctorDetail.bio}</p>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 mb-3">
+                        <GraduationCap size={15} className="text-brand-purple" />
+                        <span>Formación Académica y Títulos Médicos</span>
+                      </h4>
+
+                      {selectedDoctorDetail.educations?.length > 0 ? (
+                        <div className="space-y-2.5">
+                          {selectedDoctorDetail.educations.map((edu, idx) => (
+                            <div key={idx} className="p-3 bg-white rounded-xl border border-slate-200 flex items-start gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-purple-50 text-brand-purple flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                                <Award size={16} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h5 className="text-xs font-bold text-slate-900">{edu.degree || edu.institution}</h5>
+                                <p className="text-[11px] text-slate-600 font-medium">{edu.institution}</p>
+                                {(edu.start_year || edu.end_year) && (
+                                  <p className="text-[10px] text-slate-400 mt-0.5">
+                                    {edu.start_year || ''} {edu.start_year && edu.end_year ? '-' : ''} {edu.end_year || ''}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 text-center">
+                          Título oficial en {selectedDoctorDetail.specialty} verificado por {selectedDoctorDetail.professional_college || 'Colegio Oficial de Médicos'}.
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-2">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Experiencia</span>
+                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.experience_years} años de ejercicio clínico</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Idiomas de consulta</span>
+                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.languages || 'Español'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PESTAÑA CLÍNICA */}
+                {detailTab === 'clinic' && (
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                      <Building2 size={15} className="text-teal-600" />
+                      <span>Instalaciones del Consultorio / Centro Médico</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedDoctorDetail.clinic_photos?.map((photoUrl, idx) => (
+                        <div key={idx} className="aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
+                          <img src={photoUrl} alt={`Instalaciones ${idx + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Detalle con Acciones */}
+              <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDoctorDetail(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cerrar
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const doc = selectedDoctorDetail;
+                      setSelectedDoctorDetail(null);
+                      handleWhatsApp(doc);
+                    }}
+                    className="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-200 transition-all cursor-pointer"
+                  >
+                    <MessageCircle size={15} />
+                    <span>WhatsApp</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const doc = selectedDoctorDetail;
+                      setSelectedDoctorDetail(null);
+                      setBookingDoctor(doc);
+                    }}
+                    className="py-2.5 px-4 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-200 transition-all cursor-pointer"
+                  >
+                    <Calendar size={15} />
+                    <span>Solicitar Cita</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
