@@ -256,21 +256,89 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="w-full flex-1 min-h-0 relative overflow-hidden flex items-center justify-center py-2 xl:py-4">
-        {/* Soft flowing cyan/blue ethereal wave spanning behind emblem and 3 pillars */}
-        <div 
-          className="absolute right-0 top-0 bottom-0 w-[78%] pointer-events-none select-none"
-          style={{
-            background: 'radial-gradient(circle 420px at 44% 50%, rgba(186, 235, 255, 0.78) 0%, rgba(215, 245, 255, 0.48) 45%, transparent 78%), radial-gradient(ellipse 65% 55% at 86% 38%, rgba(220, 244, 253, 0.7) 0%, rgba(238, 236, 250, 0.45) 52%, transparent 82%), radial-gradient(ellipse 50% 50% at 92% 78%, rgba(242, 236, 255, 0.4) 0%, transparent 75%)'
-          }}
-        />
+      <section className="w-full flex-1 min-h-0 relative overflow-hidden flex items-center justify-center py-1 xl:py-2">
+        {/* Soft celestial flowing silk wave spanning across the entire hero */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden">
+          <svg className="w-full h-full" viewBox="0 0 1440 520" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+              {/* Vibrant radial glow behind emblem */}
+              <radialGradient id="emblemGlow" cx="50%" cy="48%" r="38%">
+                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.55" />
+                <stop offset="35%" stopColor="#7dd3fc" stopOpacity="0.38" />
+                <stop offset="65%" stopColor="#bae6fd" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </radialGradient>
 
-        <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-24 flex items-center justify-between gap-6 lg:gap-8 xl:gap-12 2xl:gap-16 relative z-10">
+              {/* Left subtle aura under title & security card */}
+              <radialGradient id="leftGlow" cx="22%" cy="65%" r="35%">
+                <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.6" />
+                <stop offset="50%" stopColor="#f0f9ff" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </radialGradient>
+
+              {/* Silk wave gradient 1 */}
+              <linearGradient id="silkWave1" x1="100%" y1="10%" x2="20%" y2="85%">
+                <stop offset="0%" stopColor="#bae6fd" stopOpacity="0.6" />
+                <stop offset="28%" stopColor="#7dd3fc" stopOpacity="0.5" />
+                <stop offset="55%" stopColor="#38bdf8" stopOpacity="0.4" />
+                <stop offset="80%" stopColor="#c7d2fe" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              {/* Silk wave gradient 2 */}
+              <linearGradient id="silkWave2" x1="95%" y1="0%" x2="10%" y2="100%">
+                <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.75" />
+                <stop offset="40%" stopColor="#bae6fd" stopOpacity="0.45" />
+                <stop offset="75%" stopColor="#ddd6fe" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              <filter id="waveBlurLarge" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="36" />
+              </filter>
+              <filter id="waveBlurSoft" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="18" />
+              </filter>
+            </defs>
+
+            {/* Left soft wash under title & security badge */}
+            <rect x="0" y="0" width="1440" height="520" fill="url(#leftGlow)" />
+
+            {/* Radial glow centered directly behind the emblem */}
+            <rect x="0" y="0" width="1440" height="520" fill="url(#emblemGlow)" />
+
+            {/* Organic silk ribbon wave curving behind emblem and 3 pillars */}
+            <path 
+              d="M 1440,20 Q 1120,60 960,150 T 620,310 Q 420,390 180,350 L 180,520 L 1440,520 Z" 
+              fill="url(#silkWave1)" 
+              filter="url(#waveBlurLarge)" 
+            />
+            
+            {/* Secondary upper wave layer */}
+            <path 
+              d="M 1440,0 Q 1040,30 880,120 Q 720,210 500,230 Q 300,250 100,330 L 100,520 L 1440,520 Z" 
+              fill="url(#silkWave2)" 
+              filter="url(#waveBlurLarge)" 
+            />
+
+            {/* Subtle luminous wave ridge */}
+            <path 
+              d="M 1440,45 C 1180,105 1020,175 860,215 C 700,255 540,295 240,335" 
+              stroke="#7dd3fc" 
+              strokeWidth="32" 
+              strokeOpacity="0.36" 
+              fill="none" 
+              filter="url(#waveBlurSoft)" 
+            />
+          </svg>
+        </div>
+
+        <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-24 flex items-center justify-between gap-3 lg:gap-4 xl:gap-8 relative z-10">
           
           {/* Columna Izquierda: Titular H1 + Tarjeta de Confianza */}
-          <div className="w-[34%] max-w-[420px] lg:max-w-[460px] xl:max-w-[530px] flex flex-col justify-center shrink-0">
-            <h1 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[48px] 2xl:text-[54px] font-black text-slate-950 leading-[1.02] tracking-[-0.025em] mb-4 xl:mb-5 2xl:mb-6">
-              {t('hero_title_p1') || 'Tu salud,'}<br />
+          <div className="w-[33%] max-w-[360px] xl:max-w-[490px] flex flex-col justify-center shrink-0">
+            <h1 className="text-[26px] sm:text-[30px] lg:text-[33px] xl:text-[48px] 2xl:text-[54px] font-black text-slate-950 leading-[0.98] tracking-[-0.03em] mb-2.5 xl:mb-4">
+              {(t('hero_title_p1') || 'Tu salud,').trim().replace(/\s+,/g, ',')}<br />
               {t('hero_title_p2') || 'en manos de la'}<br />
               <span className="text-[#005dff]">
                 {t('hero_title_p3') || 'IA más avanzada'}<br />
@@ -281,40 +349,40 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             {/* Tarjeta de Confianza */}
             <div 
               onClick={() => setShowSecurityModal(true)}
-              className="bg-[#edf5fe] hover:bg-[#e4effd] border border-[#d6e8fc]/80 rounded-[20px] p-3.5 xl:p-4 flex items-center gap-3.5 max-w-[400px] xl:max-w-[450px] shadow-2xs transition-all cursor-pointer group"
+              className="bg-[#edf5fe] hover:bg-[#e4effd] border border-[#d6e8fc] rounded-[18px] xl:rounded-[22px] p-2.5 xl:p-3.5 flex items-center gap-3 max-w-[360px] xl:max-w-[440px] shadow-2xs transition-all cursor-pointer group"
             >
-              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-12 xl:h-12 rounded-full bg-[#def3fe] text-[#005dff] flex items-center justify-center shrink-0 shadow-2xs">
-                <svg className="w-5.5 h-5.5 xl:w-6 xl:h-6 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-9 h-9 xl:w-12 xl:h-12 rounded-full bg-[#def3fe] text-[#005dff] flex items-center justify-center shrink-0 shadow-2xs">
+                <svg className="w-5 h-5 xl:w-6 xl:h-6 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   <polyline points="9 12 11 14 15 10" />
                 </svg>
               </div>
               <div>
-                <h4 className="text-xs sm:text-[13px] lg:text-[13.5px] xl:text-[14.5px] font-bold text-slate-900 leading-tight group-hover:text-[#005dff] transition-colors">
+                <h4 className="text-[11.5px] xl:text-[14px] font-bold text-slate-900 leading-tight group-hover:text-[#005dff] transition-colors">
                   {t('hero_security_title') || 'Tus datos están protegidos'}
                 </h4>
-                <p className="text-[10px] sm:text-[10.5px] lg:text-[11px] xl:text-[11.8px] text-slate-600 leading-snug mt-1">
+                <p className="text-[9.5px] xl:text-[11.5px] text-slate-600 leading-snug mt-0.5 xl:mt-1">
                   {t('hero_security_desc') || 'Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).'}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Columna Centro: Emblema Circular con Aura Suave */}
-          <div className="flex-1 flex items-center justify-center relative min-w-0">
+          {/* Columna Centro: Emblema Circular con Escala Amplia */}
+          <div className="w-[41%] flex items-center justify-center relative min-w-0">
             <img 
               src="/images/mivor_hero_feathered.png" 
               alt="MIVOR.ai" 
-              className="w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[460px] xl:max-w-[520px] 2xl:max-w-[580px] max-h-[min(54vh,540px)] h-auto object-contain relative z-10 select-none pointer-events-none drop-shadow-sm" 
+              className="w-full max-w-[320px] lg:max-w-[340px] xl:max-w-[500px] 2xl:max-w-[600px] max-h-[min(50vh,250px)] xl:max-h-[min(56vh,520px)] h-auto object-contain relative z-10 select-none pointer-events-none drop-shadow-sm" 
             />
           </div>
 
-          {/* Columna Derecha: Los 3 Pilares (2 líneas por subtítulo, tipografía exacta) */}
-          <div className="flex flex-col justify-center gap-4 lg:gap-5 xl:gap-6 2xl:gap-7 w-[27%] max-w-[340px] lg:max-w-[370px] xl:max-w-[410px] shrink-0">
+          {/* Columna Derecha: Los 3 Pilares */}
+          <div className="flex flex-col justify-center gap-3 lg:gap-3.5 xl:gap-6 w-[25%] max-w-[280px] xl:max-w-[380px] shrink-0">
             {/* Pilar 1: TECNOLOGÍA QUE CUIDA */}
-            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
-              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-12.5 xl:h-12.5 rounded-full bg-[#dbeefe] text-[#0284c7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#0284c7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-2.5 xl:gap-4 group cursor-default">
+              <div className="w-9 h-9 xl:w-13 xl:h-13 rounded-full bg-[#dbeefe] text-[#0284c7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-4.5 h-4.5 xl:w-6.5 xl:h-6.5 text-[#0284c7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
@@ -322,11 +390,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[11.5px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-normal uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] xl:text-[14px] text-slate-900 tracking-normal uppercase leading-tight">
                   {t('pillar_tech_line1') || 'TECNOLOGÍA'}<br />
                   {t('pillar_tech_line2') || 'QUE CUIDA'}
                 </h4>
-                <p className="text-[10px] sm:text-[10.5px] lg:text-[11px] xl:text-[11.8px] text-slate-600 leading-snug mt-0.5">
+                <p className="text-[9px] xl:text-[11.5px] text-slate-600 leading-snug mt-0.5">
                   Inteligencia artificial<br />
                   al servicio de tu salud.
                 </p>
@@ -334,18 +402,18 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
 
             {/* Pilar 2: PERSONAS QUE IMPORTAN */}
-            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
-              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-12.5 xl:h-12.5 rounded-full bg-[#ccfbf1] text-[#00c5a0] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#00c5a0]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-2.5 xl:gap-4 group cursor-default">
+              <div className="w-9 h-9 xl:w-13 xl:h-13 rounded-full bg-[#ccfbf1] text-[#00c5a0] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-4.5 h-4.5 xl:w-6.5 xl:h-6.5 text-[#00c5a0]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[11.5px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-normal uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] xl:text-[14px] text-slate-900 tracking-normal uppercase leading-tight">
                   {t('pillar_people_line1') || 'PERSONAS'}<br />
                   {t('pillar_people_line2') || 'QUE IMPORTAN'}
                 </h4>
-                <p className="text-[10px] sm:text-[10.5px] lg:text-[11px] xl:text-[11.8px] text-slate-600 leading-snug mt-0.5">
+                <p className="text-[9px] xl:text-[11.5px] text-slate-600 leading-snug mt-0.5">
                   Una atención más humana,<br />
                   cercana y personalizada.
                 </p>
@@ -353,9 +421,9 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
 
             {/* Pilar 3: UN FUTURO MÁS SALUDABLE */}
-            <div className="flex items-center gap-3 lg:gap-3.5 xl:gap-4 group cursor-default">
-              <div className="w-10 h-10 lg:w-11 lg:h-11 xl:w-12.5 xl:h-12.5 rounded-full bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
-                <svg className="w-5 h-5 lg:w-5.5 lg:h-5.5 xl:w-6 xl:h-6 text-[#7c3aed]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex items-center gap-2.5 xl:gap-4 group cursor-default">
+              <div className="w-9 h-9 xl:w-13 xl:h-13 rounded-full bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                <svg className="w-4.5 h-4.5 xl:w-6.5 xl:h-6.5 text-[#7c3aed]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="2" y="13" width="3.5" height="8" rx="0.8" />
                   <rect x="8" y="9" width="3.5" height="12" rx="0.8" />
                   <rect x="14" y="5" width="3.5" height="16" rx="0.8" />
@@ -364,11 +432,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 </svg>
               </div>
               <div>
-                <h4 className="font-extrabold text-[11.5px] sm:text-xs lg:text-[13px] xl:text-[14px] 2xl:text-[15px] text-slate-900 tracking-normal uppercase leading-tight">
+                <h4 className="font-extrabold text-[11px] xl:text-[14px] text-slate-900 tracking-normal uppercase leading-tight">
                   {t('pillar_future_line1') || 'UN FUTURO'}<br />
                   {t('pillar_future_line2') || 'MÁS SALUDABLE'}
                 </h4>
-                <p className="text-[10px] sm:text-[10.5px] lg:text-[11px] xl:text-[11.8px] text-slate-600 leading-snug mt-0.5">
+                <p className="text-[9px] xl:text-[11.5px] text-slate-600 leading-snug mt-0.5">
                   Innovación hoy,<br />
                   para una vida mejor mañana.
                 </p>
@@ -379,108 +447,108 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         </div>
       </section>
 
-      {/* 3. CINCO TARJETAS INFERIORES (Altura y proporciones idénticas a la maqueta) */}
-      <section className="w-full shrink-0 pb-3.5 sm:pb-4 lg:pb-5 xl:pb-6 pt-0">
-        <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-3.5 xl:gap-4.5 2xl:gap-5">
+      {/* 3. CINCO TARJETAS INFERIORES */}
+      <section className="w-full shrink-0 pb-2.5 xl:pb-4 pt-0">
+        <div className="w-full px-6 sm:px-10 lg:px-12 xl:px-16 2xl:px-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 lg:gap-3 xl:gap-4">
           
           {/* Tarjeta 1: Pregunta a MIVOR.ai (Pastel Lavender #fbfbfe) */}
           <div 
             onClick={() => onNavigate('general_chat')}
-            className="bg-[#fbfbfe] hover:bg-[#f4effd] border border-[#f0ebfa]/70 rounded-[24px] p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[235px] lg:h-[250px] xl:h-[275px] 2xl:h-[315px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#fbfbfe] hover:bg-[#f4effd] border border-[#f0ebfa]/70 rounded-[20px] xl:rounded-[24px] p-3 xl:p-4.5 flex flex-col justify-between h-[195px] xl:h-[245px] 2xl:h-[275px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-11 h-11 xl:w-11.5 xl:h-11.5 2xl:w-12.5 2xl:h-12.5 rounded-full bg-[#f1ebfc] flex items-center justify-center text-[#5c03f8] mb-3 2xl:mb-4 group-hover:scale-105 transition-transform shrink-0">
-                <Brain size={22} className="stroke-[2.2]" />
+              <div className="w-9 h-9 xl:w-11.5 xl:h-11.5 rounded-full bg-[#f1ebfc] flex items-center justify-center text-[#5c03f8] mb-2 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Brain size={19} className="stroke-[2.2] xl:w-[22px] xl:h-[22px]" />
               </div>
-              <h3 className="font-bold text-[14px] sm:text-[14.5px] lg:text-[15px] xl:text-[16px] 2xl:text-[17.5px] text-slate-900 mb-1.5 2xl:mb-2 leading-snug">
+              <h3 className="font-bold text-[12.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
                 {t('card_ask_title') || 'Pregunta a MIVOR.ai'}
               </h3>
-              <p className="text-[11px] sm:text-[11.5px] lg:text-[12px] xl:text-[12.6px] 2xl:text-[13.5px] text-slate-600 leading-[1.45] 2xl:leading-[1.5] font-normal">
+              <p className="text-[9.5px] xl:text-[11.8px] text-slate-600 leading-[1.38] xl:leading-[1.42] font-normal">
                 {t('card_ask_desc') || 'Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica con la ayuda de una IA médica avanzada.'}
               </p>
             </div>
-            <div className="w-9.5 h-9.5 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 rounded-full bg-[#5c03f8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={17} className="stroke-[2.6]" />
+            <div className="w-7.5 h-7.5 xl:w-9.5 xl:h-9.5 rounded-full bg-[#5c03f8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.6] xl:w-[16px] xl:h-[16px]" />
             </div>
           </div>
 
           {/* Tarjeta 2: Analiza tus pruebas médicas (Pastel Sky Blue #eff8fe) */}
           <div 
             onClick={() => onNavigate('documents')}
-            className="bg-[#eff8fe] hover:bg-[#e2f1fc] border border-[#dbeefe]/70 rounded-[24px] p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[235px] lg:h-[250px] xl:h-[275px] 2xl:h-[315px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#eff8fe] hover:bg-[#e2f1fc] border border-[#dbeefe]/70 rounded-[20px] xl:rounded-[24px] p-3 xl:p-4.5 flex flex-col justify-between h-[195px] xl:h-[245px] 2xl:h-[275px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-11 h-11 xl:w-11.5 xl:h-11.5 2xl:w-12.5 2xl:h-12.5 rounded-full bg-[#def1fe] flex items-center justify-center text-[#005dff] mb-3 2xl:mb-4 group-hover:scale-105 transition-transform shrink-0">
-                <svg className="w-6 h-6 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-9 h-9 xl:w-11.5 xl:h-11.5 rounded-full bg-[#def1fe] flex items-center justify-center text-[#005dff] mb-2 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <svg className="w-5 h-5 xl:w-6 xl:h-6 text-[#005dff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
-                  <line x1="8" y1="9" x2="12" y2="9" />
-                  <line x1="8" y1="12" x2="14" y2="12" />
-                  <path d="M7 19l3.2-4 2.3 2.5 2.5-3 3 4.5H7z" />
+                  <line x1="8" y1="13" x2="16" y2="13" />
+                  <line x1="8" y1="17" x2="12" y2="17" />
+                  <polyline points="9 9 12 11 15 8" />
                 </svg>
               </div>
-              <h3 className="font-bold text-[14px] sm:text-[14.5px] lg:text-[15px] xl:text-[16px] 2xl:text-[17.5px] text-slate-900 mb-1.5 2xl:mb-2 leading-snug">
+              <h3 className="font-bold text-[12.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
                 {t('card_analyze_title') || 'Analiza tus pruebas médicas'}
               </h3>
-              <p className="text-[11px] sm:text-[11.5px] lg:text-[12px] xl:text-[12.6px] 2xl:text-[13.5px] text-slate-600 leading-[1.45] 2xl:leading-[1.5] font-normal">
+              <p className="text-[9.5px] xl:text-[11.8px] text-slate-600 leading-[1.38] xl:leading-[1.42] font-normal">
                 {t('card_analyze_desc') || 'Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.'}
               </p>
             </div>
-            <div className="w-9.5 h-9.5 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 rounded-full bg-[#005dff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={17} className="stroke-[2.6]" />
+            <div className="w-7.5 h-7.5 xl:w-9.5 xl:h-9.5 rounded-full bg-[#005dff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.6] xl:w-[16px] xl:h-[16px]" />
             </div>
           </div>
 
           {/* Tarjeta 3: Organiza tu historial de salud (Pastel Mint #f0fffe) */}
           <div 
             onClick={() => onNavigate('history')}
-            className="bg-[#f0fffe] hover:bg-[#e1fbf8] border border-[#ccfbf1]/70 rounded-[24px] p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[235px] lg:h-[250px] xl:h-[275px] 2xl:h-[315px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#f0fffe] hover:bg-[#e1fbf8] border border-[#ccfbf1]/70 rounded-[20px] xl:rounded-[24px] p-3 xl:p-4.5 flex flex-col justify-between h-[195px] xl:h-[245px] 2xl:h-[275px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-11 h-11 xl:w-11.5 xl:h-11.5 2xl:w-12.5 2xl:h-12.5 rounded-full bg-[#dcf9f1] flex items-center justify-center text-[#00c5a0] mb-3 2xl:mb-4 group-hover:scale-105 transition-transform shrink-0">
-                <Folder size={22} className="stroke-[2.2]" />
+              <div className="w-9 h-9 xl:w-11.5 xl:h-11.5 rounded-full bg-[#dcf9f1] flex items-center justify-center text-[#00c5a0] mb-2 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Folder size={19} className="stroke-[2.2] xl:w-[22px] xl:h-[22px]" />
               </div>
-              <h3 className="font-bold text-[14px] sm:text-[14.5px] lg:text-[15px] xl:text-[16px] 2xl:text-[17.5px] text-slate-900 mb-1.5 2xl:mb-2 leading-snug">
+              <h3 className="font-bold text-[12.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
                 {t('card_history_title') || 'Organiza tu historial de salud'}
               </h3>
-              <p className="text-[11px] sm:text-[11.5px] lg:text-[12px] xl:text-[12.6px] 2xl:text-[13.5px] text-slate-600 leading-[1.45] 2xl:leading-[1.5] font-normal">
+              <p className="text-[9.5px] xl:text-[11.8px] text-slate-600 leading-[1.38] xl:leading-[1.42] font-normal">
                 {t('card_history_desc') || 'Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.'}
               </p>
             </div>
-            <div className="w-9.5 h-9.5 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 rounded-full bg-[#00c5a0] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={17} className="stroke-[2.6]" />
+            <div className="w-7.5 h-7.5 xl:w-9.5 xl:h-9.5 rounded-full bg-[#00c5a0] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.6] xl:w-[16px] xl:h-[16px]" />
             </div>
           </div>
 
           {/* Tarjeta 4: Últimos avances médicos (Pastel Warm Peach #faf4ee) */}
           <div 
             onClick={() => onNavigate('search')}
-            className="bg-[#faf4ee] hover:bg-[#f6eae0] border border-[#fed7aa]/60 rounded-[24px] p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[235px] lg:h-[250px] xl:h-[275px] 2xl:h-[315px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#faf4ee] hover:bg-[#f6eae0] border border-[#fed7aa]/60 rounded-[20px] xl:rounded-[24px] p-3 xl:p-4.5 flex flex-col justify-between h-[195px] xl:h-[245px] 2xl:h-[275px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-11 h-11 xl:w-11.5 xl:h-11.5 2xl:w-12.5 2xl:h-12.5 rounded-full bg-[#ffe9db] flex items-center justify-center text-[#fc792b] mb-3 2xl:mb-4 group-hover:scale-105 transition-transform shrink-0">
-                <Lightbulb size={22} className="stroke-[2.2]" />
+              <div className="w-9 h-9 xl:w-11.5 xl:h-11.5 rounded-full bg-[#ffe9db] flex items-center justify-center text-[#fc792b] mb-2 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <Lightbulb size={19} className="stroke-[2.2] xl:w-[22px] xl:h-[22px]" />
               </div>
-              <h3 className="font-bold text-[14px] sm:text-[14.5px] lg:text-[15px] xl:text-[16px] 2xl:text-[17.5px] text-slate-900 mb-1.5 2xl:mb-2 leading-snug">
+              <h3 className="font-bold text-[12.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
                 {t('card_advances_title') || 'Últimos avances médicos'}
               </h3>
-              <p className="text-[11px] sm:text-[11.5px] lg:text-[12px] xl:text-[12.6px] 2xl:text-[13.5px] text-slate-600 leading-[1.45] 2xl:leading-[1.5] font-normal">
+              <p className="text-[9.5px] xl:text-[11.8px] text-slate-600 leading-[1.38] xl:leading-[1.42] font-normal">
                 {t('card_advances_desc') || 'Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.'}
               </p>
             </div>
-            <div className="w-9.5 h-9.5 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 rounded-full bg-[#fc792b] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={17} className="stroke-[2.6]" />
+            <div className="w-7.5 h-7.5 xl:w-9.5 xl:h-9.5 rounded-full bg-[#fc792b] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.6] xl:w-[16px] xl:h-[16px]" />
             </div>
           </div>
 
           {/* Tarjeta 5: Encuentra tu médico (Pastel Lilac #f8f8f9 / #f4f2fd) */}
           <div 
             onClick={() => onNavigate('doctors')}
-            className="bg-[#f8f8f9] hover:bg-[#eae6fc] border border-[#ede9fe]/70 rounded-[24px] p-4.5 xl:p-5 2xl:p-5.5 flex flex-col justify-between h-[235px] lg:h-[250px] xl:h-[275px] 2xl:h-[315px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
+            className="bg-[#f8f8f9] hover:bg-[#eae6fc] border border-[#ede9fe]/70 rounded-[20px] xl:rounded-[24px] p-3 xl:p-4.5 flex flex-col justify-between h-[195px] xl:h-[245px] 2xl:h-[275px] shadow-2xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
           >
             <div>
-              <div className="w-11 h-11 xl:w-11.5 xl:h-11.5 2xl:w-12.5 2xl:h-12.5 rounded-full bg-[#ece5fc] flex items-center justify-center text-[#5c03f8] mb-3 2xl:mb-4 group-hover:scale-105 transition-transform shrink-0">
-                <svg className="w-6 h-6 text-[#5c03f8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-9 h-9 xl:w-11.5 xl:h-11.5 rounded-full bg-[#ece5fc] flex items-center justify-center text-[#5c03f8] mb-2 xl:mb-3 group-hover:scale-105 transition-transform shrink-0">
+                <svg className="w-5 h-5 xl:w-6 xl:h-6 text-[#5c03f8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M8 7a4 4 0 0 1 8 0v1H8V7z" />
                   <path d="M8.5 8a3.5 3.5 0 0 0 7 0" />
                   <path d="M9 11.5h6" />
@@ -490,15 +558,15 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                   <circle cx="14.5" cy="18.5" r="0.8" fill="currentColor" />
                 </svg>
               </div>
-              <h3 className="font-bold text-[14px] sm:text-[14.5px] lg:text-[15px] xl:text-[16px] 2xl:text-[17.5px] text-slate-900 mb-1.5 2xl:mb-2 leading-snug">
+              <h3 className="font-bold text-[12.5px] xl:text-[15.5px] text-slate-900 mb-1 leading-snug">
                 {t('card_doctors_title') || 'Encuentra tu médico'}
               </h3>
-              <p className="text-[11px] sm:text-[11.5px] lg:text-[12px] xl:text-[12.6px] 2xl:text-[13.5px] text-slate-600 leading-[1.45] 2xl:leading-[1.5] font-normal">
+              <p className="text-[9.5px] xl:text-[11.8px] text-slate-600 leading-[1.38] xl:leading-[1.42] font-normal">
                 {t('card_doctors_desc') || 'Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.'}
               </p>
             </div>
-            <div className="w-9.5 h-9.5 xl:w-10 xl:h-10 2xl:w-11 2xl:h-11 rounded-full bg-[#5c03f8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
-              <ArrowRight size={17} className="stroke-[2.6]" />
+            <div className="w-7.5 h-7.5 xl:w-9.5 xl:h-9.5 rounded-full bg-[#5c03f8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-transform self-end mt-auto shrink-0">
+              <ArrowRight size={14} className="stroke-[2.6] xl:w-[16px] xl:h-[16px]" />
             </div>
           </div>
 
