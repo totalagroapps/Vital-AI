@@ -253,42 +253,46 @@ button{font:inherit}
   padding:0 0 0 clamp(8px,1vw,16px);
   display:flex;
   flex-direction:column;
-  gap:clamp(10px,2.2vh,22px);
+  justify-content:space-between;
+  height:clamp(290px,40vh,390px);
 }
 .feature{
   display:grid;
-  grid-template-columns:clamp(44px,5vh,52px) 1fr;
-  gap:clamp(10px,0.9vw,16px);
+  grid-template-columns:clamp(52px,6.2vh,68px) 1fr;
+  gap:clamp(12px,1.1vw,18px);
   align-items:center;
 }
 .feature-icon{
-  width:clamp(44px,5vh,52px);
-  height:clamp(44px,5vh,52px);
+  width:clamp(52px,6.2vh,68px);
+  height:clamp(52px,6.2vh,68px);
   border-radius:50%;
   display:grid;
   place-items:center;
-  font-size:clamp(20px,2.4vh,26px);
   transition:transform .2s ease;
   flex-shrink:0;
 }
+.feature-icon svg{
+  width:clamp(26px,3.2vh,34px)!important;
+  height:clamp(26px,3.2vh,34px)!important;
+}
 .feature:hover .feature-icon{transform:scale(1.08)}
-.feature-icon.blue{background:#d6edfd;color:#0055ff;border:1px solid #c2e3fb}
-.feature-icon.green{background:#d2f6ed;color:#00b894;border:1px solid #b5edd8}
-.feature-icon.purple{background:#ebddfe;color:#6b12f8;border:1px solid #dbc3fc}
+.feature-icon.blue{background:#d6edfd;color:#0055ff;border:1.5px solid #c2e3fb}
+.feature-icon.green{background:#d2f6ed;color:#00b894;border:1.5px solid #b5edd8}
+.feature-icon.purple{background:#ebddfe;color:#6b12f8;border:1.5px solid #dbc3fc}
 .feature h3,.feature p{margin:0}
 .feature h3{
   text-transform:uppercase;
-  font-size:clamp(12.5px,0.92vw,16.5px);
-  font-weight:800;
+  font-size:clamp(13.5px,1.05vw,19px);
+  font-weight:900;
   letter-spacing:.02em;
-  line-height:1.15;
+  line-height:1.18;
   color:var(--navy);
 }
 .feature p{
-  margin-top:3px;
+  margin-top:4px;
   color:var(--body-text);
-  font-size:clamp(11px,0.74vw,13.5px);
-  line-height:1.26;
+  font-size:clamp(11.5px,0.8vw,14.5px);
+  line-height:1.32;
   font-weight:500;
 }
 
