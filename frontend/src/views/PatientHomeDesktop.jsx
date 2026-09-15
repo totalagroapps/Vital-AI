@@ -287,6 +287,79 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
       {/* 2. HERO SECTION */}
       <section className="mivor-hero">
+        {/* Soft celestial flowing silk wave & ambient glow spanning across the hero */}
+        <div className="hero-wave-bg pointer-events-none select-none overflow-hidden">
+          <svg className="w-full h-full" viewBox="0 0 1440 520" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <defs>
+              <radialGradient id="emblemGlow" cx="54%" cy="48%" r="46%">
+                <stop offset="0%" stopColor="#00c2ff" stopOpacity="0.65" />
+                <stop offset="30%" stopColor="#38bdf8" stopOpacity="0.48" />
+                <stop offset="60%" stopColor="#7dd3fc" stopOpacity="0.25" />
+                <stop offset="85%" stopColor="#bae6fd" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </radialGradient>
+
+              <radialGradient id="leftGlow" cx="15%" cy="60%" r="40%">
+                <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.5" />
+                <stop offset="60%" stopColor="#f0f9ff" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </radialGradient>
+
+              <linearGradient id="silkWave1" x1="100%" y1="10%" x2="0%" y2="80%">
+                <stop offset="0%" stopColor="#93daf8" stopOpacity="0.75" />
+                <stop offset="30%" stopColor="#70cdfa" stopOpacity="0.55" />
+                <stop offset="60%" stopColor="#bae6fd" stopOpacity="0.35" />
+                <stop offset="85%" stopColor="#e0f2fe" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              <linearGradient id="silkWave2" x1="95%" y1="0%" x2="5%" y2="100%">
+                <stop offset="0%" stopColor="#c2edff" stopOpacity="0.8" />
+                <stop offset="35%" stopColor="#aee4fe" stopOpacity="0.55" />
+                <stop offset="70%" stopColor="#dbeafe" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              <linearGradient id="strokeGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.6" />
+                <stop offset="50%" stopColor="#7dd3fc" stopOpacity="0.4" />
+                <stop offset="85%" stopColor="#bae6fd" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              <filter id="waveBlurLarge" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="38" />
+              </filter>
+              <filter id="waveBlurSoft" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="20" />
+              </filter>
+            </defs>
+
+            <rect x="0" y="0" width="1440" height="520" fill="url(#leftGlow)" />
+            <rect x="0" y="0" width="1440" height="520" fill="url(#emblemGlow)" />
+
+            <path 
+              d="M 1440,10 Q 1100,60 880,150 Q 640,240 420,270 Q 200,300 -50,320 L -50,520 L 1440,520 Z" 
+              fill="url(#silkWave1)" 
+              filter="url(#waveBlurLarge)" 
+            />
+            
+            <path 
+              d="M 1440,0 Q 1020,30 840,120 Q 620,210 380,240 Q 150,270 -50,300 L -50,520 L 1440,520 Z" 
+              fill="url(#silkWave2)" 
+              filter="url(#waveBlurLarge)" 
+            />
+
+            <path 
+              d="M 1440,35 C 1150,95 950,165 750,205 C 550,245 320,285 -50,315" 
+              stroke="url(#strokeGrad)" 
+              strokeWidth="48" 
+              fill="none" 
+              filter="url(#waveBlurSoft)" 
+            />
+          </svg>
+        </div>
+
         <div className="hero-copy">
           <h1>
             {tr('hero_title_p1', 'Tu salud,').trim().replace(/\s+,/g, ',')}<br />
@@ -298,13 +371,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           </h1>
           <div className="protection-card" onClick={() => setShowSecurityModal(true)}>
             <div className="shield">
-              <ShieldCheck size={28} className="text-[#1a69ed]" strokeWidth={2.4} />
+              <ShieldCheck size={26} className="text-[#0062ff]" strokeWidth={2.4} />
             </div>
             <div>
               <h3>{tr('hero_security_title', 'Tus datos están protegidos')}</h3>
               <p>{tr('hero_security_desc', 'Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).')}</p>
             </div>
-            <span className="chevron">›</span>
           </div>
         </div>
 
