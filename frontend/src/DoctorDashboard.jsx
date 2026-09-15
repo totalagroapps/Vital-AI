@@ -4,6 +4,8 @@ import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
 import DoctorProfile from './views/DoctorProfile';
 import DoctorVerificationDetail from './views/VerificationDetail';
+import DoctorSchedule from './views/DoctorSchedule';
+import DoctorProfileForm from './views/DoctorProfileForm';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
 import MedicalSearchModal from './MedicalSearchModal';
 import { useLanguage } from './contexts/LanguageContext';
@@ -359,6 +361,28 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         apiUrl={apiUrl} 
         authHeaders={authHeaders} 
         onBack={() => setDoctorScreen('home')} 
+      />
+    );
+  }
+  if (doctorScreen === 'schedule' || doctorScreen === 'disponibilidad') {
+    return (
+      <DoctorSchedule 
+        apiUrl={apiUrl} 
+        authHeaders={authHeaders} 
+        doctorProfile={doctorProfile} 
+        onProfileUpdated={setDoctorProfile}
+        onBack={() => setDoctorScreen('home')} 
+      />
+    );
+  }
+  if (doctorScreen === 'public-profile') {
+    return (
+      <DoctorProfileForm 
+        apiUrl={apiUrl} 
+        authHeaders={authHeaders} 
+        existingProfile={doctorProfile} 
+        onBack={() => setDoctorScreen('home')} 
+        onSaved={(p) => { setDoctorProfile(p); setDoctorScreen('home'); }}
       />
     );
   }

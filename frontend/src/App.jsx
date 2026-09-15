@@ -24,6 +24,14 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Auth from './Auth';
 import MedicalSearchModal from './MedicalSearchModal';
 import DoctorDirectoryModal from './components/DoctorDirectoryModal';
+import EspecialistasLanding from './views/EspecialistasLanding';
+import EspecialistasVideoSearch from './views/EspecialistasVideoSearch';
+import EspecialistasPresencialSearch from './views/EspecialistasPresencialSearch';
+import EspecialistaDetail from './views/EspecialistaDetail';
+import BookAppointment from './views/BookAppointment';
+import MisCitas from './views/MisCitas';
+import DoctorSchedule from './views/DoctorSchedule';
+import DoctorProfileForm from './views/DoctorProfileForm';
 import { UpdateModal } from './components/UpdateModal';
 import { 
   FolderOpen,
@@ -62,11 +70,11 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL || (
   typeof window !== 'undefined' && 
-  window.location.hostname !== 'localhost' && 
-  window.location.hostname !== '127.0.0.1' &&
-  !window.location.origin.startsWith('capacitor://')
-    ? window.location.origin
-    : 'https://vitalai.up.railway.app'
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? (window.location.port === '8000' ? window.location.origin : 'http://127.0.0.1:8000')
+    : (typeof window !== 'undefined' && !window.location.origin.startsWith('capacitor://')
+        ? window.location.origin
+        : 'https://vitalai.up.railway.app')
 );
 
 export default function App() {
@@ -80,13 +88,18 @@ export default function App() {
     return path || 'home';
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
+  const [selectedDoctorId, setSelectedDoctorId] = useState(null);
+  const [detailBack, setDetailBack] = useState('/paciente/especialistas/video');
+  const [bookingBack, setBookingBack] = useState('/paciente/especialistas/video');
+  const [specialistFilters, setSpecialistFilters] = useState(null);
 
   const handleNavigate = (screen) => {
-    if (screen === 'doctors') {
-      setDoctorDirectorySpecialty('');
-      setShowDoctorDirectory(true);
-      navigate('/paciente/medicos');
+    if (screen === 'doctors' || screen === 'specialists') {
+      navigate('/paciente/especialistas');
+      return;
+    }
+    if (screen === 'citas' || screen === 'mis-citas') {
+      navigate('/paciente/citas');
       return;
     }
     const screenMap = {
@@ -99,7 +112,9 @@ export default function App() {
       'treatments': '/paciente/tratamientos',
       'more': '/paciente/mas',
       'search': '/paciente/biblioteca',
-      'doctors': '/paciente/medicos'
+      'doctors': '/paciente/especialistas',
+      'specialists': '/paciente/especialistas',
+      'citas': '/paciente/citas'
     };
     if (screen === 'triage') startTriageSession();
     if (screen === 'general_chat') {
@@ -1034,6 +1049,26 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
+  if (path === '/medico/disponibilidad' || path === '/medico/horarios') {
+    if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
+    return (
+      <ErrorBoundary title="Disponibilidad y Horarios" onGoHome={() => navigate('/medico')}>
+        <DoctorSchedule apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/medico')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </ErrorBoundary>
+    );
+  }
+
+  if (path === '/medico/perfil-publico') {
+    if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
+    return (
+      <ErrorBoundary title="Perfil Público de Especialista" onGoHome={() => navigate('/medico')}>
+        <DoctorProfileForm apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/medico')} onSaved={() => navigate('/medico')} />
+        <UpdateModal t={t} apiUrl={API_URL} />
+      </ErrorBoundary>
+    );
+  }
+
   if (path.startsWith('/emergencia/')) {
     return (
       <>
@@ -1085,11 +1120,12 @@ ${text}`], {type: 'text/plain'});
   const activeTab = path === '/paciente' ? 'home'
     : (path === '/paciente/historial') ? 'history'
     : (path === '/paciente/tratamientos' || path === '/paciente/agenda') ? 'treatments'
-    : (path === '/paciente/medicos' || showDoctorDirectory) ? 'doctors'
+    : (path === '/paciente/medicos' || path.startsWith('/paciente/especialistas')) ? 'doctors'
+    : (path === '/paciente/citas' || path === '/paciente/reservar') ? 'citas'
     : (path === '/paciente/mas') ? 'more'
     : 'home';
 
-    const handleBottomNav = (tab) => {
+  const handleBottomNav = (tab) => {
     if (tab === 'home') navigate('/paciente');
     if (tab === 'ai' || tab === 'triage') {
       startTriageSession();
@@ -1109,21 +1145,19 @@ ${text}`], {type: 'text/plain'});
     }
     if (tab === 'documents') navigate('/paciente/documentos');
     if (tab === 'search') navigate('/paciente/biblioteca');
-    if (tab === 'doctors') {
-      setDoctorDirectorySpecialty('');
-      setShowDoctorDirectory(true);
-      navigate('/paciente/medicos');
+    if (tab === 'doctors' || tab === 'specialists') {
+      navigate('/paciente/especialistas');
+    }
+    if (tab === 'citas' || tab === 'mis-citas') {
+      navigate('/paciente/citas');
     }
   };
 
   const GlobalDoctorDirectoryModal = (
     <DoctorDirectoryModal 
-      isOpen={showDoctorDirectory || path === '/paciente/medicos'} 
+      isOpen={showDoctorDirectory} 
       onClose={() => {
         setShowDoctorDirectory(false);
-        if (path === '/paciente/medicos') {
-          navigate('/paciente');
-        }
       }} 
       recommendedSpecialty={doctorDirectorySpecialty} 
       apiUrl={API_URL} 
@@ -1142,8 +1176,6 @@ ${text}`], {type: 'text/plain'});
     </>
   );
 
-
-  
   if (path === '/paciente/mas') {
     return (
       <>
@@ -1155,6 +1187,7 @@ ${text}`], {type: 'text/plain'});
       </>
     );
   }
+
   if (path === '/paciente/tratamientos') {
     return (
       <>
@@ -1168,18 +1201,115 @@ ${text}`], {type: 'text/plain'});
     );
   }
 
-  if (path === '/paciente/medicos') {
+  if (path === '/paciente/especialistas') {
     return (
       <>
-        <PatientHome 
-          onLogout={handleLogout}
-          onNavigate={handleNavigate} 
-          userProfile={patientProfile}
-          username={username}
+        <EspecialistasLanding
+          apiUrl={API_URL}
+          onBack={() => navigate('/paciente')}
+          onSelectVideo={(filters) => {
+            setSpecialistFilters(filters);
+            navigate('/paciente/especialistas/video');
+          }}
+          onSelectPresencial={(filters) => {
+            setSpecialistFilters(filters);
+            navigate('/paciente/especialistas/presencial');
+          }}
+          onMyAppointments={() => navigate('/paciente/citas')}
         />
         {GlobalBottomNav}
       </>
     );
+  }
+
+  if (path === '/paciente/especialistas/video') {
+    return (
+      <>
+        <EspecialistasVideoSearch
+          apiUrl={API_URL}
+          initialFilters={specialistFilters}
+          onBack={() => navigate('/paciente/especialistas')}
+          onSelectDoctor={(id) => {
+            setSelectedDoctorId(id);
+            setDetailBack('/paciente/especialistas/video');
+            navigate('/paciente/especialistas/detalle');
+          }}
+          onBookDoctor={(id) => {
+            setSelectedDoctorId(id);
+            setBookingBack('/paciente/especialistas/video');
+            navigate('/paciente/reservar');
+          }}
+        />
+        {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente/especialistas/presencial') {
+    return (
+      <>
+        <EspecialistasPresencialSearch
+          apiUrl={API_URL}
+          initialFilters={specialistFilters}
+          onBack={() => navigate('/paciente/especialistas')}
+          onSelectDoctor={(id) => {
+            setSelectedDoctorId(id);
+            setDetailBack('/paciente/especialistas/presencial');
+            navigate('/paciente/especialistas/detalle');
+          }}
+        />
+        {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente/especialistas/detalle') {
+    return (
+      <>
+        <EspecialistaDetail
+          apiUrl={API_URL}
+          doctorId={selectedDoctorId}
+          onBack={() => navigate(detailBack || '/paciente/especialistas')}
+          onBook={() => {
+            setBookingBack('/paciente/especialistas/detalle');
+            navigate('/paciente/reservar');
+          }}
+        />
+        {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente/reservar') {
+    return (
+      <>
+        <BookAppointment
+          apiUrl={API_URL}
+          token={token}
+          doctorId={selectedDoctorId}
+          onBack={() => navigate(bookingBack || '/paciente/especialistas')}
+          onBooked={() => navigate('/paciente/citas')}
+        />
+        {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente/citas' || path === '/paciente/mis-citas') {
+    return (
+      <>
+        <MisCitas
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
+          onBack={() => navigate('/paciente')}
+        />
+        {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente/medicos') {
+    return <Navigate to="/paciente/especialistas" replace />;
   }
 
   if (path === '/paciente/historial') {

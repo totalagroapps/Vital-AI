@@ -130,6 +130,12 @@ async def on_startup():
     except Exception as e:
         logger.warning(f"Error initializing DB tables on startup: {e}")
 
+    try:
+        from scripts.seed_catalogs import seed_catalogs
+        await seed_catalogs()
+    except Exception as e:
+        logger.warning(f"Error seeding catalogs on startup: {e}")
+
     # Gating del seed de demo: solo en desarrollo o con flag explícito ENABLE_DEMO_SEED=true (Punto 2 & Punto 8)
     env = os.environ.get("ENVIRONMENT", os.environ.get("RAILWAY_ENVIRONMENT", "development")).lower()
     enable_demo_seed = os.environ.get("ENABLE_DEMO_SEED", "false").lower() in ("true", "1")
@@ -415,3 +421,21 @@ app.include_router(doctor_profile_router)
 from routers.doctor_verification import router as doctor_verification_router
 app.include_router(doctor_verification_router, prefix="/api")
 app.include_router(doctor_verification_router)
+
+# --- AVATARS & STATIC ASSETS ---
+from fastapi.staticfiles import StaticFiles
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+os.makedirs(os.path.join(STATIC_DIR, "avatars"), exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# --- CITAS Y ESPECIALISTAS (FACUNDO MODULAR INTEGRATION) ---
+from routers.catalogs import router as catalogs_router
+app.include_router(catalogs_router)
+from routers.availability import router as availability_router
+app.include_router(availability_router)
+from routers.appointments import router as appointments_router
+app.include_router(appointments_router)
+from routers.doctors import router as doctors_router
+app.include_router(doctors_router)
+from routers.health_places import router as health_places_router
+app.include_router(health_places_router)

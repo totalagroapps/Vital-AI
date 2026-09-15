@@ -92,7 +92,9 @@ async def get_current_user(
     Recupera el usuario autenticado desde la base de datos validando identidad y rol.
     """
     user_id = await get_current_user_id(token)
-    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    result = await db.execute(
+        select(models.User).where((models.User.id == user_id) | (models.User.username == user_id))
+    )
     user = result.scalars().first()
     if not user:
         raise HTTPException(
@@ -115,7 +117,9 @@ async def get_optional_current_user(
         user_id = await get_optional_current_user_id(token)
         if not user_id:
             return None
-        result = await db.execute(select(models.User).where(models.User.id == user_id))
+        result = await db.execute(
+            select(models.User).where((models.User.id == user_id) | (models.User.username == user_id))
+        )
         return result.scalars().first()
     except Exception:
         return None
@@ -133,3 +137,7 @@ def require_role(*allowed_roles: str):
             )
         return current_user
     return role_checker
+
+require_doctor = require_role("doctor", "admin")
+require_patient = require_role("patient", "admin")
+require_admin = require_role("admin")

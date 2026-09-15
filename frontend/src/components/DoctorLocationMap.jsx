@@ -1,442 +1,170 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
-import { MapPin, Navigation, Search, Loader2, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
-import ErrorBoundary from './ErrorBoundary';
+import { Crosshair, Loader2 } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
-// Configuración de iconos de Leaflet para evitar problemas de assets en Vite
-const customMarkerIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconRetinaUrl: iconRetina,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+// fix Leaflet's default marker icons, broken by bundler asset paths
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
 
-// Componente interno para manejar clics en el mapa
-function MapClickHandler({ onLocationSelect, disabled }) {
+const DEFAULT_CENTER = [40.4168, -3.7038]; // Madrid
+const NOMINATIM_SEARCH_URL = 'https://nominatim.openstreetmap.org/search';
+const NOMINATIM_REVERSE_URL = 'https://nominatim.openstreetmap.org/reverse';
+const GEOCODE_DEBOUNCE_MS = 900;
+
+function ClickHandler({ onPick, readOnly }) {
   useMapEvents({
     click(e) {
-      if (!disabled && onLocationSelect) {
-        onLocationSelect(e.latlng.lat, e.latlng.lng);
-      }
-    }
+      if (readOnly) return;
+      onPick(e.latlng.lat, e.latlng.lng);
+    },
   });
   return null;
 }
 
-// Componente interno para centrar el mapa suavemente y recalcular tamaño
-function MapViewUpdater({ center, zoom }) {
+// MapContainer only reads `center` on first render; re-center manually on change
+function Recenter({ lat, lng }) {
   const map = useMap();
-
   useEffect(() => {
-    // Invalidate size para asegurar que Leaflet dibuje correctamente las tiles
-    const timer = setTimeout(() => {
-      try {
-        if (map && typeof map.invalidateSize === 'function') {
-          map.invalidateSize();
-        }
-      } catch (e) {
-        console.warn('Leaflet invalidateSize error:', e);
-      }
-    }, 150);
-
-    return () => clearTimeout(timer);
-  }, [map]);
-
-  useEffect(() => {
-    if (center && !isNaN(center[0]) && !isNaN(center[1])) {
-      try {
-        if (map && typeof map.flyTo === 'function') {
-          const currentZoom = typeof map.getZoom === 'function' ? map.getZoom() : 13;
-          map.flyTo(center, zoom || currentZoom, { duration: 1.0 });
-        }
-      } catch (e) {
-        console.warn('Leaflet flyTo error:', e);
-      }
+    if (lat != null && lng != null) {
+      map.setView([lat, lng], Math.max(map.getZoom(), 14));
     }
-  }, [center, zoom, map]);
-
+  }, [lat, lng]); // eslint-disable-line react-hooks/exhaustive-deps
   return null;
 }
 
-export default function DoctorLocationMap({
-  latitude,
-  longitude,
-  address = '',
-  city = '',
-  country = 'Colombia',
-  onChange,
-  readOnly = false,
-  height = '300px',
-  title = 'Confirmación de ubicación en el mapa'
-}) {
-  const [searching, setSearching] = useState(false);
-  const [geoError, setGeoError] = useState(null);
-  const [geoSuccess, setGeoSuccess] = useState(null);
-  const markerRef = useRef(null);
-  const lastSearchQueryRef = useRef('');
+// Map picker: geocodes `address` via Nominatim, lets the pin be adjusted by
+// click/drag/GPS, and reverse-geocodes pin moves back into `address`.
+// `readOnly` disables all interaction.
+const DoctorLocationMap = ({ address, lat, lng, latitude, longitude, city, country, height = 260, title, onChange, readOnly = false }) => {
+  const { t } = useLanguage();
+  const actualLat = lat != null ? lat : (latitude != null ? latitude : null);
+  const actualLng = lng != null ? lng : (longitude != null ? longitude : null);
 
-  // Parsear valores
-  const currentLat = latitude !== undefined && latitude !== null && latitude !== '' ? parseFloat(latitude) : null;
-  const currentLng = longitude !== undefined && longitude !== null && longitude !== '' ? parseFloat(longitude) : null;
-  const hasCoordinates = currentLat !== null && currentLng !== null && !isNaN(currentLat) && !isNaN(currentLng);
+  const [geocoding, setGeocoding] = useState(false);
+  const [reverseGeocoding, setReverseGeocoding] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const debounceRef = useRef(null);
+  // seed with the current address when lat/lng already exist, so mounting
+  // with a saved profile doesn't immediately re-geocode and clobber it
+  const lastGeocodedAddress = useRef(actualLat != null && actualLng != null ? (address || '').trim() : null);
 
-  // Centro por defecto según país
-  const defaultCenter = useMemo(() => {
-    const c = typeof country === 'string' ? country.toLowerCase() : '';
-    if (c.includes('españa') || c.includes('spain')) {
-      return [40.4168, -3.7038]; // Madrid
-    }
-    if (c.includes('méxico') || c.includes('mexico')) {
-      return [19.4326, -99.1332]; // CDMX
-    }
-    return [4.7110, -74.0721]; // Bogotá
-  }, [country]);
-
-  const mapCenter = hasCoordinates ? [currentLat, currentLng] : defaultCenter;
-  const mapZoom = hasCoordinates ? 15 : 6;
-
-  // Auto-geocodificación automática cuando el usuario escribe o cambia la Ciudad / Dirección
   useEffect(() => {
     if (readOnly) return;
-    const queryParts = [address?.trim(), city?.trim(), country?.trim()].filter(Boolean);
-    const query = queryParts.join(', ');
-
-    if (queryParts.length === 0 || query === lastSearchQueryRef.current) {
-      return;
-    }
-
-    // Debounce de 800ms para evitar demasiadas llamadas mientras escribe
-    const timeoutId = setTimeout(async () => {
-      lastSearchQueryRef.current = query;
-      setSearching(true);
-      setGeoError(null);
-
+    const trimmed = (address || '').trim();
+    if (trimmed.length < 5 || trimmed === lastGeocodedAddress.current) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setGeocoding(true);
       try {
-        const encoded = encodeURIComponent(query);
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encoded}&limit=1`, {
-          headers: { 'Accept-Language': 'es' }
-        });
+        const res = await fetch(`${NOMINATIM_SEARCH_URL}?format=json&limit=1&q=${encodeURIComponent(trimmed)}`);
         const data = await res.json();
-
-        if (data && data.length > 0) {
-          const found = data[0];
-          const lat = parseFloat(found.lat);
-          const lon = parseFloat(found.lon);
-          if (onChange) {
-            onChange({
-              latitude: parseFloat(lat.toFixed(6)),
-              longitude: parseFloat(lon.toFixed(6))
-            });
-          }
-          setGeoSuccess(`Ubicación aproximada: ${city || address}`);
-          setTimeout(() => setGeoSuccess(null), 3500);
-        } else if (city?.trim()) {
-          // Fallback buscando solo por ciudad
-          const cityQuery = encodeURIComponent(`${city.trim()}, ${country.trim()}`);
-          const cityRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${cityQuery}&limit=1`, {
-            headers: { 'Accept-Language': 'es' }
-          });
-          const cityData = await cityRes.json();
-          if (cityData && cityData.length > 0) {
-            const found = cityData[0];
-            const lat = parseFloat(found.lat);
-            const lon = parseFloat(found.lon);
-            if (onChange) {
-              onChange({
-                latitude: parseFloat(lat.toFixed(6)),
-                longitude: parseFloat(lon.toFixed(6))
-              });
-            }
-            setGeoSuccess(`Ubicado en ciudad: ${city}`);
-            setTimeout(() => setGeoSuccess(null), 3500);
-          }
+        if (data?.[0]) {
+          lastGeocodedAddress.current = trimmed;
+          const parsedLat = parseFloat(data[0].lat);
+          const parsedLng = parseFloat(data[0].lon);
+          onChange?.({ lat: parsedLat, lng: parsedLng, latitude: parsedLat, longitude: parsedLng, address: trimmed });
         }
-      } catch (err) {
-        console.warn('Geocoding search failed:', err);
-      } finally {
-        setSearching(false);
+      } catch (e) {
+        // ignore — user can still place the pin manually
       }
-    }, 900);
+      setGeocoding(false);
+    }, GEOCODE_DEBOUNCE_MS);
+    return () => clearTimeout(debounceRef.current);
+  }, [address, readOnly]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    return () => clearTimeout(timeoutId);
-  }, [address, city, country, readOnly]);
+  // manual pin move -> reverse-geocode into `address`; update the ref here
+  // (not just on success) so the forward-geocode effect above doesn't treat
+  // this as a user-typed address change and geocode it right back
+  const handlePick = useCallback(
+    (newLat, newLng) => {
+      const rLat = Math.round(newLat * 1e6) / 1e6;
+      const rLng = Math.round(newLng * 1e6) / 1e6;
+      onChange?.({ lat: rLat, lng: rLng, latitude: rLat, longitude: rLng, address: address || '' });
+      setReverseGeocoding(true);
+      fetch(`${NOMINATIM_REVERSE_URL}?format=json&lat=${rLat}&lon=${rLng}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.display_name) {
+            lastGeocodedAddress.current = data.display_name;
+            onChange?.({ lat: rLat, lng: rLng, latitude: rLat, longitude: rLng, address: data.display_name });
+          }
+        })
+        .catch(() => {})
+        .finally(() => setReverseGeocoding(false));
+    },
+    [onChange, address]
+  );
 
-  const handleMarkerDragEnd = () => {
-    if (readOnly || !onChange) return;
-    const marker = markerRef.current;
-    if (marker != null) {
-      const latlng = marker.getLatLng();
-      onChange({
-        latitude: parseFloat(latlng.lat.toFixed(6)),
-        longitude: parseFloat(latlng.lng.toFixed(6))
-      });
-      setGeoSuccess('Punto exacto confirmado');
-      setTimeout(() => setGeoSuccess(null), 2500);
-    }
-  };
-
-  const handleMapClick = (lat, lng) => {
-    if (readOnly || !onChange) return;
-    onChange({
-      latitude: parseFloat(lat.toFixed(6)),
-      longitude: parseFloat(lng.toFixed(6))
-    });
-    setGeoSuccess('Punto fijado en el mapa');
-    setTimeout(() => setGeoSuccess(null), 2500);
-  };
-
-  // Obtener ubicación GPS del navegador
-  const handleUseCurrentLocation = () => {
-    if (readOnly) return;
-    setGeoError(null);
-    if (!navigator.geolocation) {
-      setGeoError('Tu navegador no soporta geolocalización.');
-      return;
-    }
-
-    setSearching(true);
+  const useGps = () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setSearching(false);
-        const { latitude: lat, longitude: lng } = position.coords;
-        if (onChange) {
-          onChange({
-            latitude: parseFloat(lat.toFixed(6)),
-            longitude: parseFloat(lng.toFixed(6))
-          });
-        }
-        setGeoSuccess('Ubicación GPS actual detectada');
-        setTimeout(() => setGeoSuccess(null), 3000);
+      (pos) => {
+        handlePick(pos.coords.latitude, pos.coords.longitude);
+        setLocating(false);
       },
-      (error) => {
-        setSearching(false);
-        console.warn('Geolocation error:', error);
-        setGeoError('No se pudo obtener el GPS actual. Puedes hacer clic en el mapa para colocar el pin.');
-        setTimeout(() => setGeoError(null), 4000);
-      },
+      () => setLocating(false),
       { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 
-  // Búsqueda manual forzada
-  const handleManualSearch = async () => {
-    if (readOnly) return;
-    const queryParts = [address?.trim(), city?.trim(), country?.trim()].filter(Boolean);
-    if (queryParts.length === 0) {
-      setGeoError('Por favor escribe una ciudad o dirección primero.');
-      setTimeout(() => setGeoError(null), 3000);
-      return;
-    }
-
-    setSearching(true);
-    setGeoError(null);
-    try {
-      const query = encodeURIComponent(queryParts.join(', '));
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`, {
-        headers: { 'Accept-Language': 'es' }
-      });
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const found = data[0];
-        const lat = parseFloat(found.lat);
-        const lon = parseFloat(found.lon);
-        if (onChange) {
-          onChange({
-            latitude: parseFloat(lat.toFixed(6)),
-            longitude: parseFloat(lon.toFixed(6))
-          });
-        }
-        setGeoSuccess(`Ubicado en: ${city || address}`);
-        setTimeout(() => setGeoSuccess(null), 3500);
-      } else {
-        setGeoError('No se encontró la dirección exacta. Haz clic en el mapa para situar el punto.');
-        setTimeout(() => setGeoError(null), 4000);
-      }
-    } catch (err) {
-      setGeoError('Error consultando el servicio de mapa.');
-      setTimeout(() => setGeoError(null), 3000);
-    } finally {
-      setSearching(false);
-    }
-  };
+  const hasPoint = actualLat != null && actualLng != null;
+  const center = hasPoint ? [actualLat, actualLng] : DEFAULT_CENTER;
 
   return (
-    <div className="w-full rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm flex flex-col my-2">
-      {/* Barra superior de controles */}
-      <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <MapPin size={16} />
-          </div>
-          <div>
-            <h4 className="font-bold text-slate-900 leading-tight">{title}</h4>
-            <p className="text-[11px] text-slate-500">
-              {readOnly 
-                ? (hasCoordinates ? 'Punto de atención médica confirmado' : 'Sin coordenadas registradas')
-                : (searching ? 'Buscando ubicación en el mapa...' : 'El mapa se centra automáticamente según la ciudad y dirección. Puedes arrastrar o hacer clic en el pin para ajustar.')}
-            </p>
-          </div>
-        </div>
-
-        {!readOnly && (
-          <div className="flex items-center gap-2 ml-auto">
-            {(city || address) && (
-              <button
-                type="button"
-                onClick={handleManualSearch}
-                disabled={searching}
-                title="Centrar mapa en la dirección escrita"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-              >
-                {searching ? <Loader2 size={13} className="animate-spin text-blue-600" /> : <Search size={13} className="text-blue-600" />}
-                <span>Centrar en ciudad/dirección</span>
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleUseCurrentLocation}
-              disabled={searching}
-              title="Detectar automáticamente mi ubicación actual con GPS"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-xl border border-blue-200 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-            >
-              <Navigation size={13} className="text-blue-600" />
-              <span>Usar mi GPS</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Alertas informativas */}
-      {geoError && (
-        <div className="px-4 py-2 bg-amber-50 border-b border-amber-100 text-amber-800 text-[11px] font-medium flex items-center gap-2">
-          <AlertCircle size={14} className="text-amber-600 shrink-0" />
-          <span>{geoError}</span>
-        </div>
-      )}
-
-      {geoSuccess && (
-        <div className="px-4 py-2 bg-emerald-50 border-b border-emerald-100 text-emerald-800 text-[11px] font-medium flex items-center gap-2">
-          <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-          <span>{geoSuccess}</span>
-        </div>
-      )}
-
-      {/* Contenedor del Mapa Leaflet */}
-      <div className="relative w-full" style={{ height, minHeight: '260px' }}>
-        <ErrorBoundary fallback={(err, reset) => (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 p-4 text-center rounded-xl border border-slate-200">
-            <AlertCircle size={24} className="text-amber-500 mb-2" />
-            <p className="text-xs font-bold text-slate-700">No se pudo cargar el mapa interactivo</p>
-            <p className="text-[11px] text-slate-500 mt-1 max-w-xs">
-              {hasCoordinates ? `Coordenadas: Lat ${currentLat?.toFixed(4)}, Lng ${currentLng?.toFixed(4)}` : 'Dirección guardada correctamente.'}
-            </p>
-            <button
-              type="button"
-              onClick={reset}
-              className="mt-3 px-3 py-1 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer shadow-xs"
-            >
-              Reintentar mapa
-            </button>
-          </div>
-        )}>
-          <MapContainer
-            center={mapCenter}
-            zoom={mapZoom}
-            scrollWheelZoom={!readOnly}
-            style={{ height: '100%', width: '100%', zIndex: 10 }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <div>
+      {title && <div className="text-xs font-bold text-gray-500 mb-2">{title}</div>}
+      <div className="rounded-xl overflow-hidden border border-gray-200 relative" style={{ height: typeof height === 'number' ? `${height}px` : height }}>
+        <MapContainer
+          center={center}
+          zoom={hasPoint ? 15 : 5}
+          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={!readOnly}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {hasPoint && (
+            <Marker
+              position={[actualLat, actualLng]}
+              draggable={!readOnly}
+              eventHandlers={{
+                dragend: (e) => {
+                  const p = e.target.getLatLng();
+                  handlePick(p.lat, p.lng);
+                },
+              }}
             />
-
-            <MapViewUpdater center={mapCenter} zoom={hasCoordinates ? 15 : 12} />
-
-            <MapClickHandler onLocationSelect={handleMapClick} disabled={readOnly} />
-
-            {hasCoordinates && (
-              <Marker
-                ref={markerRef}
-                position={[currentLat, currentLng]}
-                icon={customMarkerIcon}
-                draggable={!readOnly}
-                eventHandlers={{
-                  dragend: handleMarkerDragEnd
-                }}
-              >
-                <Popup>
-                  <div className="text-xs space-y-1">
-                    <p className="font-bold text-slate-800">
-                      {address || city ? `${address} ${city ? `(${city})` : ''}` : 'Ubicación del Consultorio'}
-                    </p>
-                    <p className="text-[10px] text-slate-500">
-                      Lat: {currentLat.toFixed(5)}, Lng: {currentLng.toFixed(5)}
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            )}
-          </MapContainer>
-        </ErrorBoundary>
-
-        {/* Loading overlay cuando se busca */}
-        {searching && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl px-4 py-2 text-xs font-semibold text-blue-700 shadow-md border border-blue-100 flex items-center gap-2">
-              <Loader2 size={15} className="animate-spin text-blue-600" />
-              <span>Buscando ubicación geográfica...</span>
-            </div>
-          </div>
-        )}
-
-        {/* Overlay si no tiene coordenadas en modo solo lectura */}
-        {readOnly && !hasCoordinates && (
-          <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-[1px] z-20 flex items-center justify-center p-4">
-            <div className="bg-white/90 rounded-2xl px-4 py-2 text-xs font-semibold text-slate-600 shadow-md border border-slate-200">
-              Coordenadas de ubicación no registradas aún.
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Barra inferior: Indicador de Coordenadas */}
-      <div className="p-3 bg-white border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-4 text-slate-600">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Latitud:</span>
-            <span className="font-mono font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
-              {hasCoordinates ? currentLat.toFixed(6) : 'Pendiente'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Longitud:</span>
-            <span className="font-mono font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
-              {hasCoordinates ? currentLng.toFixed(6) : 'Pendiente'}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {hasCoordinates ? (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <CheckCircle2 size={13} /> Ubicación fijada en el mapa
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-              <AlertCircle size={13} /> Escribe tu dirección/ciudad o haz clic en el mapa
-            </span>
           )}
-        </div>
+          <ClickHandler onPick={handlePick} readOnly={readOnly} />
+          <Recenter lat={actualLat} lng={actualLng} />
+        </MapContainer>
+        {(geocoding || reverseGeocoding) && (
+          <div className="absolute top-2 right-2 bg-white/90 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-gray-500 flex items-center gap-1.5 shadow z-[1000]">
+            <Loader2 className="w-3 h-3 animate-spin" /> {t(geocoding ? 'locmap_geocoding' : 'locmap_reverse_geocoding')}
+          </div>
+        )}
       </div>
+
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={useGps}
+          disabled={locating}
+          className="mt-2.5 flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-blue-600 disabled:opacity-50"
+        >
+          {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Crosshair className="w-3.5 h-3.5" />}
+          {t('locmap_use_gps')}
+        </button>
+      )}
     </div>
   );
-}
+};
+
+export default DoctorLocationMap;

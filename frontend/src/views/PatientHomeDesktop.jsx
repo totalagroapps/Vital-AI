@@ -21,7 +21,8 @@ import {
   TrendingUp,
   Stethoscope,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -227,6 +228,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                     <div className="flex-1">
                       <span className="block text-slate-800 group-hover:text-[#005dff]">{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
                       <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_docs_desc') || 'Estudios y pruebas médicas'}</span>
+                    </div>
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => { setShowUserMenu(false); onNavigate('citas'); }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Calendar size={15} />
+                    </div>
+                    <div className="flex-1">
+                      <span className="block text-slate-800 group-hover:text-[#005dff]">{tr('my_appointments', 'Mis Citas Médicas')}</span>
+                      <span className="block text-[10px] text-slate-400 font-normal">{tr('view_manage_appointments', 'Próximas consultas y reservas')}</span>
                     </div>
                   </button>
 

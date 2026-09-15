@@ -20,7 +20,8 @@ import {
   MessageCircle, 
   Mail, 
   LogOut, 
-  Lock 
+  Lock,
+  Calendar
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -402,6 +403,14 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                   >
                     <UserCheck size={17} className="text-[#7c3aed]" />
                     <span>Encuentra tu médico</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); onNavigate('citas'); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#1d63ed] transition-colors text-left"
+                  >
+                    <Calendar size={17} className="text-[#4f46e5]" />
+                    <span>{t('my_appointments') || 'Mis citas médicas'}</span>
                   </button>
 
                   <div className="pt-2 pb-1 border-t border-slate-100 my-2" />

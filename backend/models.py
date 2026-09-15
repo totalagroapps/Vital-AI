@@ -1,8 +1,8 @@
 from database import Base
-from sqlalchemy import Column, Boolean, Integer, String, DateTime, func, ForeignKey, Enum, Text, Float, UniqueConstraint, CheckConstraint
+from sqlalchemy import Column, Boolean, Integer, String, DateTime, func, ForeignKey, Enum, Text, Float, UniqueConstraint, CheckConstraint, Time, Date, Uuid
 import enum
 import uuid
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, foreign
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import JSON
 from services.encryption import EncryptedString, EncryptedText
@@ -32,6 +32,21 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     doctor = relationship("Doctor", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    doctor_profile = relationship("DoctorProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    scheduled_appointments = relationship("ScheduledAppointment", back_populates="patient", cascade="all, delete-orphan")
+    patient_profile = relationship("PatientProfile", primaryjoin="PatientProfile.user_id == foreign(User.id)", uselist=False)
+
+    @property
+    def full_name(self) -> str | None:
+        return self.patient_profile.full_name if self.patient_profile else None
+
+    @property
+    def email(self) -> str | None:
+        return self.username
+
+    @property
+    def appointments(self):
+        return self.scheduled_appointments
 
 
 class TriageSession(Base):
@@ -223,6 +238,11 @@ class Specialty(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     doctor_specialties = relationship("DoctorSpecialty", back_populates="specialty", cascade="all, delete-orphan")
+    doctor_profile_specialties = relationship("DoctorProfileSpecialty", back_populates="specialty", cascade="all, delete-orphan")
+
+    @property
+    def doctors(self):
+        return self.doctor_profile_specialties
 
 
 class Doctor(Base):
@@ -356,4 +376,224 @@ class MedicalVerification(Base):
 
     doctor = relationship("Doctor", back_populates="medical_verifications")
     verifier = relationship("User", foreign_keys=[verifier_id])
+
+
+# ==========================================================
+# MÓDULOS DE CITAS, AGENDAMIENTO Y BÚSQUEDA DE ESPECIALISTAS (FACUNDO INTEGRATION)
+# ==========================================================
+
+class Modality(str, enum.Enum):
+    in_person = "in_person"
+    video = "video"
+    both = "both"
+
+
+class AppointmentStatus(str, enum.Enum):
+    pending = "pending"
+    confirmed = "confirmed"
+    completed = "completed"
+    no_show = "no_show"
+    cancelled = "cancelled"
+
+
+class AvailabilityExceptionKind(str, enum.Enum):
+    unavailable = "unavailable"
+    extra = "extra"
+
+
+class HealthPlaceKind(str, enum.Enum):
+    hospital = "hospital"
+    clinic = "clinic"
+
+
+class Language(Base):
+    __tablename__ = "languages"
+
+    id = Column(Integer, primary_key=True)
+    code = Column(String, unique=True, nullable=False)  # ISO 639-1, e.g. "es", "en"
+    name = Column(String, nullable=False)  # e.g. "Español", "English"
+
+    doctor = relationship("DoctorLanguage", back_populates="language", cascade="all, delete-orphan")
+
+
+class InsuranceCompany(Base):
+    __tablename__ = "insurance_companies"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+
+    doctors = relationship("DoctorInsuranceCompany", back_populates="insurance_company", cascade="all, delete-orphan")
+
+
+class DoctorProfile(Base):
+    __tablename__ = "doctor_profiles"
+    __table_args__ = (
+        CheckConstraint("lat IS NULL OR (lat >= -90 AND lat <= 90)", name="ck_doctor_profiles_lat_range"),
+        CheckConstraint("lng IS NULL OR (lng >= -180 AND lng <= 180)", name="ck_doctor_profiles_lng_range"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(
+        String,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        index=True,
+        nullable=False,
+    )
+    full_name = Column(String)
+    avatar_url = Column(String, nullable=True)
+    rating = Column(Float, nullable=True)
+    address = Column(String, nullable=True)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
+    modality = Column(Enum(Modality), nullable=True, default=Modality.both)
+
+    # Calendar settings
+    timezone = Column(String, nullable=False, server_default="Europe/Madrid")
+    appointment_duration_minutes = Column(Integer, nullable=False, server_default="30")
+    appointment_buffer_minutes = Column(Integer, nullable=False, server_default="0")
+
+    clinic_name = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    website = Column(String, nullable=True)
+    years_experience = Column(Integer, nullable=True)
+    education = Column(String, nullable=True)
+
+    user = relationship("User", back_populates="doctor_profile")
+    insurance_companies = relationship("DoctorInsuranceCompany", back_populates="doctor", cascade="all, delete-orphan")
+    languages = relationship("DoctorLanguage", back_populates="doctor", cascade="all, delete-orphan")
+    specialties = relationship("DoctorProfileSpecialty", back_populates="doctor", cascade="all, delete-orphan")
+    availability_schedules = relationship(
+        "AvailabilitySchedule", back_populates="doctor", cascade="all, delete-orphan"
+    )
+    availability_exceptions = relationship(
+        "AvailabilityException", back_populates="doctor", cascade="all, delete-orphan"
+    )
+
+
+class DoctorLanguage(Base):
+    __tablename__ = "doctor_languages"
+
+    doctor_id = Column(Uuid(as_uuid=True), ForeignKey("doctor_profiles.id", ondelete="CASCADE"), primary_key=True)
+    language_id = Column(Integer, ForeignKey("languages.id", ondelete="CASCADE"), primary_key=True)
+
+    doctor = relationship("DoctorProfile", back_populates="languages")
+    language = relationship("Language", back_populates="doctor")
+
+
+class DoctorInsuranceCompany(Base):
+    __tablename__ = "doctor_insurance_companies"
+
+    doctor_id = Column(Uuid(as_uuid=True), ForeignKey("doctor_profiles.id", ondelete="CASCADE"), primary_key=True)
+    insurance_company_id = Column(Integer, ForeignKey("insurance_companies.id", ondelete="CASCADE"), primary_key=True)
+
+    doctor = relationship("DoctorProfile", back_populates="insurance_companies")
+    insurance_company = relationship("InsuranceCompany", back_populates="doctors")
+
+
+class DoctorProfileSpecialty(Base):
+    __tablename__ = "doctor_profile_specialties"
+
+    doctor_id = Column(Uuid(as_uuid=True), ForeignKey("doctor_profiles.id", ondelete="CASCADE"), primary_key=True)
+    specialty_id = Column(Integer, ForeignKey("specialties.id", ondelete="CASCADE"), primary_key=True)
+
+    doctor = relationship("DoctorProfile", back_populates="specialties")
+    specialty = relationship("Specialty", back_populates="doctor_profile_specialties")
+
+
+class AvailabilitySchedule(Base):
+    """Recurring weekly working block. Times are in the doctor's local timezone."""
+    __tablename__ = "availability_schedules"
+    __table_args__ = (
+        CheckConstraint("weekday BETWEEN 0 AND 6", name="ck_availability_weekday"),
+        CheckConstraint("start_time < end_time", name="ck_availability_time_order"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    doctor_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("doctor_profiles.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    weekday = Column(Integer, nullable=False)  # Monday=0 .. Sunday=6
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
+    modality = Column(Enum(Modality), nullable=False)
+    valid_from = Column(Date, nullable=True)
+    valid_until = Column(Date, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("DoctorProfile", back_populates="availability_schedules")
+
+
+class AvailabilityException(Base):
+    """One-off change to a doctor's availability: block time or open an extra slot."""
+    __tablename__ = "availability_exceptions"
+    __table_args__ = (
+        CheckConstraint("start_at < end_at", name="ck_availability_exception_time_order"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    doctor_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("doctor_profiles.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    start_at = Column(DateTime(timezone=True), nullable=False)
+    end_at = Column(DateTime(timezone=True), nullable=False)
+    kind = Column(Enum(AvailabilityExceptionKind), nullable=False)
+    modality = Column(Enum(Modality), nullable=True)  # only meaningful for `extra`
+    reason = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    doctor = relationship("DoctorProfile", back_populates="availability_exceptions")
+
+
+class ExternalHealthPlace(Base):
+    """Hospital/clinic NOT affiliated with Vital IA, cached from external sources."""
+    __tablename__ = "external_health_places"
+    __table_args__ = (
+        UniqueConstraint("source", "external_id", name="uq_external_health_places_source_id"),
+        CheckConstraint("lat >= -90 AND lat <= 90", name="ck_external_health_places_lat_range"),
+        CheckConstraint("lng >= -180 AND lng <= 180", name="ck_external_health_places_lng_range"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    source = Column(String, nullable=False, server_default="osm")
+    external_id = Column(String, nullable=False)  # id within `source`, e.g. "node/12345"
+    name = Column(String, nullable=True)
+    kind = Column(Enum(HealthPlaceKind), nullable=False)
+    lat = Column(Float, nullable=False)
+    lng = Column(Float, nullable=False)
+    address = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ScheduledAppointment(Base):
+    """
+    Citas médicas agendadas en tiempo real para pacientes y especialistas MIVOR.
+    """
+    __tablename__ = "scheduled_appointments"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+    doctor_id = Column(Uuid(as_uuid=True), ForeignKey("doctor_profiles.id", ondelete="CASCADE"), index=True, nullable=False)
+    scheduled_at = Column(DateTime(timezone=True), nullable=False)
+    scheduled_end = Column(DateTime(timezone=True), nullable=False)
+    duration_minutes = Column(Integer, nullable=False, default=30)
+    modality = Column(Enum(Modality), nullable=False)
+    status = Column(Enum(AppointmentStatus), nullable=False, default=AppointmentStatus.pending)
+    reason = Column(String, nullable=True)
+    cancellation_reason = Column(String, nullable=True)
+    payment_token = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    patient = relationship("User", back_populates="scheduled_appointments")
+    doctor = relationship("DoctorProfile")
 
