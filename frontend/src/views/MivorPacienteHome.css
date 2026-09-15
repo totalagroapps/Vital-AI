@@ -22,7 +22,7 @@ button{font:inherit}
   background:#ffffff;
 }
 .mivor-header{
-  height:clamp(56px,7.5vh,80px);
+  height:clamp(54px,6.5vh,70px);
   padding:0 3.2vw;
   display:flex;
   align-items:center;
@@ -137,9 +137,9 @@ button{font:inherit}
 .mivor-hero{
   position:relative;
   display:grid;
-  grid-template-columns:33% 45% 22%;
+  grid-template-columns:37% 40% 23%;
   min-height:0;
-  padding:clamp(4px,1.2vh,16px) 3.2vw clamp(2px,0.6vh,8px);
+  padding:clamp(2px,0.8vh,12px) 3.2vw clamp(2px,0.6vh,10px);
   align-items:center;
   flex:1;
   overflow:hidden;
@@ -153,12 +153,19 @@ button{font:inherit}
   z-index:0;
   overflow:hidden;
 }
-.hero-copy{position:relative;z-index:2}
+.hero-copy{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  margin-top:-12px;
+}
 .hero-copy h1{
-  margin:0 0 clamp(6px,1.2vh,18px);
-  font-size:clamp(24px,2.7vw,62px);
+  margin:0 0 clamp(8px,1.5vh,18px);
+  font-size:clamp(36px,4.4vw,84px);
   line-height:1.01;
-  letter-spacing:-1.5px;
+  letter-spacing:-2px;
   font-weight:900;
   color:var(--navy);
 }
@@ -166,16 +173,16 @@ button{font:inherit}
 
 /* TARJETA DE SEGURIDAD / PROTECCION */
 .protection-card{
-  width:min(640px,100%);
-  min-height:clamp(58px,7.5vh,90px);
+  width:min(660px,100%);
+  min-height:clamp(66px,8.2vh,96px);
   border:1.5px solid #aed6f6;
   border-radius:18px;
   background:linear-gradient(105deg,#e1f2fd 0%,#d5ebfb 100%);
   display:grid;
-  grid-template-columns:clamp(40px,4.8vh,50px) 1fr;
+  grid-template-columns:clamp(44px,5vh,52px) 1fr;
   align-items:center;
-  padding:clamp(6px,0.8vh,12px) clamp(10px,1vw,16px);
-  gap:clamp(10px,1vw,14px);
+  padding:clamp(8px,1vh,14px) clamp(12px,1.1vw,18px);
+  gap:clamp(12px,1vw,16px);
   box-shadow:0 4px 16px rgba(18,104,239,.08);
   cursor:pointer;
   transition:all .25s ease;
@@ -187,8 +194,8 @@ button{font:inherit}
   box-shadow:0 8px 24px rgba(18,104,239,.14);
 }
 .shield{
-  width:clamp(40px,4.8vh,50px);
-  height:clamp(40px,4.8vh,50px);
+  width:clamp(44px,5vh,52px);
+  height:clamp(44px,5vh,52px);
   border-radius:50%;
   display:grid;
   place-items:center;
@@ -199,15 +206,15 @@ button{font:inherit}
 }
 .protection-card h3,.protection-card p{margin:0}
 .protection-card h3{
-  font-size:clamp(12.5px,0.98vw,16.5px);
+  font-size:clamp(13px,1.02vw,17.5px);
   font-weight:800;
   margin-bottom:2px;
   color:var(--navy);
 }
 .protection-card p{
   color:var(--body-text);
-  line-height:1.26;
-  font-size:clamp(10.5px,0.72vw,12.5px);
+  line-height:1.28;
+  font-size:clamp(11px,0.76vw,13.2px);
   font-weight:500;
 }
 
@@ -222,17 +229,17 @@ button{font:inherit}
 }
 .hero-glow{
   position:absolute;
-  width:clamp(300px,36vw,640px);
-  height:clamp(300px,36vw,640px);
+  width:clamp(340px,37vw,650px);
+  height:clamp(340px,37vw,650px);
   border-radius:50%;
-  background:radial-gradient(circle,rgba(0,194,255,.52) 0%,rgba(56,189,248,.38) 40%,rgba(125,211,252,.18) 65%,transparent 80%);
+  background:radial-gradient(circle,rgba(0,194,255,.55) 0%,rgba(56,189,248,.4) 40%,rgba(125,211,252,.2) 65%,transparent 80%);
   pointer-events:none;
 }
 .hero-emblem{
   position:relative;
   z-index:1;
-  width:clamp(250px,30vw,540px);
-  max-height:clamp(210px,43vh,500px);
+  width:clamp(290px,33vw,550px);
+  max-height:clamp(240px,47vh,490px);
   object-fit:contain;
   mix-blend-mode:multiply;
   animation:mivorFloat 6s ease-in-out infinite;
@@ -246,21 +253,21 @@ button{font:inherit}
   padding:0 0 0 clamp(8px,1vw,16px);
   display:flex;
   flex-direction:column;
-  gap:clamp(8px,1.5vh,18px);
+  gap:clamp(10px,2.2vh,22px);
 }
 .feature{
   display:grid;
-  grid-template-columns:clamp(40px,4.6vh,52px) 1fr;
-  gap:clamp(8px,0.8vw,14px);
+  grid-template-columns:clamp(44px,5vh,52px) 1fr;
+  gap:clamp(10px,0.9vw,16px);
   align-items:center;
 }
 .feature-icon{
-  width:clamp(40px,4.6vh,50px);
-  height:clamp(40px,4.6vh,50px);
+  width:clamp(44px,5vh,52px);
+  height:clamp(44px,5vh,52px);
   border-radius:50%;
   display:grid;
   place-items:center;
-  font-size:clamp(18px,2.2vh,26px);
+  font-size:clamp(20px,2.4vh,26px);
   transition:transform .2s ease;
   flex-shrink:0;
 }
@@ -271,16 +278,16 @@ button{font:inherit}
 .feature h3,.feature p{margin:0}
 .feature h3{
   text-transform:uppercase;
-  font-size:clamp(12px,0.88vw,16px);
+  font-size:clamp(12.5px,0.92vw,16.5px);
   font-weight:800;
   letter-spacing:.02em;
   line-height:1.15;
   color:var(--navy);
 }
 .feature p{
-  margin-top:2px;
+  margin-top:3px;
   color:var(--body-text);
-  font-size:clamp(10.5px,0.71vw,13px);
+  font-size:clamp(11px,0.74vw,13.5px);
   line-height:1.26;
   font-weight:500;
 }
@@ -289,8 +296,8 @@ button{font:inherit}
 .service-grid{
   display:grid;
   grid-template-columns:repeat(5,1fr);
-  gap:clamp(8px,0.9vw,16px);
-  padding:clamp(2px,0.5vh,8px) 3.2vw clamp(10px,2vh,24px);
+  gap:clamp(10px,1vw,18px);
+  padding:0 3.2vw clamp(10px,1.6vh,18px);
   flex-shrink:0;
   position:relative;
   z-index:2;
@@ -298,9 +305,10 @@ button{font:inherit}
 .service-card{
   position:relative;
   text-align:left;
-  min-height:clamp(155px,21.5vh,250px);
-  border-radius:18px;
-  padding:clamp(12px,1.3vh,18px) clamp(12px,1vw,20px);
+  min-height:clamp(240px,37.5vh,365px);
+  height:clamp(240px,37.5vh,365px);
+  border-radius:22px;
+  padding:clamp(18px,2.5vh,28px) clamp(16px,1.2vw,24px);
   cursor:pointer;
   box-shadow:0 4px 18px rgba(25,45,100,.04);
   transition:all .25s cubic-bezier(.16,1,.3,1);
@@ -334,13 +342,13 @@ button{font:inherit}
 .service-card.orange:hover{border-color:#fdb685}
 
 .service-icon{
-  width:clamp(38px,4.4vh,50px);
-  height:clamp(38px,4.4vh,50px);
+  width:clamp(44px,5vh,54px);
+  height:clamp(44px,5vh,54px);
   border-radius:50%;
   display:grid;
   place-items:center;
-  background:rgba(255,255,255,.9);
-  margin-bottom:clamp(6px,0.9vh,12px);
+  background:rgba(255,255,255,.95);
+  margin-bottom:clamp(12px,1.8vh,20px);
   flex-shrink:0;
   box-shadow:0 2px 8px rgba(0,0,0,.03);
   transition:transform .2s ease;
@@ -352,31 +360,31 @@ button{font:inherit}
 .service-card.orange .service-icon{color:var(--orange)}
 
 .service-card h2{
-  margin:0 0 5px;
-  font-size:clamp(13px,0.98vw,17.5px);
+  margin:0 0 clamp(8px,1.1vh,14px);
+  font-size:clamp(15px,1.12vw,20px);
   font-weight:800;
-  line-height:1.18;
+  line-height:1.22;
   color:var(--navy);
   letter-spacing:-.02em;
 }
 .service-card p{
-  margin:0 0 clamp(18px,2.8vh,38px);
+  margin:0 0 clamp(24px,3.6vh,50px);
   color:var(--body-text);
-  font-size:clamp(10.5px,0.72vw,13px);
-  line-height:1.3;
+  font-size:clamp(12px,0.84vw,14.5px);
+  line-height:1.42;
   font-weight:500;
 }
 .service-arrow{
   position:absolute;
-  right:clamp(10px,0.9vw,16px);
-  bottom:clamp(10px,1.1vh,16px);
-  width:clamp(32px,3.8vh,42px);
-  height:clamp(32px,3.8vh,42px);
+  right:clamp(16px,1.2vw,22px);
+  bottom:clamp(16px,2vh,24px);
+  width:clamp(38px,4.5vh,48px);
+  height:clamp(38px,4.5vh,48px);
   border-radius:50%;
   display:grid;
   place-items:center;
   color:#fff!important;
-  font-size:clamp(16px,2vh,20px);
+  font-size:clamp(18px,2.2vh,24px);
   box-shadow:0 4px 12px rgba(0,0,0,.15);
   transition:all .2s ease;
 }
