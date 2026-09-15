@@ -22,7 +22,7 @@ button{font:inherit}
   background:#ffffff;
 }
 .mivor-header{
-  height:clamp(54px,6.5vh,70px);
+  height:clamp(58px,7.2vh,78px);
   padding:0 3.2vw;
   display:flex;
   align-items:center;
@@ -33,8 +33,8 @@ button{font:inherit}
   position:relative;
   z-index:30;
 }
-.mivor-logo-button{border:0;background:transparent;padding:0;cursor:pointer}
-.mivor-logo{display:block;width:clamp(190px,16vw,280px);height:auto}
+.mivor-logo-button{border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center}
+.mivor-logo{display:block;width:clamp(210px,18vw,315px);height:auto}
 .mivor-nav{margin-left:auto;display:flex;align-items:center;gap:clamp(16px,2vw,34px)}
 .mivor-nav button,.language,.notification{border:0;background:transparent;color:var(--navy);cursor:pointer}
 .mivor-nav button{
@@ -159,13 +159,13 @@ button{font:inherit}
   display:flex;
   flex-direction:column;
   justify-content:center;
-  margin-top:-12px;
+  margin-top:-8px;
 }
 .hero-copy h1{
   margin:0 0 clamp(8px,1.5vh,18px);
-  font-size:clamp(36px,4.4vw,84px);
-  line-height:1.01;
-  letter-spacing:-2px;
+  font-size:clamp(30px,3.75vw,72px);
+  line-height:1.03;
+  letter-spacing:-1.8px;
   font-weight:900;
   color:var(--navy);
 }
