@@ -161,19 +161,15 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 onClick={() => setShowUserMenu(prev => !prev)}
                 title={userProfile?.full_name || username || "Mi cuenta"}
               >
-                {userProfile?.photo_url ? (
-                  <img 
-                    src={userProfile.photo_url} 
-                    alt="Perfil" 
-                    className="w-full h-full object-cover" 
-                    onError={(e) => { e.target.style.display = 'none'; }}
-                  />
-                ) : (
-                  (userProfile?.full_name || username || "C")[0].toUpperCase()
-                )}
+                <img
+                  src={userProfile?.photo_url || "/images/mivor_avatar_default.png"}
+                  alt="Perfil"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = '/images/mivor_avatar_default.png'; }}
+                />
               </div>
-              <button 
-                className="account-button" 
+              <button
+                className="account-button"
                 onClick={() => setShowUserMenu(prev => !prev)}
                 type="button"
               >
@@ -187,16 +183,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0 flex items-center justify-center bg-gradient-to-br from-[#c89169] to-[#20263d] text-white font-bold">
-                      {userProfile?.photo_url ? (
-                        <img 
-                          src={userProfile.photo_url} 
-                          alt="Perfil" 
-                          className="w-full h-full object-cover" 
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
-                      ) : (
-                        (userProfile?.full_name || username || "C")[0].toUpperCase()
-                      )}
+                      <img
+                        src={userProfile?.photo_url || "/images/mivor_avatar_default.png"}
+                        alt="Perfil"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { e.target.src = '/images/mivor_avatar_default.png'; }}
+                      />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
