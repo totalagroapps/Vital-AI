@@ -137,7 +137,7 @@ button{font:inherit}
 .mivor-hero{
   position:relative;
   display:grid;
-  grid-template-columns:37% 40% 23%;
+  grid-template-columns:37% 38% 25%;
   min-height:0;
   padding:clamp(2px,0.8vh,12px) 3.2vw clamp(2px,0.6vh,10px);
   align-items:center;
@@ -250,21 +250,24 @@ button{font:inherit}
 .hero-features{
   position:relative;
   z-index:2;
-  padding:0 0 0 clamp(8px,1vw,16px);
+  padding:0;
+  margin-left:auto;
+  justify-self:end;
   display:flex;
   flex-direction:column;
   justify-content:space-between;
-  height:clamp(290px,40vh,390px);
+  height:clamp(320px,44vh,430px);
+  width:fit-content;
+  max-width:100%;
 }
 .feature{
-  display:grid;
-  grid-template-columns:clamp(52px,6.2vh,68px) 1fr;
-  gap:clamp(12px,1.1vw,18px);
+  display:flex;
   align-items:center;
+  gap:clamp(16px,1.2vw,24px);
 }
 .feature-icon{
-  width:clamp(52px,6.2vh,68px);
-  height:clamp(52px,6.2vh,68px);
+  width:clamp(66px,8vh,84px);
+  height:clamp(66px,8vh,84px);
   border-radius:50%;
   display:grid;
   place-items:center;
@@ -272,26 +275,26 @@ button{font:inherit}
   flex-shrink:0;
 }
 .feature-icon svg{
-  width:clamp(26px,3.2vh,34px)!important;
-  height:clamp(26px,3.2vh,34px)!important;
+  width:clamp(34px,4.2vh,44px)!important;
+  height:clamp(34px,4.2vh,44px)!important;
 }
-.feature:hover .feature-icon{transform:scale(1.08)}
-.feature-icon.blue{background:#d6edfd;color:#0055ff;border:1.5px solid #c2e3fb}
-.feature-icon.green{background:#d2f6ed;color:#00b894;border:1.5px solid #b5edd8}
-.feature-icon.purple{background:#ebddfe;color:#6b12f8;border:1.5px solid #dbc3fc}
-.feature h3,.feature p{margin:0}
+.feature:hover .feature-icon{transform:scale(1.06)}
+.feature-icon.blue{background:#daf0fe;color:#0062ff;border:1.5px solid #bae4fd}
+.feature-icon.green{background:#d8f7ee;color:#00b894;border:1.5px solid #a7f3d0}
+.feature-icon.purple{background:#efe4fe;color:#6400ff;border:1.5px solid #ddd6fe}
+.feature h3,.feature p{margin:0;white-space:nowrap}
 .feature h3{
   text-transform:uppercase;
-  font-size:clamp(13.5px,1.05vw,19px);
+  font-size:clamp(17px,1.28vw,24.5px);
   font-weight:900;
   letter-spacing:.02em;
-  line-height:1.18;
+  line-height:1.15;
   color:var(--navy);
 }
 .feature p{
-  margin-top:4px;
+  margin-top:6px;
   color:var(--body-text);
-  font-size:clamp(11.5px,0.8vw,14.5px);
+  font-size:clamp(13.5px,0.96vw,17.5px);
   line-height:1.32;
   font-weight:500;
 }

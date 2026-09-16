@@ -400,29 +400,70 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         <aside className="hero-features">
           <div className="feature">
             <div className="feature-icon blue">
-              <Users size={26} className="text-[#1168ed]" strokeWidth={2.2} />
+              <svg viewBox="0 0 36 36" fill="none" stroke="#0062ff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="11.5" r="4" />
+                <path d="M10 26.5c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" />
+                <circle cx="9.5" cy="13.5" r="3" />
+                <path d="M4 26.5c0-3.2 2.4-5.5 5.5-5.8" />
+                <circle cx="26.5" cy="13.5" r="3" />
+                <path d="M26.5 20.7c3.1.3 5.5 2.6 5.5 5.8" />
+              </svg>
             </div>
             <div>
-              <h3>{tr('pillar_tech_line1', 'TECNOLOGÍA')} {tr('pillar_tech_line2', 'QUE CUIDA')}</h3>
-              <p>{tr('pillar_tech_desc', 'Inteligencia artificial al servicio de tu salud.')}</p>
+              <h3>
+                {tr('pillar_tech_line1', 'TECNOLOGÍA')}
+                <br />
+                {tr('pillar_tech_line2', 'QUE CUIDA')}
+              </h3>
+              <p>
+                {tr('pillar_tech_desc_line1', 'Inteligencia artificial')}
+                <br />
+                {tr('pillar_tech_desc_line2', 'al servicio de tu salud.')}
+              </p>
             </div>
           </div>
           <div className="feature">
             <div className="feature-icon green">
-              <Heart size={26} className="text-[#10b69e]" strokeWidth={2.2} />
+              <svg viewBox="0 0 36 36" fill="none" stroke="#00b894" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 19.5c-3.2-3.3-7-5.5-7-9.5 0-2.8 2.2-5 5-5 1.8 0 3.3.9 4 2.2.7-1.3 2.2-2.2 4-2.2 2.8 0 5 2.2 5 5 0 4-3.8 6.2-7 9.5l-2 2-2-2z" />
+                <path d="M7 26.5c0-2.8 2.5-4.5 5.5-4.5h11c3 0 5.5 1.7 5.5 4.5" />
+              </svg>
             </div>
             <div>
-              <h3>{tr('pillar_people_line1', 'PERSONAS')} {tr('pillar_people_line2', 'QUE IMPORTAN')}</h3>
-              <p>{tr('pillar_people_desc', 'Una atención más humana, cercana y personalizada.')}</p>
+              <h3>
+                {tr('pillar_people_line1', 'PERSONAS')}
+                <br />
+                {tr('pillar_people_line2', 'QUE IMPORTAN')}
+              </h3>
+              <p>
+                {tr('pillar_people_desc_line1', 'Una atención más humana,')}
+                <br />
+                {tr('pillar_people_desc_line2', 'cercana y personalizada.')}
+              </p>
             </div>
           </div>
           <div className="feature">
             <div className="feature-icon purple">
-              <TrendingUp size={26} className="text-[#6d24ea]" strokeWidth={2.2} />
+              <svg viewBox="0 0 36 36" fill="none" stroke="#6400ff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="6" y1="28" x2="30" y2="28" />
+                <rect x="8" y="21" width="4.5" height="7" rx="1" />
+                <rect x="15.5" y="16" width="4.5" height="12" rx="1" />
+                <rect x="23" y="11" width="4.5" height="17" rx="1" />
+                <path d="M7 17l6-5 6 3 9-7" />
+                <polyline points="23 8 28 8 28 13" />
+              </svg>
             </div>
             <div>
-              <h3>{tr('pillar_future_line1', 'UN FUTURO')} {tr('pillar_future_line2', 'MÁS SALUDABLE')}</h3>
-              <p>{tr('pillar_future_desc', 'Innovación hoy, para una vida mejor mañana.')}</p>
+              <h3>
+                {tr('pillar_future_line1', 'UN FUTURO')}
+                <br />
+                {tr('pillar_future_line2', 'MÁS SALUDABLE')}
+              </h3>
+              <p>
+                {tr('pillar_future_desc_line1', 'Innovación hoy,')}
+                <br />
+                {tr('pillar_future_desc_line2', 'para una vida mejor mañana.')}
+              </p>
             </div>
           </div>
         </aside>
