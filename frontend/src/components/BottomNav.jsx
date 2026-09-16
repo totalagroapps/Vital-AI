@@ -57,86 +57,75 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
     );
   }
 
-  // ================= BARRA DE NAVEGACIÓN PACIENTE (5 PESTAÑAS DEL DISEÑO MIVOR.ai) =================
-  const isTreatmentsActive = activeTab === 'treatments' || activeTab === 'agenda';
-
+  // ================= BARRA DE NAVEGACIÓN PACIENTE (4 PESTAÑAS OFICIALES DEL DISEÑO MÓVIL) =================
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3.5 z-50 select-none lg:hidden">
-      <div className="max-w-md mx-auto grid grid-cols-5 items-center text-center">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3 z-50 select-none lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
+      <div className="max-w-md mx-auto grid grid-cols-4 items-center text-center">
         
         {/* 1. Inicio */}
         <button 
-          type="button"
+          type="button" 
           onClick={() => onTabChange('home')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Home 
-            size={23} 
-            className={activeTab === 'home' ? 'text-[#2563eb] fill-[#2563eb]' : 'text-slate-400'} 
+            size={22} 
+            className={activeTab === 'home' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] ${activeTab === 'home' ? 'font-bold text-[#2563eb]' : 'font-semibold text-slate-500'}`}>
+          <span className={`text-[10.5px] ${activeTab === 'home' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
             Inicio
           </span>
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
         </button>
 
-        {/* 2. Historial */}
+        {/* 2. Pregunta a MIVOR */}
         <button 
-          type="button"
-          onClick={() => onTabChange('history')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          type="button" 
+          onClick={() => onTabChange('general_chat')}
+          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
-          <Clock 
-            size={23} 
-            className={activeTab === 'history' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
-          />
-          <span className={`text-[11px] ${activeTab === 'history' ? 'font-bold text-[#2563eb]' : 'font-semibold text-slate-500'}`}>
-            Historial
+          <div className="relative">
+            <Sparkles 
+              size={21} 
+              className={activeTab === 'general_chat' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
+            />
+          </div>
+          <span className={`text-[10.5px] ${activeTab === 'general_chat' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+            Pregunta a MIVOR
           </span>
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
         </button>
 
-        {/* 3. Tratamientos */}
+        {/* 3. Mi Tratamiento */}
         <button 
-          type="button"
+          type="button" 
           onClick={() => onTabChange('treatments')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Pill 
-            size={23} 
-            className={isTreatmentsActive ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
+            size={21} 
+            className={activeTab === 'treatments' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] ${isTreatmentsActive ? 'font-bold text-[#2563eb]' : 'font-semibold text-slate-500'}`}>
-            Tratamientos
+          <span className={`text-[10.5px] ${activeTab === 'treatments' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+            Mi Tratamiento
           </span>
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
         </button>
 
-        {/* 4. Médicos */}
+        {/* 4. Mi cuenta */}
         <button 
-          type="button"
-          onClick={() => onTabChange('doctors')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
+          type="button" 
+          onClick={() => onTabChange('more')}
+          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Users 
-            size={23} 
-            className={activeTab === 'doctors' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
+            size={21} 
+            className={activeTab === 'more' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
           />
-          <span className={`text-[11px] ${activeTab === 'doctors' ? 'font-bold text-[#2563eb]' : 'font-semibold text-slate-500'}`}>
-            Médicos
+          <span className={`text-[10.5px] ${activeTab === 'more' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+            Mi cuenta
           </span>
-        </button>
-
-        {/* 5. Más */}
-        <button 
-          type="button"
-          onClick={() => onTabChange('more')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none"
-        >
-          <MoreHorizontal 
-            size={23} 
-            className={activeTab === 'more' ? 'text-[#2563eb] stroke-[2.5]' : 'text-slate-400'} 
-          />
-          <span className={`text-[11px] ${activeTab === 'more' ? 'font-bold text-[#2563eb]' : 'font-semibold text-slate-500'}`}>
-            Más
-          </span>
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
         </button>
 
       </div>

@@ -21,7 +21,16 @@ import {
   Mail, 
   LogOut, 
   Lock,
-  Calendar
+  Calendar,
+  Bell,
+  User,
+  Paperclip,
+  Mic,
+  Sparkles,
+  FileText,
+  Stethoscope,
+  Pill,
+  MessageSquare
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -64,66 +73,82 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
   return (
     <>
       {/* ================= VISTA MÓVIL (RÉPLICA EXACTA DISEÑO OFICIAL DEL JEFE) ================= */}
-      <div className="block lg:hidden w-full min-h-screen bg-white font-sans text-slate-900 pb-24 overflow-x-hidden select-none">
+      <div className="block lg:hidden w-full min-h-screen bg-white font-sans text-slate-900 pb-20 overflow-x-hidden select-none">
         
-        {/* 1. Barra Superior Móvil: Logo + Selector Idioma + Hamburguesa */}
-        <header className="w-full px-4 py-3 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
+        {/* 1. Barra Superior Móvil: Logo + Idioma + Campana + Perfil */}
+        <header className="w-full px-4 py-2.5 flex items-center justify-between border-b border-slate-100 bg-white/95 backdrop-blur-md sticky top-0 z-40">
           {/* Logo Marca */}
           <div 
             className="flex items-center cursor-pointer" 
             onClick={() => onNavigate('home')}
           >
             <img 
-              src="/images/mivor_nav_logo.png" 
+              src="/assets/mivor-logo.png" 
               alt="MIVOR.ai" 
               className="h-7 w-auto object-contain" 
               onError={(e) => { e.target.src = '/logo.png'; }}
             />
           </div>
 
-          {/* Controles Derecha: Idioma + Menú */}
+          {/* Controles Derecha: Idioma + Campana + Perfil */}
           <div className="flex items-center gap-2">
-            <LanguageSelector />
+            <LanguageSelector variant="pill" />
             
             <button 
-              onClick={() => setShowDrawer(true)} 
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-800 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
-              title="Menú"
+              onClick={() => setShowContactModal(true)} 
+              className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-700 relative hover:bg-slate-50 active:scale-95 transition-all cursor-pointer shadow-2xs"
+              title="Notificaciones"
             >
-              <Menu size={22} className="stroke-[2.2]" />
+              <Bell size={18} className="stroke-[2]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
+            </button>
+
+            <button 
+              onClick={() => setShowDrawer(true)} 
+              className="w-9 h-9 rounded-full border border-slate-200 bg-blue-50 text-[#0062ff] flex items-center justify-center hover:bg-blue-100 active:scale-95 transition-all cursor-pointer overflow-hidden shadow-2xs"
+              title="Mi cuenta"
+            >
+              {userProfile?.photo_url ? (
+                <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
+              ) : (
+                <User size={19} className="stroke-[2.2]" />
+              )}
             </button>
           </div>
         </header>
 
         {/* Contenedor Principal Móvil */}
-        <main className="px-4 py-3 space-y-3">
+        <main className="px-4 py-3 space-y-3.5">
           
           {/* 2. Sección Hero Móvil */}
           <section 
-            className="flex items-center justify-between gap-2 pt-1 pb-2 relative"
+            className="flex items-center justify-between gap-2 pt-1 pb-1 relative"
             style={{
               backgroundImage: 'radial-gradient(circle at 85% 35%, rgba(186, 230, 253, 0.45) 0%, rgba(224, 242, 254, 0.2) 45%, rgba(255, 255, 255, 0) 75%)'
             }}
           >
             {/* Texto Hero Izquierda */}
-            <div className="flex-1 pr-1">
-              <h1 className="text-[23px] sm:text-[26px] font-black text-slate-900 leading-[1.12] tracking-tight mb-2">
+            <div className="flex-1 min-w-0 pr-1">
+              <h1 className="text-[25px] sm:text-[28px] font-black text-[#050838] leading-[1.08] tracking-tight">
                 Tu salud,<br />
                 en manos de la<br />
-                <span className="text-[#1d63ed]">IA más avanzada</span><br />
-                en medicina.
+                <span className="text-[#0062ff]">IA más avanzada</span><br />
+                <span className="text-[#0062ff]">en medicina.</span>
               </h1>
-              <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal max-w-[260px]">
-                Entiende, gestiona y mejora tu bienestar con información médica fiable, personalizada y siempre disponible.
+              <p className="text-[11.5px] sm:text-xs text-slate-500 font-medium leading-snug mt-2">
+                Más información. Mejores decisiones.<br />
+                Una vida más saludable.
               </p>
             </div>
 
-            {/* Arte Hero Derecha: Emblema Circular + Eslogan Cursivo */}
-            <div className="w-[145px] sm:w-[170px] shrink-0 flex items-center justify-center relative">
+            {/* Arte Hero Derecha: Emblema Circular con Glow */}
+            <div className="w-[125px] sm:w-[145px] shrink-0 relative flex items-center justify-center">
+              <div className="absolute w-[120px] h-[120px] rounded-full bg-sky-200/50 blur-xl pointer-events-none" />
               <img 
-                src="/images/mivor_mobile_hero_art.png" 
+                src="/assets/mivor-emblem.png" 
                 alt="MIVOR.ai" 
-                className="w-full h-auto object-contain drop-shadow-xs select-none pointer-events-none" 
+                className="w-full h-auto object-contain relative z-1 mix-blend-multiply drop-shadow-sm select-none pointer-events-none" 
+                onError={(e) => { e.target.src = '/images/mivor-emblem.png'; }}
               />
             </div>
           </section>
@@ -131,192 +156,161 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
           {/* 3. Tarjeta de Confianza / Protección de Datos */}
           <div 
             onClick={() => setShowSecurityModal(true)}
-            className="bg-[#f0f7ff] hover:bg-[#e4f0ff] border border-blue-100/90 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+            className="bg-[#edf6fe] hover:bg-[#e2f0fc] border border-[#cbe4fc] rounded-2xl p-3 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
           >
-            <div className="w-11 h-11 rounded-2xl bg-blue-100/80 text-[#1d63ed] flex items-center justify-center shrink-0">
-              <ShieldCheck size={24} className="stroke-[2.2]" />
+            <div className="w-10 h-10 rounded-xl bg-[#0062ff] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldCheck size={22} className="stroke-[2.4]" />
             </div>
-            <div className="flex-1 pr-1">
-              <h4 className="text-[13px] sm:text-sm font-bold text-slate-900 leading-tight group-hover:text-[#1d63ed] transition-colors">
+            <div className="flex-1 min-w-0 pr-1">
+              <h4 className="text-[13px] font-black text-[#050838] leading-tight group-hover:text-[#0062ff] transition-colors">
                 Tus datos están protegidos
               </h4>
-              <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-tight mt-0.5">
-                Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).
+              <p className="text-[10.5px] text-slate-500 font-medium leading-tight mt-0.5">
+                Cifrado de nivel médico (ISO 27001, GDPR)
               </p>
             </div>
-            <ChevronRight size={18} className="text-slate-400 group-hover:translate-x-0.5 transition-transform shrink-0" />
+            <ChevronRight size={18} className="text-[#0062ff] stroke-[2.4] group-hover:translate-x-0.5 transition-transform shrink-0" />
           </div>
 
-          {/* 4. Las 5 Tarjetas de Acción Móviles (Listado Vertical Oficial) */}
-          <div className="space-y-2.5 pt-1">
-            
-            {/* Tarjeta 1: Pregunta a MIVOR.ai */}
+          {/* 4. Buscador / Pregunta a MIVOR.ai con Micrófono */}
+          <div className="space-y-1.5 pt-0.5">
             <div 
               onClick={() => onNavigate('general_chat')}
-              className="bg-[#fbf9ff] hover:bg-[#f3edff] border border-purple-100/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+              className="w-full bg-white border border-slate-200 rounded-full py-1.5 pl-3.5 pr-1.5 flex items-center gap-2.5 shadow-2xs hover:border-blue-300 active:scale-[0.99] transition-all cursor-pointer group"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#f3e8ff] text-[#9333ea] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Brain size={22} className="stroke-[2.2]" />
+              <div className="text-slate-400 p-0.5 group-hover:text-slate-600 transition-colors">
+                <Paperclip size={20} className="stroke-[2.2] -rotate-45" />
               </div>
-              <div className="flex-1 pr-1">
-                <h3 className="font-bold text-[13px] sm:text-[14px] text-slate-900 leading-tight">
-                  Pregunta a MIVOR.ai
-                </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-snug mt-0.5">
-                  Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica y científica con la ayuda de una IA médica avanzada.
-                </p>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-[#9333ea] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 active:scale-95 transition-transform">
-                <ArrowRight size={16} />
-              </div>
+              <div className="h-5 w-[1px] bg-slate-200" />
+              <span className="flex-1 text-[13px] text-slate-400 font-normal select-none">
+                Pregunta a MIVOR.ai...
+              </span>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigate('general_chat');
+                }}
+                className="w-10 h-10 rounded-full bg-[#0062ff] text-white flex items-center justify-center shadow-xs hover:bg-blue-700 active:scale-95 transition-all shrink-0 cursor-pointer"
+                title="Dictar pregunta"
+              >
+                <Mic size={19} className="stroke-[2.2]" />
+              </button>
             </div>
+            
+            <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-[#0062ff]">
+              <Sparkles size={12} className="stroke-[2.5]" />
+              <span>Resuelve tus dudas de salud con nuestra IA médica</span>
+            </div>
+          </div>
 
-            {/* Tarjeta 2: Analiza tus pruebas médicas */}
+          {/* 5. Cuadrícula 2x2 de Servicios */}
+          <div className="grid grid-cols-2 gap-2.5 pt-0.5">
+            {/* Tarjeta 1: Analiza tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#f0f7ff] hover:bg-[#e2f0fe] border border-blue-100/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+              className="bg-[#f2f8fe] hover:bg-[#e6f2fd] border border-[#d8ebfc] rounded-2xl p-3 flex flex-col justify-between min-h-[142px] shadow-2xs active:scale-[0.98] transition-all cursor-pointer group"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#e0f2fe] text-[#0284c7] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Activity size={22} className="stroke-[2.2]" />
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white text-[#0062ff] flex items-center justify-center border border-blue-100 shadow-2xs group-hover:scale-105 transition-transform">
+                  <FileText size={20} className="stroke-[2.2]" />
+                </div>
+                <div className="w-7 h-7 rounded-full bg-[#0062ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                  <ArrowRight size={14} className="stroke-[2.6]" />
+                </div>
               </div>
-              <div className="flex-1 pr-1">
-                <h3 className="font-bold text-[13px] sm:text-[14px] text-slate-900 leading-tight">
+              <div className="mt-2">
+                <h3 className="text-[13px] font-black text-[#050838] leading-tight">
                   Analiza tus pruebas médicas
                 </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-snug mt-0.5">
-                  Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.
+                <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1">
+                  Sube y analiza tus análisis, radiografías, TAC, etc.
                 </p>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-[#0284c7] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 active:scale-95 transition-transform">
-                <ArrowRight size={16} />
               </div>
             </div>
 
-            {/* Tarjeta 3: Organiza tu historial de salud */}
+            {/* Tarjeta 2: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#f0fdf9] hover:bg-[#def7ee] border border-teal-100/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+              className="bg-[#f0fbf7] hover:bg-[#e1f8ef] border border-[#d3f4e8] rounded-2xl p-3 flex flex-col justify-between min-h-[142px] shadow-2xs active:scale-[0.98] transition-all cursor-pointer group"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#ccfbf1] text-[#0d9488] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Folder size={22} className="stroke-[2.2]" />
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white text-[#00b894] flex items-center justify-center border border-emerald-100 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Folder size={20} className="stroke-[2.2]" />
+                </div>
+                <div className="w-7 h-7 rounded-full bg-[#00b894] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                  <ArrowRight size={14} className="stroke-[2.6]" />
+                </div>
               </div>
-              <div className="flex-1 pr-1">
-                <h3 className="font-bold text-[13px] sm:text-[14px] text-slate-900 leading-tight">
+              <div className="mt-2">
+                <h3 className="text-[13px] font-black text-[#050838] leading-tight">
                   Organiza tu historial de salud
                 </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-snug mt-0.5">
-                  Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.
+                <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1">
+                  Toda tu información en un solo lugar.
                 </p>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-[#0d9488] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 active:scale-95 transition-transform">
-                <ArrowRight size={16} />
               </div>
             </div>
 
-            {/* Tarjeta 4: Últimos avances médicos */}
+            {/* Tarjeta 3: Últimos avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#fff8f1] hover:bg-[#ffeedd] border border-orange-100/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+              className="bg-[#fff8f3] hover:bg-[#ffefe3] border border-[#fde4d4] rounded-2xl p-3 flex flex-col justify-between min-h-[142px] shadow-2xs active:scale-[0.98] transition-all cursor-pointer group"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#ffedd5] text-[#ea580c] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <Lightbulb size={22} className="stroke-[2.2]" />
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white text-[#ff6414] flex items-center justify-center border border-orange-100 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Lightbulb size={20} className="stroke-[2.2]" />
+                </div>
+                <div className="w-7 h-7 rounded-full bg-[#ff6414] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                  <ArrowRight size={14} className="stroke-[2.6]" />
+                </div>
               </div>
-              <div className="flex-1 pr-1">
-                <h3 className="font-bold text-[13px] sm:text-[14px] text-slate-900 leading-tight">
+              <div className="mt-2">
+                <h3 className="text-[13px] font-black text-[#050838] leading-tight">
                   Últimos avances médicos
                 </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-snug mt-0.5">
-                  Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.
+                <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1">
+                  Conoce los tratamientos y novedades más recientes.
                 </p>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-[#ea580c] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 active:scale-95 transition-transform">
-                <ArrowRight size={16} />
               </div>
             </div>
 
-            {/* Tarjeta 5: Encuentra tu médico */}
+            {/* Tarjeta 4: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#faf5ff] hover:bg-[#ede5ff] border border-purple-100/90 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs active:scale-[0.99] transition-all cursor-pointer group"
+              className="bg-[#f9f5ff] hover:bg-[#f1e8ff] border border-[#ebdffc] rounded-2xl p-3 flex flex-col justify-between min-h-[142px] shadow-2xs active:scale-[0.98] transition-all cursor-pointer group"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#ede9fe] text-[#7c3aed] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                <UserCheck size={22} className="stroke-[2.2]" />
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 rounded-xl bg-white text-[#8b2cf5] flex items-center justify-center border border-purple-100 shadow-2xs group-hover:scale-105 transition-transform">
+                  <Stethoscope size={20} className="stroke-[2.2]" />
+                </div>
+                <div className="w-7 h-7 rounded-full bg-[#8b2cf5] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                  <ArrowRight size={14} className="stroke-[2.6]" />
+                </div>
               </div>
-              <div className="flex-1 pr-1">
-                <h3 className="font-bold text-[13px] sm:text-[14px] text-slate-900 leading-tight">
+              <div className="mt-2">
+                <h3 className="text-[13px] font-black text-[#050838] leading-tight">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[10px] sm:text-[10.5px] text-slate-500 leading-snug mt-0.5">
-                  Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.
+                <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1">
+                  Busca un especialista y consulta por video o en persona.
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-[#7c3aed] text-white flex items-center justify-center shadow-xs shrink-0 group-hover:scale-105 active:scale-95 transition-transform">
-                <ArrowRight size={16} />
-              </div>
             </div>
-
           </div>
+
+          {/* 6. Banner Destacado: Medicina Preventiva y Longevidad */}
+          <div 
+            onClick={() => setShowMissionModal(true)}
+            className="w-full rounded-2xl overflow-hidden border border-sky-100 shadow-2xs hover:shadow-xs active:scale-[0.99] transition-all cursor-pointer"
+          >
+            <img 
+              src="/images/banner_preventive_mobile.png" 
+              alt="Medicina preventiva y longevidad" 
+              className="w-full h-auto object-cover block select-none pointer-events-none" 
+            />
+          </div>
+
         </main>
-
-        {/* 5. Barra de Navegación Inferior Oficial Móvil (Las 5 pestañas de la maqueta) */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-1 py-1.5 pb-2.5 z-40 select-none">
-          <div className="grid grid-cols-5 items-center text-center">
-            
-            {/* Pestaña 1: Para médicos */}
-            <button 
-              type="button" 
-              onClick={() => { window.location.href = '/medico'; }}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 text-slate-600 hover:text-[#1d63ed] active:scale-95 transition-all"
-            >
-              <Users size={21} className="stroke-[2]" />
-              <span className="text-[9.5px] font-medium leading-tight">Para médicos</span>
-            </button>
-
-            {/* Pestaña 2: Cómo funciona */}
-            <button 
-              type="button" 
-              onClick={() => setShowHowModal(true)}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 text-slate-600 hover:text-[#1d63ed] active:scale-95 transition-all"
-            >
-              <Sliders size={21} className="stroke-[2]" />
-              <span className="text-[9.5px] font-medium leading-tight">Cómo funciona</span>
-            </button>
-
-            {/* Pestaña 3: Inicio (Central Activo) */}
-            <button 
-              type="button" 
-              onClick={() => onNavigate('home')}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 active:scale-95 transition-all"
-            >
-              <Home size={23} className="text-[#1d63ed] fill-[#1d63ed]" />
-              <span className="text-[10px] font-bold text-[#1d63ed] leading-tight">Inicio</span>
-              <span className="w-6 h-[2px] bg-[#1d63ed] rounded-full mt-0.5" />
-            </button>
-
-            {/* Pestaña 4: Sobre MIVOR.ai */}
-            <button 
-              type="button" 
-              onClick={() => setShowAboutModal(true)}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 text-slate-600 hover:text-[#1d63ed] active:scale-95 transition-all"
-            >
-              <Info size={21} className="stroke-[2]" />
-              <span className="text-[9.5px] font-medium leading-tight">Sobre MIVOR.ai</span>
-            </button>
-
-            {/* Pestaña 5: Eslogan / Misión */}
-            <button 
-              type="button" 
-              onClick={() => setShowMissionModal(true)}
-              className="flex flex-col items-center justify-center gap-0.5 py-1 text-slate-600 hover:text-[#1d63ed] active:scale-95 transition-all"
-            >
-              <Heart size={21} className="text-[#1d63ed] stroke-[2]" />
-              <span className="text-[7.5px] font-normal leading-[1.1] text-slate-500 max-w-[80px]">
-                Juntos por una medicina más humana y eficiente.
-              </span>
-            </button>
-
-          </div>
-        </nav>
 
         {/* 6. DRAWER / MENÚ LATERAL MÓVIL */}
         {showDrawer && (
