@@ -54,9 +54,9 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
   };
 
   return (
-    <div className="flex-1 flex gap-8 items-start">
+    <div className="flex-1 flex flex-col xl:flex-row gap-8 items-start">
       {/* Contenido Central - Paso Opcional */}
-      <main className="flex-1 space-y-6">
+      <main className="w-full xl:flex-1 space-y-6">
         <div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[11px] font-bold mb-2">
             <Star size={13} className="fill-blue-600" />
@@ -222,7 +222,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
       </main>
 
       {/* Sidebar Derecha - Banner del Perfil */}
-      <aside className="w-80 shrink-0 space-y-4">
+      <aside className="w-full xl:w-80 shrink-0 space-y-4">
         <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-6">
           {/* Ilustración de Perfil Profesional */}
           <div className="bg-gradient-to-b from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100/50 flex flex-col items-center justify-center relative overflow-hidden">

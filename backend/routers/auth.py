@@ -24,6 +24,16 @@ _login_ip_rate_limit_store = defaultdict(list)
 LOGIN_IP_WINDOW = 60
 LOGIN_IP_MAX = 10
 
+# Rate limit de registro por IP, para evitar creación masiva de cuentas
+_register_ip_rate_limit_store = defaultdict(list)
+REGISTER_IP_WINDOW = 60
+REGISTER_IP_MAX = 10
+
+# Roles auto-asignables mediante el endpoint público de registro.
+# 'doctor' requiere el flujo de verificación de /api/auth/register-doctor
+# y 'admin' nunca debe poder ser elegido por el propio usuario.
+SELF_REGISTERABLE_ROLES = {'patient', 'verifier'}
+
 
 def apply_login_rate_limit(client_ip: str):
     now = time.time()
@@ -39,8 +49,30 @@ def apply_login_rate_limit(client_ip: str):
     _login_ip_rate_limit_store[client_ip].append(now)
 
 
+def apply_register_rate_limit(client_ip: str):
+    now = time.time()
+    _register_ip_rate_limit_store[client_ip] = [
+        t for t in _register_ip_rate_limit_store[client_ip] if now - t < REGISTER_IP_WINDOW
+    ]
+    if len(_register_ip_rate_limit_store[client_ip]) >= REGISTER_IP_MAX:
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados intentos de registro. Por favor, espere un minuto antes de reintentar.",
+            headers={"Retry-After": str(REGISTER_IP_WINDOW)}
+        )
+    _register_ip_rate_limit_store[client_ip].append(now)
+
+
 @router.post('/api/auth/register')
-async def register(request: RegisterRequest, db: AsyncSession=Depends(get_db)):
+async def register(request: RegisterRequest, req: Request, db: AsyncSession=Depends(get_db)):
+    client_ip = req.client.host if req.client else "unknown"
+    apply_register_rate_limit(client_ip)
+
+    # Evita escalada de privilegios: el rol enviado por el cliente no puede
+    # usarse para auto-registrarse como 'doctor' (requiere verificación) ni 'admin'.
+    if request.role not in SELF_REGISTERABLE_ROLES:
+        raise HTTPException(status_code=400, detail='Rol de registro no válido.')
+
     result = (await db.execute(select(models.User).where((models.User.username == request.username))))
     if result.scalars().first():
         # Mitigación de enumeración de usuarios (Punto 16 Auditoría R3)
@@ -54,7 +86,10 @@ async def register(request: RegisterRequest, db: AsyncSession=Depends(get_db)):
         new_profile = models.PatientProfile(user_id=new_user.id, full_name=new_user.username)
         db.add(new_profile)
         (await db.commit())
-    return {'message': 'Usuario registrado exitosamente'}
+    # El registro debe dejar al usuario autenticado igual que /api/auth/register-doctor,
+    # de lo contrario el frontend recibe un token undefined y rebota silenciosamente al login.
+    access_token = create_access_token(data={'sub': new_user.id})
+    return {'access_token': access_token, 'token_type': 'bearer', 'role': new_user.role}
 
 
 

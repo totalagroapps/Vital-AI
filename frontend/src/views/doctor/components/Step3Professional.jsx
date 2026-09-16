@@ -34,9 +34,9 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
   };
 
   return (
-    <div className="flex-1 flex gap-8 items-start">
+    <div className="flex-1 flex flex-col xl:flex-row gap-8 items-start">
       {/* Contenido Central - Resumen de Información */}
-      <main className="flex-1 space-y-6">
+      <main className="w-full xl:flex-1 space-y-6">
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
             <span className="p-1 rounded-full bg-blue-100 text-blue-600">
@@ -277,7 +277,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
       </main>
 
       {/* Sidebar Derecha */}
-      <aside className="w-80 shrink-0 flex flex-col gap-6">
+      <aside className="w-full xl:w-80 shrink-0 flex flex-col gap-6">
         <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-6">
           {/* Header con Imagen IA */}
           <div className="flex flex-col items-center text-center">

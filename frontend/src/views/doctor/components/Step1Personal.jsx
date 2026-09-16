@@ -62,9 +62,9 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
   };
 
   return (
-    <div className="flex-1 flex gap-8">
+    <div className="flex-1 flex flex-col xl:flex-row gap-8">
       {/* Sidebar Izquierda */}
-      <aside className="w-72 shrink-0 flex flex-col justify-between py-2">
+      <aside className="w-full xl:w-72 shrink-0 flex flex-col justify-between py-2">
         <div className="space-y-8">
           <div>
             <h2 className="text-2xl font-extrabold text-slate-900 leading-tight">
@@ -118,7 +118,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
       </aside>
 
       {/* Formulario Central */}
-      <main className="flex-1 max-w-2xl">
+      <main className="w-full xl:flex-1 xl:max-w-2xl">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">{t('create_prof_account', 'Crea tu cuenta profesional')}</h1>
           <p className="text-sm text-slate-500 mt-1">El proceso es rápido, seguro y 100% confidencial.</p>
@@ -404,7 +404,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
       </main>
 
       {/* Sidebar Derecha */}
-      <aside className="w-80 shrink-0 bg-gradient-to-b from-blue-50/50 to-indigo-50/30 border border-slate-200/60 rounded-3xl p-6 flex flex-col justify-between overflow-hidden">
+      <aside className="w-full xl:w-80 shrink-0 bg-gradient-to-b from-blue-50/50 to-indigo-50/30 border border-slate-200/60 rounded-3xl p-6 flex flex-col justify-between overflow-hidden">
         <div className="relative">
           <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-6 shadow-sm border border-white">
             <img src={iaBanner} alt="IA Médica" className="w-full h-full object-cover" />

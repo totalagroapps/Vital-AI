@@ -61,7 +61,7 @@ from fastapi.responses import StreamingResponse, FileResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 import ollama
@@ -301,8 +301,8 @@ from sqlalchemy.future import select
 
 
 class RegisterRequest(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=3, max_length=255)
+    password: str = Field(min_length=6, max_length=128)
     role: str = 'patient'
 
 

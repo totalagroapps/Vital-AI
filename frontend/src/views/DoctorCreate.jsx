@@ -185,12 +185,12 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Top Header Fijo */}
-      <header className="h-16 border-b border-slate-200/80 bg-white px-6 md:px-8 flex items-center justify-between shrink-0 sticky top-0 z-30">
+      <header className="min-h-16 border-b border-slate-200/80 bg-white px-4 md:px-8 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 shrink-0 sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20">
+          <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20 shrink-0">
             <Activity size={20} />
           </div>
-          <span className="font-extrabold text-xl text-slate-900 tracking-tight">
+          <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
             MIVOR<span className="text-blue-600">.ai</span>
             <span className="block text-[10px] text-blue-600 font-bold tracking-widest -mt-1 uppercase">PORTAL MÉDICO</span>
           </span>
@@ -201,9 +201,9 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
           {currentStep < 5 && (
             <div className="flex items-center gap-3 text-sm">
               <span className="hidden sm:inline text-slate-500 font-medium">{t('already_have_account', '¿Ya tienes cuenta?')}</span>
-              <button 
-                onClick={onNavigateLogin || (() => navigate('/login'))} 
-                className="px-4 py-2 text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-all text-xs cursor-pointer"
+              <button
+                onClick={onNavigateLogin || (() => navigate('/login'))}
+                className="px-4 py-2 text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-all text-xs cursor-pointer whitespace-nowrap"
               >
                 {t('login_button', 'Iniciar sesión')}
               </button>

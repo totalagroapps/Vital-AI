@@ -41,7 +41,14 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
 
       if (res.ok) {
         const finalRole = selectedRole || data.role || 'patient';
-        onLogin(data.token ? data.token : data.access_token, finalRole);
+        const jwt = data.token ? data.token : data.access_token;
+        if (!jwt) {
+          // El backend respondió OK pero sin token de sesión: evita dejar al usuario
+          // con un token "undefined" que provoca un cierre de sesión silencioso.
+          setError(t("server_connection_error"));
+        } else {
+          onLogin(jwt, finalRole);
+        }
       } else {
         const errorMsg = typeof data.detail === 'string' ? data.detail : (Array.isArray(data.detail) ? data.detail[0]?.msg : t("auth_error"));
         setError(errorMsg || t("auth_error"));
@@ -144,7 +151,9 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
     buttonClass: isVerifier ? 'bg-teal-600 hover:bg-teal-700 text-white' : (isDoc ? 'bg-brand-blue hover:bg-blue-600 text-white' : 'bg-brand-purple hover:bg-purple-600 text-white'),
     title: isVerifier ? t("verifier_login_title", "Portal de Verificación y Auditoría") : (isDoc ? t("doctor_login_title") : t("patient_portal_title")),
     Icon: isVerifier ? ShieldCheck : (isDoc ? Stethoscope : HeartPulse),
-    placeholder: isVerifier ? t("verifier_placeholder", "ej. auditor_medico") : (isDoc ? t("doctor_placeholder") : t("patient_placeholder"))
+    placeholder: isVerifier ? t("verifier_placeholder", "ej. auditor_medico") : (isDoc ? t("doctor_placeholder") : t("patient_placeholder")),
+    // Solo el portal de paciente pide explícitamente un email; doctor/verificador aceptan un username libre.
+    usernameInputType: (!isDoc && !isVerifier) ? 'email' : 'text'
   };
 
   return (
@@ -194,8 +203,8 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
               <label className="block text-[11px] font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wider">{t("username_email")}</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input 
-                  type="text" 
+                <input
+                  type={theme.usernameInputType}
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
