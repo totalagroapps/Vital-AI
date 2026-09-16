@@ -59,7 +59,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
 
   // ================= BARRA DE NAVEGACIÓN PACIENTE (4 PESTAÑAS OFICIALES DEL DISEÑO MÓVIL) =================
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-2 py-1.5 pb-3 z-50 select-none lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.04)]">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 px-2 py-1.5 pb-3 z-50 select-none lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
       <div className="max-w-md mx-auto grid grid-cols-4 items-center text-center">
         
         {/* 1. Inicio */}
@@ -70,12 +70,12 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         >
           <Home 
             size={22} 
-            className={activeTab === 'home' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
+            className={activeTab === 'home' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[10.5px] ${activeTab === 'home' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+          <span className={`text-[11.5px] ${activeTab === 'home' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Inicio
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 2. Pregunta a MIVOR */}
@@ -87,13 +87,13 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           <div className="relative">
             <Sparkles 
               size={21} 
-              className={activeTab === 'general_chat' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
+              className={activeTab === 'general_chat' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
             />
           </div>
-          <span className={`text-[10.5px] ${activeTab === 'general_chat' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+          <span className={`text-[11.5px] ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Pregunta a MIVOR
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 3. Mi Tratamiento */}
@@ -104,12 +104,12 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         >
           <Pill 
             size={21} 
-            className={activeTab === 'treatments' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
+            className={activeTab === 'treatments' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[10.5px] ${activeTab === 'treatments' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+          <span className={`text-[11.5px] ${activeTab === 'treatments' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Mi Tratamiento
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 4. Mi cuenta */}
@@ -120,12 +120,12 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
         >
           <Users 
             size={21} 
-            className={activeTab === 'more' ? 'text-[#0062ff] stroke-[2.4]' : 'text-slate-400'} 
+            className={activeTab === 'more' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[10.5px] ${activeTab === 'more' ? 'font-bold text-[#0062ff]' : 'font-medium text-slate-500'}`}>
+          <span className={`text-[11.5px] ${activeTab === 'more' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Mi cuenta
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0062ff]' : 'bg-transparent'}`} />
+          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
       </div>
