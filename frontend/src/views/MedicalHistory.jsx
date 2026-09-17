@@ -3,8 +3,8 @@ import {
   ArrowLeft, ShieldCheck, ShieldAlert, Activity, Edit3, QrCode, 
   Droplet, Heart, Scale, Ruler, Pill, AlertTriangle, 
   Calendar, Phone, Save, X, FileText, Share2, HeartHandshake, Shield,
-  LogOut, Home, User, Leaf, Settings, Headphones, Search, Bell, HelpCircle,
-  ChevronRight, ChevronDown, Check, ExternalLink
+  LogOut, Home, User, Search, Bell, HelpCircle,
+  ChevronRight, ChevronDown, Check, ExternalLink, Mail
 } from "lucide-react";
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
@@ -83,6 +83,23 @@ const MedicalHistory = ({
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
+  // Handle Email Share
+  const handleShareEmail = () => {
+    const emergencyUrl = patientProfile?.emergency_url || 
+      `${window.location.origin}/emergencia/${encodeURIComponent(patientProfile?.user_id || 'me')}`;
+    const subject = `Ficha Médica de Emergencia MIVOR.ai - ${displayName}`;
+    const body = `Ficha Médica de Emergencia MIVOR.ai\n` +
+      `Paciente: ${displayName}\n` +
+      `Grupo Sanguíneo: ${patientProfile?.blood_type || 'A+'}\n` +
+      `Donante de Órganos: ${patientProfile?.organ_donor || 'No especificado'}\n` +
+      `Alergias: ${patientProfile?.allergies || 'Rinitis'}\n` +
+      (patientProfile?.medical_notes ? `Alerta Médica: ${patientProfile.medical_notes}\n` : '') +
+      (patientProfile?.insurance_provider ? `Seguro: ${patientProfile.insurance_provider}\n` : '') +
+      `Contacto de Urgencias: ${patientProfile?.emergency_contact || 'Viviana Giraldo – 3185552217'}\n\n` +
+      `Ver Ficha Táctica en vivo (sin clave):\n${emergencyUrl}`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+  };
+
   // Handle Export PDF
   const handleExportPDF = () => {
     const safeName = escapeHtml(displayName);
@@ -151,27 +168,23 @@ const MedicalHistory = ({
     setIsEditing(false);
   };
 
-  // Nav items for left sidebar
-  const navItems = [
+  // Nav tabs for horizontal top navbar (Exact match with media_1789683184109.png)
+  const navTabs = [
     { id: 'inicio', label: 'Inicio', icon: Home, path: '/paciente' },
     { id: 'consultas', label: 'Mis consultas', icon: Calendar, path: '/paciente/citas' },
     { id: 'documentos', label: 'Mis documentos', icon: FileText, path: '/paciente/documentos' },
     { id: 'salud', label: 'Mi salud', icon: Heart, path: '/paciente/tratamientos' },
-    { id: 'perfil', label: 'Perfil médico', icon: User, path: '/paciente/historial', active: true },
-    { id: 'preventiva', label: 'Medicina preventiva', icon: Shield, path: null },
-    { id: 'longevidad', label: 'Longevidad', icon: Leaf, path: null },
-    { id: 'configuracion', label: 'Configuración', icon: Settings, path: '/paciente/mas' },
+    { id: 'perfil', label: 'Mi perfil', icon: User, path: '/paciente/historial', active: true },
   ];
 
-  const handleMenuClick = (item) => {
-    if (item.path) {
+  const handleTabClick = (tab) => {
+    if (tab.path) {
       if (onNavigate) {
-        if (item.id === 'inicio') onNavigate('home');
-        else if (item.id === 'consultas') onNavigate('citas');
-        else if (item.id === 'documentos') onNavigate('documents');
-        else if (item.id === 'salud') onNavigate('agenda');
-        else if (item.id === 'perfil') onNavigate('history');
-        else if (item.id === 'configuracion') onNavigate('more');
+        if (tab.id === 'inicio') onNavigate('home');
+        else if (tab.id === 'consultas') onNavigate('citas');
+        else if (tab.id === 'documentos') onNavigate('documents');
+        else if (tab.id === 'salud') onNavigate('agenda');
+        else if (tab.id === 'perfil') onNavigate('history');
       } else if (onBack) {
         onBack();
       }
@@ -234,119 +247,85 @@ const MedicalHistory = ({
   };
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-sans antialiased text-slate-800">
+    <div className="min-h-screen bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col">
       
-      {/* ================= LEFT SIDEBAR (DESKTOP) Matching Image 5 ================= */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200/90 shrink-0 sticky top-0 h-screen justify-between p-5 z-20">
-        <div>
-          {/* Brand Logo */}
-          <div className="flex items-center gap-2.5 mb-8 px-1">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-teal-500 to-sky-500 flex items-center justify-center text-white shadow-sm">
-              <Activity size={22} className="stroke-[2.5]" />
-            </div>
-            <div>
-              <span className="font-black text-xl text-slate-900 tracking-tight leading-none block">
-                MIVOR<span className="text-teal-600">.ai</span>
-              </span>
-              <span className="text-[8.5px] text-slate-400 font-bold uppercase tracking-widest leading-none block mt-1">
-                Better health. Brighter lives.
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.active;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleMenuClick(item)}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
-                    isActive 
-                      ? 'bg-[#f0f9ff] text-[#0284c7] shadow-xs' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
-                  }`}
-                >
-                  <Icon size={18} className={isActive ? 'text-[#0284c7]' : 'text-slate-400'} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Support 24/7 Widget in Sidebar */}
-        <div className="bg-[#f0f9ff] border border-[#e0f2fe] rounded-2xl p-4 text-center flex flex-col items-center mt-6">
-          <div className="w-10 h-10 rounded-full bg-white text-[#0284c7] shadow-xs flex items-center justify-center mb-2">
-            <Headphones size={20} />
-          </div>
-          <span className="font-extrabold text-xs text-slate-900">Asistencia 24/7</span>
-          <p className="text-[11px] text-slate-500 mb-3">Estamos aquí para ayudarte</p>
-          <button 
-            onClick={() => window.open('https://wa.me/?text=Hola,%20necesito%20asistencia%20en%20MIVOR.ai', '_blank')}
-            className="w-full py-2 bg-white hover:bg-slate-50 text-[#0284c7] font-bold text-xs rounded-xl border border-[#bae6fd] shadow-xs transition-all cursor-pointer active:scale-95"
-          >
-            Contactar
-          </button>
-        </div>
-      </aside>
-
-      {/* ================= MAIN CONTENT WRAPPER ================= */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* ================= TOP NAVBAR Matching Image 5 ================= */}
-        <header className="bg-white border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-10">
+      {/* ================= TOP NAVBAR (HORIZONTAL) Matching media_1789683184109.png ================= */}
+      <header className="bg-white border-b border-slate-200/90 px-4 lg:px-8 py-3 sticky top-0 z-30 shadow-xs">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
           
-          {/* Left: Breadcrumbs or Mobile Back */}
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={onBack}
-              className="md:hidden w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 active:scale-95 cursor-pointer mr-1"
-              title="Volver"
+          {/* 1. Left: Brand Logo & Slogan */}
+          <div className="flex items-center gap-6 shrink-0">
+            <div 
+              onClick={() => onNavigate ? onNavigate('home') : onBack?.()} 
+              className="flex items-center gap-2.5 cursor-pointer"
             >
-              <ArrowLeft size={16} />
-            </button>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
-              <span 
-                className="cursor-pointer hover:text-slate-600 transition-colors"
-                onClick={() => onNavigate ? onNavigate('home') : onBack?.()}
-              >
-                Inicio
-              </span>
-              <span>&gt;</span>
-              <span className="text-slate-600 font-bold">Perfil médico</span>
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-teal-500 to-sky-500 flex items-center justify-center text-white shadow-xs">
+                <Activity size={22} className="stroke-[2.5]" />
+              </div>
+              <div>
+                <span className="font-black text-xl text-slate-900 tracking-tight leading-none block">
+                  MIVOR<span className="text-teal-600">.ai</span>
+                </span>
+                <span className="text-[8.5px] text-slate-400 font-bold uppercase tracking-widest leading-none block mt-1">
+                  Better health. Brighter lives.
+                </span>
+              </div>
             </div>
+
+            {/* 2. Top Navigation Links (Desktop horizontal tabs) */}
+            <nav className="hidden md:flex items-center gap-1.5 ml-2">
+              {navTabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = tab.active;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabClick(tab)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      isActive 
+                        ? 'bg-[#e0f2fe] text-[#0284c7] shadow-xs' 
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
+                    }`}
+                  >
+                    <Icon size={16} className={isActive ? 'text-[#0284c7]' : 'text-slate-400'} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
           </div>
 
-          {/* Center: Search input */}
-          <div className="hidden sm:flex relative max-w-xs w-full mx-4">
-            <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Buscar en mi salud..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#f8fafc] border border-slate-200 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
-            />
-          </div>
+          {/* 3. Right: Search Input, Help, Bell, User Avatar */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            
+            {/* Search Input */}
+            <div className="hidden lg:flex relative w-60">
+              <input 
+                type="text" 
+                placeholder="Buscar en mi salud..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#f8fafc] border border-slate-200 rounded-full pl-4 pr-9 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+              />
+              <Search size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
 
-          {/* Right: Notifications, Help, User Avatar */}
-          <div className="flex items-center gap-3 sm:gap-4">
+            {/* Help Question Icon */}
+            <button 
+              onClick={() => window.open('https://wa.me/?text=Hola,%20tengo%20una%20consulta%20en%20MIVOR.ai', '_blank')}
+              className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
+              title="¿Necesitas ayuda?"
+            >
+              <HelpCircle size={18} />
+            </button>
+
+            {/* Notification Bell */}
             <div className="relative w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center cursor-pointer text-slate-600 transition-colors" title="Notificaciones">
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
             </div>
 
-            <div 
-              onClick={() => window.open('https://wa.me/?text=Hola,%20tengo%20una%20consulta%20en%20MIVOR.ai', '_blank')}
-              className="hidden lg:flex items-center gap-1.5 text-xs text-slate-600 font-semibold cursor-pointer hover:text-slate-900 transition-colors"
-            >
-              <HelpCircle size={16} className="text-slate-500" />
-              <span>¿Necesitas ayuda?</span>
-            </div>
-
+            {/* User Profile Avatar */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-200 cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-[#7c3aed] text-white font-black text-xs flex items-center justify-center shadow-xs">
                 {getInitials(displayName)}
@@ -356,529 +335,550 @@ const MedicalHistory = ({
               </span>
               <ChevronDown size={14} className="hidden sm:block text-slate-400" />
             </div>
-          </div>
-        </header>
 
-        {/* ================= PAGE BODY ================= */}
-        <main className="p-4 sm:p-8 max-w-6xl w-full mx-auto space-y-6 pb-24">
+          </div>
+
+        </div>
+      </header>
+
+      {/* ================= PAGE BODY ================= */}
+      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-6 space-y-6 pb-24">
+        
+        {/* Title and Top Action Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              Tus Datos Clínicos <br />
+              <span className="text-[#0d9488]">Centralizados y Seguros</span>
+            </h1>
+            <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+              Mantén tu información biológica actualizada para situaciones de emergencia y consultas médicas.
+            </p>
+          </div>
           
-          {/* Title and Top Action */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                Tus Datos Clínicos <br />
-                <span className="text-[#0d9488]">Centralizados y Seguros</span>
-              </h1>
-              <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-                Mantén tu información biológica actualizada para situaciones de emergencia y consultas médicas.
-              </p>
+          <div className="flex items-center gap-4 self-start sm:self-center">
+            {/* Tagline right above button */}
+            <div className="hidden lg:block text-right">
+              <p className="text-xs font-black text-slate-900">Tu salud, siempre contigo</p>
+              <p className="text-[10.5px] text-slate-400 font-medium">Información segura. Mejor atención. Mayor tranquilidad.</p>
             </div>
-            
+
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2.5 bg-[#0d9488] hover:bg-[#0f766e] active:scale-95 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer self-start sm:self-center"
+              className="px-4 py-2.5 bg-[#0d9488] hover:bg-[#0f766e] active:scale-95 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer"
             >
               {isEditing ? <X size={15} /> : <Edit3 size={15} />}
               <span>{isEditing ? "Cancelar" : "Editar Información"}</span>
             </button>
           </div>
+        </div>
 
-          {!isEditing ? (
-            /* ================= VIEW MODE ================= */
-            <>
-              {/* Banner Identidad Médica Matching Image 5 */}
-              <div className="bg-gradient-to-r from-[#032e22] via-[#064e3b] to-[#044a38] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-900/60 shadow-md">
-                <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="relative z-10 flex-1 w-full">
-                  <div className="flex items-center gap-2 mb-1">
-                    <ShieldCheck size={18} className="text-emerald-400" />
-                    <h3 className="font-extrabold text-base text-white">Identidad Médica</h3>
-                    <span className="text-[10px] uppercase font-black tracking-wider bg-red-600 text-white px-2.5 py-0.5 rounded-full">
-                      URGENCIAS
-                    </span>
-                  </div>
-
-                  <p className="text-xs font-semibold text-emerald-100/90 mb-0.5">
-                    {patientProfile?.full_name || username || 'cristianlv11'}
-                  </p>
-                  <p className="text-[11px] text-emerald-200/70 mb-4">
-                    Escaneable por personal de socorro y médicos sin desbloquear el móvil.
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-2 mb-4">
-                    <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
-                      <Droplet size={13} className="text-white fill-white/20" /> {patientProfile?.blood_type || 'A+'}
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
-                      <Calendar size={13} className="text-white" /> {age} años
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <button
-                      onClick={() => setShowEmergencyModal(true)}
-                      className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 active:scale-95 font-black text-xs rounded-full shadow-sm flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <ShieldAlert size={15} className="text-red-600" />
-                      <span>CHAPA MILITAR QR</span>
-                    </button>
-
-                    <button
-                      onClick={handleExportPDF}
-                      className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-xs rounded-full border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
-                    >
-                      <FileText size={15} />
-                      <span>Exportar Pasaporte (PDF)</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* QR Code preview */}
-                <div 
-                  onClick={() => setShowEmergencyModal(true)}
-                  className="relative z-10 bg-white p-3 rounded-2xl shadow-xl flex flex-col items-center shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                  title="Tocar para ampliar"
-                >
-                  {patientProfile?.qr_code_base64 ? (
-                    <img 
-                      src={`data:image/png;base64,${patientProfile.qr_code_base64}`} 
-                      alt="QR Code" 
-                      className="w-24 h-24 rounded-lg object-contain" 
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-slate-50 rounded-lg flex flex-col items-center justify-center text-slate-400">
-                      <QrCode size={32} />
-                      <span className="text-[9px] mt-1 font-bold">QR Activo</span>
-                    </div>
-                  )}
-                  <span className="text-[9px] font-black text-slate-800 mt-1.5 uppercase tracking-wider">
-                    TOCAR PARA AMPLIAR
-                  </span>
-                </div>
-              </div>
-
-              {/* 3 Metric Cards: PESO, ALTURA, IMC */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Peso */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs flex flex-col items-center text-center">
-                  <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
-                    <Scale size={22} />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">PESO</span>
-                  <span className="text-2xl font-black text-slate-900 mt-1">
-                    {patientProfile?.weight || '88'} <span className="text-xs font-bold text-slate-500">kg</span>
-                  </span>
-                </div>
-
-                {/* Altura */}
-                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs flex flex-col items-center text-center">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-2">
-                    <Ruler size={22} />
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ALTURA</span>
-                  <span className="text-2xl font-black text-slate-900 mt-1">
-                    {patientProfile?.height || '182'} <span className="text-xs font-bold text-slate-500">cm</span>
-                  </span>
-                </div>
-
-                {/* IMC Highlighted */}
-                <div className="bg-[#fffbeb] border border-[#fef3c7] rounded-2xl p-5 shadow-xs flex flex-col items-center text-center">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center mb-2">
-                    <Activity size={22} />
-                  </div>
-                  <span className="text-[10px] text-amber-800/80 font-bold uppercase tracking-wider">IMC</span>
-                  <span className="text-2xl font-black text-[#d97706] mt-1">
-                    {bmiInfo?.value || '26.6'}
-                  </span>
-                  <span className="text-xs font-bold text-amber-800 mt-0.5">
-                    {bmiInfo?.status || 'Sobrepeso'}
-                  </span>
-                </div>
-              </div>
-
-              {/* 2 Small Cards: Donante & Seguro */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0">
-                    <HeartHandshake size={20} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">DONANTE DE ÓRGANOS</span>
-                    <span className="text-xs font-black text-slate-800 truncate block">
-                      {patientProfile?.organ_donor || 'No especificado'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
-                    <Shield size={20} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">SEGURO MÉDICO / MUTUA</span>
-                    <span className="text-xs font-black text-slate-800 truncate block">
-                      {patientProfile?.insurance_provider || 'No especificado'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2 Wide Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  onClick={handleShareWhatsApp}
-                  className="w-full py-3.5 px-4 bg-[#0e9f6e] hover:bg-[#047857] active:scale-[0.99] text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
-                >
-                  <Share2 size={18} />
-                  <span>Compartir Ficha por WhatsApp</span>
-                </button>
-
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full py-3.5 px-4 bg-[#ede9fe] hover:bg-[#ddd6fe] active:scale-[0.99] text-[#6d28d9] font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 border border-[#ddd6fe] transition-all cursor-pointer"
-                >
-                  <Edit3 size={18} />
-                  <span>Editar Información</span>
-                </button>
-              </div>
-
-              {/* Bottom 2-Column Section Matching Image 5 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                {/* Left Column: Alergias, Enfermedades Crónicas, Medicación */}
-                <div className="space-y-3">
-                  {/* Alergias Conocidas */}
-                  <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <AlertTriangle size={18} className="text-amber-500 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-xs font-extrabold text-slate-900 block mb-1">Alergias Conocidas</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {allergiesList.map((a, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
-                              <AlertTriangle size={10} /> {a}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight size={18} className="text-slate-400 shrink-0" />
-                  </div>
-
-                  {/* Enfermedades Crónicas */}
-                  <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Heart size={18} className="text-red-500 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-xs font-extrabold text-slate-900 block mb-1">Enfermedades Crónicas</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {conditionsList.map((c, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
-                              {c}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight size={18} className="text-slate-400 shrink-0" />
-                  </div>
-
-                  {/* Medicación Activa */}
-                  <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <Pill size={18} className="text-purple-500 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-xs font-extrabold text-slate-900 block mb-1">Medicación Activa</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {medicationsList.map((m, i) => (
-                            <span key={i} className="inline-flex items-center gap-1 bg-purple-50 border border-purple-200 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
-                              {m}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight size={18} className="text-slate-400 shrink-0" />
-                  </div>
-                </div>
-
-                {/* Right Column: Contacto de Emergencia & Historial de Triajes */}
-                <div className="space-y-4">
-                  {/* Contacto de Emergencia */}
-                  <div className="bg-[#eff6ff] border border-[#dbeafe] rounded-2xl p-4 flex items-center justify-between shadow-xs">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-[#dbeafe] text-blue-600 flex items-center justify-center shrink-0">
-                        <Phone size={18} className="stroke-[2.5]" />
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Contacto de Emergencia</span>
-                        <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
-                          {patientProfile?.emergency_contact || 'Viviana Giraldo – 3185552217'}
-                        </span>
-                      </div>
-                    </div>
-                    {patientProfile?.emergency_contact ? (
-                      <a 
-                        href={`tel:${patientProfile.emergency_contact.replace(/[^0-9+]/g, '')}`} 
-                        className="w-9 h-9 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
-                        title="Llamar"
-                      >
-                        <Phone size={16} />
-                      </a>
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                        <Phone size={16} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Mi Historial de Triajes */}
-                  <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Activity size={18} className="text-purple-600" />
-                        <h4 className="font-extrabold text-sm text-slate-900">Mi Historial de Triajes</h4>
-                      </div>
-                      <span className="text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 flex items-center gap-1">
-                        Más recientes <ChevronDown size={14} />
-                      </span>
-                    </div>
-
-                    <div className="space-y-4">
-                      {triageItems.map((item) => {
-                        const isExpanded = expandedTriages[item.id];
-                        return (
-                          <div key={item.id} className="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-[11px] font-semibold text-slate-400">
-                                {item.display_date}
-                              </span>
-                              <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${item.severity_badge}`}>
-                                {item.status_label}
-                              </span>
-                            </div>
-                            <p className={`text-xs text-slate-600 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
-                              {item.text}
-                            </p>
-                            <button
-                              onClick={() => toggleTriageAccordion(item.id)}
-                              className="text-[11px] font-bold text-slate-500 hover:text-slate-800 mt-1 flex items-center gap-1 cursor-pointer transition-colors"
-                            >
-                              <span>{isExpanded ? "Ver menos" : "Ver más"}</span>
-                              <ChevronDown size={12} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </>
-          ) : (
-            /* ================= EDIT MODE ================= */
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 animate-fadeIn">
-              <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2 text-base">
-                <Edit3 size={18} className="text-teal-600" />
-                <span>Editar Información de Perfil Médico</span>
-              </h3>
+        {!isEditing ? (
+          /* ================= VIEW MODE ================= */
+          <>
+            {/* Banner Identidad Médica Matching media_1789683184109.png */}
+            <div className="bg-gradient-to-r from-[#032e22] via-[#064e3b] to-[#044a38] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-900/60 shadow-md">
+              <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
               
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Nombre Completo</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={patientProfile?.full_name || ""} 
-                      onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    />
+              <div className="relative z-10 flex-1 w-full">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShieldCheck size={18} className="text-emerald-400" />
+                  <h3 className="font-extrabold text-base text-white">Identidad Médica</h3>
+                  <span className="text-[10px] uppercase font-black tracking-wider bg-red-600 text-white px-2.5 py-0.5 rounded-full">
+                    URGENCIAS
+                  </span>
+                </div>
+
+                <p className="text-xs font-semibold text-emerald-100/90 mb-0.5">
+                  {patientProfile?.full_name || username || 'cristianlv11'}
+                </p>
+                <p className="text-[11px] text-emerald-200/70 mb-4">
+                  Escaneable por personal de socorro y médicos sin desbloquear el móvil.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
+                    <Droplet size={13} className="text-white fill-white/20" /> {patientProfile?.blood_type || 'A+'}
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
+                    <Calendar size={13} className="text-white" /> {age} años
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Fecha de Nacimiento</label>
-                    <input 
-                      type="date" 
-                      value={patientProfile?.date_of_birth || ""} 
-                      onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Género</label>
-                    <select 
-                      value={patientProfile?.gender || ""} 
-                      onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
-                    >
-                      <option value="">Seleccionar</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Femenino">Femenino</option>
-                      <option value="Otro">Otro</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Grupo Sangre</label>
-                    <select 
-                      value={patientProfile?.blood_type || "A+"} 
-                      onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-bold text-red-600"
-                    >
-                      <option value="A+">A+</option>
-                      <option value="A-">A-</option>
-                      <option value="B+">B+</option>
-                      <option value="B-">B-</option>
-                      <option value="AB+">AB+</option>
-                      <option value="AB-">AB-</option>
-                      <option value="O+">O+</option>
-                      <option value="O-">O-</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Altura (cm)</label>
-                    <input 
-                      type="number" 
-                      value={patientProfile?.height || "182"} 
-                      onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                      placeholder="182" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Peso (kg)</label>
-                    <input 
-                      type="number" 
-                      value={patientProfile?.weight || "88"} 
-                      onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                      placeholder="88" 
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Donante de Órganos</label>
-                    <select 
-                      value={patientProfile?.organ_donor || "No especificado"} 
-                      onChange={e => setPatientProfile({...patientProfile, organ_donor: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
-                    >
-                      <option value="No especificado">No especificado</option>
-                      <option value="Sí">Sí, donante de órganos</option>
-                      <option value="No">No</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-1">Seguro Médico / Mutua</label>
-                    <input 
-                      type="text" 
-                      value={patientProfile?.insurance_provider || ""} 
-                      onChange={e => setPatientProfile({...patientProfile, insurance_provider: e.target.value})} 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                      placeholder="Ej. Sanitas, Sura, EPS..." 
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Contacto de Emergencia</label>
-                  <input 
-                    type="text" 
-                    value={patientProfile?.emergency_contact || ""} 
-                    onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    placeholder="Viviana Giraldo - 3185552217" 
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Alergias Conocidas (separadas por comas)</label>
-                  <textarea 
-                    value={patientProfile?.allergies || ""} 
-                    onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    rows={2} 
-                    placeholder="Rinitis, Penicilina..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Enfermedades Crónicas (separadas por comas)</label>
-                  <textarea 
-                    value={patientProfile?.chronic_conditions || ""} 
-                    onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    rows={2} 
-                    placeholder="Hipertensión, asma..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Medicación Activa (separadas por comas)</label>
-                  <textarea 
-                    value={patientProfile?.current_medications || ""} 
-                    onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    rows={2} 
-                    placeholder="Losartán 50mg..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Notas Médicas Críticas / Implantes</label>
-                  <textarea 
-                    value={patientProfile?.medical_notes || ""} 
-                    onChange={e => setPatientProfile({...patientProfile, medical_notes: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
-                    rows={2} 
-                    placeholder="Marcapasos, prótesis..."
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-2">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsEditing(false)} 
-                    className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-xs hover:bg-slate-50 cursor-pointer"
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    onClick={() => setShowEmergencyModal(true)}
+                    className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 active:scale-95 font-black text-xs rounded-full shadow-sm flex items-center gap-2 transition-all cursor-pointer"
                   >
-                    Cancelar
+                    <ShieldAlert size={15} className="text-red-600" />
+                    <span>CHAPA MILITAR QR</span>
                   </button>
-                  <button 
-                    type="submit" 
-                    className="flex-1 bg-[#0d9488] hover:bg-[#0f766e] text-white font-bold py-3 rounded-xl shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+
+                  <button
+                    onClick={handleExportPDF}
+                    className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-xs rounded-full border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
                   >
-                    <Save size={18} /> Guardar Cambios
+                    <FileText size={15} />
+                    <span>Exportar Pasaporte (PDF)</span>
                   </button>
                 </div>
-              </form>
-            </div>
-          )}
+              </div>
 
-          {/* Botón de Cerrar Sesión al final */}
-          {onLogout && (
-            <div className="pt-6 border-t border-slate-200/80 max-w-md mx-auto w-full">
-              <button 
-                type="button"
-                onClick={onLogout}
-                className="w-full py-3 px-4 rounded-2xl border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              {/* QR Code thumbnail */}
+              <div 
+                onClick={() => setShowEmergencyModal(true)}
+                className="relative z-10 bg-white p-3 rounded-2xl shadow-xl flex flex-col items-center shrink-0 cursor-pointer hover:scale-105 transition-transform"
+                title="Tocar para ampliar"
               >
-                <LogOut size={16} />
-                <span>Cerrar sesión</span>
+                {patientProfile?.qr_code_base64 ? (
+                  <img 
+                    src={`data:image/png;base64,${patientProfile.qr_code_base64}`} 
+                    alt="QR Code" 
+                    className="w-24 h-24 rounded-lg object-contain" 
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-slate-50 rounded-lg flex flex-col items-center justify-center text-slate-400">
+                    <QrCode size={32} />
+                    <span className="text-[9px] mt-1 font-bold">QR Activo</span>
+                  </div>
+                )}
+                <span className="text-[9px] font-black text-slate-800 mt-1.5 uppercase tracking-wider">
+                  TOCAR PARA AMPLIAR
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Metric Cards: PESO, ALTURA, IMC */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Peso */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2">
+                  <Scale size={22} />
+                </div>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">PESO</span>
+                <span className="text-2xl font-black text-slate-900 mt-1">
+                  {patientProfile?.weight || '88'} <span className="text-xs font-bold text-slate-500">kg</span>
+                </span>
+              </div>
+
+              {/* Altura */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-2">
+                  <Ruler size={22} />
+                </div>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ALTURA</span>
+                <span className="text-2xl font-black text-slate-900 mt-1">
+                  {patientProfile?.height || '182'} <span className="text-xs font-bold text-slate-500">cm</span>
+                </span>
+              </div>
+
+              {/* IMC Highlighted */}
+              <div className="bg-[#fffbeb] border border-[#fef3c7] rounded-2xl p-5 shadow-xs flex flex-col items-center text-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center mb-2">
+                  <Activity size={22} />
+                </div>
+                <span className="text-[10px] text-amber-800/80 font-bold uppercase tracking-wider">IMC</span>
+                <span className="text-2xl font-black text-[#d97706] mt-1">
+                  {bmiInfo?.value || '26.6'}
+                </span>
+                <span className="text-xs font-bold text-amber-800 mt-0.5">
+                  {bmiInfo?.status || 'Sobrepeso'}
+                </span>
+              </div>
+            </div>
+
+            {/* 2 Small Cards: Donante & Seguro */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0">
+                  <HeartHandshake size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">DONANTE DE ÓRGANOS</span>
+                  <span className="text-xs font-black text-slate-800 truncate block">
+                    {patientProfile?.organ_donor || 'No especificado'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                  <Shield size={20} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">SEGURO MÉDICO / MUTUA</span>
+                  <span className="text-xs font-black text-slate-800 truncate block">
+                    {patientProfile?.insurance_provider || 'No especificado'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Action Buttons Matching media_1789683184109.png */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Button 1: WhatsApp */}
+              <button
+                onClick={handleShareWhatsApp}
+                className="w-full py-3 px-4 bg-[#0e9f6e] hover:bg-[#047857] active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              >
+                <Share2 size={16} />
+                <span>Compartir Ficha por WhatsApp</span>
+              </button>
+
+              {/* Button 2: Email */}
+              <button
+                onClick={handleShareEmail}
+                className="w-full py-3 px-4 bg-[#f0f9ff] hover:bg-[#e0f2fe] active:scale-[0.99] text-[#0284c7] font-extrabold text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2 border border-[#bae6fd] shadow-xs transition-all cursor-pointer"
+              >
+                <Mail size={16} />
+                <span>Compartir por Email</span>
+              </button>
+
+              {/* Button 3: Edit */}
+              <button
+                onClick={() => setIsEditing(true)}
+                className="w-full py-3 px-4 bg-[#ede9fe] hover:bg-[#ddd6fe] active:scale-[0.99] text-[#6d28d9] font-extrabold text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2 border border-[#ddd6fe] transition-all cursor-pointer"
+              >
+                <Edit3 size={16} />
+                <span>Editar Información</span>
               </button>
             </div>
-          )}
 
-        </main>
-      </div>
+            {/* Bottom 2-Column Section Matching media_1789683184109.png */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* Left Column: Alergias, Enfermedades Crónicas, Medicación */}
+              <div className="space-y-3">
+                {/* Alergias Conocidas */}
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <AlertTriangle size={18} className="text-amber-500 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-xs font-extrabold text-slate-900 block mb-1">Alergias Conocidas</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {allergiesList.map((a, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
+                            <AlertTriangle size={10} /> {a}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-400 shrink-0" />
+                </div>
+
+                {/* Enfermedades Crónicas */}
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Heart size={18} className="text-red-500 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-xs font-extrabold text-slate-900 block mb-1">Enfermedades Crónicas</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {conditionsList.map((c, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 bg-rose-50 border border-rose-200 text-rose-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-400 shrink-0" />
+                </div>
+
+                {/* Medicación Activa */}
+                <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Pill size={18} className="text-purple-500 shrink-0" />
+                    <div className="min-w-0">
+                      <span className="text-xs font-extrabold text-slate-900 block mb-1">Medicación Activa</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {medicationsList.map((m, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 bg-purple-50 border border-purple-200 text-purple-800 text-[11px] font-bold px-2.5 py-0.5 rounded-lg">
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-400 shrink-0" />
+                </div>
+              </div>
+
+              {/* Right Column: Contacto de Emergencia & Historial de Triajes */}
+              <div className="space-y-4">
+                {/* Contacto de Emergencia */}
+                <div className="bg-[#eff6ff] border border-[#dbeafe] rounded-2xl p-4 flex items-center justify-between shadow-xs">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-[#dbeafe] text-blue-600 flex items-center justify-center shrink-0">
+                      <Phone size={18} className="stroke-[2.5]" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Contacto de Emergencia</span>
+                      <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
+                        {patientProfile?.emergency_contact || 'Viviana Giraldo – 3185552217'}
+                      </span>
+                    </div>
+                  </div>
+                  {patientProfile?.emergency_contact ? (
+                    <a 
+                      href={`tel:${patientProfile.emergency_contact.replace(/[^0-9+]/g, '')}`} 
+                      className="w-9 h-9 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                      title="Llamar"
+                    >
+                      <Phone size={16} />
+                    </a>
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                      <Phone size={16} />
+                    </div>
+                  )}
+                </div>
+
+                {/* Mi Historial de Triajes */}
+                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Activity size={18} className="text-purple-600" />
+                      <h4 className="font-extrabold text-sm text-slate-900">Mi Historial de Triajes</h4>
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 flex items-center gap-1">
+                      Más recientes <ChevronDown size={14} />
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {triageItems.map((item) => {
+                      const isExpanded = expandedTriages[item.id];
+                      return (
+                        <div key={item.id} className="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[11px] font-semibold text-slate-400">
+                              {item.display_date}
+                            </span>
+                            <span className={`text-[9px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${item.severity_badge}`}>
+                              {item.status_label}
+                            </span>
+                          </div>
+                          <p className={`text-xs text-slate-600 leading-relaxed ${isExpanded ? '' : 'line-clamp-2'}`}>
+                            {item.text}
+                          </p>
+                          <button
+                            onClick={() => toggleTriageAccordion(item.id)}
+                            className="text-[11px] font-bold text-slate-500 hover:text-slate-800 mt-1 flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <span>{isExpanded ? "Ver menos" : "Ver más"}</span>
+                            <ChevronDown size={12} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </>
+        ) : (
+          /* ================= EDIT MODE ================= */
+          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 animate-fadeIn">
+            <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2 text-base">
+              <Edit3 size={18} className="text-teal-600" />
+              <span>Editar Información de Perfil Médico</span>
+            </h3>
+            
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={patientProfile?.full_name || ""} 
+                    onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Fecha de Nacimiento</label>
+                  <input 
+                    type="date" 
+                    value={patientProfile?.date_of_birth || ""} 
+                    onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Género</label>
+                  <select 
+                    value={patientProfile?.gender || ""} 
+                    onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Grupo Sangre</label>
+                  <select 
+                    value={patientProfile?.blood_type || "A+"} 
+                    onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-bold text-red-600"
+                  >
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Altura (cm)</label>
+                  <input 
+                    type="number" 
+                    value={patientProfile?.height || "182"} 
+                    onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    placeholder="182" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Peso (kg)</label>
+                  <input 
+                    type="number" 
+                    value={patientProfile?.weight || "88"} 
+                    onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    placeholder="88" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Donante de Órganos</label>
+                  <select 
+                    value={patientProfile?.organ_donor || "No especificado"} 
+                    onChange={e => setPatientProfile({...patientProfile, organ_donor: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  >
+                    <option value="No especificado">No especificado</option>
+                    <option value="Sí">Sí, donante de órganos</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Seguro Médico / Mutua</label>
+                  <input 
+                    type="text" 
+                    value={patientProfile?.insurance_provider || ""} 
+                    onChange={e => setPatientProfile({...patientProfile, insurance_provider: e.target.value})} 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    placeholder="Ej. Sanitas, Sura, EPS..." 
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Contacto de Emergencia</label>
+                <input 
+                  type="text" 
+                  value={patientProfile?.emergency_contact || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  placeholder="Viviana Giraldo - 3185552217" 
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Alergias Conocidas (separadas por comas)</label>
+                <textarea 
+                  value={patientProfile?.allergies || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  rows={2} 
+                  placeholder="Rinitis, Penicilina..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Enfermedades Crónicas (separadas por comas)</label>
+                <textarea 
+                  value={patientProfile?.chronic_conditions || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  rows={2} 
+                  placeholder="Hipertensión, asma..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Medicación Activa (separadas por comas)</label>
+                <textarea 
+                  value={patientProfile?.current_medications || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  rows={2} 
+                  placeholder="Losartán 50mg..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Notas Médicas Críticas / Implantes</label>
+                <textarea 
+                  value={patientProfile?.medical_notes || ""} 
+                  onChange={e => setPatientProfile({...patientProfile, medical_notes: e.target.value})} 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  rows={2} 
+                  placeholder="Marcapasos, prótesis..."
+                />
+              </div>
+
+              <div className="flex gap-4 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsEditing(false)} 
+                  className="flex-1 bg-white border border-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-xs hover:bg-slate-50 cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  className="flex-1 bg-[#0d9488] hover:bg-[#0f766e] text-white font-bold py-3 rounded-xl shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Save size={18} /> Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Botón de Cerrar Sesión al final */}
+        {onLogout && (
+          <div className="pt-6 border-t border-slate-200/80 max-w-md mx-auto w-full">
+            <button 
+              type="button"
+              onClick={onLogout}
+              className="w-full py-3 px-4 rounded-2xl border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+            >
+              <LogOut size={16} />
+              <span>Cerrar sesión</span>
+            </button>
+          </div>
+        )}
+
+      </main>
 
       {/* Chapa Militar & Pasaporte QR de Emergencia Modal (Matching Image 4) */}
       <EmergencyPassportModal
