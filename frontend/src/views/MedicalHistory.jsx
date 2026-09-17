@@ -376,15 +376,20 @@ const MedicalHistory = ({
         {!isEditing ? (
           /* ================= VIEW MODE ================= */
           <>
-            {/* Banner Identidad Médica Matching media_1789683184109.png */}
-            <div className="bg-gradient-to-r from-[#032e22] via-[#064e3b] to-[#044a38] text-white rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-900/60 shadow-md">
-              <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            {/* Banner Identidad Médica - Oscura y Degradada Oficial */}
+            <div 
+              className="text-white rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border border-[#043b35]/60 shadow-xl"
+              style={{
+                background: 'linear-gradient(95deg, #011119 0%, #011f26 20%, #023637 50%, #03534a 75%, #05665a 100%)'
+              }}
+            >
+              <div className="absolute -right-8 -bottom-8 w-60 h-60 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="relative z-10 flex-1 w-full">
                 <div className="flex items-center gap-2 mb-1">
                   <ShieldCheck size={18} className="text-emerald-400" />
                   <h3 className="font-extrabold text-base text-white">Identidad Médica</h3>
-                  <span className="text-[10px] uppercase font-black tracking-wider bg-red-600 text-white px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] uppercase font-black tracking-wider bg-red-600 text-white px-2.5 py-0.5 rounded-full shadow-xs">
                     URGENCIAS
                   </span>
                 </div>
@@ -397,18 +402,18 @@ const MedicalHistory = ({
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
-                    <Droplet size={13} className="text-white fill-white/20" /> {patientProfile?.blood_type || 'A+'}
+                  <div className="bg-[#01252d]/80 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-[#044a56]/40">
+                    <Droplet size={13} className="text-emerald-300 fill-emerald-300/20" /> {patientProfile?.blood_type || 'A+'}
                   </div>
-                  <div className="bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-white/10">
-                    <Calendar size={13} className="text-white" /> {age} años
+                  <div className="bg-[#01252d]/80 backdrop-blur-xs px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 text-white border border-[#044a56]/40">
+                    <Calendar size={13} className="text-emerald-300" /> {age} años
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     onClick={() => setShowEmergencyModal(true)}
-                    className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 active:scale-95 font-black text-xs rounded-full shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+                    className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 active:scale-95 font-black text-xs rounded-full shadow-md flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <ShieldAlert size={15} className="text-red-600" />
                     <span>CHAPA MILITAR QR</span>
@@ -416,7 +421,7 @@ const MedicalHistory = ({
 
                   <button
                     onClick={handleExportPDF}
-                    className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold text-xs rounded-full border border-white/20 flex items-center gap-2 transition-all cursor-pointer"
+                    className="px-4 py-2.5 bg-[#023b36]/60 hover:bg-[#024a44]/80 active:scale-95 text-emerald-100 font-semibold text-xs rounded-full border border-emerald-500/30 flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <FileText size={15} />
                     <span>Exportar Pasaporte (PDF)</span>
