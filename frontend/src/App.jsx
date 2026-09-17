@@ -1362,6 +1362,9 @@ ${text}`], {type: 'text/plain'});
       <>
         <DocumentAnalyzer
           onBack={() => navigate('/paciente')}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
           apiUrl={API_URL}
           authHeaders={authHeaders}
           onOpenDoctorDirectory={(spec) => {
@@ -1384,7 +1387,8 @@ ${text}`], {type: 'text/plain'});
             startTriageSession().then(() => navigate('/paciente/asistente'));
           }}
         />
-        {GlobalBottomNav}
+        {GlobalDoctorDirectoryModal}
+        <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
   }

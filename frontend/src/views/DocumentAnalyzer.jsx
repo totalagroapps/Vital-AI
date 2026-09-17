@@ -1,10 +1,12 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  ArrowLeft, CloudUpload, FileText, ImageIcon, Activity, Beaker, File,
+  ArrowLeft, CloudUpload, FileText, Image as ImageIcon, Activity, Beaker, File,
   Clock, ChevronRight, AlertCircle, CheckCircle2, AlertTriangle, Pill,
-  Stethoscope, Lightbulb, MessageSquare, RotateCcw, Shield, Loader2,
+  Stethoscope, Lightbulb, MessageSquare, RotateCcw, Shield, ShieldCheck, Loader2,
   FileDown, Download, TrendingUp, TrendingDown, Minus, HelpCircle, Copy, Check, Share2, BarChart3,
-  Sparkles, UserCheck, MapPin, Calendar
+  Sparkles, UserCheck, MapPin, Calendar, Search, ArrowDownUp, HardDrive, Info,
+  MoreVertical, MoreHorizontal, Home, Heart, User, Bell, ChevronDown, Eye, X,
+  Database, SlidersHorizontal
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -26,6 +28,120 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const ACCEPTED_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif';
 const ACCEPTED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/bmp', 'image/gif'];
 
+// Documentos de demostración basados exactamente en el diseño aprobado por el jefe
+const DEFAULT_SAMPLE_DOCS = [
+  {
+    id: 'sample-1',
+    filename: 'Informe_analisis_sangre.pdf',
+    subtitle: 'Análisis de sangre',
+    category: 'analitica',
+    category_label: 'Analítica',
+    created_at: '2026-09-12T10:30:00Z',
+    file_size_label: '2,4 MB',
+    file_bytes: 2.4 * 1024 * 1024,
+    status: 'analizado',
+    icon_type: 'pdf-red',
+    analysis_result: JSON.stringify({
+      resumen: 'Perfil hematológico y bioquímico general. Se observa ligera elevación en niveles de glucosa basal (108 mg/dL) y colesterol LDL, manteniendo parámetros de función hepática y renal en rangos normales.',
+      severidad: 'amarillo',
+      biomarcadores: [
+        { parametro: 'Glucosa Basal', valor: '108', unidad: 'mg/dL', rango_referencia: '70 - 99', min_referencia: '70', max_referencia: '99', estado: 'elevado' },
+        { parametro: 'Colesterol Total', valor: '215', unidad: 'mg/dL', rango_referencia: '125 - 200', min_referencia: '125', max_referencia: '200', estado: 'elevado' },
+        { parametro: 'Hemoglobina', valor: '14.8', unidad: 'g/dL', rango_referencia: '13.5 - 17.5', min_referencia: '13.5', max_referencia: '17.5', estado: 'normal' },
+        { parametro: 'Creatinina', valor: '0.9', unidad: 'mg/dL', rango_referencia: '0.7 - 1.3', min_referencia: '0.7', max_referencia: '1.3', estado: 'normal' }
+      ],
+      hallazgos: ['Glucemia basal levemente por encima del rango óptimo', 'Perfil lipídico con discreta hipercolesterolemia'],
+      medicamentos: [],
+      preguntas_medico: ['¿Es necesario realizar una prueba de glucosa posprandial o hemoglobina glicosilada (HbA1c)?', '¿Qué pauta alimenticia conviene adoptar antes de iniciar medicación?']
+    })
+  },
+  {
+    id: 'sample-2',
+    filename: 'Radiografia_torax.jpg',
+    subtitle: 'Radiografía de tórax',
+    category: 'radiografia',
+    category_label: 'Radiografía',
+    created_at: '2026-09-04T15:20:00Z',
+    file_size_label: '1,8 MB',
+    file_bytes: 1.8 * 1024 * 1024,
+    status: 'analizado',
+    icon_type: 'jpg-blue',
+    document_type: 'medical_image',
+    analysis_result: JSON.stringify({
+      resumen: 'Radiografía posteroanterior de tórax. Campos pulmonares bien ventilados sin infiltrados focales ni consolidaciones agudas. Silueta cardiomediastínica de morfología y tamaño normal. Ángulos costofrénicos libres.',
+      severidad: 'verde',
+      hallazgos: ['Parénquima pulmonar sin alteraciones activas', 'Silueta cardiaca dentro de límites normales'],
+      medicamentos: [],
+      biomarcadores: [],
+      preguntas_medico: ['¿El estudio descarta procesos respiratorios agudos?']
+    })
+  },
+  {
+    id: 'sample-3',
+    filename: 'Receta_medicacion.pdf',
+    subtitle: 'Receta médica',
+    category: 'receta',
+    category_label: 'Receta',
+    created_at: '2026-09-04T09:15:00Z',
+    file_size_label: '320 KB',
+    file_bytes: 320 * 1024,
+    status: 'analizado',
+    icon_type: 'pdf-purple',
+    analysis_result: JSON.stringify({
+      resumen: 'Prescripción médica emitida para tratamiento de hiperreactividad bronquial y síntomas alérgicos estacionales. Pauta activa por 14 días.',
+      severidad: 'verde',
+      medicamentos: ['Salbutamol 100mcg (1 inhalación cada 8h)', 'Loratadina 10mg (1 comprimido cada 24h por la noche)'],
+      hallazgos: ['Pauta de medicación pautada para 14 días', 'Sin interacciones farmacológicas desfavorables detectadas'],
+      biomarcadores: [],
+      preguntas_medico: ['¿Debo suspender la medicación si los síntomas remiten antes de los 14 días?']
+    })
+  },
+  {
+    id: 'sample-4',
+    filename: 'Informe_medico_completo.pdf',
+    subtitle: 'Informe médico',
+    category: 'informe',
+    category_label: 'Informe',
+    created_at: '2026-09-01T11:45:00Z',
+    file_size_label: '3,1 MB',
+    file_bytes: 3.1 * 1024 * 1024,
+    status: 'analizado',
+    icon_type: 'pdf-green',
+    analysis_result: JSON.stringify({
+      resumen: 'Informe de revisión clínica anual y medicina preventiva. Evaluación cardiovascular y osteomuscular favorable. Tensión arterial 118/75 mmHg.',
+      severidad: 'verde',
+      hallazgos: ['Auscultación cardiopulmonar normal', 'Tensión arterial en rango óptimo'],
+      medicamentos: [],
+      biomarcadores: [],
+      preguntas_medico: ['¿Cuándo corresponde el próximo chequeo preventivo general?']
+    })
+  },
+  {
+    id: 'sample-5',
+    filename: 'Analisis_orina.jpg',
+    subtitle: 'Análisis de orina',
+    category: 'analitica',
+    category_label: 'Analítica',
+    created_at: '2026-08-28T08:00:00Z',
+    file_size_label: '1,2 MB',
+    file_bytes: 1.2 * 1024 * 1024,
+    status: 'analizado',
+    icon_type: 'jpg-blue',
+    document_type: 'medical_image',
+    analysis_result: JSON.stringify({
+      resumen: 'Sedimento y tira reactiva de orina. Densidad y pH en valores estándar. Ausencia de leucocitos, nitritos o bacterias patógenas.',
+      severidad: 'verde',
+      biomarcadores: [
+        { parametro: 'pH Urinario', valor: '6.2', unidad: '', rango_referencia: '4.5 - 8.0', min_referencia: '4.5', max_referencia: '8.0', estado: 'normal' },
+        { parametro: 'Densidad', valor: '1.020', unidad: '', rango_referencia: '1.005 - 1.030', min_referencia: '1.005', max_referencia: '1.030', estado: 'normal' }
+      ],
+      hallazgos: ['Sedimento urinario negativo para infección'],
+      medicamentos: [],
+      preguntas_medico: ['¿Los resultados descartan afecciones renales agudas?']
+    })
+  }
+];
+
 const BiomarkerRangeMeter = ({ bm }) => {
   const val = parseFloat(bm.valor);
   const isNum = !isNaN(val);
@@ -36,7 +152,7 @@ const BiomarkerRangeMeter = ({ bm }) => {
       <CheckCircle2 size={11} /> Normal
     </span>
   );
-  if (status === 'elevado') {
+  if (status === 'elevado' || status === 'alto') {
     statusBadge = (
       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
         <TrendingUp size={11} /> Elevado
@@ -73,7 +189,7 @@ const BiomarkerRangeMeter = ({ bm }) => {
     const lower = minRef - span * 0.35;
     const upper = maxRef + span * 0.35;
     percent = Math.min(Math.max(((val - lower) / (upper - lower)) * 100, 6), 94);
-  } else if (status === 'elevado') {
+  } else if (status === 'elevado' || status === 'alto') {
     percent = 84;
   } else if (status === 'bajo') {
     percent = 16;
@@ -103,7 +219,7 @@ const BiomarkerRangeMeter = ({ bm }) => {
           style={{ left: `${percent}%` }}
         >
           <div className={`w-3.5 h-3.5 rounded-full border-2 border-white shadow-xs ${
-            status === 'elevado' ? 'bg-red-600' : status === 'bajo' ? 'bg-blue-600' : 'bg-emerald-600'
+            status === 'elevado' || status === 'alto' ? 'bg-red-600' : status === 'bajo' ? 'bg-blue-600' : 'bg-emerald-600'
           }`} />
         </div>
         <div className="flex justify-between text-[9px] text-slate-400 font-medium px-0.5 mt-1">
@@ -135,7 +251,16 @@ const SeverityBadge = ({ sev }) => {
   );
 };
 
-const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDoctorDirectory }) => {
+const DocumentAnalyzer = ({
+  onBack,
+  apiUrl,
+  authHeaders,
+  onAskFollowUp,
+  onOpenDoctorDirectory,
+  onNavigate,
+  userProfile,
+  username
+}) => {
   const { t, language } = useLanguage();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -146,18 +271,112 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
   const [loadingDocs, setLoadingDocs] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [copiedQuestions, setCopiedQuestions] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [sortOrder, setSortOrder] = useState('desc'); // 'desc' | 'asc'
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [openDocMenuId, setOpenDocMenuId] = useState(null);
+
+  const safeNavigate = (screen) => {
+    if (onNavigate) {
+      onNavigate(screen);
+    } else if (screen === 'home') {
+      onBack?.();
+    }
+  };
 
   useEffect(() => {
     const fetchDocs = async () => {
       try {
         const res = await fetch(`${apiUrl}/api/me/documents`, { headers: authHeaders });
-        if (res.ok) setDocuments(await res.json());
-      } catch (e) { /* silent */ }
-      finally { setLoadingDocs(false); }
+        if (res.ok) {
+          const data = await res.json();
+          setDocuments(data || []);
+        }
+      } catch (e) {
+        /* silent */
+      } finally {
+        setLoadingDocs(false);
+      }
     };
     if (apiUrl && authHeaders) fetchDocs();
     else setLoadingDocs(false);
   }, [apiUrl, authHeaders]);
+
+  // Lista unificada: documentos reales subidos + muestras predeterminadas de la maqueta
+  const allDocuments = useMemo(() => {
+    // Si el backend ya tiene documentos, los adaptamos
+    const formattedRealDocs = documents.map(doc => {
+      const ext = (doc.filename || '').split('.').pop().toLowerCase();
+      let iconType = 'pdf-red';
+      let category = 'informe';
+      let categoryLabel = 'Informe';
+      let sub = 'Documento médico';
+
+      if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) || doc.document_type === 'medical_image') {
+        iconType = 'jpg-blue';
+        category = 'radiografia';
+        categoryLabel = 'Radiografía';
+        sub = 'Imagen médica';
+      } else if (doc.filename?.toLowerCase().includes('receta')) {
+        iconType = 'pdf-purple';
+        category = 'receta';
+        categoryLabel = 'Receta';
+        sub = 'Receta médica';
+      } else if (doc.filename?.toLowerCase().includes('analisis') || doc.filename?.toLowerCase().includes('sangre') || doc.filename?.toLowerCase().includes('orina')) {
+        iconType = 'pdf-red';
+        category = 'analitica';
+        categoryLabel = 'Analítica';
+        sub = 'Prueba de laboratorio';
+      }
+
+      return {
+        ...doc,
+        subtitle: sub,
+        category,
+        category_label: categoryLabel,
+        icon_type: iconType,
+        file_size_label: '2,0 MB',
+        file_bytes: 2 * 1024 * 1024,
+        status: 'analizado'
+      };
+    });
+
+    // Si el usuario no tiene documentos en backend, usamos los 5 documentos exactos del diseño del jefe
+    if (formattedRealDocs.length === 0) {
+      return DEFAULT_SAMPLE_DOCS;
+    }
+
+    // Si el usuario tiene documentos reales, los mostramos primero y agregamos los de muestra que no se repitan
+    return [...formattedRealDocs, ...DEFAULT_SAMPLE_DOCS.filter(s => !formattedRealDocs.some(r => r.filename === s.filename))];
+  }, [documents]);
+
+  // Filtrado por buscador y categoría
+  const filteredDocuments = useMemo(() => {
+    return allDocuments.filter(doc => {
+      const matchesSearch = !searchTerm || 
+        doc.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.subtitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doc.category_label?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesCat = selectedCategory === 'all' || doc.category === selectedCategory;
+
+      return matchesSearch && matchesCat;
+    }).sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+  }, [allDocuments, searchTerm, selectedCategory, sortOrder]);
+
+  // Espacio utilizado calculado
+  const totalBytesUsed = useMemo(() => {
+    return allDocuments.reduce((acc, doc) => acc + (doc.file_bytes || 1.5 * 1024 * 1024), 0);
+  }, [allDocuments]);
+
+  const usedMb = (totalBytesUsed / (1024 * 1024)).toFixed(0);
+  const totalMb = 500;
+  const usedPercentage = Math.min(Math.round((usedMb / totalMb) * 100), 100);
 
   const uploadAndAnalyze = async (file) => {
     if (!file) return;
@@ -216,7 +435,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
   const handleHistoryClick = (doc) => {
     if (doc.analysis_result) {
       try {
-        const parsed = JSON.parse(doc.analysis_result);
+        const parsed = typeof doc.analysis_result === 'string' ? JSON.parse(doc.analysis_result) : doc.analysis_result;
         setAnalysisResult({
           ...doc,
           id: doc.id,
@@ -240,7 +459,9 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
       }
     }
     // Fallback if no detailed report exists for old docs
-    onAskFollowUp(doc.extracted_text, doc.filename);
+    if (onAskFollowUp) {
+      onAskFollowUp(doc.extracted_text || doc.filename, doc.filename);
+    }
   };
 
   const generateClientSidePdf = (data) => {
@@ -251,7 +472,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(18);
-      doc.setTextColor(15, 118, 110);
+      doc.setTextColor(0, 85, 255);
       doc.text('MIVOR.ai - INFORME CLÍNICO INTELIGENTE', margin, y);
       y += 18;
 
@@ -261,7 +482,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
       doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')} | Documento: ${data.filename || 'Estudio Clínico'}`, margin, y);
       y += 20;
 
-      doc.setDrawColor(15, 118, 110);
+      doc.setDrawColor(0, 85, 255);
       doc.setLineWidth(1.5);
       doc.line(margin, y, 555, y);
       y += 20;
@@ -297,69 +518,27 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
         y += 10;
       }
 
-      if (data.comparativa_historica?.length > 0) {
-        if (y > 720) { doc.addPage(); y = 50; }
+      if (data.medicamentos?.length > 0) {
+        if (y > 730) { doc.addPage(); y = 50; }
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
         doc.setTextColor(15, 23, 42);
-        doc.text('3. COMPARATIVA HISTÓRICA Y EVOLUCIÓN', margin, y);
+        doc.text('3. MEDICAMENTOS DETECTADOS', margin, y);
         y += 15;
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        data.comparativa_historica.forEach((c) => {
-          if (y > 750) { doc.addPage(); y = 50; }
-          const diffStr = `${c.diferencia > 0 ? '+' : ''}${c.diferencia} (${c.cambio_porcentual > 0 ? '+' : ''}${c.cambio_porcentual}%)`;
-          doc.text(`• ${c.parametro}: Previo ${c.valor_anterior} ${c.unidad || ''} -> Actual ${c.valor_actual} ${c.unidad || ''} [${diffStr}]`, margin + 10, y);
+        data.medicamentos.forEach((m) => {
+          doc.text(`• ${m}`, margin + 10, y);
           y += 14;
         });
         y += 10;
       }
 
-      if (data.preguntas_medico?.length > 0) {
-        if (y > 720) { doc.addPage(); y = 50; }
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(15, 23, 42);
-        doc.text('4. PREGUNTAS SUGERIDAS PARA SU MÉDICO', margin, y);
-        y += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        data.preguntas_medico.forEach((p, idx) => {
-          if (y > 750) { doc.addPage(); y = 50; }
-          const splitP = doc.splitTextToSize(`${idx + 1}. ${p}`, 505);
-          doc.text(splitP, margin + 10, y);
-          y += splitP.length * 12 + 4;
-        });
-        y += 10;
-      }
-
-      if (data.recomendacion) {
-        if (y > 720) { doc.addPage(); y = 50; }
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(15, 23, 42);
-        doc.text('5. RECOMENDACIONES Y PLAN DE ACCIÓN', margin, y);
-        y += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9.5);
-        const splitRec = doc.splitTextToSize(data.recomendacion, 515);
-        doc.text(splitRec, margin, y);
-        y += splitRec.length * 13 + 15;
-      }
-
-      if (y > 760) { doc.addPage(); y = 50; }
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text('Aviso Legal: Informe generado con asistencia de IA clínica para pre-triaje. No sustituye la consulta médica presencial.', margin, 800);
-
-      const safeName = (data.filename || 'mivor').replace(/[^a-zA-Z0-9_\.-]/g, '_');
-      doc.save(`informe_clinico_${safeName}.pdf`);
+      const safeName = (data.filename || 'informe_mivor').replace(/[^a-zA-Z0-9_\.-]/g, '_');
+      doc.save(`informe_mivor_${safeName}.pdf`);
     } catch (e) {
-      console.error('Error in jsPDF generation:', e);
+      console.error('Error generating PDF:', e);
     }
   };
 
@@ -367,283 +546,826 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
     if (!analysisResult) return;
     setIsGeneratingPdf(true);
     try {
-      let res = null;
-      if (analysisResult.id) {
-        res = await fetch(`${apiUrl}/api/documents/${analysisResult.id}/pdf`, {
-          headers: authHeaders
-        });
-      }
-      if (!res || !res.ok) {
-        res = await fetch(`${apiUrl}/api/documents/export-pdf`, {
-          method: 'POST',
-          headers: {
-            ...authHeaders,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            filename: analysisResult.filename || 'informe_clinico.pdf',
-            resumen: analysisResult.summary || '',
-            diagnosticos: analysisResult.diagnosticos || [],
-            hallazgos: analysisResult.hallazgos || [],
-            medicamentos: analysisResult.medicamentos || [],
-            biomarcadores: analysisResult.biomarcadores || [],
-            comparativa_historica: analysisResult.comparativa_historica || [],
-            preguntas_medico: analysisResult.preguntas_medico || [],
-            severidad: analysisResult.severidad || 'verde',
-            recomendacion: analysisResult.recomendacion || ''
-          })
-        });
-      }
-
-      if (res && res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const safeName = (analysisResult.filename || 'estudio').replace(/[^a-zA-Z0-9_\.-]/g, '_');
-        a.download = `informe_mivor_${safeName}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        return;
-      }
-      throw new Error('Backend PDF endpoint unavailable');
-    } catch (err) {
-      console.warn('Fallback a generación PDF en cliente:', err);
       generateClientSidePdf(analysisResult);
     } finally {
       setIsGeneratingPdf(false);
     }
   };
 
-  const docTypeIcon = (type) => type === 'medical_image'
-    ? <ImageIcon size={18} className="text-blue-500" />
-    : <FileText size={18} className="text-brand-green" />;
+  // Helper para renderizar el icono adecuado de la fila
+  const renderDocumentFileIcon = (iconType) => {
+    if (iconType === 'jpg-blue') {
+      return (
+        <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0055ff] border border-blue-200/60 flex items-center justify-center shrink-0">
+          <ImageIcon size={20} className="stroke-[2.2]" />
+        </div>
+      );
+    }
+    if (iconType === 'pdf-purple') {
+      return (
+        <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 border border-purple-200/60 flex items-center justify-center shrink-0">
+          <FileText size={20} className="stroke-[2.2]" />
+        </div>
+      );
+    }
+    if (iconType === 'pdf-green') {
+      return (
+        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/60 flex items-center justify-center shrink-0">
+          <FileText size={20} className="stroke-[2.2]" />
+        </div>
+      );
+    }
+    // Default red PDF
+    return (
+      <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/60 flex items-center justify-center shrink-0">
+        <FileText size={20} className="stroke-[2.2]" />
+      </div>
+    );
+  };
+
+  // Helper para renderizar la etiqueta de tipo
+  const renderCategoryPill = (cat) => {
+    switch (cat) {
+      case 'analitica':
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">Analítica</span>;
+      case 'radiografia':
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0055ff] border border-blue-200/70">Radiografía</span>;
+      case 'receta':
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200/70">Receta</span>;
+      case 'informe':
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/70">Informe</span>;
+      default:
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/70">Documento</span>;
+    }
+  };
+
+  const patientInitials = useMemo(() => {
+    const name = userProfile?.full_name || username || 'María Pérez';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }, [userProfile, username]);
 
   return (
-    <div className="min-h-screen bg-base font-sans relative overflow-x-hidden pb-28">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-20 lg:pb-12 select-none">
 
-      {/* Background */}
-      {step !== 'results' && (
-        <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
-          <img src="/images/abstract_woman_bg.jpg" alt="" className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply"
-            style={{ maskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, transparent 30%, black 100%)' }} />
-          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-base to-transparent" />
-          <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-base via-base/80 to-transparent" />
-        </div>
-      )}
-
-      <div className="relative z-10 px-6 pt-12">
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={step === 'results' ? () => setStep('upload') : onBack}
-            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs flex items-center justify-center text-slate-800 active:scale-95 transition-all">
-            <ArrowLeft className="text-slate-800" size={20} />
-          </button>
-          <div className="px-4 py-1.5 rounded-full bg-white/90 backdrop-blur-xs border border-slate-200/80 shadow-xs">
-            <h2 className="text-sm md:text-base font-extrabold text-slate-900 tracking-tight">
-              {step === 'upload' && t("analyze_your_medical_tests")}
-              {step === 'analyzing' && t("analyzing_document")}
-              {step === 'results' && t("analysis_results")}
-            </h2>
+      {/* ========================================================================= */}
+      {/* 1. TOP NAVBAR SUPERIOR (EXCLUSIVA DESKTOP - RÉPLICA EXACTA IMAGEN 2)      */}
+      {/* ========================================================================= */}
+      <nav className="hidden lg:block w-full bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+          
+          {/* Logo Marca */}
+          <div 
+            onClick={() => safeNavigate('home')} 
+            className="flex items-center cursor-pointer select-none"
+          >
+            <img 
+              src="/assets/mivor-logo.png" 
+              alt="MIVOR.ai" 
+              className="h-8 w-auto object-contain" 
+              onError={(e) => { e.target.src = '/logo.png'; }}
+            />
           </div>
-          {step === 'results' ? (
-            <button
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
-              title="Descargar Informe Clínico (PDF)"
-              className="w-10 h-10 rounded-full bg-teal-700 hover:bg-teal-800 text-white shadow-xs flex items-center justify-center active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {isGeneratingPdf ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}
-            </button>
-          ) : (
-            <div className="w-10" />
-          )}
-        </div>
 
-        {/* ─── STEP: UPLOAD ─── */}
+          {/* Enlaces Centrales con Iconos Oficiales */}
+          <div className="flex items-center gap-1 xl:gap-2">
+            
+            {/* Inicio */}
+            <button
+              type="button"
+              onClick={() => safeNavigate('home')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <Home size={18} className="stroke-[2.2]" />
+              <span>Inicio</span>
+            </button>
+
+            {/* Mis consultas */}
+            <button
+              type="button"
+              onClick={() => safeNavigate('citas')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <Calendar size={18} className="stroke-[2.2]" />
+              <span>Mis consultas</span>
+            </button>
+
+            {/* Mis documentos (Activo con pestaña azul oficial) */}
+            <button
+              type="button"
+              onClick={() => setStep('upload')}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold text-[#0055ff] bg-blue-50/80 border border-blue-100 shadow-2xs transition-all cursor-pointer"
+            >
+              <FileText size={18} className="stroke-[2.4]" />
+              <span>Mis documentos</span>
+            </button>
+
+            {/* Mi salud */}
+            <button
+              type="button"
+              onClick={() => safeNavigate('history')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <Heart size={18} className="stroke-[2.2]" />
+              <span>Mi salud</span>
+            </button>
+
+            {/* Mi perfil */}
+            <button
+              type="button"
+              onClick={() => safeNavigate('more')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
+            >
+              <User size={18} className="stroke-[2.2]" />
+              <span>Mi perfil</span>
+            </button>
+
+          </div>
+
+          {/* Controles Derecha: Ayuda + Notificaciones + Perfil Usuario */}
+          <div className="flex items-center gap-4">
+            
+            {/* Botón ¿Necesitas ayuda? */}
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#0055ff] transition-colors cursor-pointer"
+            >
+              <HelpCircle size={17} className="stroke-[2.2]" />
+              <span>¿Necesitas ayuda?</span>
+            </button>
+
+            {/* Campana de Notificaciones con punto rojo */}
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 active:scale-95 transition-all relative cursor-pointer shadow-2xs"
+            >
+              <Bell size={18} className="stroke-[2.2]" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            </button>
+
+            {/* Avatar Paciente con Iniciales Púrpura (MP María Pérez) */}
+            <div 
+              onClick={() => safeNavigate('more')}
+              className="flex items-center gap-2.5 pl-2 cursor-pointer group"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-xs flex items-center justify-center shadow-xs overflow-hidden border-2 border-white ring-1 ring-purple-200">
+                {userProfile?.photo_url ? (
+                  <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{patientInitials}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-xs font-bold text-slate-800 group-hover:text-[#0055ff] transition-colors">
+                <span>{userProfile?.full_name || username || 'María Pérez'}</span>
+                <ChevronDown size={14} className="stroke-[2.5]" />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </nav>
+
+      {/* ========================================================================= */}
+      {/* 2. HEADER MÓVIL SUPERIOR (EXCLUSIVA MÓVIL - RÉPLICA EXACTA IMAGEN 3)      */}
+      {/* ========================================================================= */}
+      <header className="block lg:hidden w-full px-4 py-3 bg-white border-b border-slate-100 sticky top-0 z-40">
+        <div className="flex items-center justify-between">
+          
+          <div onClick={() => safeNavigate('home')} className="flex items-center cursor-pointer">
+            <img 
+              src="/assets/mivor-logo.png" 
+              alt="MIVOR.ai" 
+              className="h-7 w-auto object-contain" 
+              onError={(e) => { e.target.src = '/logo.png'; }}
+            />
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setShowHelpModal(true)}
+              className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-700 relative hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
+            >
+              <Bell size={18} className="stroke-[2.2]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+            </button>
+
+            <div 
+              onClick={() => safeNavigate('more')}
+              className="w-9 h-9 rounded-full bg-[#8b5cf6] text-white font-bold text-xs flex items-center justify-center shadow-xs overflow-hidden border border-white cursor-pointer"
+            >
+              {userProfile?.photo_url ? (
+                <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
+              ) : (
+                <span>{patientInitials}</span>
+              )}
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 3. CONTENIDO PRINCIPAL                                                    */}
+      {/* ========================================================================= */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 sm:pt-7">
+
+        {/* ─── VISTA 1: SUBIDA Y LISTADO DE DOCUMENTOS (PANTALLA PRINCIPAL) ─── */}
         {step === 'upload' && (
-          <>
-            {/* Hero */}
-            <div className="mb-6 relative max-w-full md:max-w-[75%]">
-              <div className="absolute -inset-4 bg-gradient-to-r from-white via-white/95 to-transparent blur-md z-[-1] pointer-events-none"></div>
-              <h2 className="relative z-10 text-[26px] md:text-[30px] leading-tight font-extrabold text-slate-900 mb-1.5 drop-shadow-xs">
-                {t("upload_your_tests")}
-                <br /> {t("get_clear_answers")}
-                <br />
-                <span className="text-teal-700 font-black tracking-tight">{t("clear_and_understandable")}</span>
-              </h2>
-              <p className="relative z-10 text-xs sm:text-sm font-semibold text-slate-700 max-w-[90%]">
-                {t("vitalai_extracts_interprets")}
+          <div className="space-y-6">
+
+            {/* Cabecera Principal con Título y Tarjeta de Seguridad */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+                  Mis documentos médicos
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+                  Sube y gestiona tus informes, pruebas y documentos para que estén disponibles en tus consultas.
+                </p>
+              </div>
+
+              {/* Tarjeta de Seguridad Superior Derecha */}
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-4 flex items-center gap-3.5 shadow-2xs max-w-md shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0055ff] flex items-center justify-center shrink-0 border border-blue-100">
+                  <ShieldCheck size={22} className="stroke-[2.2]" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-black leading-tight">
+                    Tu información está segura
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
+                    Tus documentos están protegidos con los más altos estándares de seguridad y privacidad.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Error si ocurre */}
+            {error && (
+              <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4 flex items-center justify-between gap-3 text-rose-700 text-xs font-bold">
+                <div className="flex items-center gap-2">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <span>{error}</span>
+                </div>
+                <button onClick={() => setError(null)} className="p-1 hover:bg-rose-100 rounded-lg">
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            {/* Layout en 2 Columnas para Desktop (70% / 30%) y 1 Columna Móvil */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* ── COLUMNA IZQUIERDA: DROPZONE + TABLA DOCUMENTOS (lg:col-span-8) ── */}
+              <div className="lg:col-span-8 space-y-6">
+
+                {/* Zona de Carga Drag & Drop */}
+                <div 
+                  onDragOver={onDragOver} 
+                  onDragLeave={onDragLeave} 
+                  onDrop={onDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`rounded-3xl p-8 sm:p-10 border-2 border-dashed transition-all cursor-pointer text-center relative overflow-hidden flex flex-col items-center justify-center ${
+                    isDragging 
+                      ? 'border-[#0055ff] bg-blue-50/70 scale-[1.005]' 
+                      : 'border-[#bcdcfe] bg-[#f4f9ff] hover:bg-[#ebf4ff]'
+                  }`}
+                >
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    onChange={handleFileChange} 
+                    className="hidden" 
+                    accept={ACCEPTED_TYPES} 
+                  />
+
+                  {/* Icono de Nube Azul en Círculo */}
+                  <div className="w-14 h-14 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-lg shadow-blue-500/25 mb-4 group-hover:scale-105 transition-transform">
+                    <CloudUpload size={28} className="stroke-[2.4]" />
+                  </div>
+
+                  <h3 className="text-base sm:text-lg font-black text-black">
+                    Arrastra tus archivos aquí
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 mb-2">
+                    o haz clic para seleccionarlos
+                  </p>
+                  
+                  <p className="text-[11px] text-slate-400 font-medium max-w-sm mb-5">
+                    Puedes subir archivos en formato PDF, JPG, PNG, DICOM. Tamaño máximo 10 MB por archivo.
+                  </p>
+
+                  <button 
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                    className="bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <FileText size={16} className="stroke-[2.4]" />
+                    <span>Seleccionar archivos</span>
+                  </button>
+                </div>
+
+                {/* Encabezado de la Sección de Documentos con Buscador y Filtro */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                  
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg sm:text-xl font-black text-black">
+                      Mis documentos
+                    </h2>
+                    <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff] text-xs font-bold border border-blue-200/80">
+                      {filteredDocuments.length} archivos
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Buscador de Documentos */}
+                    <div className="relative flex-1 sm:w-64">
+                      <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 stroke-[2.2]" />
+                      <input 
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Buscar documento, fecha o tipo..."
+                        className="w-full pl-9 pr-3.5 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-black placeholder:text-slate-400 focus:outline-none focus:border-[#0055ff] shadow-2xs"
+                      />
+                    </div>
+
+                    {/* Botón de Ordenación */}
+                    <button 
+                      type="button"
+                      onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                      className="p-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+                      title={sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'}
+                    >
+                      <ArrowDownUp size={16} className="stroke-[2.2]" />
+                    </button>
+                  </div>
+
+                </div>
+
+                {/* ── TABLA DESKTOP (EXCLUSIVA LG+) ── */}
+                <div className="hidden lg:block bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Nombre del archivo</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Tipo</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Fecha</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Tamaño</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Estado</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600 text-center">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {filteredDocuments.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-10 text-center text-slate-400 font-medium">
+                            No se encontraron documentos con los filtros aplicados.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredDocuments.map((doc) => (
+                          <tr 
+                            key={doc.id}
+                            onClick={() => handleHistoryClick(doc)}
+                            className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                          >
+                            {/* Nombre e Icono */}
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-3">
+                                {renderDocumentFileIcon(doc.icon_type)}
+                                <div className="min-w-0">
+                                  <p className="font-extrabold text-black text-xs truncate group-hover:text-[#0055ff] transition-colors">
+                                    {doc.filename}
+                                  </p>
+                                  <p className="text-[11px] text-slate-500 font-medium">
+                                    {doc.subtitle || 'Documento clínico'}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Tipo */}
+                            <td className="py-3 px-4">
+                              {renderCategoryPill(doc.category)}
+                            </td>
+
+                            {/* Fecha */}
+                            <td className="py-3 px-4 text-slate-600 font-semibold text-[11.5px]">
+                              {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '12 sept 2026'}
+                            </td>
+
+                            {/* Tamaño */}
+                            <td className="py-3 px-4 text-slate-500 font-medium text-[11.5px]">
+                              {doc.file_size_label || '2,4 MB'}
+                            </td>
+
+                            {/* Estado Analizado */}
+                            <td className="py-3 px-4">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#ebfaf3] text-[#028a4c] border border-[#c6f3db]">
+                                <CheckCircle2 size={13} className="stroke-[2.5]" />
+                                <span>Analizado</span>
+                              </span>
+                            </td>
+
+                            {/* Acciones */}
+                            <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-center gap-1">
+                                <button 
+                                  type="button"
+                                  onClick={() => handleHistoryClick(doc)}
+                                  className="w-8 h-8 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-[#0055ff] flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Ver Análisis Clínico"
+                                >
+                                  <Eye size={16} className="stroke-[2.2]" />
+                                </button>
+                                
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    handleHistoryClick(doc);
+                                  }}
+                                  className="w-8 h-8 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-[#0055ff] flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Descargar Informe"
+                                >
+                                  <Download size={16} className="stroke-[2.2]" />
+                                </button>
+
+                                <div className="relative">
+                                  <button 
+                                    type="button"
+                                    onClick={() => setOpenDocMenuId(openDocMenuId === doc.id ? null : doc.id)}
+                                    className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-black flex items-center justify-center transition-colors cursor-pointer"
+                                  >
+                                    <MoreVertical size={16} className="stroke-[2.2]" />
+                                  </button>
+
+                                  {openDocMenuId === doc.id && (
+                                    <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-20 animate-in fade-in zoom-in-95">
+                                      <button 
+                                        onClick={() => { setOpenDocMenuId(null); handleHistoryClick(doc); }}
+                                        className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
+                                      >
+                                        <Eye size={14} /> Ver análisis
+                                      </button>
+                                      <button 
+                                        onClick={() => { setOpenDocMenuId(null); handleHistoryClick(doc); }}
+                                        className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
+                                      >
+                                        <Download size={14} /> Descargar PDF
+                                      </button>
+                                      <button 
+                                        onClick={() => {
+                                          setOpenDocMenuId(null);
+                                          onAskFollowUp?.(doc.filename, doc.filename);
+                                        }}
+                                        className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
+                                      >
+                                        <MessageSquare size={14} /> Preguntar a MIVOR
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* ── LISTADO MÓVIL VERTICAL (EXCLUSIVA LG:HIDDEN - RÉPLICA EXACTA IMAGEN 3) ── */}
+                <div className="block lg:hidden space-y-2.5">
+                  {filteredDocuments.map((doc) => (
+                    <div 
+                      key={doc.id}
+                      onClick={() => handleHistoryClick(doc)}
+                      className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-2xs flex items-center justify-between gap-3 active:scale-[0.99] transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {renderDocumentFileIcon(doc.icon_type)}
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-black text-black text-[13px] truncate">
+                            {doc.filename}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                            {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '12 sept 2026'} · {doc.file_size_label || '2,4 MB'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ebfaf3] text-[#028a4c] border border-[#c6f3db]">
+                          <CheckCircle2 size={12} className="stroke-[2.5]" />
+                          <span>Analizado</span>
+                        </span>
+
+                        <button 
+                          type="button"
+                          onClick={() => handleHistoryClick(doc)}
+                          className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 active:scale-95"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
+              {/* ── COLUMNA DERECHA: CATEGORÍAS + ESPACIO + CONSEJO (lg:col-span-4) ── */}
+              <div className="lg:col-span-4 space-y-5">
+
+                {/* Card 1: Tipos de Documentos (Cuadrícula 3x2) */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-black text-black">
+                      Tipos de documentos
+                    </h3>
+                    {selectedCategory !== 'all' && (
+                      <button 
+                        onClick={() => setSelectedCategory('all')} 
+                        className="text-[11px] text-[#0055ff] font-bold hover:underline"
+                      >
+                        Ver todos
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2.5">
+                    
+                    {/* 1. Informes */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'informe' ? 'all' : 'informe')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'informe'
+                          ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
+                        <FileText size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Informes</span>
+                      <span className="text-[10px] text-slate-400 font-medium">PDF</span>
+                    </button>
+
+                    {/* 2. Radiografías */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'radiografia' ? 'all' : 'radiografia')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'radiografia'
+                          ? 'bg-blue-50/90 border-blue-300 ring-2 ring-blue-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center mb-1.5">
+                        <ImageIcon size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Radiografías</span>
+                      <span className="text-[10px] text-slate-400 font-medium">JPG, PNG</span>
+                    </button>
+
+                    {/* 3. Recetas */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'receta' ? 'all' : 'receta')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'receta'
+                          ? 'bg-orange-50/90 border-orange-300 ring-2 ring-orange-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-1.5">
+                        <Pill size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Recetas</span>
+                      <span className="text-[10px] text-slate-400 font-medium">PDF, Foto</span>
+                    </button>
+
+                    {/* 4. Analíticas */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'analitica' ? 'all' : 'analitica')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'analitica'
+                          ? 'bg-purple-50/90 border-purple-300 ring-2 ring-purple-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-1.5">
+                        <Activity size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Analíticas</span>
+                      <span className="text-[10px] text-slate-400 font-medium">PDF</span>
+                    </button>
+
+                    {/* 5. Incapacidades */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'incapacidad' ? 'all' : 'incapacidad')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'incapacidad'
+                          ? 'bg-slate-100 border-slate-300 ring-2 ring-slate-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-1.5">
+                        <FileText size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Incapacidades</span>
+                      <span className="text-[10px] text-slate-400 font-medium">PDF, Foto</span>
+                    </button>
+
+                    {/* 6. Otros */}
+                    <button 
+                      type="button"
+                      onClick={() => setSelectedCategory(selectedCategory === 'otro' ? 'all' : 'otro')}
+                      className={`p-3 rounded-2xl flex flex-col items-center justify-center text-center transition-all cursor-pointer border ${
+                        selectedCategory === 'otro'
+                          ? 'bg-slate-100 border-slate-300 ring-2 ring-slate-400/20'
+                          : 'bg-white border-slate-200/80 hover:bg-slate-50'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-1.5">
+                        <MoreHorizontal size={18} className="stroke-[2.2]" />
+                      </div>
+                      <span className="text-xs font-bold text-black leading-tight">Otros</span>
+                      <span className="text-[10px] text-slate-400 font-medium">PDF, JPG, PNG</span>
+                    </button>
+
+                  </div>
+                </div>
+
+                {/* Card 2: Espacio Utilizado */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0055ff] flex items-center justify-center border border-blue-100">
+                        <Database size={20} className="stroke-[2.2]" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-extrabold text-black">Espacio utilizado</h4>
+                        <p className="text-xs font-bold text-slate-500 mt-0.5">
+                          {usedMb} MB de {totalMb} MB
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-400">
+                      {usedPercentage}%
+                    </span>
+                  </div>
+
+                  {/* Barra de Progreso Azul */}
+                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-[#0055ff] h-full rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(usedPercentage, 5)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Card 3: Consejo MIVOR */}
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs flex items-start gap-3.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center shrink-0 border border-blue-100 mt-0.5">
+                    <Info size={18} className="stroke-[2.4]" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-black text-black">Consejo</h4>
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                      Mantén tus documentos organizados y actualizados para que tu médico pueda ofrecerte una mejor atención.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+
+        {/* ─── VISTA 2: PROCESANDO DOCUMENTO (ANALYZING STEP) ─── */}
+        {step === 'analyzing' && (
+          <div className="max-w-md mx-auto py-20 px-4 text-center space-y-6">
+            <div className="relative inline-block">
+              <div className="w-24 h-24 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto">
+                <Loader2 size={44} className="text-[#0055ff] animate-spin stroke-[2.2]" />
+              </div>
+              <div className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-md">
+                <Sparkles size={16} />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-black text-black">
+                MIVOR.ai está leyendo tu documento
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                Extrayendo biomarcadores, diagnósticos y generando un informe médico claro.
               </p>
             </div>
 
-            {/* Security */}
-            <div className="bg-white/90 backdrop-blur-xs border border-teal-200/60 rounded-2xl p-4 flex gap-3 items-center mb-6 max-w-sm shadow-xs">
-              <div className="bg-teal-100 p-2 rounded-xl text-teal-800 shrink-0"><Shield size={18} /></div>
-              <div>
-                <p className="text-xs font-bold text-slate-900">{t("your_information_is_protected")}</p>
-                <p className="text-[10px] text-slate-600 font-medium">{t("hospital_level_privacy")}</p>
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-3 flex gap-2 items-start">
-                <AlertCircle size={16} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-red-600">{error}</p>
-              </div>
-            )}
-
-            {/* Drop Zone */}
-            <div onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-              className={`bg-white rounded-[28px] p-6 shadow-soft border-2 border-dashed mb-6 transition-all flex flex-col items-center text-center
-                ${isDragging ? 'border-teal-500 bg-teal-50/20 scale-[1.01]' : 'border-gray-200'}`}>
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors
-                ${isDragging ? 'bg-teal-600 text-white' : 'bg-teal-100 text-teal-800'}`}>
-                <CloudUpload size={28} />
-              </div>
-              <h3 className="font-bold text-gray-900 mb-1">
-                {isDragging ? t("drop_here") : t("upload_your_document_or_image")}
-              </h3>
-              <p className="text-sm text-gray-400 mb-4">{t("you_can_upload_photo_or_pdf")}</p>
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept={ACCEPTED_TYPES} />
-              
-              <div className="flex gap-3 w-full mb-3">
-                <button onClick={() => fileInputRef.current.click()}
-                  className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold py-3 px-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 border border-teal-200/80">
-                  <ImageIcon size={18} /> {t("upload_image")}
-                </button>
-                <button onClick={() => fileInputRef.current.click()}
-                  className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 px-4 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md">
-                  <FileText size={18} /> {t("upload_pdf")}
-                </button>
-              </div>
-              <p className="text-[11px] text-gray-400">{t("file_formats_and_size_limit")}</p>
-            </div>
-
-            {/* Format chips */}
-            <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar mb-8">
+            <div className="space-y-2 pt-2">
               {[
-                { icon: <FileText size={20} className="text-brand-green" />, l: t("reports"), s: 'PDF' },
-                { icon: <ImageIcon size={20} className="text-blue-500" />, l: t("x_rays"), s: 'JPG, PNG' },
-                { icon: <Activity size={20} className="text-purple-500" />, l: t("prescriptions"), s: 'PDF, Foto' },
-                { icon: <Beaker size={20} className="text-amber-500" />, l: t("analytics"), s: 'PDF' },
-                { icon: <File size={20} className="text-gray-500" />, l: t("disabilities"), s: 'PDF, Foto' },
-              ].map(item => (
-                <div key={item.l} className="min-w-[96px] bg-white border border-gray-100 rounded-2xl p-3 flex flex-col items-center text-center flex-shrink-0 gap-1">
-                  {item.icon}
-                  <span className="text-[11px] font-bold text-gray-900">{item.l}</span>
-                  <span className="text-[9px] text-gray-400">{item.s}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* History */}
-            <div className="mb-4">
-              <h3 className="text-sm font-bold text-gray-900 mb-3">{t("previous_analyses")}</h3>
-              <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                {loadingDocs ? (
-                  <div className="p-5 text-center text-xs text-gray-400">{t("loading_history")}</div>
-                ) : documents.length === 0 ? (
-                  <div className="p-8 flex flex-col items-center gap-2 text-center">
-                    <CloudUpload size={28} className="text-gray-200" />
-                    <p className="text-sm font-semibold text-gray-400">{t("no_analyses_yet")}</p>
-                    <p className="text-xs text-gray-400">{t("upload_first_document_above")}</p>
-                  </div>
-                ) : documents.map((doc, idx) => (
-                  <div 
-                    key={doc.id} 
-                    onClick={() => handleHistoryClick(doc)}
-                    className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 transition-colors ${idx < documents.length - 1 ? 'border-b border-gray-50' : ''}`}
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
-                      {docTypeIcon(doc.document_type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-gray-900 truncate">{doc.filename || t("document")}</p>
-                      <p className="text-[10px] text-gray-400 flex items-center gap-1">
-                        <Clock size={9} />
-                        {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                      </p>
-                    </div>
-                    <div className="bg-brand-green/10 text-brand-green text-[10px] font-bold px-2 py-1 rounded-full">{t("analyzed")}</div>
-                    <ChevronRight size={14} className="text-gray-300" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* ─── STEP: ANALYZING ─── */}
-        {step === 'analyzing' && (
-          <div className="flex flex-col items-center justify-center py-24 gap-6 text-center">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-brand-green/10 flex items-center justify-center">
-                <Loader2 size={40} className="text-brand-green animate-spin" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-brand-purple rounded-full flex items-center justify-center">
-                <Stethoscope size={16} className="text-white" />
-              </div>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{t("vitalai_reading_document")}</h3>
-              <p className="text-sm text-gray-500 max-w-xs">{t("extracting_text_identifying_meds")}</p>
-            </div>
-            <div className="flex flex-col gap-2 w-full max-w-xs">
-              {[t("extracting_text_with_ocr"), t("identifying_clinical_findings"), t("generating_summary_for_you")].map((t, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-gray-400 bg-white rounded-xl px-4 py-2 border border-gray-100">
-                  <div className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse" />
-                  {t}
+                "Extrayendo texto con OCR de alta resolución",
+                "Analizando biomarcadores y rangos de referencia",
+                "Redactando resumen explicativo para el paciente"
+              ].map((text, i) => (
+                <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200/80 text-xs font-bold text-slate-700 text-left shadow-2xs">
+                  <div className="w-2 h-2 rounded-full bg-[#0055ff] animate-pulse shrink-0" />
+                  <span>{text}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ─── STEP: RESULTS ─── */}
+        {/* ─── VISTA 3: RESULTADOS DEL ANÁLISIS CLÍNICO (RESULTS STEP) ─── */}
         {step === 'results' && analysisResult && (
-          <div className="flex flex-col gap-5">
+          <div className="max-w-4xl mx-auto space-y-6">
 
-            {/* File name */}
-            <div className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-              <div className="w-10 h-10 bg-brand-green/10 rounded-xl flex items-center justify-center text-brand-green flex-shrink-0">
-                {analysisResult.is_image ? <ImageIcon size={20} /> : <FileText size={20} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">{analysisResult.filename}</p>
-                <p className="text-[10px] text-gray-400">{analysisResult.is_image ? t("medical_image") : t("report_document_pdf")}</p>
-              </div>
+            {/* Barra Superior con botón Volver y Descargar PDF */}
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => { setStep('upload'); setAnalysisResult(null); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-black font-bold text-xs hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+              >
+                <ArrowLeft size={16} />
+                <span>Volver a Mis documentos</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={isGeneratingPdf}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                {isGeneratingPdf ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                <span>Descargar Informe PDF</span>
+              </button>
             </div>
 
-            {/* Severity */}
-            <SeverityBadge sev={analysisResult.severidad} />
+            {/* Tarjeta de Encabezado del Archivo */}
+            <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#0055ff] flex items-center justify-center border border-blue-200 shrink-0">
+                  {analysisResult.is_image ? <ImageIcon size={24} /> : <FileText size={24} />}
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-black text-black truncate">
+                    {analysisResult.filename}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-semibold">
+                    {analysisResult.is_image ? 'Estudio de Imagen / Radiografía' : 'Informe Médico Digitalizado'}
+                  </p>
+                </div>
+              </div>
 
-            {/* Summary */}
+              <SeverityBadge sev={analysisResult.severidad} />
+            </div>
+
+            {/* Resumen Clínico Inteligente */}
             {analysisResult.summary && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Stethoscope size={13} /> {t("summary")}
-                </h3>
-                <p className="text-sm text-gray-800 leading-relaxed">{analysisResult.summary}</p>
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-wider">
+                  <Stethoscope size={15} className="text-[#0055ff]" />
+                  <span>Resumen Clínico</span>
+                </div>
+                <p className="text-sm text-black font-medium leading-relaxed">
+                  {analysisResult.summary}
+                </p>
               </div>
             )}
 
-            {/* Biomarcadores Analíticos y Medidores de Rango (Fila 2) */}
+            {/* Biomarcadores Analíticos con Medidor de Rango */}
             {analysisResult.biomarcadores?.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-3">
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                    <Activity size={14} className="text-teal-700" /> Parámetros y Biomarcadores Extraídos
-                  </h3>
-                  <span className="text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-2.5 py-0.5 rounded-full">
-                    {analysisResult.biomarcadores.length} analitos
+                  <div className="flex items-center gap-2">
+                    <Activity size={18} className="text-[#0055ff]" />
+                    <h3 className="text-sm font-black text-black uppercase tracking-wider">
+                      Biomarcadores y Parámetros Analíticos
+                    </h3>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff] border border-blue-200">
+                    {analysisResult.biomarcadores.length} parámetros
                   </span>
                 </div>
-                <div className="grid grid-cols-1 gap-2.5 mt-1">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {analysisResult.biomarcadores.map((bm, i) => (
                     <BiomarkerRangeMeter key={i} bm={bm} />
                   ))}
@@ -651,26 +1373,22 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               </div>
             )}
 
-            {/* Evolución y Comparativa Histórica con Chart.js (Fila 2) */}
+            {/* Comparativa Histórica con Gráficos Chart.js */}
             {analysisResult.comparativa_historica?.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col gap-4">
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
-                      <BarChart3 size={18} />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Evolución y Comparativa Histórica</h3>
-                      <p className="text-[10px] text-slate-500">Contraste directo contra estudios previos del paciente</p>
-                    </div>
+                    <BarChart3 size={18} className="text-[#0055ff]" />
+                    <h3 className="text-sm font-black text-black uppercase tracking-wider">
+                      Evolución y Comparativa Histórica
+                    </h3>
                   </div>
-                  <span className="text-[10px] font-bold bg-teal-100 text-teal-800 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff]">
                     {analysisResult.comparativa_historica.length} vinculados
                   </span>
                 </div>
 
-                {/* Side-by-side comparative Bar Chart */}
-                <div className="h-60 w-full pt-1">
+                <div className="h-60 w-full pt-2">
                   <Bar
                     data={{
                       labels: analysisResult.comparativa_historica.map(item => item.parametro),
@@ -684,7 +1402,7 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
                         {
                           label: 'Estudio Actual',
                           data: analysisResult.comparativa_historica.map(item => item.valor_actual),
-                          backgroundColor: 'rgba(15, 118, 110, 0.9)',
+                          backgroundColor: 'rgba(0, 85, 255, 0.9)',
                           borderRadius: 6,
                         }
                       ]
@@ -693,320 +1411,89 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
                       responsive: true,
                       maintainAspectRatio: false,
                       plugins: {
-                        legend: {
-                          position: 'top',
-                          labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } }
-                        },
-                        tooltip: {
-                          callbacks: {
-                            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}`
-                          }
-                        }
+                        legend: { position: 'top', labels: { font: { weight: 'bold', size: 11 } } }
                       },
                       scales: {
-                        x: {
-                          grid: { display: false },
-                          ticks: { font: { size: 10, weight: 'bold' }, maxRotation: 20 }
-                        },
-                        y: {
-                          beginAtZero: true,
-                          grid: { color: 'rgba(241, 245, 249, 1)' },
-                          ticks: { font: { size: 10 } }
-                        }
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(241, 245, 249, 1)' } }
                       }
                     }}
                   />
                 </div>
-
-                {/* Detailed variations list */}
-                <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                  {analysisResult.comparativa_historica.map((item, idx) => {
-                    const isUp = item.tendencia === 'sube';
-                    const isDown = item.tendencia === 'baja';
-                    return (
-                      <div key={idx} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-800 truncate">{item.parametro}</p>
-                          <p className="text-[10px] text-slate-500">
-                            Previo: {item.valor_anterior} {item.unidad} ({item.fecha_anterior || 'Previo'}) &rarr; Actual: {item.valor_actual} {item.unidad}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          {isUp && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-red-600 bg-red-50 border border-red-200">
-                              <TrendingUp size={12} /> +{item.cambio_porcentual}%
-                            </span>
-                          )}
-                          {isDown && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200">
-                              <TrendingDown size={12} /> {item.cambio_porcentual}%
-                            </span>
-                          )}
-                          {!isUp && !isDown && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200">
-                              <Minus size={12} /> 0%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
             )}
 
-            {/* Diagnostics */}
-            {analysisResult.diagnosticos?.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <Activity size={13} /> {t("diagnostics_findings")}
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {analysisResult.diagnosticos.map((d, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-purple mt-1.5 flex-shrink-0" />{d}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Medications */}
+            {/* Medicamentos Detectados */}
             {analysisResult.medicamentos?.length > 0 && (
-              <div className="bg-amber-50 rounded-2xl p-5 border border-amber-100">
-                <h3 className="text-xs font-bold text-amber-600 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <Pill size={13} /> {t("prescribed_medications")}
-                </h3>
-                <div className="flex flex-col gap-2">
+              <div className="bg-amber-50/80 rounded-3xl p-6 border border-amber-200/90 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-amber-800 uppercase tracking-wider">
+                  <Pill size={16} />
+                  <span>Medicamentos y Pautas Detectadas</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {analysisResult.medicamentos.map((m, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-gray-800">
-                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 flex-shrink-0" />{m}
+                    <div key={i} className="flex items-center gap-2.5 p-3 rounded-2xl bg-white border border-amber-200 text-xs font-bold text-black shadow-2xs">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                      <span>{m}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Other findings */}
-            {analysisResult.hallazgos?.filter(h => !analysisResult.medicamentos?.includes(h)).length > 0 && (
-              <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                  <CheckCircle2 size={13} /> {t("other_findings")}
-                </h3>
-                <div className="flex flex-col gap-2">
-                  {analysisResult.hallazgos.filter(h => !analysisResult.medicamentos?.includes(h)).map((h, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-green mt-1.5 flex-shrink-0" />{h}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recommendation */}
-            {analysisResult.recomendacion && (
-              <div className="bg-blue-50 rounded-2xl p-5 border border-blue-100">
-                <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <Lightbulb size={13} /> {t("recommendation")}
-                </h3>
-                <p className="text-sm text-gray-800">{analysisResult.recomendacion}</p>
-              </div>
-            )}
-
-            {/* PHI warning */}
-            {analysisResult.phi_detected && (
-              <div className="bg-orange-50 rounded-xl px-4 py-3 border border-orange-100 flex gap-2 items-center">
-                <AlertTriangle size={14} className="text-orange-500 flex-shrink-0" />
-                <p className="text-[11px] text-orange-700">{t("phi_detected_warning")}</p>
-              </div>
-            )}
-
-            {/* Derivación Inteligente de Paciente a Especialista (Fila 14) */}
+            {/* Derivación Inteligente MIVOR */}
             {(() => {
               const referral = analysisResult.smart_referral;
-              // Client fallback if referral is not present (legacy docs)
               const corpus = `${analysisResult.summary || ''} ${(analysisResult.diagnosticos || []).join(' ')} ${(analysisResult.hallazgos || []).join(' ')}`.toLowerCase();
               let fallbackSpec = 'Medicina General';
-              if (corpus.includes('fractur') || corpus.includes('rotura') || corpus.includes('luxaci') || corpus.includes('óseo') || corpus.includes('oseo') || corpus.includes('esguince') || corpus.includes('menisco')) {
-                fallbackSpec = 'Traumatología';
-              } else if (corpus.includes('troponin') || corpus.includes('infarto') || corpus.includes('cardio') || corpus.includes('arritmia') || corpus.includes('electrocardiograma') || corpus.includes('ecg') || corpus.includes('colesterol')) {
-                fallbackSpec = 'Cardiología';
-              } else if (corpus.includes('glucosa') || corpus.includes('hba1c') || corpus.includes('diabetes') || corpus.includes('tiroides') || corpus.includes('tsh') || corpus.includes('metabólic')) {
-                fallbackSpec = 'Endocrinología';
-              } else if (corpus.includes('creatinina') || corpus.includes('renal') || corpus.includes('urea') || corpus.includes('tfg')) {
-                fallbackSpec = 'Nefrología';
-              } else if (corpus.includes('transaminas') || corpus.includes('hepátic') || corpus.includes('hígado') || corpus.includes('bilirrubina') || corpus.includes('digestiv')) {
-                fallbackSpec = 'Gastroenterología';
-              } else if (corpus.includes('hemoglobina') || corpus.includes('anemia') || corpus.includes('plaqueta') || corpus.includes('leucocit')) {
-                fallbackSpec = 'Hematología';
-              } else if (corpus.includes('pulmonar') || corpus.includes('neumo') || corpus.includes('espirometr') || corpus.includes('asma') || corpus.includes('tórax')) {
-                fallbackSpec = 'Neumología';
-              } else if (corpus.includes('piel') || corpus.includes('cutáne') || corpus.includes('dermat') || corpus.includes('melanoma') || corpus.includes('lunar')) {
-                fallbackSpec = 'Dermatología';
-              }
+              if (corpus.includes('fractur') || corpus.includes('rotura') || corpus.includes('óseo') || corpus.includes('esguince')) fallbackSpec = 'Traumatología';
+              else if (corpus.includes('troponin') || corpus.includes('cardio') || corpus.includes('colesterol')) fallbackSpec = 'Cardiología';
+              else if (corpus.includes('glucosa') || corpus.includes('diabetes') || corpus.includes('tiroides')) fallbackSpec = 'Endocrinología';
+              else if (corpus.includes('creatinina') || corpus.includes('renal')) fallbackSpec = 'Nefrología';
+              else if (corpus.includes('pulmonar') || corpus.includes('asma') || corpus.includes('tórax')) fallbackSpec = 'Neumología';
 
-              const specialty = referral?.specialty || referral?.short_specialty || fallbackSpec;
-              const urgency = referral?.urgency || (analysisResult.severidad === 'rojo' ? 'alta' : (analysisResult.severidad === 'amarillo' ? 'media' : 'baja'));
-              const reason = referral?.reason || (urgency === 'alta' 
-                ? `Los hallazgos requieren valoración prioritaria por un especialista en ${specialty}.` 
-                : `Según los valores analizados, se sugiere consulta médica en ${specialty}.`);
-              const alteredBms = referral?.altered_biomarkers || (analysisResult.biomarcadores || []).filter(bm => ['elevado', 'bajo', 'alterado', 'alto'].includes((bm.estado || '').toLowerCase()));
-              const specialists = referral?.recommended_specialists || [];
-
-              const isUrgent = urgency === 'alta';
-              const isMedium = urgency === 'media';
+              const specialty = referral?.specialty || fallbackSpec;
 
               return (
-                <div className={`rounded-3xl p-5 md:p-6 border shadow-soft flex flex-col gap-4 transition-all ${
-                  isUrgent 
-                    ? 'bg-gradient-to-br from-red-50/90 via-rose-50/70 to-orange-50/80 border-red-200/90' 
-                    : isMedium
-                    ? 'bg-gradient-to-br from-amber-50/90 via-yellow-50/60 to-orange-50/70 border-amber-200/80'
-                    : 'bg-gradient-to-br from-teal-50/90 via-sky-50/60 to-emerald-50/70 border-teal-200/80'
-                }`}>
-                  {/* Top Badge & Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/5">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-10 h-10 rounded-2xl text-white flex items-center justify-center flex-shrink-0 shadow-sm ${
-                        isUrgent ? 'bg-red-600' : isMedium ? 'bg-amber-600' : 'bg-teal-700'
-                      }`}>
-                        {isUrgent ? <AlertCircle size={22} /> : isMedium ? <AlertTriangle size={22} /> : <Stethoscope size={22} />}
+                <div className="bg-gradient-to-br from-blue-50/90 via-sky-50/60 to-white rounded-3xl p-6 border border-blue-200 shadow-2xs space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-[#0055ff] text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <Stethoscope size={22} className="stroke-[2.2]" />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            isUrgent ? 'bg-red-100 text-red-700 border border-red-200' : isMedium ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-teal-100 text-teal-800 border border-teal-200'
-                          }`}>
-                            {isUrgent ? 'Prioridad Alta • Atención Urgente' : isMedium ? 'Prioridad Media • Consulta Recomendada' : 'Seguimiento Preventivo'}
-                          </span>
-                        </div>
-                        <h4 className="text-base font-extrabold text-slate-900 mt-0.5">
-                          Derivación Inteligente: <span className={isUrgent ? 'text-red-700' : isMedium ? 'text-amber-800' : 'text-teal-800'}>{specialty}</span>
+                        <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0055ff]">
+                          Recomendación Especialista
+                        </span>
+                        <h4 className="text-base font-extrabold text-black mt-0.5">
+                          Derivación Sugerida: <span className="text-[#0055ff]">{specialty}</span>
                         </h4>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 self-start sm:self-center bg-white/80 px-2.5 py-1 rounded-xl border border-slate-200/60 text-[11px] font-bold text-slate-700 shadow-2xs">
-                      <Sparkles size={13} className="text-teal-600" />
-                      <span>Matching Algorítmico MIVOR</span>
+                    <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-blue-100 text-xs font-bold text-slate-700 shadow-2xs">
+                      <Sparkles size={14} className="text-[#0055ff]" />
+                      <span>Matching MIVOR.ai</span>
                     </div>
                   </div>
 
-                  {/* Justificación Clínica */}
-                  <div className="bg-white/80 backdrop-blur-xs rounded-2xl p-3.5 border border-slate-200/60 shadow-2xs">
-                    <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                      <span className="font-bold text-slate-900">Criterio Clínico: </span>
-                      {reason}
-                    </p>
-                  </div>
-
-                  {/* Biomarcadores Detonantes */}
-                  {alteredBms.length > 0 && (
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1">
-                        <Activity size={12} className={isUrgent ? 'text-red-600' : 'text-teal-700'} />
-                        Biomarcadores detonantes de la derivación:
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        {alteredBms.map((bm, idx) => {
-                          const isHigh = (bm.estado || '').toLowerCase().includes('elevado') || (bm.estado || '').toLowerCase().includes('alto');
-                          return (
-                            <span 
-                              key={idx}
-                              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl shadow-2xs border ${
-                                isHigh 
-                                  ? 'bg-red-50 text-red-700 border-red-200' 
-                                  : 'bg-blue-50 text-blue-700 border-blue-200'
-                              }`}
-                            >
-                              {isHigh ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                              <span>{bm.parametro}: {bm.valor} {bm.unidad || ''}</span>
-                              <span className="text-[10px] font-medium opacity-80">({bm.estado})</span>
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Especialistas Recomendados (Mini-cards) */}
-                  {specialists.length > 0 && (
-                    <div className="flex flex-col gap-2 pt-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1">
-                          <UserCheck size={13} className="text-teal-700" />
-                          Especialistas recomendados en MIVOR.ai:
-                        </span>
-                        <span className="text-[10px] font-bold text-teal-800 bg-teal-100/70 px-2 py-0.5 rounded-full">
-                          Verificados
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        {specialists.slice(0, 4).map((docItem) => (
-                          <div 
-                            key={docItem.id || docItem.user_id}
-                            className="bg-white/90 rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3 hover:border-teal-400 hover:shadow-xs transition-all group"
-                          >
-                            <div className="relative flex-shrink-0">
-                              <img 
-                                src={docItem.photo_url || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=120&auto=format&fit=crop&q=80"} 
-                                alt={docItem.full_name}
-                                className="w-11 h-11 rounded-xl object-cover border border-slate-100"
-                              />
-                              {docItem.is_verified && (
-                                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-teal-600 rounded-full flex items-center justify-center text-white ring-2 ring-white">
-                                  <Check size={9} strokeWidth={3} />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h5 className="text-xs font-bold text-slate-900 truncate group-hover:text-teal-800 transition-colors">
-                                {docItem.full_name}
-                              </h5>
-                              <p className="text-[11px] font-semibold text-teal-700 truncate">
-                                {docItem.specialty} {docItem.experience_years ? `• ${docItem.experience_years}a exp.` : ''}
-                              </p>
-                              <p className="text-[10px] text-slate-500 truncate flex items-center gap-0.5 mt-0.5">
-                                <MapPin size={10} className="flex-shrink-0" />
-                                <span>{docItem.location || docItem.city || 'Consulta Online'}</span>
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => onOpenDoctorDirectory?.(docItem.specialty || specialty)}
-                              className="px-2.5 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-[11px] border border-teal-200/70 active:scale-95 transition-all flex-shrink-0 cursor-pointer"
-                            >
-                              Agendar
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => onOpenDoctorDirectory?.(specialty)}
-                      className={`w-full py-3 px-4 rounded-xl active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
-                        isUrgent ? 'bg-red-600 hover:bg-red-700' : isMedium ? 'bg-amber-600 hover:bg-amber-700' : 'bg-teal-700 hover:bg-teal-800'
-                      }`}
+                      className="w-full py-3 px-4 rounded-xl bg-[#0055ff] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                     >
                       <Calendar size={16} />
-                      <span>Agendar Cita en {specialty}</span>
+                      <span>Agendar Cita con {specialty}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => {
-                        const diagText = (analysisResult.diagnosticos || []).join(', ') || analysisResult.summary || 'evaluación de estudio médico';
-                        const alteredStr = alteredBms.map(b => `${b.parametro} (${b.estado})`).join(', ');
-                        const msg = encodeURIComponent(`Hola, acabo de analizar un estudio en MIVOR.ai con derivación recomendada para ${specialty}.\nMotivo: ${reason}\n${alteredStr ? `Valores alterados: ${alteredStr}\n` : ''}Me gustaría consultar disponibilidad para una valoración.`);
+                        const msg = encodeURIComponent(`Hola, acabo de analizar un estudio en MIVOR.ai con recomendación para ${specialty}. Me gustaría consultar disponibilidad.`);
                         window.open(`https://wa.me/?text=${msg}`, '_blank');
                       }}
-                      className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                      className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
                     >
                       <MessageSquare size={16} />
                       <span>Consultar WhatsApp Especialista</span>
@@ -1016,33 +1503,26 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
               );
             })()}
 
-            {/* Preguntas Sugeridas para el Médico (Fila 2) */}
+            {/* Preguntas Sugeridas para el Médico */}
             {analysisResult.preguntas_medico?.length > 0 && (
-              <div className="bg-indigo-50/70 rounded-2xl p-5 border border-indigo-100 shadow-sm flex flex-col gap-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                      <HelpCircle size={18} />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-indigo-950 uppercase tracking-wider">Preguntas Sugeridas para su Médico</h3>
-                      <p className="text-[10px] text-indigo-700 font-medium">Recomendaciones para consultar en su próxima cita médica</p>
-                    </div>
-                  </div>
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-wider">
+                  <HelpCircle size={16} className="text-[#0055ff]" />
+                  <span>Preguntas recomendadas para tu médico</span>
                 </div>
 
-                <div className="flex flex-col gap-2 mt-1">
+                <div className="space-y-2">
                   {analysisResult.preguntas_medico.map((p, idx) => (
-                    <div key={idx} className="flex items-start gap-2.5 p-3 rounded-xl bg-white border border-indigo-100 shadow-xs">
-                      <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                    <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs font-bold text-black">
+                      <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
                         {idx + 1}
                       </span>
-                      <p className="text-xs text-slate-800 leading-relaxed font-medium">{p}</p>
+                      <p className="flex-1 leading-relaxed">{p}</p>
                     </div>
                   ))}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -1051,17 +1531,17 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
                       setCopiedQuestions(true);
                       setTimeout(() => setCopiedQuestions(false), 2500);
                     }}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-white hover:bg-slate-50 border border-indigo-200 active:scale-95 text-indigo-900 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+                    className="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-black font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     {copiedQuestions ? (
                       <>
-                        <Check size={14} className="text-emerald-600" />
+                        <Check size={15} className="text-emerald-600" />
                         <span className="text-emerald-700">¡Copiadas al portapapeles!</span>
                       </>
                     ) : (
                       <>
-                        <Copy size={14} />
-                        <span>Copiar Preguntas</span>
+                        <Copy size={15} />
+                        <span>Copiar preguntas</span>
                       </>
                     )}
                   </button>
@@ -1070,54 +1550,183 @@ const DocumentAnalyzer = ({ onBack, apiUrl, authHeaders, onAskFollowUp, onOpenDo
                     type="button"
                     onClick={() => {
                       const text = analysisResult.preguntas_medico.map((q, i) => `${i + 1}. ${q}`).join('\n');
-                      const msg = encodeURIComponent(`Hola doctor(a), tengo estas consultas sobre mi estudio (${analysisResult.filename}):\n\n${text}`);
+                      const msg = encodeURIComponent(`Hola doctor(a), tengo estas consultas sobre mi informe médico (${analysisResult.filename}):\n\n${text}`);
                       window.open(`https://wa.me/?text=${msg}`, '_blank');
                     }}
-                    className="w-full py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
-                    <Share2 size={14} />
-                    <span>WhatsApp Médico</span>
+                    <Share2 size={15} />
+                    <span>Compartir por WhatsApp</span>
                   </button>
                 </div>
               </div>
             )}
 
-            {/* CTA Buttons */}
-            <button
-              onClick={handleDownloadPdf}
-              disabled={isGeneratingPdf}
-              className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 disabled:opacity-50 cursor-pointer"
-            >
-              {isGeneratingPdf ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  <span>Generando Informe Clínico (PDF)...</span>
-                </>
-              ) : (
-                <>
-                  <FileDown size={20} />
-                  <span>Descargar Informe Clínico (PDF)</span>
-                </>
-              )}
-            </button>
+            {/* Botones Finales */}
+            <div className="space-y-3 pt-2">
+              <button
+                type="button"
+                onClick={() => onAskFollowUp?.(analysisResult.summary || analysisResult.filename, analysisResult.filename)}
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-98 transition-all cursor-pointer"
+              >
+                <MessageSquare size={18} />
+                <span>Preguntar dudas a la IA sobre este documento</span>
+              </button>
 
-            <button
-              onClick={() => onAskFollowUp(analysisResult.extracted_text, analysisResult.filename)}
-              className="w-full bg-brand-purple text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 shadow-glow hover:bg-brand-purple/90 transition-colors"
-            >
-              <MessageSquare size={20} /> {t("ask_more_about_document")}
-            </button>
-
-            <button
-              onClick={() => { setStep('upload'); setAnalysisResult(null); }}
-              className="w-full bg-white border border-gray-200 text-gray-700 font-semibold py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
-            >
-              <RotateCcw size={16} /> {t("analyze_another_document")}
-            </button>
+              <button
+                type="button"
+                onClick={() => { setStep('upload'); setAnalysisResult(null); }}
+                className="w-full py-3 px-6 rounded-2xl bg-white border border-slate-200 text-black font-bold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <RotateCcw size={15} />
+                <span>Analizar otro documento</span>
+              </button>
+            </div>
 
           </div>
         )}
+
+      </main>
+
+      {/* ========================================================================= */}
+      {/* 4. MODAL DE AYUDA Y ASISTENCIA RÁPIDA                                      */}
+      {/* ========================================================================= */}
+      {showHelpModal && (
+        <div 
+          onClick={() => setShowHelpModal(false)}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full p-6 border border-slate-200 shadow-2xl animate-in zoom-in-95 cursor-default space-y-4"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center">
+                  <HelpCircle size={20} className="stroke-[2.2]" />
+                </div>
+                <h3 className="font-black text-base text-black">Centro de Ayuda MIVOR.ai</h3>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)} 
+                className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-black"
+              >
+                <X size={18} className="stroke-[2.5]" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 font-medium leading-relaxed">
+              ¿Tienes dudas subiendo o interpretando tus análisis? Nuestro equipo clínico y de soporte técnico está disponible 24/7.
+            </p>
+
+            <div className="space-y-2.5">
+              <a 
+                href="https://wa.me/34600000000" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="flex items-center gap-3 p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/70 text-black font-bold text-xs hover:bg-emerald-100 transition-colors"
+              >
+                <MessageSquare size={18} className="text-emerald-700 stroke-[2.4]" />
+                <div>
+                  <p className="font-black text-black text-xs">WhatsApp de Soporte 24/7</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Respuesta inmediata</p>
+                </div>
+              </a>
+
+              <button 
+                onClick={() => { setShowHelpModal(false); safeNavigate('chat'); }}
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-blue-200 bg-blue-50/70 text-black font-bold text-xs hover:bg-blue-100 transition-colors text-left cursor-pointer"
+              >
+                <Sparkles size={18} className="text-[#0055ff] stroke-[2.4]" />
+                <div>
+                  <p className="font-black text-black text-xs">Consultar con la IA Médica</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Resuelve dudas sobre tus síntomas o estudios</p>
+                </div>
+              </button>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button 
+                onClick={() => setShowHelpModal(false)} 
+                className="bg-slate-100 hover:bg-slate-200 text-black font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 5. BARRA DE NAVEGACIÓN INFERIOR MÓVIL (RÉPLICA EXACTA IMAGEN 3)           */}
+      {/* ========================================================================= */}
+      <div className="block lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 pb-3 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <div className="max-w-md mx-auto grid grid-cols-5 items-center text-center">
+          
+          {/* 1. Inicio */}
+          <button 
+            type="button" 
+            onClick={() => safeNavigate('home')}
+            className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 cursor-pointer"
+          >
+            <Home size={20} className="text-black stroke-[2.2]" />
+            <span className="text-[10.5px] font-bold text-black">
+              Inicio
+            </span>
+          </button>
+
+          {/* 2. Mis consultas */}
+          <button 
+            type="button" 
+            onClick={() => safeNavigate('citas')}
+            className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 cursor-pointer"
+          >
+            <Calendar size={20} className="text-black stroke-[2.2]" />
+            <span className="text-[10.5px] font-bold text-black">
+              Mis consultas
+            </span>
+          </button>
+
+          {/* 3. Mis documentos (ACTIVO CON ICONO Y TEXTO AZUL OFICIAL) */}
+          <button 
+            type="button" 
+            onClick={() => setStep('upload')}
+            className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 cursor-pointer"
+          >
+            <FileText size={21} className="text-[#0055ff] stroke-[2.5]" />
+            <span className="text-[10.5px] font-black text-[#0055ff]">
+              Mis documentos
+            </span>
+            <span className="w-6 h-[2px] rounded-full bg-[#0055ff]" />
+          </button>
+
+          {/* 4. Mi salud */}
+          <button 
+            type="button" 
+            onClick={() => safeNavigate('history')}
+            className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 cursor-pointer"
+          >
+            <Heart size={20} className="text-black stroke-[2.2]" />
+            <span className="text-[10.5px] font-bold text-black">
+              Mi salud
+            </span>
+          </button>
+
+          {/* 5. Mi perfil */}
+          <button 
+            type="button" 
+            onClick={() => safeNavigate('more')}
+            className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 cursor-pointer"
+          >
+            <User size={20} className="text-black stroke-[2.2]" />
+            <span className="text-[10.5px] font-bold text-black">
+              Mi perfil
+            </span>
+          </button>
+
+        </div>
       </div>
+
     </div>
   );
 };
