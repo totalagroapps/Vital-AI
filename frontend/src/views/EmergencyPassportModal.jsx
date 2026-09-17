@@ -1,8 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   X, ShieldAlert, Droplet, Phone, AlertTriangle, 
   Heart, Pill, QrCode, Download, Share2, Copy, 
-  Check, ExternalLink, Smartphone, Printer, Sparkles, Loader2
+  Check, ExternalLink, Printer, Sparkles, Loader2, Info, ChevronRight, ChevronDown, Lightbulb
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
@@ -12,12 +12,13 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const [generatingWallpaper, setGeneratingWallpaper] = useState(false);
+  const [showMedicalDetails, setShowMedicalDetails] = useState(false);
 
-  // Validación de UUID del paciente para evitar enlaces rotos o malformados (Punto 12 Auditoría R3)
+  // Validación de UUID del paciente para evitar enlaces rotos o malformados
   const isUserIdValid = Boolean(patientProfile?.user_id && UUID_REGEX.test(patientProfile.user_id));
   const emergencyUrl = isUserIdValid 
     ? (patientProfile?.emergency_url || `${window.location.origin}/emergencia/${patientProfile.user_id}`)
-    : null;
+    : (patientProfile?.emergency_url || `${window.location.origin}/emergencia/${encodeURIComponent(patientProfile?.full_name || 'paciente')}`);
 
   // Fallback age calculation
   const age = useMemo(() => {
@@ -257,190 +258,128 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-[32px] shadow-2xl overflow-hidden text-slate-100 my-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-lg bg-white rounded-[32px] shadow-2xl overflow-hidden text-slate-900 my-6 border border-slate-200">
         
-        {/* Modal Header */}
-        <div className="bg-gradient-to-r from-red-600 to-rose-700 px-6 py-5 flex items-center justify-between shadow-lg">
+        {/* Modal Header: Red Emergency Banner matching Image 4 */}
+        <div className="bg-[#dc2626] px-5 py-4 flex items-center justify-between text-white shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-black text-xl shadow-inner">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-white font-black text-2xl shadow-inner">
               ✚
             </div>
             <div>
-              <h3 className="text-base font-black uppercase tracking-wider text-white">
-                Pasaporte QR & Chapa Militar
+              <h3 className="text-sm sm:text-base font-black uppercase tracking-wider text-white">
+                PASAPORTE QR & CHAPA MILITAR
               </h3>
-              <p className="text-xs text-white/80">Ficha médica táctica de emergencia</p>
+              <p className="text-xs text-white/90 font-medium">Ficha médica táctica de emergencia</p>
             </div>
           </div>
           
           <button 
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 text-white flex items-center justify-center transition-all"
+            className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 text-white flex items-center justify-center transition-all cursor-pointer"
             title="Cerrar"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+        <div className="p-4 sm:p-5 space-y-4 max-h-[82vh] overflow-y-auto bg-[#f8fafd]">
 
-          {/* Quick Notice */}
-          <div className="bg-blue-950/40 border border-blue-800/60 rounded-2xl p-4 flex items-start gap-3">
-            <Smartphone className="w-6 h-6 text-blue-400 shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-200 leading-relaxed">
-              <strong>Acceso sin desbloquear:</strong> Cualquier persona o paramédico con un celular puede escanear tu código QR para ver tu tipo de sangre, alergias y contacto sin necesidad de tu PIN o huella digital.
-            </p>
-          </div>
-
-          {/* Tactical Dog Tag Badge Card */}
-          <div className="bg-gradient-to-b from-slate-950 to-slate-900 rounded-3xl p-5 border-2 border-slate-700 shadow-xl relative">
-            
-            {/* Dog Tag Notch / Rivet */}
-            <div className="flex justify-center -mt-2 mb-3">
-              <div className="w-5 h-5 rounded-full bg-slate-900 border border-slate-600 shadow-inner flex items-center justify-center">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-800" />
+          {/* 1. Contacto Urgencias Card */}
+          <div className="bg-[#eaf8f0] border border-[#a7f3d0] rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-[#cbf3de] text-[#059669] flex items-center justify-center shrink-0">
+                <Phone size={20} className="stroke-[2.5]" />
               </div>
-            </div>
-
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  PACIENTE
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                  CONTACTO URGENCIAS
                 </span>
-                <h4 className="text-lg font-black text-white">
-                  {patientProfile?.full_name || 'Nombre no asignado'}
-                </h4>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {patientProfile?.date_of_birth || '--'} ({age} años) • {patientProfile?.gender || '--'}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <div className="bg-red-950/90 border-2 border-red-600 px-3.5 py-1 rounded-2xl text-center shadow-md">
-                  <span className="text-[9px] uppercase font-bold text-red-400 block">SANGRE</span>
-                  <span className="text-xl font-black text-white">{patientProfile?.blood_type || 'N/D'}</span>
-                </div>
-                <div className="bg-sky-950/90 border-2 border-sky-600 px-3 py-1 rounded-2xl text-center shadow-md">
-                  <span className="text-[9px] uppercase font-bold text-sky-400 block">DONANTE</span>
-                  <span className="text-xs font-black text-white mt-1 block">
-                    {patientProfile?.organ_donor === 'Sí' ? '❤️ SÍ' : (patientProfile?.organ_donor || 'N/D')}
-                  </span>
-                </div>
+                <span className="text-xs sm:text-sm font-black text-slate-900 truncate block">
+                  {patientProfile?.emergency_contact || 'Viviana Giraldo – 3185552217'}
+                </span>
               </div>
             </div>
-
-            {/* Critical Medical Notes Alert (if present) */}
-            {patientProfile?.medical_notes && (
-              <div className="bg-rose-950/60 border-2 border-rose-500/80 rounded-xl p-3 mb-3 shadow-md">
-                <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold mb-1">
-                  <ShieldAlert size={14} className="text-rose-500 animate-pulse" />
-                  <span>ALERTA MÉDICA CRÍTICA / IMPLANTES:</span>
-                </div>
-                <p className="text-xs text-rose-100 font-black">
-                  {patientProfile.medical_notes}
-                </p>
-              </div>
-            )}
-
-            {/* Critical Allergies Badge */}
-            <div className="bg-red-950/50 border border-red-700/60 rounded-xl p-3 mb-3">
-              <div className="flex items-center gap-1.5 text-red-400 text-xs font-bold mb-1">
-                <AlertTriangle size={14} />
-                <span>ALERGIAS CRÍTICAS:</span>
-              </div>
-              <p className="text-xs text-red-100 font-semibold">
-                {patientProfile?.allergies || 'Ninguna conocida'}
-              </p>
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="bg-slate-800/80 rounded-xl p-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Phone size={15} className="text-emerald-400" />
-                <div>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase block">Contacto Urgencias</span>
-                  <span className="text-xs font-bold text-white">{patientProfile?.emergency_contact || 'No especificado'}</span>
-                </div>
-              </div>
-              <span className="text-[10px] bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold px-2 py-0.5 rounded-lg">
-                Activo
-              </span>
-            </div>
+            <span className="bg-[#059669] text-white text-[11px] font-bold px-3 py-1 rounded-full shrink-0 shadow-xs">
+              Activo
+            </span>
           </div>
 
-          {/* QR Code Section */}
-          <div className="bg-slate-800/60 rounded-3xl p-5 border border-slate-700 flex flex-col items-center text-center">
-            <h4 className="text-sm font-bold text-slate-200 mb-1 flex items-center gap-2">
-              <QrCode size={18} className="text-brand-purple" />
-              Código QR de Emergencia Médico
-            </h4>
-            <p className="text-xs text-slate-400 mb-4 max-w-xs">
+          {/* 2. Código QR Section Card */}
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xs flex flex-col items-center text-center">
+            <div className="flex items-center gap-2 mb-1">
+              <QrCode size={18} className="text-purple-600" />
+              <h4 className="text-sm sm:text-base font-extrabold text-slate-900">
+                Código QR de Emergencia Médico
+              </h4>
+            </div>
+            <p className="text-xs text-slate-500 max-w-sm mb-4 leading-relaxed">
               Al escanear este código se abre directamente la ficha táctica pública en cualquier navegador.
             </p>
 
-            <div className="bg-white p-3 rounded-2xl shadow-xl mb-4">
-              {!isUserIdValid ? (
-                <div className="w-44 h-44 flex flex-col items-center justify-center text-slate-500 text-xs gap-2 p-2 text-center">
-                  <Loader2 size={32} className="animate-spin text-brand-purple" />
+            {/* QR Card container */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 mb-4 flex items-center justify-center">
+              {!isUserIdValid && !emergencyUrl ? (
+                <div className="w-48 h-48 flex flex-col items-center justify-center text-slate-400 text-xs gap-2 p-2">
+                  <Loader2 size={32} className="animate-spin text-purple-600" />
                   <span>Cargando identificador seguro...</span>
                 </div>
               ) : patientProfile?.qr_code_base64 ? (
                 <img 
                   src={`data:image/png;base64,${patientProfile.qr_code_base64}`} 
                   alt="QR Code Emergencia"
-                  className="w-44 h-44 rounded-xl"
+                  className="w-48 h-48 sm:w-52 sm:h-52 rounded-xl object-contain"
                 />
               ) : (
-                <div className="w-44 h-44 flex flex-col items-center justify-center text-slate-400 text-xs">
-                  <QrCode size={40} className="mb-2 text-slate-300" />
-                  <span>Sin código generado</span>
+                <div className="w-48 h-48 flex flex-col items-center justify-center text-slate-400 text-xs">
+                  <QrCode size={48} className="mb-2 text-slate-300" />
+                  <span>Generando código QR...</span>
                 </div>
               )}
             </div>
 
-            {/* Public URL with Copy button */}
-            <div className="w-full flex items-center gap-2 bg-slate-900 border border-slate-700 rounded-xl p-2 max-w-md">
-              <span className="text-xs text-slate-400 truncate flex-1 font-mono text-left px-2">
-                {emergencyUrl || "Generando enlace seguro..."}
+            {/* Truncated Link Bar with Copy & Open button */}
+            <div className="w-full bg-[#f1f5f9] border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+              <span className="text-xs font-mono text-slate-600 truncate text-left flex-1">
+                {emergencyUrl || "https://vitalai.up.railway.app/emergencia/..."}
               </span>
               <button
                 onClick={handleCopyLink}
                 disabled={!emergencyUrl}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
+                className="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer active:scale-95"
               >
-                {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-                <span>{copied ? "¡Listo!" : "Copiar"}</span>
+                {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                <span>{copied ? "Copiado" : "Copiar"}</span>
               </button>
               {emergencyUrl ? (
                 <a
                   href={emergencyUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 bg-brand-purple/20 text-purple-300 hover:bg-brand-purple/30 rounded-lg transition-all"
-                  title="Probar vista en nueva pestaña"
+                  className="p-1 text-slate-500 hover:text-slate-800 transition-colors shrink-0"
+                  title="Abrir en navegador"
                 >
                   <ExternalLink size={16} />
                 </a>
               ) : (
-                <span className="p-1.5 text-slate-600 cursor-not-allowed">
+                <span className="p-1 text-slate-400 cursor-not-allowed shrink-0">
                   <ExternalLink size={16} />
                 </span>
               )}
             </div>
           </div>
 
-          {/* Action Buttons: Wallpaper & PDF */}
-          <div className="space-y-3 pt-2">
-            
+          {/* 3. Action Buttons */}
+          <div className="space-y-2.5">
             {/* WhatsApp Direct Share Button */}
             <button
               onClick={handleShareWhatsApp}
               disabled={!emergencyUrl}
-              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 transition-all active:scale-95"
+              className="w-full py-3.5 px-4 bg-[#059669] hover:bg-[#047857] active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-2xl flex items-center justify-center gap-2.5 shadow-xs transition-all cursor-pointer disabled:opacity-50"
             >
-              <Share2 size={16} />
+              <Share2 size={18} />
               <span>Compartir Ficha de Rescate por WhatsApp</span>
             </button>
 
@@ -448,7 +387,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
             <button
               onClick={handleDownloadLockscreenWallpaper}
               disabled={generatingWallpaper}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-600 text-white font-bold text-sm rounded-2xl shadow-xl shadow-red-950/60 flex items-center justify-center gap-2.5 transition-all active:scale-95 disabled:opacity-50"
+              className="w-full py-3.5 px-4 bg-[#dc2626] hover:bg-[#b91c1c] active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-xs flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
             >
               <Download size={18} />
               <span>
@@ -457,30 +396,86 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
                   : "Descargar Tarjeta para Pantalla de Bloqueo"}
               </span>
             </button>
-            <p className="text-[11px] text-center text-slate-400">
-              💡 Pon esta imagen como fondo de pantalla de bloqueo en tu móvil para que los médicos la lean sin desbloquear el teléfono.
+          </div>
+
+          {/* 4. "Más información médica" Accordion */}
+          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <button
+              onClick={() => setShowMedicalDetails(!showMedicalDetails)}
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                  <Info size={16} />
+                </div>
+                <span className="text-xs sm:text-sm font-black text-slate-900">
+                  Más información médica
+                </span>
+              </div>
+              {showMedicalDetails ? (
+                <ChevronDown size={18} className="text-slate-400" />
+              ) : (
+                <ChevronRight size={18} className="text-slate-400" />
+              )}
+            </button>
+
+            {showMedicalDetails && (
+              <div className="p-4 pt-0 border-t border-slate-100 space-y-3 bg-slate-50/50">
+                <div className="grid grid-cols-2 gap-2 pt-3">
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Sangre</span>
+                    <span className="text-xs font-black text-red-600">{patientProfile?.blood_type || 'N/D'}</span>
+                  </div>
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase block">Donante</span>
+                    <span className="text-xs font-black text-slate-800">{patientProfile?.organ_donor || 'No especificado'}</span>
+                  </div>
+                </div>
+
+                {patientProfile?.allergies && (
+                  <div className="bg-orange-50 border border-orange-200 p-2.5 rounded-xl">
+                    <span className="text-[10px] font-bold text-orange-700 uppercase block">Alergias</span>
+                    <span className="text-xs font-bold text-orange-950">{patientProfile.allergies}</span>
+                  </div>
+                )}
+
+                {patientProfile?.medical_notes && (
+                  <div className="bg-red-50 border border-red-200 p-2.5 rounded-xl">
+                    <span className="text-[10px] font-bold text-red-700 uppercase block">Alerta Médica</span>
+                    <span className="text-xs font-bold text-red-950">{patientProfile.medical_notes}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* 5. Tip Banner */}
+          <div className="bg-[#eff6ff] border border-[#dbeafe] rounded-2xl p-4 flex items-start gap-3 text-left">
+            <span className="text-lg shrink-0 mt-0.5">💡</span>
+            <p className="text-xs font-medium text-slate-600 leading-relaxed">
+              Pon esta imagen como fondo de pantalla de bloqueo en tu móvil para que los médicos la lean sin desbloquear el teléfono.
             </p>
+          </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <button
-                onClick={() => {
-                  onExportPDF?.();
-                  onClose?.();
-                }}
-                className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all"
-              >
-                <Printer size={15} />
-                <span>Imprimir Ficha PDF</span>
-              </button>
+          {/* 6. Bottom Action Buttons: Imprimir PDF & Cerrar */}
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <button
+              onClick={() => {
+                onExportPDF?.();
+                onClose?.();
+              }}
+              className="py-3 px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer active:scale-95"
+            >
+              <Printer size={15} />
+              <span>Imprimir Ficha PDF</span>
+            </button>
 
-              <button
-                onClick={onClose}
-                className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 font-bold text-xs rounded-xl transition-all"
-              >
-                Cerrar
-              </button>
-            </div>
-
+            <button
+              onClick={onClose}
+              className="py-3 px-4 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-extrabold text-xs rounded-xl flex items-center justify-center transition-all shadow-xs cursor-pointer active:scale-95"
+            >
+              Cerrar
+            </button>
           </div>
 
         </div>

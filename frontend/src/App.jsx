@@ -1322,6 +1322,8 @@ ${text}`], {type: 'text/plain'});
           sessions={sessions}
           onBack={() => navigate('/paciente')}
           onLogout={handleLogout}
+          onNavigate={handleNavigate}
+          username={username}
         />
         {GlobalBottomNav}
       </>
