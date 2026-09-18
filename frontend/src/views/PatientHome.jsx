@@ -35,7 +35,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
+const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments }) => {
   const { t } = useLanguage();
   const [showDrawer, setShowDrawer] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
@@ -43,6 +43,41 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+
+  const homeFileInputRef = useRef(null);
+
+  const handleHomeFilesSelected = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      if (onAddAttachments) {
+        onAddAttachments(e.target.files);
+      }
+      onNavigate('general_chat');
+      e.target.value = '';
+    }
+  };
+
+  useEffect(() => {
+    const handlePaste = (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const pastedFiles = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file') {
+          const file = items[i].getAsFile();
+          if (file) pastedFiles.push(file);
+        }
+      }
+      if (pastedFiles.length > 0) {
+        e.preventDefault();
+        if (onAddAttachments) {
+          onAddAttachments(pastedFiles);
+        }
+        onNavigate('general_chat');
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [onAddAttachments, onNavigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -149,15 +184,31 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
             </div>
           </section>
 
-          {/* 3. Buscador / Pregunta a MIVOR.ai con Micrófono */}
+          {/* 3. Buscador / Pregunta a MIVOR.ai con Micrófono y Clip Directo */}
           <div className="shrink-0 mobile-search">
+            <input
+              type="file"
+              ref={homeFileInputRef}
+              onChange={handleHomeFilesSelected}
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+              className="hidden"
+            />
             <div 
               onClick={() => onNavigate('general_chat')}
               className="w-full bg-white border-2 border-[#8ec3f8] rounded-full py-1 sm:py-1.5 pl-3.5 pr-1.5 flex items-center gap-2 shadow-2xs hover:border-[#0055ff] active:scale-[0.99] transition-all cursor-pointer group"
             >
-              <div className="text-black p-0.5">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  homeFileInputRef.current?.click();
+                }}
+                className="text-black p-0.5 hover:text-[#0055ff] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+                title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+              >
                 <Paperclip size={18} className="stroke-[2.5] -rotate-45" />
-              </div>
+              </button>
               <div className="h-3.5 w-[1.5px] bg-slate-300" />
               <span className="flex-1 text-xs sm:text-[13px] text-black font-bold select-none truncate">
                 Pregunta a MIVOR.ai...

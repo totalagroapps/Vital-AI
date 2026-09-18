@@ -1465,6 +1465,7 @@ ${text}`], {type: 'text/plain'});
           onNavigate={handleNavigate} 
           userProfile={patientProfile}
           username={username}
+          onAddAttachments={addAttachments}
         />
         {GlobalBottomNav}
       </>
@@ -1480,6 +1481,7 @@ ${text}`], {type: 'text/plain'});
           onNavigate={handleNavigate} 
           userProfile={patientProfile}
           username={username}
+          onAddAttachments={addAttachments}
         />
         <MedicalSearchModal isOpen={true} onClose={() => navigate('/paciente')} token={token} apiUrl={API_URL} userProfile={patientProfile} />
         {GlobalBottomNav}

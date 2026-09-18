@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Calendar, Sparkles, BookOpen, Search, Mic, ArrowRight, 
-  Bell, ChevronDown, LogOut, ShieldCheck 
+  Bell, ChevronDown, LogOut, ShieldCheck, Paperclip 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -12,6 +12,14 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
   const [isListening, setIsListening] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const recognitionRef = useRef(null);
+  const doctorDesktopFileInputRef = useRef(null);
+
+  const handleDoctorDesktopFileSelected = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      onNavigate('patients');
+      e.target.value = '';
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -349,7 +357,23 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
           </div>
 
           <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 border border-gray-200/80 rounded-2xl p-1.5 focus-within:border-brand-purple/50 focus-within:ring-2 focus-within:ring-brand-purple/10 transition-all">
-            <div className="pl-3.5 pr-2 text-gray-400">
+            <input
+              type="file"
+              ref={doctorDesktopFileInputRef}
+              onChange={handleDoctorDesktopFileSelected}
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => doctorDesktopFileInputRef.current?.click()}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-brand-purple hover:bg-white transition-all ml-1 shrink-0 cursor-pointer shadow-2xs"
+              title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+            >
+              <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
+            </button>
+            <div className="pl-2 pr-2 text-gray-400">
               <Search size={18} />
             </div>
             <input 

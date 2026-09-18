@@ -16,7 +16,7 @@ import {
   ArrowLeft, Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, 
   ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, 
   ShieldCheck, Sparkles, Mic, Pill, AlertTriangle, Stethoscope, CheckCircle2, 
-  MessageSquare, ExternalLink 
+  MessageSquare, ExternalLink, Paperclip, X, Image as ImageIcon, Trash2 
 } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
@@ -38,6 +38,91 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const [isCopilotListening, setIsCopilotListening] = useState(false);
   const copilotEndRef = useRef(null);
   const copilotSpeechRef = useRef(null);
+
+  // Copilot Attachments State (Unified Clip System)
+  const [copilotAttachments, setCopilotAttachments] = useState([]);
+  const copilotFileInputRef = useRef(null);
+  const doctorStudiesInputRef = useRef(null);
+  const [isUploadingStudies, setIsUploadingStudies] = useState(false);
+
+  const addCopilotAttachments = (newFiles) => {
+    if (!newFiles || newFiles.length === 0) return;
+    const validFiles = Array.from(newFiles).map(file => ({
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      file,
+      name: file.name,
+      type: file.type || 'application/octet-stream',
+      size: file.size,
+      previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+    }));
+    setCopilotAttachments(prev => [...prev, ...validFiles]);
+  };
+
+  const removeCopilotAttachment = (id) => {
+    setCopilotAttachments(prev => {
+      const item = prev.find(a => a.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter(a => a.id !== id);
+    });
+  };
+
+  const clearCopilotAttachments = () => {
+    copilotAttachments.forEach(a => {
+      if (a.previewUrl) URL.revokeObjectURL(a.previewUrl);
+    });
+    setCopilotAttachments([]);
+  };
+
+  const handleCopilotFilesChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      addCopilotAttachments(e.target.files);
+      e.target.value = '';
+    }
+  };
+
+  const handleCopilotPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const pastedFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) pastedFiles.push(file);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      addCopilotAttachments(pastedFiles);
+    }
+  };
+
+  const handleDoctorDirectUpload = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !selectedPatient) return;
+    setIsUploadingStudies(true);
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach(f => formData.append('files', f));
+      formData.append('patient_id', selectedPatient.user_id);
+      formData.append('language', language);
+      const res = await fetch(`${apiUrl}/api/documents/upload`, {
+        method: 'POST',
+        headers: { Authorization: authHeaders.Authorization },
+        body: formData
+      });
+      if (!res.ok) {
+        throw new Error('Error al subir los estudios médicos');
+      }
+      await fetchPatientDetail(selectedPatient.user_id);
+    } catch (err) {
+      console.error(err);
+      alert('Error al subir los estudios: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setIsUploadingStudies(false);
+      e.target.value = '';
+    }
+  };
 
   const toggleCopilotListening = () => {
     if (isCopilotListening) {
@@ -273,18 +358,63 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
   const handleCopilotSend = async (e) => {
     e.preventDefault();
-    if (!copilotInput.trim() || isCopilotThinking || !selectedPatient) return;
+    if ((!copilotInput.trim() && copilotAttachments.length === 0) || isCopilotThinking || !selectedPatient) return;
 
-    const userText = copilotInput.trim();
-    setCopilotMessages(prev => [...prev, { role: 'user', content: userText }]);
+    const userText = copilotInput.trim() || (copilotAttachments.length > 0 ? "Por favor analiza los documentos o estudios adjuntos de este paciente." : "");
+    const currentAttachmentsSnapshot = [...copilotAttachments];
+
+    setCopilotMessages(prev => [...prev, { 
+      role: 'user', 
+      content: userText, 
+      attachments: currentAttachmentsSnapshot 
+    }]);
     setCopilotInput('');
+    clearCopilotAttachments();
     setIsCopilotThinking(true);
+
+    let enrichedQuery = userText;
+
+    // If there were attachments, upload them to /api/documents/upload for joint OCR and clinical insights
+    if (currentAttachmentsSnapshot.length > 0) {
+      try {
+        const formData = new FormData();
+        currentAttachmentsSnapshot.forEach(att => formData.append('files', att.file));
+        formData.append('patient_id', selectedPatient.user_id);
+        formData.append('language', language);
+
+        const uploadRes = await fetch(`${apiUrl}/api/documents/upload`, {
+          method: 'POST',
+          headers: { Authorization: authHeaders.Authorization },
+          body: formData
+        });
+
+        if (uploadRes.ok) {
+          const docData = await uploadRes.json();
+          let ocrContext = `\n\n[DOCUMENTO(S) ADJUNTO(S) ANALIZADO(S) POR IA: ${docData.filename || 'Estudio clínico'}]`;
+          if (docData.summary) ocrContext += `\nResumen Clínico: ${docData.summary}`;
+          if (docData.hallazgos && docData.hallazgos.length > 0) ocrContext += `\nHallazgos: ${docData.hallazgos.join('; ')}`;
+          if (docData.diagnosticos && docData.diagnosticos.length > 0) ocrContext += `\nDiagnósticos Sugeridos: ${docData.diagnosticos.join('; ')}`;
+          if (docData.biomarcadores && docData.biomarcadores.length > 0) {
+            ocrContext += `\nBiomarcadores: ${docData.biomarcadores.map(b => `${b.parametro}: ${b.valor} ${b.unidad || ''} (${b.estado || ''})`).join(', ')}`;
+          }
+          if (docData.extracted_text) {
+            ocrContext += `\nTexto OCR:\n${docData.extracted_text.slice(0, 1500)}`;
+          }
+          enrichedQuery += ocrContext;
+
+          // Refresh patient details so the new document appears in the middle panel
+          fetchPatientDetail(selectedPatient.user_id);
+        }
+      } catch (uploadErr) {
+        console.error("Error al subir adjuntos del copiloto:", uploadErr);
+      }
+    }
 
     try {
       const res = await fetch(`${apiUrl}/api/doctor/ask`, {
         method: 'POST',
         headers: { ...authHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: userText, patient_id: selectedPatient.user_id, text_model: 'llama3.1', language: language })
+        body: JSON.stringify({ query: enrichedQuery, patient_id: selectedPatient.user_id, text_model: 'llama3.1', language: language })
       });
 
       if (!res.ok) throw new Error("Error fetching copilot");
@@ -747,10 +877,32 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
                 {/* Documents with AI Insights (Fila 23) */}
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider flex items-center gap-2">
-                    <FolderOpen className="w-4 h-4 text-brand-teal" />
-                    Estudios, Analíticas y Documentos Clínicos con IA
-                  </h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                      <FolderOpen className="w-4 h-4 text-brand-teal" />
+                      Estudios, Analíticas y Documentos Clínicos con IA
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        ref={doctorStudiesInputRef}
+                        onChange={handleDoctorDirectUpload}
+                        multiple
+                        accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => doctorStudiesInputRef.current?.click()}
+                        disabled={isUploadingStudies || !selectedPatient}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-teal-50 text-brand-teal hover:bg-brand-teal hover:text-white border border-teal-200/80 active:scale-95 transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
+                        title="Adjuntar cualquier archivo clínico (imágenes, PDF o analíticas)"
+                      >
+                        {isUploadingStudies ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paperclip className="w-3.5 h-3.5 -rotate-45" />}
+                        <span>{isUploadingStudies ? 'Procesando con IA...' : 'Adjuntar Estudios'}</span>
+                      </button>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {(patientDocuments || []).length === 0 ? (
                       <div className="col-span-full bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
@@ -885,6 +1037,23 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   ? 'bg-brand-teal text-white rounded-br-sm' 
                   : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm'
                 }`}>
+                  {/* Attachments preview inside user message bubble */}
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="mb-2.5 flex flex-wrap gap-1.5">
+                      {msg.attachments.map((att, attIdx) => (
+                        <div key={att.id || attIdx} className="rounded-xl overflow-hidden border border-white/25 bg-black/15 p-1 flex items-center gap-1.5 text-xs text-white max-w-[200px]">
+                          {att.previewUrl ? (
+                            <img src={att.previewUrl} alt={att.name} className="w-8 h-8 object-cover rounded-lg shrink-0" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                              <FileText className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                          <span className="truncate text-[10px] font-medium pr-1">{att.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className={`prose prose-sm max-w-none prose-p:leading-relaxed ${msg.role === 'user' ? 'text-white' : 'text-gray-700'}`}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{String(msg.content || '')}</ReactMarkdown>
                   </div>
@@ -903,14 +1072,71 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           <div ref={copilotEndRef} />
         </div>
 
+        {/* Attachment preview strip */}
+        {copilotAttachments.length > 0 && (
+          <div className="px-4 pt-3 pb-1 bg-white border-t border-gray-100 flex items-center gap-2 overflow-x-auto">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {copilotAttachments.map((att) => (
+                <div key={att.id} className="relative group shrink-0 flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl p-1 pr-2">
+                  {att.previewUrl ? (
+                    <img src={att.previewUrl} alt={att.name} className="w-8 h-8 object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-teal-50 text-brand-teal flex items-center justify-center">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                  )}
+                  <span className="text-[11px] font-medium text-gray-700 max-w-[100px] truncate">{att.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeCopilotAttachment(att.id)}
+                    className="w-4 h-4 rounded-full bg-gray-300 hover:bg-red-500 text-white flex items-center justify-center transition-colors ml-0.5 cursor-pointer"
+                    title="Descartar adjunto"
+                  >
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {copilotAttachments.length > 1 && (
+              <button
+                type="button"
+                onClick={clearCopilotAttachments}
+                className="text-[11px] font-bold text-red-600 hover:text-red-700 whitespace-nowrap pl-1 cursor-pointer"
+              >
+                Eliminar todos
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="p-4 bg-white border-t border-gray-100 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-          <form onSubmit={handleCopilotSend} className="relative flex items-end">
+          <form onSubmit={handleCopilotSend} onPaste={handleCopilotPaste} className="relative flex items-end">
+            <input
+              type="file"
+              ref={copilotFileInputRef}
+              onChange={handleCopilotFilesChange}
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+              className="hidden"
+            />
+            {/* Paperclip Button - Direct native file selector for ANY clinical file */}
+            <button
+              type="button"
+              onClick={() => copilotFileInputRef.current?.click()}
+              disabled={!selectedPatient || isCopilotThinking}
+              className="absolute left-2.5 bottom-2.5 w-7.5 h-7.5 flex items-center justify-center rounded-xl bg-gray-200 text-gray-700 hover:bg-brand-teal hover:text-white transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
+              title="Adjuntar cualquier archivo clínico (PDF o imagen)"
+            >
+              <Paperclip className="w-4 h-4 -rotate-45 stroke-[2.2]" />
+            </button>
+
             <textarea
               value={copilotInput}
               onChange={(e) => setCopilotInput(e.target.value)}
+              onPaste={handleCopilotPaste}
               disabled={!selectedPatient || isCopilotThinking}
               placeholder={t('ask_about_history')}
-              className="w-full bg-gray-100 border-none rounded-2xl py-3 pl-4 pr-20 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-teal disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
+              className="w-full bg-gray-100 border-none rounded-2xl py-3 pl-12 pr-20 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-brand-teal disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
               rows="1"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -929,8 +1155,8 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             </button>
             <button
               type="submit"
-              disabled={!copilotInput.trim() || !selectedPatient || isCopilotThinking}
-              className="absolute right-2 bottom-2 w-8 h-8 bg-brand-teal flex items-center justify-center rounded-xl text-white disabled:opacity-50 transition-transform active:scale-95 shadow-md hover:bg-teal-600"
+              disabled={(!copilotInput.trim() && copilotAttachments.length === 0) || !selectedPatient || isCopilotThinking}
+              className="absolute right-2 bottom-2 w-8 h-8 bg-brand-teal flex items-center justify-center rounded-xl text-white disabled:opacity-50 transition-transform active:scale-95 shadow-md hover:bg-teal-600 cursor-pointer"
             >
               <Send className="w-3.5 h-3.5 ml-0.5" />
             </button>

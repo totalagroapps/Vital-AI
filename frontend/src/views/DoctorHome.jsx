@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck, Paperclip } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -10,6 +10,14 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
+  const doctorHomeFileInputRef = useRef(null);
+
+  const handleDoctorHomeFileSelected = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      onNavigate('patients');
+      e.target.value = '';
+    }
+  };
 
   const toggleListening = () => {
     if (isListening) {
@@ -242,7 +250,23 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
           <p className="text-xs text-gray-400 mb-4 relative z-10">{t("search_patient_or_ask_vitalai")}</p>
           
           <form onSubmit={handleSearchSubmit} className="relative z-10 flex items-center bg-brand-dark border border-white/10 rounded-2xl p-1 shadow-inner">
-            <button type="submit" className="pl-3 pr-2 text-gray-400 hover:text-white transition-colors" title="Buscar">
+            <input
+              type="file"
+              ref={doctorHomeFileInputRef}
+              onChange={handleDoctorHomeFileSelected}
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => doctorHomeFileInputRef.current?.click()}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors ml-1 shrink-0"
+              title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+            >
+              <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
+            </button>
+            <button type="submit" className="pl-2 pr-2 text-gray-400 hover:text-white transition-colors" title="Buscar">
               <Search size={18} />
             </button>
             <input 

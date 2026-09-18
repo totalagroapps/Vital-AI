@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
   Loader2, 
@@ -10,7 +10,9 @@ import {
   Layers, 
   ChevronDown, 
   ChevronUp, 
-  CheckCircle2 
+  CheckCircle2,
+  Paperclip,
+  FileText 
 } from 'lucide-react';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
@@ -34,6 +36,72 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   const [error, setError] = useState(null);
   const [selectedSource, setSelectedSource] = useState('all');
   const [expandedCards, setExpandedCards] = useState({});
+
+  const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
+  const [attachedDocName, setAttachedDocName] = useState('');
+  const searchFileInputRef = useRef(null);
+
+  const processSearchFiles = async (files) => {
+    if (!files || files.length === 0) return;
+    setIsAnalyzingDoc(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach(f => formData.append('files', f));
+      formData.append('language', language);
+      const res = await fetch(`${apiUrl}/api/documents/upload`, {
+        method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: formData
+      });
+      if (!res.ok) throw new Error('Error al procesar el documento para búsqueda');
+      const data = await res.json();
+      setAttachedDocName(data.filename || 'Documento adjunto');
+      let searchTerms = '';
+      if (data.diagnosticos && data.diagnosticos.length > 0) {
+        searchTerms = data.diagnosticos.slice(0, 3).join(' ');
+      } else if (data.hallazgos && data.hallazgos.length > 0) {
+        searchTerms = data.hallazgos.slice(0, 2).join(' ');
+      } else if (data.summary) {
+        searchTerms = data.summary.split('.')[0];
+      }
+      if (searchTerms) {
+        setQuery(searchTerms);
+        fetchResults(searchTerms);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('No se pudo extraer términos clínicos del documento.');
+    } finally {
+      setIsAnalyzingDoc(false);
+      if (searchFileInputRef.current) searchFileInputRef.current.value = '';
+    }
+  };
+
+  const handleSearchFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processSearchFiles(e.target.files);
+    }
+  };
+
+  const handleSearchPaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const pastedFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) pastedFiles.push(file);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      processSearchFiles(pastedFiles);
+    }
+  };
 
   // Cierre con Escape y scroll lock (Punto 17 Auditoría R3)
   useEffect(() => {
@@ -213,22 +281,40 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
         <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50/50 custom-scrollbar space-y-4">
           
           {/* Search Box */}
-          <form onSubmit={handleSearch} className="relative w-full group">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-500 group-focus-within:text-brand transition-colors" />
+          <form onSubmit={handleSearch} onPaste={handleSearchPaste} className="relative w-full group">
+            <input
+              type="file"
+              ref={searchFileInputRef}
+              onChange={handleSearchFileChange}
+              multiple
+              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf"
+              className="hidden"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center gap-1.5 z-10">
+              <button
+                type="button"
+                onClick={() => searchFileInputRef.current?.click()}
+                disabled={isAnalyzingDoc || loading}
+                className="p-1 rounded-lg text-slate-500 hover:text-brand hover:bg-slate-100 transition-all cursor-pointer"
+                title="Adjuntar informe o imagen para buscar estudios automáticamente"
+              >
+                {isAnalyzingDoc ? <Loader2 size={18} className="animate-spin text-brand" /> : <Paperclip size={18} className="-rotate-45 stroke-[2.2]" />}
+              </button>
+              <Search className="h-4 w-4 text-slate-400 group-focus-within:text-brand transition-colors pointer-events-none" />
             </div>
             <input
               type="text"
+              onPaste={handleSearchPaste}
               style={{ color: "#0f172a", backgroundColor: "#ffffff" }}
-              className="block w-full pl-12 pr-36 py-3.5 bg-white border-2 border-slate-300 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base font-semibold"
-              placeholder={t('search_studies_placeholder') || 'Buscar por enfermedad, tratamiento o patología (ej: Cáncer, Diabetes, Inmunoterapia)...'}
+              className="block w-full pl-20 pr-36 py-3.5 bg-white border-2 border-slate-300 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base font-semibold"
+              placeholder={isAnalyzingDoc ? 'Analizando documento con IA para buscar...' : (t('search_studies_placeholder') || 'Buscar por enfermedad o adjuntar informe con el clip...')}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
             {query && (
               <button
                 type="button"
-                onClick={() => setQuery('')}
+                onClick={() => { setQuery(''); setAttachedDocName(''); }}
                 className="absolute inset-y-0 right-28 pr-2 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
                 aria-label="Limpiar búsqueda"
               >
@@ -237,12 +323,26 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             )}
             <button
               type="submit"
-              disabled={loading || !query.trim()}
+              disabled={loading || isAnalyzingDoc || !query.trim()}
               className="absolute inset-y-1.5 right-1.5 bg-brand hover:opacity-90 disabled:bg-slate-100 disabled:text-slate-400 text-white font-bold rounded-xl px-4 md:px-6 transition-all shadow-sm flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed text-xs md:text-sm"
             >
-              {loading ? <Loader2 className="animate-spin" size={16} /> : (t('search_action') || 'Buscar')}
+              {(loading || isAnalyzingDoc) ? <Loader2 className="animate-spin" size={16} /> : (t('search_action') || 'Buscar')}
             </button>
           </form>
+
+          {attachedDocName && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700 font-medium">
+              <FileText size={14} className="shrink-0" />
+              <span className="truncate">Analizado para búsqueda: <strong>{attachedDocName}</strong></span>
+              <button 
+                type="button" 
+                onClick={() => setAttachedDocName('')} 
+                className="ml-auto text-blue-400 hover:text-blue-700 cursor-pointer"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          )}
 
           {/* Quick Discovery Pills */}
           <div className="space-y-1.5">

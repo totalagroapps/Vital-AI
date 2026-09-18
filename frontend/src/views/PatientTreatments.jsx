@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2 } from 'lucide-react';
-import { useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
@@ -40,14 +39,13 @@ export default function PatientTreatments({
   };
 
   
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const processFiles = async (files) => {
+    if (!files || files.length === 0) return;
     setIsExtracting(true);
     setMedQueue([]);
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      Array.from(files).forEach(f => formData.append('files', f));
       const res = await fetch(`${apiUrl}/api/documents/extract_medication`, {
         method: 'POST',
         headers: {
@@ -82,6 +80,29 @@ export default function PatientTreatments({
     }
     setIsExtracting(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleFileUpload = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+    }
+  };
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const pastedFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) pastedFiles.push(file);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      processFiles(pastedFiles);
+    }
   };
 
   const handleToggleLog = async (med) => {
@@ -278,7 +299,7 @@ export default function PatientTreatments({
 
         {/* Add Form */}
         {isAdding && (
-          <form onSubmit={handleAddMedication} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
+          <form onSubmit={handleAddMedication} onPaste={handlePaste} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
             <h3 className="font-bold text-gray-900 mb-4">
               {t("new_medication")}
               {medQueue.length > 0 && <span className="ml-2 text-xs font-normal text-teal-800 bg-teal-100/80 px-2 py-1 rounded-lg">+{medQueue.length} pendientes</span>}
@@ -286,16 +307,26 @@ export default function PatientTreatments({
             
             <div className="mb-6 bg-teal-50 border border-teal-200/60 rounded-2xl p-4 text-center">
               <p className="text-xs text-teal-800 mb-3 font-semibold">{t("have_prescription")}</p>
-              <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" />
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileUpload} 
+                multiple
+                className="hidden" 
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf" 
+              />
               <button 
                 type="button" 
                 onClick={() => fileInputRef.current?.click()} 
                 disabled={isExtracting}
-                className="w-full bg-teal-700 hover:bg-teal-800 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="w-full bg-teal-700 hover:bg-teal-800 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
               >
-                {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
-                {isExtracting ? t("analyzing_with_ai") : t("extract_from_prescription")}
+                {isExtracting ? <Loader2 size={16} className="animate-spin" /> : <Paperclip size={16} className="-rotate-45 stroke-[2.2]" />}
+                {isExtracting ? t("analyzing_with_ai") : "Adjuntar o pegar (Ctrl+V) receta(s)"}
               </button>
+              <p className="text-[10px] text-teal-600/90 mt-1.5 font-medium">
+                Soporta varias imágenes o PDFs a la vez y pegado directo desde portapapeles
+              </p>
             </div>
             
             <div className="space-y-4">
