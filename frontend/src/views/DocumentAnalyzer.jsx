@@ -22,6 +22,7 @@ import {
 import { Bar } from 'react-chartjs-2';
 import jsPDF from 'jspdf';
 import { useLanguage } from '../contexts/LanguageContext';
+import PatientTopNav from '../components/PatientTopNav';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -259,7 +260,8 @@ const DocumentAnalyzer = ({
   onOpenDoctorDirectory,
   onNavigate,
   userProfile,
-  username
+  username,
+  onLogout
 }) => {
   const { t, language } = useLanguage();
   const fileInputRef = useRef(null);
@@ -610,123 +612,17 @@ const DocumentAnalyzer = ({
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-20 lg:pb-12 select-none">
 
       {/* ========================================================================= */}
-      {/* 1. TOP NAVBAR SUPERIOR (EXCLUSIVA DESKTOP - RÉPLICA EXACTA IMAGEN 2)      */}
+      {/* 1. TOP NAVBAR SUPERIOR UNIFICADO (DESKTOP)                                */}
       {/* ========================================================================= */}
-      <nav className="hidden lg:block w-full bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
-        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
-          
-          {/* Logo Marca */}
-          <div 
-            onClick={() => safeNavigate('home')} 
-            className="flex items-center cursor-pointer select-none"
-          >
-            <img 
-              src="/assets/mivor-logo.png" 
-              alt="MIVOR.ai" 
-              className="h-8 w-auto object-contain" 
-              onError={(e) => { e.target.src = '/logo.png'; }}
-            />
-          </div>
-
-          {/* Enlaces Centrales con Iconos Oficiales */}
-          <div className="flex items-center gap-1 xl:gap-2">
-            
-            {/* Inicio */}
-            <button
-              type="button"
-              onClick={() => safeNavigate('home')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
-            >
-              <Home size={18} className="stroke-[2.2]" />
-              <span>Inicio</span>
-            </button>
-
-            {/* Mis consultas */}
-            <button
-              type="button"
-              onClick={() => safeNavigate('citas')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
-            >
-              <Calendar size={18} className="stroke-[2.2]" />
-              <span>Mis consultas</span>
-            </button>
-
-            {/* Mis documentos (Activo con pestaña azul oficial) */}
-            <button
-              type="button"
-              onClick={() => setStep('upload')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-extrabold text-[#0055ff] bg-blue-50/80 border border-blue-100 shadow-2xs transition-all cursor-pointer"
-            >
-              <FileText size={18} className="stroke-[2.4]" />
-              <span>Mis documentos</span>
-            </button>
-
-            {/* Mi salud */}
-            <button
-              type="button"
-              onClick={() => safeNavigate('history')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
-            >
-              <Heart size={18} className="stroke-[2.2]" />
-              <span>Mi salud</span>
-            </button>
-
-            {/* Mi perfil */}
-            <button
-              type="button"
-              onClick={() => safeNavigate('more')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer"
-            >
-              <User size={18} className="stroke-[2.2]" />
-              <span>Mi perfil</span>
-            </button>
-
-          </div>
-
-          {/* Controles Derecha: Ayuda + Notificaciones + Perfil Usuario */}
-          <div className="flex items-center gap-4">
-            
-            {/* Botón ¿Necesitas ayuda? */}
-            <button
-              type="button"
-              onClick={() => setShowHelpModal(true)}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#0055ff] transition-colors cursor-pointer"
-            >
-              <HelpCircle size={17} className="stroke-[2.2]" />
-              <span>¿Necesitas ayuda?</span>
-            </button>
-
-            {/* Campana de Notificaciones con punto rojo */}
-            <button
-              type="button"
-              onClick={() => setShowHelpModal(true)}
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 active:scale-95 transition-all relative cursor-pointer shadow-2xs"
-            >
-              <Bell size={18} className="stroke-[2.2]" />
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-            </button>
-
-            {/* Avatar Paciente con Iniciales Púrpura (MP María Pérez) */}
-            <div 
-              onClick={() => safeNavigate('more')}
-              className="flex items-center gap-2.5 pl-2 cursor-pointer group"
-            >
-              <div className="w-10 h-10 rounded-full bg-[#8b5cf6] text-white font-extrabold text-xs flex items-center justify-center shadow-xs overflow-hidden border-2 border-white ring-1 ring-purple-200">
-                {userProfile?.photo_url ? (
-                  <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
-                ) : (
-                  <span>{patientInitials}</span>
-                )}
-              </div>
-              <div className="flex items-center gap-1 text-xs font-bold text-slate-800 group-hover:text-[#0055ff] transition-colors">
-                <span>{userProfile?.full_name || username || 'María Pérez'}</span>
-                <ChevronDown size={14} className="stroke-[2.5]" />
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </nav>
+      <div className="hidden lg:block">
+        <PatientTopNav
+          activeTab="documents"
+          onNavigate={safeNavigate}
+          userProfile={userProfile}
+          username={username}
+          onLogout={onLogout}
+        />
+      </div>
 
       {/* ========================================================================= */}
       {/* 2. HEADER MÓVIL SUPERIOR (EXCLUSIVA MÓVIL - RÉPLICA EXACTA IMAGEN 3)      */}
@@ -736,10 +632,10 @@ const DocumentAnalyzer = ({
           
           <div onClick={() => safeNavigate('home')} className="flex items-center cursor-pointer">
             <img 
-              src="/assets/mivor-logo.png" 
+              src="/images/mivor-logo.png" 
               alt="MIVOR.ai" 
               className="h-7 w-auto object-contain" 
-              onError={(e) => { e.target.src = '/logo.png'; }}
+              onError={(e) => { e.target.src = '/assets/mivor-logo.png'; }}
             />
           </div>
 

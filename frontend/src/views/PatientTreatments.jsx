@@ -3,8 +3,16 @@ import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2 } fro
 import { useRef } from 'react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
+import PatientTopNav from '../components/PatientTopNav';
 
-export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
+export default function PatientTreatments({ 
+  apiUrl, 
+  authHeaders, 
+  onNavigate,
+  userProfile,
+  username,
+  onLogout 
+}) {
   const { t } = useLanguage();
   const [medications, setMedications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -135,6 +143,15 @@ export default function PatientTreatments({ apiUrl, authHeaders, onNavigate }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-base font-sans relative pb-28 overflow-x-hidden">
+      {/* Top Navbar Unificado */}
+      <PatientTopNav
+        activeTab="treatments"
+        onNavigate={onNavigate}
+        userProfile={userProfile}
+        username={username}
+        onLogout={onLogout}
+      />
+
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 

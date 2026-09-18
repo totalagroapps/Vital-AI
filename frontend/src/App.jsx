@@ -1195,7 +1195,10 @@ ${text}`], {type: 'text/plain'});
         <PatientTreatments 
           apiUrl={API_URL} 
           authHeaders={authHeaders} 
-          onNavigate={handleBottomNav} 
+          onNavigate={handleNavigate} 
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
         />
       </>
     );
@@ -1210,6 +1213,7 @@ ${text}`], {type: 'text/plain'});
           onNavigate={handleNavigate}
           userProfile={patientProfile}
           username={username}
+          onLogout={handleLogout}
           onSelectVideo={(filters) => {
             setSpecialistFilters(filters);
             navigate('/paciente/especialistas/video');
@@ -1305,6 +1309,10 @@ ${text}`], {type: 'text/plain'});
           apiUrl={API_URL}
           authHeaders={authHeaders}
           onBack={() => navigate('/paciente')}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
         />
         {GlobalBottomNav}
       </>
@@ -1370,6 +1378,7 @@ ${text}`], {type: 'text/plain'});
           onNavigate={handleNavigate}
           userProfile={patientProfile}
           username={username}
+          onLogout={handleLogout}
           apiUrl={API_URL}
           authHeaders={authHeaders}
           onOpenDoctorDirectory={(spec) => {

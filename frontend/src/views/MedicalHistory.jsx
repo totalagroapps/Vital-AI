@@ -9,6 +9,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
+import PatientTopNav from '../components/PatientTopNav';
 
 const MedicalHistory = ({
   patientProfile = {},
@@ -168,28 +169,7 @@ const MedicalHistory = ({
     setIsEditing(false);
   };
 
-  // Nav tabs for horizontal top navbar (Exact match with media_1789683184109.png)
-  const navTabs = [
-    { id: 'inicio', label: 'Inicio', icon: Home, path: '/paciente' },
-    { id: 'consultas', label: 'Mis consultas', icon: Calendar, path: '/paciente/citas' },
-    { id: 'documentos', label: 'Mis documentos', icon: FileText, path: '/paciente/documentos' },
-    { id: 'salud', label: 'Mi salud', icon: Heart, path: '/paciente/tratamientos' },
-    { id: 'perfil', label: 'Mi perfil', icon: User, path: '/paciente/historial', active: true },
-  ];
 
-  const handleTabClick = (tab) => {
-    if (tab.path) {
-      if (onNavigate) {
-        if (tab.id === 'inicio') onNavigate('home');
-        else if (tab.id === 'consultas') onNavigate('citas');
-        else if (tab.id === 'documentos') onNavigate('documents');
-        else if (tab.id === 'salud') onNavigate('agenda');
-        else if (tab.id === 'perfil') onNavigate('history');
-      } else if (onBack) {
-        onBack();
-      }
-    }
-  };
 
   // Triages list fallback for exact Image 5 rendering
   const defaultTriages = [
@@ -249,97 +229,15 @@ const MedicalHistory = ({
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col">
       
-      {/* ================= TOP NAVBAR (HORIZONTAL) Matching media_1789683184109.png ================= */}
-      <header className="bg-white border-b border-slate-200/90 px-4 lg:px-8 py-3 sticky top-0 z-30 shadow-xs">
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
-          
-          {/* 1. Left: Brand Logo & Slogan */}
-          <div className="flex items-center gap-6 shrink-0">
-            <div 
-              onClick={() => onNavigate ? onNavigate('home') : onBack?.()} 
-              className="flex items-center gap-2.5 cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-teal-500 to-sky-500 flex items-center justify-center text-white shadow-xs">
-                <Activity size={22} className="stroke-[2.5]" />
-              </div>
-              <div>
-                <span className="font-black text-xl text-slate-900 tracking-tight leading-none block">
-                  MIVOR<span className="text-teal-600">.ai</span>
-                </span>
-                <span className="text-[8.5px] text-slate-400 font-bold uppercase tracking-widest leading-none block mt-1">
-                  Better health. Brighter lives.
-                </span>
-              </div>
-            </div>
-
-            {/* 2. Top Navigation Links (Desktop horizontal tabs) */}
-            <nav className="hidden md:flex items-center gap-1.5 ml-2">
-              {navTabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = tab.active;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabClick(tab)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      isActive 
-                        ? 'bg-[#e0f2fe] text-[#0284c7] shadow-xs' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
-                    }`}
-                  >
-                    <Icon size={16} className={isActive ? 'text-[#0284c7]' : 'text-slate-400'} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* 3. Right: Search Input, Help, Bell, User Avatar */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-            
-            {/* Search Input */}
-            <div className="hidden lg:flex relative w-60">
-              <input 
-                type="text" 
-                placeholder="Buscar en mi salud..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#f8fafc] border border-slate-200 rounded-full pl-4 pr-9 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
-              />
-              <Search size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            </div>
-
-            {/* Help Question Icon */}
-            <button 
-              onClick={() => window.open('https://wa.me/?text=Hola,%20tengo%20una%20consulta%20en%20MIVOR.ai', '_blank')}
-              className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer"
-              title="¿Necesitas ayuda?"
-            >
-              <HelpCircle size={18} />
-            </button>
-
-            {/* Notification Bell */}
-            <div className="relative w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center cursor-pointer text-slate-600 transition-colors" title="Notificaciones">
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
-            </div>
-
-            {/* User Profile Avatar */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200 cursor-pointer">
-              <div className="w-8 h-8 rounded-full bg-[#7c3aed] text-white font-black text-xs flex items-center justify-center shadow-xs">
-                {getInitials(displayName)}
-              </div>
-              <span className="hidden sm:block text-xs font-bold text-slate-800 truncate max-w-[120px]">
-                {displayName}
-              </span>
-              <ChevronDown size={14} className="hidden sm:block text-slate-400" />
-            </div>
-
-          </div>
-
-        </div>
-      </header>
+      {/* ================= TOP NAVBAR SUPERIOR UNIFICADO ================= */}
+      <PatientTopNav
+        activeTab="history"
+        onNavigate={onNavigate}
+        userProfile={patientProfile}
+        username={username}
+        onLogout={onLogout}
+        onOpenEmergencyPassport={() => setShowEmergencyModal(true)}
+      />
 
       {/* ================= PAGE BODY ================= */}
       <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-6 space-y-6 pb-24">

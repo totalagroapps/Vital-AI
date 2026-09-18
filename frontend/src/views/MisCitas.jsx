@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Loader2, Video, MapPin, Calendar, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import CancelAppointmentModal from '../components/CancelAppointmentModal';
+import PatientTopNav from '../components/PatientTopNav';
 
 const STATUS_STYLES = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -12,7 +13,16 @@ const STATUS_STYLES = {
 };
 const CANCELABLE = new Set(['pending', 'confirmed']);
 
-const MisCitas = ({ apiUrl, authHeaders, onBack, isDoctor = false }) => {
+const MisCitas = ({ 
+  apiUrl, 
+  authHeaders, 
+  onBack, 
+  isDoctor = false,
+  onNavigate,
+  userProfile,
+  username,
+  onLogout
+}) => {
   const { t, language } = useLanguage();
   const locale = language === 'es' ? 'es-ES' : 'en-US';
 
@@ -53,9 +63,18 @@ const MisCitas = ({ apiUrl, authHeaders, onBack, isDoctor = false }) => {
     new Date(iso).toLocaleString(locale, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="min-h-screen bg-base px-5 pt-4 pb-28 lg:px-6 lg:pt-8">
-      <div className="max-w-screen-md mx-auto">
-        <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark">
+    <div className="min-h-screen bg-base pb-28 font-sans">
+      {!isDoctor && (
+        <PatientTopNav
+          activeTab="citas"
+          onNavigate={onNavigate}
+          userProfile={userProfile}
+          username={username}
+          onLogout={onLogout}
+        />
+      )}
+      <div className="max-w-screen-md mx-auto px-5 pt-6 lg:px-6 lg:pt-8">
+        <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark cursor-pointer transition-colors">
           <ArrowLeft className="w-4 h-4" /> {t('detail_back')}
         </button>
         <h1 className="text-xl font-extrabold text-brand-dark mb-4">{t(isDoctor ? 'appts_title_doctor' : 'appts_title')}</h1>

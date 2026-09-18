@@ -25,6 +25,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import PatientTopNav from '../components/PatientTopNav';
 
 const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => {
   const { language, changeLanguage, t } = useLanguage();
@@ -90,207 +91,14 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
   return (
     <main className="mivor-page">
-      {/* 1. HEADER */}
-      <header className="mivor-header">
-        <button className="mivor-logo-button" onClick={() => onNavigate("home")}>
-          <img 
-            src="/assets/mivor-logo.png" 
-            alt="MIVOR.ai - Better Health. Brighter Lives." 
-            className="mivor-logo" 
-            onError={(e) => { e.target.src = '/images/mivor-logo.png'; }}
-          />
-        </button>
-
-        <nav className="mivor-nav">
-          <button className="active" onClick={() => onNavigate("home")}>
-            {t('patient_nav_home') || 'Inicio'}
-          </button>
-          <button onClick={() => setShowAboutModal(true)}>
-            {t('patient_nav_about') || 'Sobre MIVOR.ai'}
-          </button>
-          <button onClick={() => setShowHowModal(true)}>
-            {t('patient_nav_how') || 'Cómo funciona'}
-          </button>
-          <button onClick={() => setShowContactModal(true)}>
-            {t('patient_nav_contact') || 'Contacto'}
-          </button>
-        </nav>
-
-        <div className="mivor-account">
-          {/* Selector de Idioma */}
-          <div className="relative" ref={langRef}>
-            <button 
-              className="language" 
-              onClick={() => setShowLangDropdown(prev => !prev)}
-              type="button"
-            >
-              <Globe size={16} className="text-[#1268ef]" />
-              <span className="uppercase">{language}</span>
-              <ChevronDown size={14} className={`transition-transform duration-150 ${showLangDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            {showLangDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-32 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden py-1 z-50 animate-in fade-in zoom-in-95">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => { changeLanguage(lang.code); setShowLangDropdown(false); }}
-                    className={`w-full text-left px-4 py-2 text-xs font-medium transition-colors ${language === lang.code ? 'bg-blue-50 text-[#1268ef] font-bold' : 'text-slate-700 hover:bg-slate-50'}`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Notificaciones */}
-          <button 
-            className="notification" 
-            onClick={() => onNavigate('search')} 
-            title="Notificaciones"
-            type="button"
-          >
-            <Bell size={20} className="text-[#101b56]" />
-            <span />
-          </button>
-
-          {/* Avatar y Botón Mi cuenta */}
-          <div className="relative" ref={userMenuRef}>
-            <div className="flex items-center gap-3">
-              <div 
-                className="avatar" 
-                onClick={() => setShowUserMenu(prev => !prev)}
-                title={userProfile?.full_name || username || "Mi cuenta"}
-              >
-                <img
-                  src={userProfile?.photo_url || "/images/mivor_avatar_default.png"}
-                  alt="Perfil"
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.src = '/images/mivor_avatar_default.png'; }}
-                />
-              </div>
-              <button
-                className="account-button"
-                onClick={() => setShowUserMenu(prev => !prev)}
-                type="button"
-              >
-                {t('patient_nav_my_account') || 'Mi cuenta'} <b>→</b>
-              </button>
-            </div>
-
-            {/* Dropdown Menu Mi cuenta */}
-            {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xs shrink-0 flex items-center justify-center bg-gradient-to-br from-[#c89169] to-[#20263d] text-white font-bold">
-                      <img
-                        src={userProfile?.photo_url || "/images/mivor_avatar_default.png"}
-                        alt="Perfil"
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.target.src = '/images/mivor_avatar_default.png'; }}
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                        {userProfile?.full_name || username || "Mi cuenta"}
-                      </p>
-                      <p className="text-[11px] text-slate-500 truncate">
-                        {userProfile?.email || "Paciente"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-0.5">
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); onNavigate('history'); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-blue-50 text-[#005dff] flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <User size={15} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="block text-slate-800 group-hover:text-[#005dff]">{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
-                      <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_history_desc') || 'Ficha médica y antecedentes'}</span>
-                    </div>
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); onNavigate('documents'); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <FileText size={15} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="block text-slate-800 group-hover:text-[#005dff]">{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
-                      <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_docs_desc') || 'Estudios y pruebas médicas'}</span>
-                    </div>
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); onNavigate('citas'); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <Calendar size={15} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="block text-slate-800 group-hover:text-[#005dff]">{tr('my_appointments', 'Mis Citas Médicas')}</span>
-                      <span className="block text-[10px] text-slate-400 font-normal">{tr('view_manage_appointments', 'Próximas consultas y reservas')}</span>
-                    </div>
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); setShowSecurityModal(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <ShieldCheck size={15} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="block text-slate-800 group-hover:text-[#005dff]">{t('patient_data_protected') || 'Seguridad y privacidad'}</span>
-                      <span className="block text-[10px] text-slate-400 font-normal">{t('patient_menu_meds_desc') || 'Cifrado y protección de datos'}</span>
-                    </div>
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); setShowContactModal(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                      <MessageCircle size={15} />
-                    </div>
-                    <div className="flex-1">
-                      <span className="block text-slate-800 group-hover:text-[#005dff]">{t('patient_contact_support') || 'Contacto y soporte'}</span>
-                      <span className="block text-[10px] text-slate-400 font-normal">Atención 24/7</span>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="pt-2 mt-1.5 border-t border-slate-100">
-                  <button 
-                    type="button"
-                    onClick={() => { setShowUserMenu(false); if (onLogout) onLogout(); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200/60 transition-all text-left group cursor-pointer"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
-                      <LogOut size={15} />
-                    </div>
-                    <span>{t('patient_menu_logout_title') || 'Cerrar sesión'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* 1. TOP NAVBAR SUPERIOR UNIFICADO */}
+      <PatientTopNav
+        activeTab="home"
+        onNavigate={onNavigate}
+        userProfile={userProfile}
+        username={username}
+        onLogout={onLogout}
+      />
 
       {/* 2. HERO SECTION */}
       <section className="mivor-hero">

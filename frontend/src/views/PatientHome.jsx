@@ -83,10 +83,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
             onClick={() => onNavigate('home')}
           >
             <img 
-              src="/assets/mivor-logo.png" 
+              src="/images/mivor-logo.png" 
               alt="MIVOR.ai" 
               className="h-7 w-auto object-contain" 
-              onError={(e) => { e.target.src = '/logo.png'; }}
+              onError={(e) => { e.target.src = '/assets/mivor-logo.png'; }}
             />
           </div>
 
