@@ -20,7 +20,7 @@ const EspecialistasLanding = ({
   const { t } = useLanguage();
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col">
+    <div className="h-[100dvh] max-h-[100dvh] lg:min-h-screen lg:max-h-none bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col justify-between overflow-hidden lg:overflow-auto pb-16 sm:pb-20 lg:pb-0">
       
       {/* ================= TOP NAVBAR SUPERIOR UNIFICADO ================= */}
       <PatientTopNav
@@ -32,28 +32,28 @@ const EspecialistasLanding = ({
       />
 
       {/* ================= PAGE BODY ================= */}
-      <main className="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-6 space-y-6 pb-24">
+      <main className="flex-1 min-h-0 max-w-[1440px] w-full mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-4 lg:py-6 flex flex-col justify-between gap-2.5 lg:gap-6 overflow-hidden lg:overflow-visible">
         
         {/* Top Header Row with Back link & Hero Banner */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-1.5 sm:gap-3 lg:gap-6 shrink-0">
           <div>
             <button
               onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-500 hover:text-slate-900 transition-colors mb-3 cursor-pointer group"
+              className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-slate-500 hover:text-slate-900 transition-colors mb-0.5 sm:mb-2 cursor-pointer group"
             >
-              <ArrowLeft size={15} className="group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft size={13} className="group-hover:-translate-x-1 transition-transform" />
               <span>Volver al inicio</span>
             </button>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-lg sm:text-2xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
               Conéctate con <span className="text-[#0d9488]">médicos especialistas</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1.5 max-w-xl leading-relaxed">
+            <p className="text-[11px] sm:text-xs lg:text-sm text-slate-500 font-medium mt-0.5 sm:mt-1 max-w-xl leading-relaxed">
               Elige la opción que mejor se adapte a tus necesidades y encuentra atención médica de calidad.
             </p>
           </div>
 
-          {/* Right Hero Banner matching official image */}
+          {/* Right Hero Banner matching official image (Desktop only) */}
           <div className="hidden sm:flex items-center bg-white rounded-3xl p-3 pr-4 border border-slate-200/80 shadow-xs gap-4 shrink-0 max-w-md">
             <div className="pl-3">
               <div className="w-6 h-1 bg-teal-500 rounded-full mb-1.5" />
@@ -73,10 +73,111 @@ const EspecialistasLanding = ({
           </div>
         </div>
 
-        {/* ================= TWO MAIN ACTION CARDS (SIN BARRA DE BÚSQUEDA) ================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+        {/* ================= MÓVIL: CUADRÍCULA 2 COLUMNAS COMPACTA (ZERO-SCROLL EN CUALQUIER SMARTPHONE) ================= */}
+        <div className="grid grid-cols-2 lg:hidden gap-2.5 sm:gap-4 flex-1 min-h-0 my-auto items-stretch">
           
-          {/* Card 1: Cita Presencial */}
+          {/* Tarjeta Móvil 1: Cita Presencial */}
+          <div 
+            onClick={() => onSelectPresencial({})}
+            className="bg-[#f4fbf7] border border-[#bbf7d0] rounded-2xl p-2.5 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
+          >
+            <div className="min-h-0 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#10b981] text-white font-black text-xs flex items-center justify-center shadow-2xs">
+                  1
+                </div>
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-[#0d9488] flex items-center justify-center">
+                  <MapPin size={13} className="stroke-[2.4]" />
+                </div>
+              </div>
+
+              {/* Imagen thumbnail compacta */}
+              <div className="w-full h-18 sm:h-24 rounded-xl overflow-hidden mb-2 bg-emerald-50 relative shrink-0">
+                <img 
+                  src="/images/especialistas_presencial_card.png" 
+                  alt="Consulta Presencial" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => { e.target.src = "/images/in-person.png"; }}
+                />
+                <span className="absolute bottom-1 left-1 bg-white/90 backdrop-blur-xs text-[9px] font-extrabold text-[#0d9488] px-1.5 py-0.5 rounded-md shadow-2xs">
+                  Cerca de ti
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                  Cita presencial
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium line-clamp-2 mt-0.5 leading-snug">
+                  Especialistas en consulta médica cerca de tu ubicación.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSelectPresencial({}); }}
+              className="w-full mt-2 py-2 px-2 bg-[#0d9488] active:bg-[#0f766e] text-white font-extrabold text-[10px] sm:text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+            >
+              <span>Buscar presencial</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+
+          {/* Tarjeta Móvil 2: Videollamada */}
+          <div 
+            onClick={() => onSelectVideo({})}
+            className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-2.5 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
+          >
+            <div className="min-h-0 flex-1 flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="w-6 h-6 rounded-full bg-[#3b82f6] text-white font-black text-xs flex items-center justify-center shadow-2xs">
+                  2
+                </div>
+                <div className="w-6 h-6 rounded-full bg-blue-100 text-[#2563eb] flex items-center justify-center">
+                  <Video size={13} className="stroke-[2.4]" />
+                </div>
+              </div>
+
+              {/* Imagen thumbnail compacta */}
+              <div className="w-full h-18 sm:h-24 rounded-xl overflow-hidden mb-2 bg-blue-50 relative shrink-0">
+                <img 
+                  src="/images/especialistas_video_card.png" 
+                  alt="Videollamada médica" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => { e.target.src = "/images/video-call.png"; }}
+                />
+                <span className="absolute bottom-1 left-1 bg-white/90 backdrop-blur-xs text-[9px] font-extrabold text-[#2563eb] px-1.5 py-0.5 rounded-md shadow-2xs">
+                  Online
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                  Videollamada
+                </h3>
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium line-clamp-2 mt-0.5 leading-snug">
+                  Atención online inmediata estés donde estés.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onSelectVideo({}); }}
+              className="w-full mt-2 py-2 px-2 bg-[#2563eb] active:bg-[#1d4ed8] text-white font-extrabold text-[10px] sm:text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+            >
+              <span>Solicitar video</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+
+        </div>
+
+        {/* ================= DESKTOP: DOS TARJETAS EXPANDIDAS (LG+) ================= */}
+        <div className="hidden lg:grid grid-cols-2 gap-6 pt-2">
+          
+          {/* Card 1: Cita Presencial (Desktop) */}
           <div className="bg-[#f4fbf7] border border-[#bbf7d0] rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
             <div className="flex flex-col sm:flex-row gap-5 items-start justify-between">
               
@@ -132,7 +233,7 @@ const EspecialistasLanding = ({
             </div>
           </div>
 
-          {/* Card 2: Videollamada */}
+          {/* Card 2: Videollamada (Desktop) */}
           <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
             <div className="flex flex-col sm:flex-row gap-5 items-start justify-between">
               
@@ -191,13 +292,13 @@ const EspecialistasLanding = ({
         </div>
 
         {/* ================= BOTTOM SECURITY BANNER ================= */}
-        <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
-            <ShieldCheck size={18} />
+        <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3.5 border border-slate-200/80 shadow-2xs flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+            <ShieldCheck size={15} className="sm:w-[18px] sm:h-[18px]" />
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="text-[10px] sm:text-xs text-slate-600 leading-snug">
             <span className="font-extrabold text-slate-900">Atención segura y confidencial</span>
-            <span className="mx-2 text-slate-300">|</span>
+            <span className="mx-1.5 text-slate-300">|</span>
             <span>Todos los médicos están verificados y tu información está protegida.</span>
           </p>
         </div>
