@@ -177,17 +177,17 @@ const MedicalHistory = ({
       id: 'mock-1',
       created_at: '2026-09-12T10:16:58',
       display_date: '12/9/2026, 10:16:58',
-      status_label: 'NORMAL',
+      status_label: 'ORIENTACIÓN GENERAL',
       severity_badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-      text: 'Me alegra saber que no has tenido otros sintomas preocupantes. Si solo te preocupaba la falta de sangre y el estreñimiento parece haber mejorado, eso puede ser una base importante monitorear cualquier cambio en tu salud.'
+      text: 'Me alegra saber que no has tenido otros síntomas preocupantes. Si solo te preocupaba la falta de energía y el estreñimiento parece haber mejorado, es un buen punto de partida para comentarlo en tu próximo control médico de rutina.'
     },
     {
       id: 'mock-2',
       created_at: '2026-08-25T11:12:04',
       display_date: '25/8/2026, 11:12:04',
-      status_label: 'URGENCIA',
+      status_label: 'PRIORIDAD ALTA',
       severity_badge: 'bg-red-50 text-red-700 border border-red-200',
-      text: 'Lo siento, pero debemos interrumpir el proceso de triaje. La presencia de mareo y un dolor de cabeza de intensidad 10/10 sugiere un posible riesgo de complicación cerebral. Por favor, **requiere atención médica de urgencia**.'
+      text: 'Ante la presencia de mareo intenso y un dolor de cabeza de intensidad 10/10, se identifican signos de alarma que requieren valoración médica presencial inmediata en un centro de urgencias.'
     }
   ];
 
@@ -196,7 +196,7 @@ const MedicalHistory = ({
       return patientProfile.triages.map(t_item => ({
         id: t_item.id || String(Math.random()),
         display_date: new Date(t_item.created_at).toLocaleString(),
-        status_label: t_item.status === 'closed_red' ? 'URGENCIA' : (t_item.status === 'closed_yellow' ? 'ATENCIÓN' : 'NORMAL'),
+        status_label: t_item.status === 'closed_red' ? 'PRIORIDAD ALTA' : (t_item.status === 'closed_yellow' ? 'CONSULTA PRIORITARIA' : 'ORIENTACIÓN GENERAL'),
         severity_badge: t_item.status === 'closed_red' ? 'bg-red-50 text-red-700 border border-red-200' : (t_item.status === 'closed_yellow' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
         text: t_item.final_report || "Consulta completada satisfactoriamente."
       }));
@@ -208,9 +208,9 @@ const MedicalHistory = ({
         return {
           id: s.id,
           display_date: new Date(s.created_at).toLocaleString(),
-          status_label: sev,
+          status_label: sev === 'ROJO' || sev === 'URGENCIA' ? 'PRIORIDAD ALTA' : (sev === 'NARANJA' || sev === 'AMARILLO' ? 'CONSULTA PRIORITARIA' : 'ORIENTACIÓN GENERAL'),
           severity_badge: sev === 'ROJO' || sev === 'URGENCIA' ? 'bg-red-50 text-red-700 border border-red-200' : (sev === 'NARANJA' || sev === 'AMARILLO' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
-          text: s.payload?.summary || s.payload?.title || s.title || "Triaje evaluado por inteligencia clínica."
+          text: s.payload?.summary || s.payload?.title || s.title || "Consulta de orientación de salud completada."
         };
       });
     }
@@ -537,12 +537,12 @@ const MedicalHistory = ({
                   )}
                 </div>
 
-                {/* Mi Historial de Triajes */}
+                {/* Historial de Orientaciones de Salud */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
                       <Activity size={18} className="text-purple-600" />
-                      <h4 className="font-extrabold text-sm text-slate-900">Mi Historial de Triajes</h4>
+                      <h4 className="font-extrabold text-sm text-slate-900">{t('my_triage_history') || 'Historial de Orientaciones de Salud'}</h4>
                     </div>
                     <span className="text-xs font-bold text-slate-400 cursor-pointer hover:text-slate-600 flex items-center gap-1">
                       Más recientes <ChevronDown size={14} />

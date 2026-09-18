@@ -385,19 +385,19 @@ Perfil Demográfico y Vitales:
     else:
         context_text += '\n[TRATAMIENTO FARMACOLÓGICO ACTIVO]: No tiene recordatorios farmacológicos activos en la plataforma.\n'
 
-    context_text += '\n[HISTORIAL DE TRIAJES Y EVALUACIONES ASISTIDAS]\n'
+    context_text += '\n[HISTORIAL DE ORIENTACIONES DE SALUD Y CONSULTAS ASISTIDAS]\n'
     if triages:
         for t in triages:
-            context_text += f'''- Fecha: {t.created_at}, Estado: {t.status}, Categoría de urgencia: {t.category}
+            context_text += f'''- Fecha: {t.created_at}, Estado: {t.status}, Nivel de atención: {t.category}
 '''
             if t.recommended_specialty:
-                context_text += f'''  Especialidad sugerida en triaje: {t.recommended_specialty}
+                context_text += f'''  Especialidad sugerida en orientación: {t.recommended_specialty}
 '''
             if t.final_report:
-                context_text += f'''  Informe Clínico: {t.final_report}
+                context_text += f'''  Resumen de Orientación: {t.final_report}
 '''
     else:
-        context_text += '- Sin triajes previos registrados.\n'
+        context_text += '- Sin consultas de orientación previas registradas.\n'
 
     # 3. Documentos, analíticas y estudios estructurados (Fila 23)
     if profile:

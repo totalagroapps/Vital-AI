@@ -1386,7 +1386,7 @@ const DocumentAnalyzer = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const msg = encodeURIComponent(`Hola, acabo de analizar un estudio en MIVOR.ai con recomendación para ${specialty}. Me gustaría consultar disponibilidad.`);
+                        const msg = encodeURIComponent(`Hola, he revisado un estudio con la guía explicativa de MIVOR.ai con sugerencia de consulta para ${specialty}. Me gustaría consultar disponibilidad.`);
                         window.open(`https://wa.me/?text=${msg}`, '_blank');
                       }}
                       className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
@@ -1458,6 +1458,13 @@ const DocumentAnalyzer = ({
               </div>
             )}
 
+            {/* Aviso Informativo Regulatorio (EU MDR Non-Device) */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+              <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                🛡️ <strong>Aviso Informativo:</strong> MIVOR.ai es una herramienta explicativa e informativa de apoyo en salud. Facilita la comprensión de términos clínicos y documentos tanto para pacientes como para profesionales de la salud. No realiza diagnósticos médicos ni sustituye la consulta personalizada con un profesional sanitario colegiado.
+              </p>
+            </div>
+
             {/* Botones Finales */}
             <div className="space-y-3 pt-2">
               <button
@@ -1512,7 +1519,7 @@ const DocumentAnalyzer = ({
             </div>
 
             <p className="text-xs text-slate-600 font-medium leading-relaxed">
-              ¿Tienes dudas subiendo o interpretando tus análisis? Nuestro equipo clínico y de soporte técnico está disponible 24/7.
+              ¿Tienes dudas subiendo o comprendiendo las explicaciones de tus análisis? Nuestro equipo de soporte técnico y orientación está disponible 24/7.
             </p>
 
             <div className="space-y-2.5">

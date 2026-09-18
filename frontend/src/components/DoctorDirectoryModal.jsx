@@ -294,7 +294,7 @@ export default function DoctorDirectoryModal({
   const handleWhatsApp = (doctor) => {
     const patientIntro = patientName ? `Mi nombre es ${patientName}.` : 'Soy usuario de la plataforma MIVOR.ai.';
     const triageContext = recommendedSpecialty 
-      ? `Acabo de realizar un triaje médico digital donde se me orientó consultar con un especialista en *${doctor.specialty}*.`
+      ? `Acabo de recibir una orientación de salud en MIVOR.ai donde se me sugirió consultar con un especialista en *${doctor.specialty}*.`
       : `Le contacto porque me gustaría agendar una consulta médica en su especialidad (*${doctor.specialty}*).`;
 
     const text = `Hola ${doctor.full_name}, ${patientIntro}\n\n${triageContext}\n\n¿Tendría disponibilidad para una consulta presencial u online?\n\nMuchas gracias por su atención.`;
@@ -354,7 +354,7 @@ export default function DoctorDirectoryModal({
           </button>
         </div>
 
-        {/* Banner Recomendación de Triaje (si aplica) */}
+        {/* Banner Sugerencia de Consulta (si aplica) */}
         {recommendedSpecialty && (
           <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 px-6 py-3 border-b border-purple-100 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
@@ -362,7 +362,7 @@ export default function DoctorDirectoryModal({
                 <Sparkles size={16} />
               </div>
               <div className="text-xs">
-                <span className="font-bold text-brand-purple">Especialidad Recomendada por Triaje: </span>
+                <span className="font-bold text-brand-purple">Especialidad Sugerida en tu Consulta: </span>
                 <span className="font-semibold text-slate-700">{recommendedSpecialty}</span>
               </div>
             </div>

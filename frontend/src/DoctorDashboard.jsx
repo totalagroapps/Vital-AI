@@ -93,7 +93,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   useEffect(() => {
     if (selectedPatient) {
       fetchPatientDetail(selectedPatient.user_id);
-      setCopilotMessages([{ role: 'assistant', content: `Hola Doctor. Soy su Copiloto Clínico IA (Fila 23). He indexado el expediente completo de ${selectedPatient.full_name} (triajes, analíticas, valores alterados y medicación activa). ¿Qué desea consultar sobre este caso?` }]);
+      setCopilotMessages([{ role: 'assistant', content: `Hola Doctor. Soy su Copiloto Clínico IA (Fila 23). He indexado el expediente completo de ${selectedPatient.full_name} (orientaciones de salud, analíticas explicadas, valores alterados y medicación activa). ¿Qué desea consultar sobre este caso?` }]);
     }
   }, [selectedPatient]);
 
@@ -191,8 +191,8 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </table>
       ` : '<p style="color: #64748b; font-size: 0.9em;">No hay medicamentos activos pautados.</p>'}
       
-      <h2>Historial de Triajes y Evaluaciones</h2>
-      ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay triajes registrados.</p>'}
+      <h2>Historial de Orientaciones de Salud</h2>
+      ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay orientaciones de salud registradas.</p>'}
       
       <div class="footer">
         Documento emitido por MIVOR.ai Medical System · Fecha de impresión: ${escapeHtml(new Date().toLocaleString())}
@@ -711,16 +711,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               {/* Triage and Docs Tabs Area */}
               <div className="space-y-8">
                 
-                {/* Triages */}
+                {/* Orientaciones de Salud */}
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                     <Activity className="w-4 h-4 text-brand-orange" />
-                    Historial de Triajes Asistidos
+                    Historial de Orientaciones de Salud
                   </h3>
                   <div className="space-y-4">
                     {(patientDetail.triages || []).length === 0 ? (
                       <div className="bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
-                        No hay triajes registrados para este paciente.
+                        No hay orientaciones de salud registradas para este paciente.
                       </div>
                     ) : (
                       (patientDetail.triages || []).map(triageItem => (

@@ -446,7 +446,7 @@ export default function DoctorCalendarView({
               </h3>
               <p className="text-xs text-slate-500 max-w-xs mx-auto mb-4">
                 {appointments.length === 0 
-                  ? "Carga las 14 citas de demostración y 15 pacientes con triajes para comenzar a probar." 
+                  ? "Carga las 14 citas de demostración y 15 pacientes con orientaciones clínicas para comenzar a probar." 
                   : "Puedes cambiar el filtro de fecha o agregar una nueva cita a tu agenda."}
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -626,7 +626,7 @@ export default function DoctorCalendarView({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Prioridad Triaje</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Nivel de Atención Sugerido</label>
                   <select
                     value={newTriage}
                     onChange={(e) => setNewTriage(e.target.value)}

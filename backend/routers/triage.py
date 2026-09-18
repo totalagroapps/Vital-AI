@@ -71,7 +71,7 @@ async def get_triage_session(session_id: int, db: AsyncSession=Depends(get_db), 
     if (not session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
     if session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
-        raise HTTPException(status_code=403, detail='No autorizado para ver esta sesión de triaje')
+        raise HTTPException(status_code=403, detail='No autorizado para ver esta sesión de orientación')
     return {'session_id': session.id, 'status': session.status, 'questions_asked': session.questions_asked, 'final_report': session.final_report}
 
 
@@ -87,14 +87,14 @@ async def send_triage_message(session_id: int, request: TriageRequest, db: Async
     if (not t_session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
     if t_session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
-        raise HTTPException(status_code=403, detail='No autorizado para interactuar en esta sesión de triaje')
+        raise HTTPException(status_code=403, detail='No autorizado para interactuar en esta sesión de orientación')
     if (t_session.status != 'in_progress'):
-        raise HTTPException(status_code=400, detail='Esta sesión de triaje ya está cerrada.')
+        raise HTTPException(status_code=400, detail='Esta sesión de orientación ya está cerrada.')
     sanitized_messages = []
     for msg in request.messages:
         if (msg.role == 'user'):
-            (scrubbed_text, _) = scrub_phi(msg.content)
-            sanitized_messages.append({'role': 'user', 'content': scrubbed_text})
+            (scrubbed_content, _) = scrub_phi(msg.content)
+            sanitized_messages.append({'role': 'user', 'content': scrubbed_content})
         else:
             sanitized_messages.append({'role': msg.role, 'content': msg.content})
     lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
@@ -117,10 +117,18 @@ Formulate all medical responses, questions, and guidance directly in {target_lan
                     token = chunk.choices[0].delta.content
                     full_response += token
                     (yield token)
-            if (('Informe de Prediagn' in full_response) or ('Informe de Emergencia' in full_response) or ('Nivel de Urgencia:' in full_response) or ('Especialidad M' in full_response)):
-                if (('🔴 Urgencia (Rojo)' in full_response) or ('Urgencia Inmediata' in full_response) or ('🔴' in full_response)):
+            if (
+                ('Resumen Explicativo' in full_response) or
+                ('Informe de Prediagn' in full_response) or
+                ('Informe de Emergencia' in full_response) or
+                ('Nivel de atención recomendado' in full_response) or
+                ('Nivel de Urgencia:' in full_response) or
+                ('Especialidad sugerida' in full_response) or
+                ('Especialidad M' in full_response)
+            ):
+                if (('Atención Inmediata' in full_response) or ('🔴 Urgencia (Rojo)' in full_response) or ('Urgencia Inmediata' in full_response) or ('🔴' in full_response)):
                     t_session.status = 'closed_red'
-                elif (('🟡 Atención Temprana' in full_response) or ('🟡' in full_response)):
+                elif (('Consulta Prioritaria' in full_response) or ('🟡 Atención Temprana' in full_response) or ('🟡' in full_response)):
                     t_session.status = 'closed_yellow'
                 else:
                     t_session.status = 'closed_green'
@@ -130,7 +138,7 @@ Formulate all medical responses, questions, and guidance directly in {target_lan
                 if t_session.status.startswith('closed_'):
                     try:
                         import json
-                        payload_data = {'title': 'Sesin de Triaje', 'severity': t_session.status.replace('closed_', '').upper(), 'report': t_session.final_report, 'questions_asked': t_session.questions_asked}
+                        payload_data = {'title': 'Consulta de Orientación', 'severity': t_session.status.replace('closed_', '').upper(), 'report': t_session.final_report, 'questions_asked': t_session.questions_asked}
                         p_stmt = select(models.PatientProfile).where((models.PatientProfile.user_id == t_session.user_id))
                         p_res = (await db.execute(p_stmt))
                         profile = p_res.scalars().first()
@@ -138,15 +146,14 @@ Formulate all medical responses, questions, and guidance directly in {target_lan
                             new_event = models.HealthEvent(patient_id=profile.id, type=models.HealthEventType.triage, payload=payload_data, source_ref_id=str(t_session.id))
                             db.add(new_event)
                     except Exception as he_err:
-                        logger.error(f'Error creating HealthEvent for triage: {he_err}')
+                        logger.error(f'Error creating HealthEvent for orientation: {he_err}')
                 db.add(t_session)
             (await db.commit())
             return
         except Exception as e:
-            logger.error(f'Error en Triaje Stream: {str(e)}')
+            logger.error(f'Error en Orientación Stream: {str(e)}')
             (yield f'''
 
-[Error de conexión en Triaje: {str(e)}]''')
+[Error de conexión en Orientación: {str(e)}]''')
             return
     return StreamingResponse(generate_triage_response(), media_type='text/plain')
-

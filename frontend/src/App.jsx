@@ -672,8 +672,8 @@ ${text}`], {type: 'text/plain'});
         throw new Error("Fallo en el servidor");
       }
     } catch (err) {
-      console.error("Error iniciando sesión de triaje:", err);
-      alert("Error al iniciar la sesión de triaje. Verifica tu conexión o intenta de nuevo.");
+      console.error("Error iniciando sesión de orientación:", err);
+      alert("Error al iniciar la sesión de orientación. Verifica tu conexión o intenta de nuevo.");
       navigate('/paciente');
     }
   };
@@ -980,7 +980,12 @@ ${text}`], {type: 'text/plain'});
         }
       }
       
-      if (triageSessionId && currentAiText.includes("📝 Informe de Prediagnóstico y Triaje")) {
+      if (triageSessionId && (
+        currentAiText.includes("📝 Resumen Explicativo de Orientación") ||
+        currentAiText.includes("Resumen Explicativo de Orientación") ||
+        currentAiText.includes("📝 Informe de Prediagnóstico y Triaje") ||
+        currentAiText.includes("Informe de Prediagnóstico")
+      )) {
         setIsTriageClosed(true);
       }
     } catch (err) {

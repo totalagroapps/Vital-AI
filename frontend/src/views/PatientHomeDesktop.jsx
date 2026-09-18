@@ -430,16 +430,16 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-blue-100 text-[#005dff] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-900">Consulta y Triaje Inteligente</h5>
-                    <p className="text-[11px] text-slate-500">Expresa tus síntomas y recibe una evaluación guiada de prioridad y recomendaciones clínicas iniciales.</p>
+                    <h5 className="font-bold text-xs text-slate-900">Orientación Inteligente de Salud</h5>
+                    <p className="text-[11px] text-slate-500">Expresa tus síntomas y recibe una guía explicativa clara para comprender lo que sientes y preparar tu consulta médica.</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-900">Interpretación de Pruebas</h5>
-                    <p className="text-[11px] text-slate-500">Sube analíticas, recetas e informes en PDF o foto para comprender los valores y términos clínicos.</p>
+                    <h5 className="font-bold text-xs text-slate-900">Explicación de Pruebas y Analíticas</h5>
+                    <p className="text-[11px] text-slate-500">Sube analíticas, recetas e informes en PDF o foto para traducir y comprender términos clínicos tanto para ti como para tu médico.</p>
                   </div>
                 </div>
 

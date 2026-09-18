@@ -370,7 +370,7 @@ def generate_clinical_pdf(data: dict, filename: str = "documento.pdf") -> bytes:
     # 10. Medical Disclaimer
     story.append(HRFlowable(width="100%", thickness=0.5, color=border_color, spaceBefore=4, spaceAfter=6))
     story.append(Paragraph(
-        "<b>Aviso M\u00e9dico Legal:</b> Este informe ha sido emitido autom\u00e1ticamente mediante algoritmos de inteligencia artificial cl\u00ednica de MIVOR.ai con fines informativos, de pre-triaje y seguimiento evolutivo. No constituye un diagn\u00f3stico m\u00e9dico vinculante, prescripci\u00f3n terap\u00e9utica ni sustituye la consulta presencial con un profesional m\u00e9dico debidamente colegiado.",
+        "<b>Aviso Legal Informativo:</b> Este documento ha sido generado automáticamente por MIVOR.ai con fines exclusivamente divulgativos, de orientación general y de facilitación de la comprensión de la información de salud tanto para el paciente como para el profesional médico. MIVOR.ai no es un dispositivo médico, no realiza diagnósticos clínicos, triajes asistenciales ni prescripciones terapéuticas, y no sustituye la consulta ni el criterio clínico presencial de un profesional médico debidamente colegiado.",
         disclaimer_style
     ))
 

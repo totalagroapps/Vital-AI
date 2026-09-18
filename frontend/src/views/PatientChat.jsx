@@ -47,13 +47,13 @@ const DEMO_CONVERSATIONS_MESSAGES = {
     {
       id: 'm2_1',
       type: 'user',
-      text: 'Hola MIVOR, me acaban de entregar los resultados de mi análisis de sangre. ¿Podrías ayudarme a interpretarlos?',
+      text: 'Hola MIVOR, me acaban de entregar los resultados de mi análisis de sangre. ¿Podrías ayudarme a comprenderlos y explicármelos?',
       time: '09:15'
     },
     {
       id: 'm2_2',
       type: 'assistant',
-      text: '¡Hola Antonio! Con gusto te ayudo a interpretar tu analítica sanguínea.\n\nPuedes indicarme o adjuntar los valores principales que llamen tu atención (como glucosa, colesterol, hemoglobina, leucocitos o transaminasas) junto con sus rangos de referencia para darte una explicación clara y orientativa paso a paso.',
+      text: '¡Hola Antonio! Con gusto te explico tu analítica sanguínea para que la comprendas perfectamente tanto tú como tu médico.\n\nPuedes indicarme o adjuntar los valores principales que llamen tu atención (como glucosa, colesterol, hemoglobina, leucocitos o transaminasas) junto con sus rangos de referencia para darte una explicación clara, orientativa y didáctica paso a paso.',
       time: '09:16'
     }
   ],
@@ -745,7 +745,7 @@ const PatientChat = ({
                           ¿Qué puede significar este resultado?
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Te ayudo a interpretar tus análisis, pruebas e informes médicos.
+                          Te explico con claridad tus análisis, pruebas e informes médicos para ti y tu médico.
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -758,8 +758,8 @@ const PatientChat = ({
                       onClick={() => {
                         setIsNewConsultation(false);
                         const prompt = inputMessage.trim() 
-                          ? `Hola MIVOR, quiero evaluar estos síntomas para triaje clínico: ${inputMessage.trim()}`
-                          : 'Hola MIVOR, quiero evaluar unos síntomas que tengo para saber las posibles causas y qué debo hacer (iniciar triaje clínico).';
+                          ? `Hola MIVOR, quiero consultar estos síntomas para recibir orientación de salud: ${inputMessage.trim()}`
+                          : 'Hola MIVOR, quiero consultar unos síntomas que tengo para saber posibles causas y qué dudas preparar para mi médico.';
                         handleSend(null, prompt);
                       }}
                       className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
@@ -772,7 +772,7 @@ const PatientChat = ({
                           ¿Cuáles pueden ser las causas de este síntoma?
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Analizo tus síntomas y te explico las posibles causas y próximos pasos.
+                          Te oriento sobre tus síntomas y te explico las posibles causas y pasos recomendados para preparar tu consulta médica.
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -910,9 +910,12 @@ const PatientChat = ({
                             {/* Alerta de derivación médica si aplica */}
                             {Boolean(
                               (msg.text || msg.content) && (
+                                (msg.text || msg.content).includes("Resumen Explicativo") ||
                                 (msg.text || msg.content).includes("Informe de Prediagnóstico") ||
                                 (msg.text || msg.content).includes("Prediagnóstico y Triaje") ||
+                                (msg.text || msg.content).includes("Especialidad sugerida") ||
                                 (msg.text || msg.content).includes("Especialidad a la que debería acudir") ||
+                                (msg.text || msg.content).includes("Nivel de atención") ||
                                 (msg.text || msg.content).includes("Nivel de urgencia")
                               )
                             ) && (
@@ -923,15 +926,15 @@ const PatientChat = ({
                                   </div>
                                   <div>
                                     <span className="text-xs font-bold text-slate-900 block">
-                                      Orientación de Triaje Finalizada
+                                      Orientación de Salud Finalizada
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-[#005dff]">
-                                      Especialidad sugerida: {extractSpecialty(msg.text || msg.content)}
+                                      Especialidad sugerida para tu consulta: {extractSpecialty(msg.text || msg.content)}
                                     </span>
                                   </div>
                                 </div>
                                 <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
-                                  Puedes conectar de inmediato con especialistas certificados para recibir diagnóstico formal o agendar una consulta médica.
+                                  Puedes conectar con profesionales sanitarios colegiados para recibir una valoración médica personalizada o agendar tu consulta.
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <button
@@ -946,7 +949,7 @@ const PatientChat = ({
                                     type="button"
                                     onClick={() => {
                                       const spec = extractSpecialty(msg.text || msg.content);
-                                      const whatsappText = encodeURIComponent(`Hola, acabo de realizar una evaluación clínica en MIVOR.ai con recomendación hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
+                                      const whatsappText = encodeURIComponent(`Hola, acabo de recibir una orientación informativa en MIVOR.ai con sugerencia hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
                                       window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
                                     }}
                                     className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"

@@ -870,7 +870,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                     <Globe size={20} />
                   </div>
                   <h4 className="font-bold text-sm text-brand-dark mb-2">Visibilidad de Especialista</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Tu perfil se lista en el directorio para derivaciones de pacientes del triaje clínico.</p>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">Tu perfil se lista en el directorio para consultas y derivaciones de pacientes orientados en la plataforma.</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
