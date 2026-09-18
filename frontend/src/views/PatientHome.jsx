@@ -185,8 +185,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ddecfe] hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-2xl p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#0055ff] flex items-center justify-center border-2 border-[#8ec3f8] shadow-xs group-hover:scale-105 transition-transform">
-                  <FileText size={20} className="stroke-[2.4]" />
+                <div className="w-10.5 h-10.5 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center border-2 border-[#8ec3f8] shadow-xs group-hover:scale-105 transition-transform p-0.5">
+                  <img src="/images/icon_card_explain.png" alt="Explica tus pruebas" className="w-full h-full object-contain" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -208,8 +208,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#d2f7eb] hover:bg-[#c0f2e2] border-2 border-[#6ae0b7] rounded-2xl p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#009b78] flex items-center justify-center border-2 border-[#6ae0b7] shadow-xs group-hover:scale-105 transition-transform">
-                  <Folder size={20} className="stroke-[2.4]" />
+                <div className="w-10.5 h-10.5 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center border-2 border-[#6ae0b7] shadow-xs group-hover:scale-105 transition-transform p-0.5">
+                  <img src="/images/icon_card_history.png" alt="Organiza tu historial" className="w-full h-full object-contain" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-[#009b78] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -231,8 +231,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ffe8d6] hover:bg-[#ffdcc1] border-2 border-[#fba86f] rounded-2xl p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#f25500] flex items-center justify-center border-2 border-[#fba86f] shadow-xs group-hover:scale-105 transition-transform">
-                  <Lightbulb size={20} className="stroke-[2.4]" />
+                <div className="w-10.5 h-10.5 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center border-2 border-[#fba86f] shadow-xs group-hover:scale-105 transition-transform p-0.5">
+                  <img src="/images/icon_card_advances.png" alt="Últimos avances médicos" className="w-full h-full object-contain" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -254,8 +254,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ede0fe] hover:bg-[#e2cefd] border-2 border-[#be8efb] rounded-2xl p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#7116e0] flex items-center justify-center border-2 border-[#be8efb] shadow-xs group-hover:scale-105 transition-transform">
-                  <Stethoscope size={20} className="stroke-[2.4]" />
+                <div className="w-10.5 h-10.5 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center border-2 border-[#be8efb] shadow-xs group-hover:scale-105 transition-transform p-0.5">
+                  <img src="/images/icon_card_doctors.png" alt="Encuentra tu médico" className="w-full h-full object-contain" />
                 </div>
                 <div className="w-7 h-7 rounded-full bg-[#7116e0] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -279,8 +279,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
             className="bg-[#ddecfe]/90 hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-xl px-3 py-2 flex items-center justify-between gap-2.5 shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-[#0055ff] text-white flex items-center justify-center shrink-0 shadow-2xs">
-                <ShieldCheck size={16} className="stroke-[2.5]" />
+              <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                <img src="/images/icon_security_shield.png" alt="Seguridad" className="w-full h-full object-contain drop-shadow-xs" />
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-[13px] font-black text-black leading-tight">

@@ -102,77 +102,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
       {/* 2. HERO SECTION */}
       <section className="mivor-hero">
-        {/* Soft celestial flowing silk wave & ambient glow spanning across the hero */}
-        <div className="hero-wave-bg pointer-events-none select-none overflow-hidden">
-          <svg className="w-full h-full" viewBox="0 0 1440 520" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-              <radialGradient id="emblemGlow" cx="54%" cy="48%" r="46%">
-                <stop offset="0%" stopColor="#00c2ff" stopOpacity="0.65" />
-                <stop offset="30%" stopColor="#38bdf8" stopOpacity="0.48" />
-                <stop offset="60%" stopColor="#7dd3fc" stopOpacity="0.25" />
-                <stop offset="85%" stopColor="#bae6fd" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </radialGradient>
-
-              <radialGradient id="leftGlow" cx="15%" cy="60%" r="40%">
-                <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.5" />
-                <stop offset="60%" stopColor="#f0f9ff" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </radialGradient>
-
-              <linearGradient id="silkWave1" x1="100%" y1="10%" x2="0%" y2="80%">
-                <stop offset="0%" stopColor="#93daf8" stopOpacity="0.75" />
-                <stop offset="30%" stopColor="#70cdfa" stopOpacity="0.55" />
-                <stop offset="60%" stopColor="#bae6fd" stopOpacity="0.35" />
-                <stop offset="85%" stopColor="#e0f2fe" stopOpacity="0.15" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </linearGradient>
-
-              <linearGradient id="silkWave2" x1="95%" y1="0%" x2="5%" y2="100%">
-                <stop offset="0%" stopColor="#c2edff" stopOpacity="0.8" />
-                <stop offset="35%" stopColor="#aee4fe" stopOpacity="0.55" />
-                <stop offset="70%" stopColor="#dbeafe" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </linearGradient>
-
-              <linearGradient id="strokeGrad" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.6" />
-                <stop offset="50%" stopColor="#7dd3fc" stopOpacity="0.4" />
-                <stop offset="85%" stopColor="#bae6fd" stopOpacity="0.15" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
-              </linearGradient>
-
-              <filter id="waveBlurLarge" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="38" />
-              </filter>
-              <filter id="waveBlurSoft" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="20" />
-              </filter>
-            </defs>
-
-            <rect x="0" y="0" width="1440" height="520" fill="url(#leftGlow)" />
-            <rect x="0" y="0" width="1440" height="520" fill="url(#emblemGlow)" />
-
-            <path 
-              d="M 1440,10 Q 1100,60 880,150 Q 640,240 420,270 Q 200,300 -50,320 L -50,520 L 1440,520 Z" 
-              fill="url(#silkWave1)" 
-              filter="url(#waveBlurLarge)" 
-            />
-            
-            <path 
-              d="M 1440,0 Q 1020,30 840,120 Q 620,210 380,240 Q 150,270 -50,300 L -50,520 L 1440,520 Z" 
-              fill="url(#silkWave2)" 
-              filter="url(#waveBlurLarge)" 
-            />
-
-            <path 
-              d="M 1440,35 C 1150,95 950,165 750,205 C 550,245 320,285 -50,315" 
-              stroke="url(#strokeGrad)" 
-              strokeWidth="48" 
-              fill="none" 
-              filter="url(#waveBlurSoft)" 
-            />
-          </svg>
+        {/* Portada Oficial MIVOR.ai (Hero Art con ondas celestiales y emblema central) */}
+        <div className="hero-wave-bg pointer-events-none select-none overflow-hidden flex items-center justify-center">
+          <img 
+            src="/images/mivor_cover_hero.png" 
+            alt="MIVOR.ai Cover" 
+            className="w-full h-full object-cover object-center pointer-events-none select-none" 
+          />
         </div>
 
         <div className="hero-copy">
@@ -186,7 +122,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           </h1>
           <div className="protection-card" onClick={() => setShowSecurityModal(true)}>
             <div className="shield">
-              <ShieldCheck size={26} className="text-[#0062ff]" strokeWidth={2.4} />
+              <img 
+                src="/images/icon_security_shield.png" 
+                alt="Seguridad" 
+                className="w-full h-full object-contain drop-shadow-xs" 
+              />
             </div>
             <div>
               <h3>{tr('hero_security_title', 'Tus datos están protegidos')}</h3>
@@ -195,27 +135,17 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           </div>
         </div>
 
-        <div className="hero-art">
-          <div className="hero-glow" />
-          <img 
-            src="/assets/mivor-emblem.png" 
-            alt="MIVOR.ai" 
-            className="hero-emblem" 
-            onError={(e) => { e.target.src = '/images/mivor-emblem.png'; }}
-          />
-        </div>
+        {/* Espaciador responsivo central: la portada ya integra el emblema central brillante */}
+        <div className="hero-art pointer-events-none select-none" aria-hidden="true" />
 
         <aside className="hero-features">
           <div className="feature">
-            <div className="feature-icon blue">
-              <svg viewBox="0 0 36 36" fill="none" stroke="#0062ff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="11.5" r="4" />
-                <path d="M10 26.5c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5" />
-                <circle cx="9.5" cy="13.5" r="3" />
-                <path d="M4 26.5c0-3.2 2.4-5.5 5.5-5.8" />
-                <circle cx="26.5" cy="13.5" r="3" />
-                <path d="M26.5 20.7c3.1.3 5.5 2.6 5.5 5.8" />
-              </svg>
+            <div className="feature-icon">
+              <img 
+                src="/images/icon_pillar_tech.png" 
+                alt="Tecnología que cuida" 
+                className="w-full h-full object-contain" 
+              />
             </div>
             <div>
               <h3>
@@ -231,11 +161,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
           </div>
           <div className="feature">
-            <div className="feature-icon green">
-              <svg viewBox="0 0 36 36" fill="none" stroke="#00b894" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 19.5c-3.2-3.3-7-5.5-7-9.5 0-2.8 2.2-5 5-5 1.8 0 3.3.9 4 2.2.7-1.3 2.2-2.2 4-2.2 2.8 0 5 2.2 5 5 0 4-3.8 6.2-7 9.5l-2 2-2-2z" />
-                <path d="M7 26.5c0-2.8 2.5-4.5 5.5-4.5h11c3 0 5.5 1.7 5.5 4.5" />
-              </svg>
+            <div className="feature-icon">
+              <img 
+                src="/images/icon_pillar_people.png" 
+                alt="Personas que importan" 
+                className="w-full h-full object-contain" 
+              />
             </div>
             <div>
               <h3>
@@ -251,15 +182,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
           </div>
           <div className="feature">
-            <div className="feature-icon purple">
-              <svg viewBox="0 0 36 36" fill="none" stroke="#6400ff" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="6" y1="28" x2="30" y2="28" />
-                <rect x="8" y="21" width="4.5" height="7" rx="1" />
-                <rect x="15.5" y="16" width="4.5" height="12" rx="1" />
-                <rect x="23" y="11" width="4.5" height="17" rx="1" />
-                <path d="M7 17l6-5 6 3 9-7" />
-                <polyline points="23 8 28 8 28 13" />
-              </svg>
+            <div className="feature-icon">
+              <img 
+                src="/images/icon_pillar_future.png" 
+                alt="Un futuro más saludable" 
+                className="w-full h-full object-contain" 
+              />
             </div>
             <div>
               <h3>
@@ -282,7 +210,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         {/* Tarjeta 1: Pregunta a MIVOR.ai */}
         <button className="service-card violet" onClick={() => onNavigate('general_chat')}>
           <div className="service-icon">
-            <Brain size={28} className="text-[#6b20e9]" strokeWidth={2.2} />
+            <img 
+              src="/images/icon_card_ask.png" 
+              alt="Pregunta a MIVOR.ai" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <h2>{tr('card_ask_title', 'Pregunta a MIVOR.ai')}</h2>
           <p>{tr('card_ask_desc', 'Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica con la ayuda de una IA médica avanzada.')}</p>
@@ -294,7 +226,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         {/* Tarjeta 2: Explica tus pruebas médicas */}
         <button className="service-card blue" onClick={() => onNavigate('documents')}>
           <div className="service-icon">
-            <FileText size={28} className="text-[#1268ef]" strokeWidth={2.2} />
+            <img 
+              src="/images/icon_card_explain.png" 
+              alt="Explica tus pruebas médicas" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <h2>{tr('card_analyze_title', 'Explica tus pruebas médicas')}</h2>
           <p>{tr('card_analyze_desc', 'Descubre qué dicen tus pruebas. MIVOR.ai traduce y explica términos clínicos y analíticas para facilitarte su comprensión a ti y a tu médico de forma clara y sencilla.')}</p>
@@ -306,7 +242,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         {/* Tarjeta 3: Organiza tu historial de salud */}
         <button className="service-card green" onClick={() => onNavigate('history')}>
           <div className="service-icon">
-            <Folder size={28} className="text-[#0bb89e]" strokeWidth={2.2} />
+            <img 
+              src="/images/icon_card_history.png" 
+              alt="Organiza tu historial de salud" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <h2>{tr('card_history_title', 'Organiza tu historial de salud')}</h2>
           <p>{tr('card_history_desc', 'Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.')}</p>
@@ -318,7 +258,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         {/* Tarjeta 4: Últimos avances médicos */}
         <button className="service-card orange" onClick={() => onNavigate('search')}>
           <div className="service-icon">
-            <Lightbulb size={28} className="text-[#ff6414]" strokeWidth={2.2} />
+            <img 
+              src="/images/icon_card_advances.png" 
+              alt="Últimos avances médicos" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <h2>{tr('card_advances_title', 'Últimos avances médicos')}</h2>
           <p>{tr('card_advances_desc', 'Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.')}</p>
@@ -330,7 +274,11 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
         {/* Tarjeta 5: Encuentra tu médico */}
         <button className="service-card violet" onClick={() => onNavigate('doctors')}>
           <div className="service-icon">
-            <Stethoscope size={28} className="text-[#6b20e9]" strokeWidth={2.2} />
+            <img 
+              src="/images/icon_card_doctors.png" 
+              alt="Encuentra tu médico" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <h2>{tr('card_doctors_title', 'Encuentra tu médico')}</h2>
           <p>{tr('card_doctors_desc', 'Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.')}</p>
