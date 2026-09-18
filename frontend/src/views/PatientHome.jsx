@@ -185,8 +185,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ddecfe] hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-9 h-9 sm:w-10.5 sm:h-10.5 rounded-xl bg-white flex items-center justify-center border-2 border-[#8ec3f8] shadow-xs group-hover:scale-105 transition-transform p-0.5 shrink-0 mobile-card-icon">
-                  <img src="/images/icon_card_explain.png" alt="Explica tus pruebas" className="w-full h-full object-contain" />
+                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                  <img src="/images/icon_card_explain.png" alt="Explica tus pruebas" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
                 <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={13} className="stroke-[2.8]" />
@@ -208,8 +208,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#d2f7eb] hover:bg-[#c0f2e2] border-2 border-[#6ae0b7] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-9 h-9 sm:w-10.5 sm:h-10.5 rounded-xl bg-white flex items-center justify-center border-2 border-[#6ae0b7] shadow-xs group-hover:scale-105 transition-transform p-0.5 shrink-0 mobile-card-icon">
-                  <img src="/images/icon_card_history.png" alt="Organiza tu historial" className="w-full h-full object-contain" />
+                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                  <img src="/images/icon_card_history.png" alt="Organiza tu historial" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
                 <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#009b78] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={13} className="stroke-[2.8]" />
@@ -231,8 +231,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ffe8d6] hover:bg-[#ffdcc1] border-2 border-[#fba86f] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-9 h-9 sm:w-10.5 sm:h-10.5 rounded-xl bg-white flex items-center justify-center border-2 border-[#fba86f] shadow-xs group-hover:scale-105 transition-transform p-0.5 shrink-0 mobile-card-icon">
-                  <img src="/images/icon_card_advances.png" alt="Últimos avances médicos" className="w-full h-full object-contain" />
+                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                  <img src="/images/icon_card_advances.png" alt="Últimos avances médicos" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
                 <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={13} className="stroke-[2.8]" />
@@ -254,8 +254,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               className="bg-[#ede0fe] hover:bg-[#e2cefd] border-2 border-[#be8efb] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-9 h-9 sm:w-10.5 sm:h-10.5 rounded-xl bg-white flex items-center justify-center border-2 border-[#be8efb] shadow-xs group-hover:scale-105 transition-transform p-0.5 shrink-0 mobile-card-icon">
-                  <img src="/images/icon_card_doctors.png" alt="Encuentra tu médico" className="w-full h-full object-contain" />
+                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                  <img src="/images/icon_card_doctors.png" alt="Encuentra tu médico" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
                 <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#7116e0] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={13} className="stroke-[2.8]" />

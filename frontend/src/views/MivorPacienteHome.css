@@ -147,11 +147,20 @@ button{font:inherit}
 .hero-wave-bg{
   position:absolute;
   inset:0;
+  bottom:clamp(10px,2vh,26px);
   width:100%;
-  height:100%;
+  height:calc(100% - clamp(10px,2vh,26px));
   pointer-events:none;
   z-index:0;
   overflow:hidden;
+}
+.hero-wave-bg img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:56% bottom;
+  pointer-events:none;
+  user-select:none;
 }
 .hero-copy{
   position:relative;
@@ -353,24 +362,28 @@ button{font:inherit}
 .service-card.orange:hover{border-color:#fdb685}
 
 .service-icon{
-  width:clamp(46px,5.5vh,58px);
-  height:clamp(46px,5.5vh,58px);
-  border-radius:50%;
+  width:clamp(56px,7.4vh,74px);
+  height:clamp(56px,7.4vh,74px);
+  border-radius:18px;
   display:grid;
   place-items:center;
-  background:rgba(255,255,255,.95);
-  margin-bottom:clamp(12px,1.8vh,20px);
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  margin-bottom:clamp(8px,1.4vh,16px);
   flex-shrink:0;
-  box-shadow:0 3px 10px rgba(0,0,0,.04);
-  transition:transform .2s ease;
-  padding:clamp(6px,0.8vh,9px);
+  transition:transform .25s cubic-bezier(.16,1,.3,1);
+  padding:0;
 }
 .service-icon img{
   width:100%;
   height:100%;
   object-fit:contain;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.08));
 }
-.service-card:hover .service-icon{transform:scale(1.08)}
+.service-card:hover .service-icon{
+  transform:scale(1.1) translateY(-2px);
+}
 
 .service-card h2{
   margin:0 0 clamp(8px,1.1vh,14px);
@@ -435,6 +448,23 @@ button{font:inherit}
 }
 @media(max-height:480px){.mivor-page{height:auto;overflow-y:auto}}
 
+/* ESTILOS BASE MÓVIL (ZERO-SCROLL) */
+.mivor-mobile-home .mobile-card-icon {
+  width: 44px;
+  height: 44px;
+  max-width: 44px;
+  max-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mivor-mobile-home .mobile-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
 /* RESPONSIVE MOBILE ZERO-SCROLL FOR COMPACT & BUDGET DEVICES */
 @media (max-height: 800px) {
   .mivor-mobile-home {
@@ -449,8 +479,8 @@ button{font:inherit}
     padding: 8px 10px !important;
   }
   .mivor-mobile-home .mobile-card-icon {
-    width: 34px !important;
-    height: 34px !important;
+    width: 38px !important;
+    height: 38px !important;
   }
   .mivor-mobile-home .mobile-card-arrow {
     width: 25px !important;
@@ -493,8 +523,8 @@ button{font:inherit}
     padding: 6px 8px !important;
   }
   .mivor-mobile-home .mobile-card-icon {
-    width: 30px !important;
-    height: 30px !important;
+    width: 34px !important;
+    height: 34px !important;
   }
   .mivor-mobile-home .mobile-card-arrow {
     width: 22px !important;
@@ -545,8 +575,8 @@ button{font:inherit}
     padding: 5px 7px !important;
   }
   .mivor-mobile-home .mobile-card-icon {
-    width: 26px !important;
-    height: 26px !important;
+    width: 30px !important;
+    height: 30px !important;
   }
   .mivor-mobile-home .mobile-card-arrow {
     width: 20px !important;

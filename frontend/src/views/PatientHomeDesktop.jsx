@@ -107,7 +107,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <img 
             src="/images/mivor_cover_hero.png" 
             alt="MIVOR.ai Cover" 
-            className="w-full h-full object-cover object-center pointer-events-none select-none" 
+            className="w-full h-full object-cover object-[56%_bottom] pointer-events-none select-none" 
           />
         </div>
 
