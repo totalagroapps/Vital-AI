@@ -59,73 +59,73 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
 
   // ================= BARRA DE NAVEGACIÓN PACIENTE (4 PESTAÑAS OFICIALES DEL DISEÑO MÓVIL) =================
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t-2 border-slate-200 px-2 py-1.5 pb-3 z-50 select-none lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1 pb-1.5 z-50 select-none lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
       <div className="max-w-md mx-auto grid grid-cols-4 items-center text-center">
         
         {/* 1. Inicio */}
         <button 
           type="button" 
           onClick={() => onTabChange('home')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Home 
-            size={22} 
+            size={20} 
             className={activeTab === 'home' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[11.5px] ${activeTab === 'home' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
+          <span className={`text-[10.5px] leading-tight ${activeTab === 'home' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Inicio
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
+          <span className={`w-5 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 2. Pregunta a MIVOR */}
         <button 
           type="button" 
           onClick={() => onTabChange('general_chat')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <div className="relative">
             <Sparkles 
-              size={21} 
+              size={20} 
               className={activeTab === 'general_chat' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
             />
           </div>
-          <span className={`text-[11.5px] ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
+          <span className={`text-[10.5px] leading-tight ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Pregunta a MIVOR
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
+          <span className={`w-5 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 3. Mi Tratamiento */}
         <button 
           type="button" 
           onClick={() => onTabChange('treatments')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Pill 
-            size={21} 
+            size={20} 
             className={activeTab === 'treatments' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[11.5px] ${activeTab === 'treatments' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
+          <span className={`text-[10.5px] leading-tight ${activeTab === 'treatments' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Mi Tratamiento
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
+          <span className={`w-5 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
         {/* 4. Mi cuenta */}
         <button 
           type="button" 
           onClick={() => onTabChange('more')}
-          className="flex flex-col items-center justify-center gap-1 py-1 transition-colors active:scale-95 focus:outline-none cursor-pointer"
+          className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
           <Users 
-            size={21} 
+            size={20} 
             className={activeTab === 'more' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
-          <span className={`text-[11.5px] ${activeTab === 'more' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
+          <span className={`text-[10.5px] leading-tight ${activeTab === 'more' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Mi cuenta
           </span>
-          <span className={`w-6 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
+          <span className={`w-5 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
 
       </div>

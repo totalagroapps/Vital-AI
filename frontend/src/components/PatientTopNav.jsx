@@ -60,12 +60,12 @@ export default function PatientTopNav({
   };
 
   const navTabs = [
-    { id: 'home', label: 'Inicio', icon: Home, screen: 'home' },
-    { id: 'citas', label: 'Mis consultas', icon: Calendar, screen: 'citas' },
-    { id: 'documents', label: 'Mis documentos', icon: FileText, screen: 'documents' },
-    { id: 'treatments', label: 'Mi salud', icon: Heart, screen: 'treatments' },
-    { id: 'specialists', label: 'Conectar con especialistas', icon: Users, screen: 'specialists' },
-    { id: 'history', label: 'Mi perfil', icon: User, screen: 'history' },
+    { id: 'home', label: 'Inicio', shortLabel: 'Inicio', icon: Home, screen: 'home' },
+    { id: 'citas', label: 'Mis consultas', shortLabel: 'Consultas', icon: Calendar, screen: 'citas' },
+    { id: 'documents', label: 'Mis documentos', shortLabel: 'Documentos', icon: FileText, screen: 'documents' },
+    { id: 'treatments', label: 'Mi salud', shortLabel: 'Mi salud', icon: Heart, screen: 'treatments' },
+    { id: 'specialists', label: 'Conectar con especialistas', shortLabel: 'Especialistas', icon: Users, screen: 'specialists' },
+    { id: 'history', label: 'Mi perfil', shortLabel: 'Mi perfil', icon: User, screen: 'history' },
   ];
 
   const handleTabClick = (screen) => {
@@ -80,10 +80,10 @@ export default function PatientTopNav({
 
   return (
     <header className={`bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs select-none ${className}`}>
-      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-2.5 flex items-center justify-between gap-4">
+      <div className="max-w-[1440px] mx-auto px-3 lg:px-4 xl:px-8 py-2 flex items-center justify-between gap-2 xl:gap-4">
         
         {/* 1. BRAND LOGO & SLOGAN */}
-        <div className="flex items-center gap-6 shrink-0">
+        <div className="flex items-center gap-2.5 xl:gap-6 shrink-0">
           <div 
             onClick={() => handleTabClick('home')} 
             className="flex items-center cursor-pointer select-none shrink-0 group"
@@ -92,7 +92,7 @@ export default function PatientTopNav({
             <img 
               src="/images/mivor-logo.png" 
               alt="MIVOR.ai" 
-              className="h-8 lg:h-9 w-auto object-contain transition-transform group-hover:scale-102" 
+              className="h-7 lg:h-8 xl:h-9 w-auto object-contain transition-transform group-hover:scale-102" 
               onError={(e) => { 
                 if (e.target.src.indexOf('mivor-logo.png') !== -1) {
                   e.target.src = '/assets/mivor-logo.png';
@@ -102,7 +102,7 @@ export default function PatientTopNav({
           </div>
 
           {/* 2. HORIZONTAL NAVIGATION TABS (DESKTOP) */}
-          <nav className="hidden lg:flex items-center gap-1.5 ml-2">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 ml-1 xl:ml-2">
             {navTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -111,14 +111,15 @@ export default function PatientTopNav({
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabClick(tab.screen)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs xl:text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2 xl:px-3.5 py-1.5 xl:py-2 rounded-xl text-[11.5px] xl:text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive 
                       ? 'bg-[#e0f2fe] text-[#0284c7] shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
                   }`}
                 >
-                  <Icon size={16} className={isActive ? 'text-[#0284c7] stroke-[2.4]' : 'text-slate-400 stroke-[2]'} />
-                  <span>{tab.label}</span>
+                  <Icon size={15} className={isActive ? 'text-[#0284c7] stroke-[2.4]' : 'text-slate-400 stroke-[2]'} />
+                  <span className="hidden xl:inline">{tab.label}</span>
+                  <span className="xl:hidden">{tab.shortLabel || tab.label}</span>
                 </button>
               );
             })}
@@ -126,7 +127,7 @@ export default function PatientTopNav({
         </div>
 
         {/* 3. RIGHT UTILITIES: LANGUAGE, HELP, NOTIFICATIONS, USER AVATAR */}
-        <div className="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
+        <div className="flex items-center gap-1.5 xl:gap-3 shrink-0">
           
           {/* Selector de idioma */}
           <div className="hidden sm:block">
