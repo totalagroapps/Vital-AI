@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { App as CapApp } from '@capacitor/app';
 
-export const CURRENT_APP_VERSION = '1.0.1';
+export const CURRENT_APP_VERSION = '1.0.2';
 // Servidor de Railway o respaldo en version.json
 export const VERSION_CHECK_URL = 'https://vitalai.up.railway.app/api/version';
-export const FALLBACK_APK_URL = 'https://vitalai.up.railway.app/download/mivor-latest.apk';
+export const FALLBACK_APK_URL = 'https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk';
 
 export function UpdateModal({ t, apiUrl }) {
   const [updateInfo, setUpdateInfo] = useState(null);

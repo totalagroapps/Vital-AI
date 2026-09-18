@@ -1,6 +1,6 @@
-﻿{
-  "version": "1.0.1",
-  "apkUrl": "https://vitalai.up.railway.app/download/mivor-latest.apk",
-  "notes": "Nuevas mejoras en el portal de médicos y correcciones.",
+{
+  "version": "1.0.2",
+  "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
+  "notes": "Nueva versión con diseño optimizado 100dvh para móvil (sin scroll) y adecuación regulatoria.",
   "forceUpdate": false
 }

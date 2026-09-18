@@ -171,9 +171,9 @@ def health_check():
 @app.get('/api/version')
 def get_version():
     return {
-        "version": os.getenv("APP_LATEST_VERSION", "1.0.1"),
-        "apkUrl": os.getenv("APP_APK_URL", "https://vitalai.up.railway.app/download/mivor-latest.apk"),
-        "notes": os.getenv("APP_UPDATE_NOTES", "Nuevas mejoras en el portal de médicos y correcciones."),
+        "version": os.getenv("APP_LATEST_VERSION", "1.0.2"),
+        "apkUrl": os.getenv("APP_APK_URL", "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk"),
+        "notes": os.getenv("APP_UPDATE_NOTES", "Nueva versión con diseño optimizado 100dvh para móvil (sin scroll) y adecuación regulatoria."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1")
     }
 
