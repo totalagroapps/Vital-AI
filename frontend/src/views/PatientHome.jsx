@@ -205,7 +205,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
 
           {/* 5. Cuadrícula 2x2 de Servicios */}
           <div className="grid grid-cols-2 gap-3 pt-0.5">
-            {/* Tarjeta 1: Analiza tus pruebas médicas */}
+            {/* Tarjeta 1: Explica tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
               className="bg-[#ddecfe] hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-2xl p-3.5 flex flex-col justify-between min-h-[148px] shadow-xs active:scale-[0.98] transition-all cursor-pointer group"
@@ -220,10 +220,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
               </div>
               <div className="mt-2.5">
                 <h3 className="text-[14px] font-black text-black leading-tight">
-                  Analiza tus pruebas médicas
+                  Explica tus pruebas médicas
                 </h3>
                 <p className="text-[11.5px] text-black font-bold leading-snug mt-1.5">
-                  Sube y analiza tus análisis, radiografías, TAC, etc.
+                  Sube y comprende tus análisis, radiografías, informes, etc.
                 </p>
               </div>
             </div>
@@ -372,7 +372,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username }) => {
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <Activity size={18} className="text-[#0284c7] stroke-[2.4]" />
-                    <span>Analiza tus pruebas médicas</span>
+                    <span>Explica tus pruebas médicas</span>
                   </button>
 
                   <button 

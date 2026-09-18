@@ -291,13 +291,13 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           </span>
         </button>
 
-        {/* Tarjeta 2: Analiza tus pruebas médicas */}
+        {/* Tarjeta 2: Explica tus pruebas médicas */}
         <button className="service-card blue" onClick={() => onNavigate('documents')}>
           <div className="service-icon">
             <FileText size={28} className="text-[#1268ef]" strokeWidth={2.2} />
           </div>
-          <h2>{tr('card_analyze_title', 'Analiza tus pruebas médicas')}</h2>
-          <p>{tr('card_analyze_desc', 'Descubre qué dicen tus pruebas. MIVOR.ai las analiza con IA médica avanzada, identifica posibles alteraciones y te explica los resultados de forma clara y comprensible.')}</p>
+          <h2>{tr('card_analyze_title', 'Explica tus pruebas médicas')}</h2>
+          <p>{tr('card_analyze_desc', 'Descubre qué dicen tus pruebas. MIVOR.ai traduce y explica términos clínicos y analíticas para facilitarte su comprensión a ti y a tu médico de forma clara y sencilla.')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
