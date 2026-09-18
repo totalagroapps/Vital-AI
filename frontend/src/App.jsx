@@ -1207,6 +1207,9 @@ ${text}`], {type: 'text/plain'});
         <EspecialistasLanding
           apiUrl={API_URL}
           onBack={() => navigate('/paciente')}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
           onSelectVideo={(filters) => {
             setSpecialistFilters(filters);
             navigate('/paciente/especialistas/video');
