@@ -51,24 +51,75 @@ def apply_document_upload_rate_limit(user_id: str):
 
 @router.post('/api/documents/upload')
 async def upload_document(
-    file: UploadFile=File(...), 
-    language: Optional[str]=Form(None), 
-    db: AsyncSession=Depends(get_db), 
-    current_user: models.User=Depends(get_current_user)
+    file: Optional[UploadFile] = File(None), 
+    files: Optional[List[UploadFile]] = File(None),
+    language: Optional[str] = Form(None), 
+    db: AsyncSession = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
 ):
     '''
-    Recibe un documento clínico (PDF, JPG, PNG), extrae sus datos mediante
-    PyPDF2 o Visión por Computador (GPT-4o-mini) y genera análisis clínico estructurado.
-    Protegido con límite de tamaño (10MB) y rate limiting (máx 10/min) (Punto 13).
+    Recibe uno o varios documentos clínicos (PDF, JPG, PNG, WEBP, etc.),
+    extrae sus datos mediante PyPDF2, PyMuPDF o Visión por Computador conjunta (GPT-4o-mini Vision)
+    y genera análisis clínico estructurado con correlación diagnóstica entre archivos.
+    Protegido con límite de tamaño (10MB por archivo) y rate limiting (máx 10/min) (Punto 13).
     '''
     apply_document_upload_rate_limit(current_user.id)
     current_user_id = current_user.id
-    content = (await file.read())
-    if len(content) > 10 * 1024 * 1024:
-        raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo permitido de 10MB.")
 
-    file_extension = (file.filename.split('.')[(- 1)].lower() if file.filename else '')
-    response_data = {'filename': file.filename, 'document_type': 'unknown', 'extracted_text': '', 'phi_detected': False, 'is_image': False}
+    upload_files = []
+    if files:
+        upload_files.extend(files)
+    if file and file not in upload_files:
+        upload_files.append(file)
+
+    upload_files = [f for f in upload_files if f and getattr(f, 'filename', None)]
+    if not upload_files:
+        raise HTTPException(status_code=400, detail="No se ha proporcionado ningún archivo para analizar.")
+
+    file_payloads = []
+    for f in upload_files:
+        content = await f.read()
+        if len(content) > 10 * 1024 * 1024:
+            raise HTTPException(
+                status_code=400,
+                detail=f"El archivo '{f.filename}' excede el tamaño máximo permitido de 10MB."
+            )
+        file_ext = (f.filename.split('.')[-1].lower() if f.filename else '')
+        file_payloads.append({
+            'filename': f.filename or 'documento',
+            'content': content,
+            'ext': file_ext,
+            'content_type': f.content_type or ''
+        })
+
+    image_payloads = []
+    pdf_payloads = []
+    for p in file_payloads:
+        is_pdf = (p['content_type'] == 'application/pdf') or (p['ext'] == 'pdf')
+        is_img = p['content_type'].startswith('image/') or (p['ext'] in ['jpg', 'jpeg', 'png', 'webp', 'heic', 'bmp', 'gif', 'avif'])
+        if is_pdf:
+            pdf_payloads.append(p)
+        elif is_img:
+            image_payloads.append(p)
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Formato de archivo no soportado para '{p['filename']}'. Formatos aceptados: PDF, JPG, PNG, WEBP, HEIC, BMP, GIF."
+            )
+
+    all_names = [p['filename'] for p in file_payloads]
+    combined_filename = ", ".join(all_names)
+    if len(combined_filename) > 250:
+        combined_filename = combined_filename[:247] + "..."
+
+    response_data = {
+        'filename': combined_filename,
+        'document_type': 'medical_image' if image_payloads else 'pdf_report',
+        'extracted_text': '',
+        'phi_detected': False,
+        'is_image': len(image_payloads) > 0,
+        'files_count': len(file_payloads)
+    }
 
     lang_map = {'es': 'Español', 'en': 'English', 'fr': 'Français', 'ar': 'العربية'}
     target_lang = (lang_map.get(language, 'Español') if language else 'Español')
@@ -77,48 +128,31 @@ async def upload_document(
     summary_data_json = None
 
     try:
-        if ((file.content_type == 'application/pdf') or (file_extension == 'pdf')):
-            response_data['document_type'] = 'pdf_report'
-            pdf_b64 = base64.b64encode(content).decode('utf-8')
-            raw_text = extract_text_from_pdf(pdf_b64)
-            if ((not raw_text) or (len(raw_text.strip()) < 30)):
-                logger.info('PDF text extraction returned empty/short. Attempting direct page rendering...')
+        if image_payloads:
+            # Multi-image vision processing (correlating multiple views, scans, or pages)
+            extra_pdf_text = []
+            for p in pdf_payloads:
                 try:
-                    import fitz
-                    pdf_doc = fitz.open(stream=content, filetype='pdf')
-                    page_texts = []
-                    openai_client2 = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-                    for page_num in range(min(len(pdf_doc), 4)):
-                        page = pdf_doc.load_page(page_num)
-                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-                        img_b64 = base64.b64encode(pix.tobytes('jpeg')).decode('utf-8')
-                        vr = (await openai_client2.chat.completions.create(model='gpt-4o-mini', messages=[{'role': 'user', 'content': [{'type': 'text', 'text': f'Transcribe con fidelidad todo el texto de esta página de documento médico. {lang_directive}'}, {'type': 'image_url', 'image_url': {'url': f'data:image/jpeg;base64,{img_b64}'}}]}], max_tokens=2000, temperature=0.0))
-                        page_texts.append(vr.choices[0].message.content)
-                    raw_text = '\n\n'.join(page_texts)
-                    pdf_doc.close()
-                except Exception as e2:
-                    logger.error(f'PyMuPDF fallback failed: {e2}')
-                    raw_text = 'Documento PDF recibido. No contiene texto seleccionable directo.'
-            (scrubbed_text, phi_detected) = scrub_phi(raw_text)
-            response_data['extracted_text'] = scrubbed_text
-            response_data['phi_detected'] = phi_detected
-        elif (file.content_type.startswith('image/') or (file_extension in ['jpg', 'jpeg', 'png', 'webp', 'heic', 'bmp', 'gif', 'avif'])):
-            response_data['document_type'] = 'medical_image'
-            response_data['is_image'] = True
-            img_b64_raw = base64.b64encode(content).decode('utf-8')
-            img_b64_optimized = resize_image_to_base64(img_b64_raw)
-            logger.info('Analizando imagen médica directamente con GPT-4o-mini Vision...')
+                    pdf_b64 = base64.b64encode(p['content']).decode('utf-8')
+                    t_extracted = extract_text_from_pdf(pdf_b64)
+                    if t_extracted and len(t_extracted.strip()) > 10:
+                        (scrubbed_t, _) = scrub_phi(t_extracted)
+                        extra_pdf_text.append(f"--- Documento adjunto {p['filename']} ---\n{scrubbed_t}")
+                except Exception as p_err:
+                    logger.warning(f"No se pudo extraer texto de PDF adjunto {p['filename']}: {p_err}")
+
             vision_system_prompt = f'''Eres MIVOR.ai, un asistente explicativo e informativo de salud especializado en transcribir, describir y explicar con claridad hallazgos visibles, términos técnicos y estructuras en imágenes y documentos clínicos.
-Tu objetivo es explicar de forma rigurosa, didáctica y comprensible el contenido visual de la imagen o documento, facilitando su comprensión tanto para el paciente como para el profesional sanitario colegiado que lo evalúe. MIVOR.ai no es un dispositivo médico y no emite diagnósticos clínicos vinculantes.
+Tu objetivo es explicar de forma rigurosa, didáctica y comprensible el contenido visual de la(s) imagen(es) o documento(s), correlacionando todos los ángulos, tomas o páginas adjuntas, facilitando su comprensión tanto para el paciente como para el profesional sanitario colegiado que lo evalúe. MIVOR.ai no es un dispositivo médico y no emite diagnósticos clínicos vinculantes.
 
 {lang_directive}
 
 INSTRUCCIONES EXPLICATIVAS FUNDAMENTALES:
 1. SI ES UNA RADIOGRAFÍA, TOMOGRAFÍA (TAC), RESONANCIA (RM), ECOGRAFÍA O ESTUDIO DE IMAGEN:
+   - Si se adjuntan múltiples imágenes (ej. proyección anteroposterior y lateral, o comparación bilateral), examínalas conjuntamente y explica cómo se relacionan los hallazgos entre ambas tomas.
    - Identifica y describe la región anatómica y estructura observada (ej. Fémur, cadera, pelvis, rodilla, tórax, extremidad, etc.).
    - Describe con detalle la continuidad de la cortical ósea: describe signos visibles de roturas, fracturas (completas, desplazadas, conminutas, fisuras, luxaciones o desalineaciones óseas).
    - Observa marcadores de orientación (letras 'L' o 'R', objetos externos o material de osteosíntesis).
-   - REGLA DE SEGURIDAD VITAL: Si observas signos visibles de fractura ósea, desplazamiento, rotura o lesión traumática aguda, indícalo claramente como un hallazgo de atención prioritaria y asigna la severidad a "rojo" para recomendar acudir a valoración médica presencial inmediata.
+   - REGLA DE SEGURIDAD VITAL: Si observas signos visibles de fractura ósea, desplazamiento, rotura o lesión traumática aguda en cualquiera de las imágenes, indícalo claramente como un hallazgo de atención prioritaria y asigna la severidad a "rojo" para recomendar acudir a valoración médica presencial inmediata.
    - NUNCA digas que "no hay contenido relevante" si estás ante un estudio de imagen: explica siempre con claridad la anatomía visible y los hallazgos para orientar al paciente.
 
 2. SI ES UNA RECETA MÉDICA, INFORME EN PAPEL O ANÁLISIS DE LABORATORIO:
@@ -126,7 +160,7 @@ INSTRUCCIONES EXPLICATIVAS FUNDAMENTALES:
 
 3. DEBES RESPONDER ÚNICAMENTE UN OBJETO JSON con esta estructura exacta:
 {{
-  "resumen": "Resumen claro, comprensible y didáctico para el paciente que explique exactamente lo que se aprecia en la imagen o documento.",
+  "resumen": "Resumen claro, comprensible y didáctico para el paciente que explique exactamente lo que se aprecia en el conjunto de imágenes o documentos.",
   "hallazgos": ["Hallazgo descriptivo 1 (ej. Signos de discontinuidad ósea compatible con fractura en la diáfisis femoral)", "Hallazgo 2..."],
   "medicamentos": ["Medicamentos identificados con dosis, si aplica (vacío si no hay fármacos)"],
   "diagnosticos": ["Conceptos clínicos o términos explicados para comentar con el médico"],
@@ -154,14 +188,43 @@ Criterios de prioridad sugerida:
 - "amarillo": Alteraciones o hallazgos que conviene consultar con un profesional médico sin ser una urgencia vital.
 - "verde": Estudios normales, controles de rutina o sin anomalías evidentes.
 '''
+            img_count = len(image_payloads)
+            user_prompt_text = (
+                f"Analiza visualmente la(s) siguiente(s) {img_count} imagen(es) médica(s) para explicarla(s) con claridad didáctica. "
+                f"Si hay múltiples imágenes (por ejemplo diferentes proyecciones o ángulos de una radiografía, estudios comparativos o diferentes páginas), analízalas en conjunto y correlaciona todos los hallazgos. "
+                f"Inspecciona la continuidad de las estructuras y describe cualquier hallazgo visible. Devuelve el JSON estructurado."
+            )
+            if extra_pdf_text:
+                user_prompt_text += f"\n\nInformación clínica complementaria extraída de documentos adjuntos:\n" + "\n\n".join(extra_pdf_text)[:3000]
+
+            user_content = [{'type': 'text', 'text': user_prompt_text}]
+            for p in image_payloads:
+                img_b64_raw = base64.b64encode(p['content']).decode('utf-8')
+                img_b64_opt = resize_image_to_base64(img_b64_raw)
+                user_content.append({
+                    'type': 'image_url',
+                    'image_url': {'url': f'data:image/jpeg;base64,{img_b64_opt}'}
+                })
+
+            logger.info(f"Analizando {img_count} imagen(es) médica(s) conjuntamente con GPT-4o-mini Vision...")
             openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-            openai_messages = [{'role': 'system', 'content': vision_system_prompt}, {'role': 'user', 'content': [{'type': 'text', 'text': 'Analiza visualmente esta imagen médica para explicarla con claridad didáctica. Inspecciona la continuidad de las estructuras y describe cualquier hallazgo visible. Devuelve el JSON estructurado.'}, {'type': 'image_url', 'image_url': {'url': f'data:image/jpeg;base64,{img_b64_optimized}'}}]}]
-            resp = (await openai_client.chat.completions.create(model='gpt-4o-mini', messages=openai_messages, response_format={'type': 'json_object'}, max_tokens=1500, temperature=0.1))
+            openai_messages = [
+                {'role': 'system', 'content': vision_system_prompt},
+                {'role': 'user', 'content': user_content}
+            ]
+            resp = (await openai_client.chat.completions.create(
+                model='gpt-4o-mini',
+                messages=openai_messages,
+                response_format={'type': 'json_object'},
+                max_tokens=1800,
+                temperature=0.1
+            ))
             try:
                 img_data = json.loads(resp.choices[0].message.content)
             except Exception as parse_err:
                 logger.error(f'Error parseando JSON de visión médica: {parse_err}')
                 img_data = {}
+
             summary = img_data.get('resumen', '')
             hallazgos = img_data.get('hallazgos', [])
             medicamentos = img_data.get('medicamentos', [])
@@ -173,6 +236,7 @@ Criterios de prioridad sugerida:
             all_text_combined = f"{summary} {' '.join(hallazgos)} {' '.join(diagnosticos)}".lower()
             if any((term in all_text_combined) for term in ['fractur', 'rotura', 'desplazad', 'luxaci', 'discontinuidad', 'quebradura']):
                 severidad = 'rojo'
+
             response_data['summary'] = summary
             response_data['hallazgos'] = hallazgos
             response_data['medicamentos'] = medicamentos
@@ -181,6 +245,7 @@ Criterios de prioridad sugerida:
             response_data['preguntas_medico'] = preguntas_medico
             response_data['severidad'] = severidad
             response_data['recomendacion'] = recomendacion
+
             report_lines = []
             if diagnosticos:
                 report_lines.append(f"Diagnóstico: {', '.join(diagnosticos)}")
@@ -190,13 +255,64 @@ Criterios de prioridad sugerida:
                 report_lines.append(f'Resumen Clínico: {summary}')
             if recomendacion:
                 report_lines.append(f'Recomendación: {recomendacion}')
-            extracted_text = (('\n\n'.join(report_lines) or summary) or 'Imagen médica analizada con éxito.')
+            extracted_text = (('\n\n'.join(report_lines) or summary) or 'Imágenes médicas analizadas con éxito.')
             (scrubbed_text, phi_detected) = scrub_phi(extracted_text)
             response_data['extracted_text'] = scrubbed_text
             response_data['phi_detected'] = phi_detected
-            summary_data_json = json.dumps({'resumen': summary, 'hallazgos': hallazgos, 'medicamentos': medicamentos, 'diagnosticos': diagnosticos, 'biomarcadores': biomarcadores, 'preguntas_medico': preguntas_medico, 'severidad': severidad, 'recomendacion': recomendacion})
+            summary_data_json = json.dumps({
+                'resumen': summary,
+                'hallazgos': hallazgos,
+                'medicamentos': medicamentos,
+                'diagnosticos': diagnosticos,
+                'biomarcadores': biomarcadores,
+                'preguntas_medico': preguntas_medico,
+                'severidad': severidad,
+                'recomendacion': recomendacion
+            })
         else:
-            raise HTTPException(status_code=400, detail='Formato de archivo no soportado. Usa PDF, JPG o PNG.')
+            # Only PDFs
+            response_data['document_type'] = 'pdf_report'
+            all_pdf_texts = []
+            any_phi = False
+            for p in pdf_payloads:
+                pdf_b64 = base64.b64encode(p['content']).decode('utf-8')
+                raw_text = extract_text_from_pdf(pdf_b64)
+                if ((not raw_text) or (len(raw_text.strip()) < 30)):
+                    logger.info(f"PDF text extraction returned empty/short for {p['filename']}. Attempting PyMuPDF direct page rendering...")
+                    try:
+                        import fitz
+                        pdf_doc = fitz.open(stream=p['content'], filetype='pdf')
+                        page_texts = []
+                        openai_client2 = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+                        for page_num in range(min(len(pdf_doc), 4)):
+                            page = pdf_doc.load_page(page_num)
+                            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                            img_b64 = base64.b64encode(pix.tobytes('jpeg')).decode('utf-8')
+                            vr = (await openai_client2.chat.completions.create(
+                                model='gpt-4o-mini',
+                                messages=[{
+                                    'role': 'user',
+                                    'content': [
+                                        {'type': 'text', 'text': f'Transcribe con fidelidad todo el texto de esta página de documento médico. {lang_directive}'},
+                                        {'type': 'image_url', 'image_url': {'url': f'data:image/jpeg;base64,{img_b64}'}}
+                                    ]
+                                }],
+                                max_tokens=2000,
+                                temperature=0.0
+                            ))
+                            page_texts.append(vr.choices[0].message.content)
+                        raw_text = '\n\n'.join(page_texts)
+                        pdf_doc.close()
+                    except Exception as e2:
+                        logger.error(f"PyMuPDF fallback failed for {p['filename']}: {e2}")
+                        raw_text = f"Documento PDF ({p['filename']}) recibido."
+                (scrubbed_text, phi_detected) = scrub_phi(raw_text)
+                if phi_detected:
+                    any_phi = True
+                all_pdf_texts.append(f"=== {p['filename']} ===\n{scrubbed_text}")
+
+            response_data['extracted_text'] = "\n\n".join(all_pdf_texts)
+            response_data['phi_detected'] = any_phi
         if response_data['extracted_text']:
             try:
                 openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))

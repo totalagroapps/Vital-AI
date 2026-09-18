@@ -150,6 +150,10 @@ const PatientChat = ({
   handleSend,
   isLoading,
   onBack,
+  attachments = [],
+  onAddAttachments,
+  onRemoveAttachment,
+  onClearAttachments,
   imageInputRef,
   pdfInputRef,
   handleImageChange,
@@ -169,7 +173,6 @@ const PatientChat = ({
   username
 }) => {
   const [isListening, setIsListening] = useState(false);
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -180,6 +183,7 @@ const PatientChat = ({
   const [localMessages, setLocalMessages] = useState([]);
 
   const { t, language } = useLanguage();
+  const fileInputRef = useRef(null);
   const internalImageRef = useRef(null);
   const internalPdfRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -187,6 +191,46 @@ const PatientChat = ({
 
   const actualImageRef = imageInputRef || internalImageRef;
   const actualPdfRef = pdfInputRef || internalPdfRef;
+
+  const handleFilesSelected = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      if (onAddAttachments) {
+        onAddAttachments(Array.from(e.target.files));
+      } else if (handleImageChange || handlePdfChange) {
+        const first = e.target.files[0];
+        if (first.type.startsWith('image/')) handleImageChange?.(e);
+        else handlePdfChange?.(e);
+      }
+      e.target.value = '';
+    }
+  };
+
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items || items.length === 0) return;
+
+    const filesToAttach = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) {
+          const customName = file.name && file.name !== 'image.png'
+            ? file.name
+            : `captura_${new Date().toLocaleTimeString().replace(/:/g, '-')}.png`;
+          const renamedFile = new File([file], customName, { type: file.type || 'image/png' });
+          filesToAttach.push(renamedFile);
+        }
+      }
+    }
+
+    if (filesToAttach.length > 0) {
+      e.preventDefault();
+      if (onAddAttachments) {
+        onAddAttachments(filesToAttach);
+      }
+    }
+  };
 
   const displayName = patientProfile?.full_name || username || "Antonio Villena";
   const firstName = displayName.split(' ')[0] || "Antonio";
@@ -840,16 +884,34 @@ const PatientChat = ({
                         /* USER MESSAGE: Light ice-blue bubble aligned right + Patient Avatar */
                         <div className="flex justify-end items-start gap-2.5 sm:gap-3 my-2 sm:my-3 group">
                           <div className="bg-[#edf5fe] text-slate-900 rounded-2xl rounded-tr-xs px-4 sm:px-5 lg:px-6 py-3 sm:py-4 max-w-[85%] sm:max-w-[70%] lg:max-w-[62%] xl:max-w-[55%] shadow-2xs border border-blue-100/50">
-                            {/* Attached Image if any */}
-                            {msg.image && (
-                              <img src={msg.image} alt={t('attachment')} className="w-full max-w-[240px] h-auto rounded-xl mb-2 object-cover border border-slate-200" />
-                            )}
-                            {/* Attached PDF if any */}
-                            {msg.pdf && (
-                              <div className="flex items-center gap-2 bg-blue-100/60 p-2.5 rounded-xl mb-2 text-blue-900 text-xs font-medium">
-                                <FileText size={16} />
-                                <span className="truncate">{t('attached_document')}</span>
+                            {/* Multi-attachments rendering if msg.attachments exists */}
+                            {msg.attachments && msg.attachments.length > 0 ? (
+                              <div className="flex flex-wrap gap-2 mb-2">
+                                {msg.attachments.map((att, attIdx) => (
+                                  att.previewUrl ? (
+                                    <img key={attIdx} src={att.previewUrl} alt={att.name || t('attachment')} className="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border border-slate-200 shadow-2xs" />
+                                  ) : (
+                                    <div key={attIdx} className="flex items-center gap-1.5 bg-blue-100/70 px-2.5 py-1.5 rounded-xl text-blue-900 text-xs font-medium border border-blue-200/50">
+                                      <FileText size={15} className="text-[#005dff] shrink-0" />
+                                      <span className="truncate max-w-[140px] font-semibold">{att.name || t('attached_document')}</span>
+                                    </div>
+                                  )
+                                ))}
                               </div>
+                            ) : (
+                              <>
+                                {/* Attached Image if any */}
+                                {msg.image && (
+                                  <img src={msg.image} alt={t('attachment')} className="w-full max-w-[240px] h-auto rounded-xl mb-2 object-cover border border-slate-200" />
+                                )}
+                                {/* Attached PDF if any */}
+                                {msg.pdf && (
+                                  <div className="flex items-center gap-2 bg-blue-100/60 p-2.5 rounded-xl mb-2 text-blue-900 text-xs font-medium">
+                                    <FileText size={16} />
+                                    <span className="truncate">{t('attached_document')}</span>
+                                  </div>
+                                )}
+                              </>
                             )}
                             <p className="text-xs sm:text-sm lg:text-[15px] leading-relaxed whitespace-pre-wrap font-normal text-slate-800">
                               {msg.text || msg.content}
@@ -1007,10 +1069,48 @@ const PatientChat = ({
           </div>
 
           {/* 3. BOTTOM CHAT INPUT CAPSULE (MATCHING FULL 100% WIDTH) */}
-          <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pb-2 pt-0.5 relative z-20 shrink-0 max-w-[1700px] mx-auto">
+          <div 
+            onPaste={handlePaste}
+            className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 pb-2 pt-0.5 relative z-20 shrink-0 max-w-[1700px] mx-auto"
+          >
             
             {/* Attachment preview if exists */}
-            {(selectedImagePreview || selectedPdfName) && (
+            {attachments && attachments.length > 0 ? (
+              <div className="mb-1.5 p-2 px-3 bg-blue-50/90 border border-blue-200 rounded-2xl flex flex-wrap items-center gap-2 shadow-2xs text-xs text-blue-900 animate-in fade-in max-h-24 overflow-y-auto">
+                {attachments.map((att) => (
+                  <div 
+                    key={att.id} 
+                    className="flex items-center gap-1.5 bg-white border border-blue-200/90 rounded-xl px-2.5 py-1 shadow-2xs text-xs text-slate-800"
+                  >
+                    {att.type === 'image' && att.previewUrl ? (
+                      <img src={att.previewUrl} alt={att.name} className="w-5 h-5 object-cover rounded-md border border-slate-200 shrink-0" />
+                    ) : att.type === 'image' ? (
+                      <ImageIcon size={14} className="text-[#005dff] shrink-0" />
+                    ) : (
+                      <FileText size={14} className="text-teal-600 shrink-0" />
+                    )}
+                    <span className="truncate max-w-[130px] sm:max-w-[180px] font-semibold">{att.name}</span>
+                    <button 
+                      type="button" 
+                      onClick={() => onRemoveAttachment ? onRemoveAttachment(att.id) : onClearAttachment?.()} 
+                      className="p-0.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-rose-600 cursor-pointer"
+                      title="Quitar archivo"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+                {attachments.length > 1 && (
+                  <button 
+                    type="button" 
+                    onClick={onClearAttachments || onClearAttachment} 
+                    className="text-[11px] font-bold text-slate-500 hover:text-rose-600 px-1.5 py-0.5 transition-colors cursor-pointer ml-auto"
+                  >
+                    Eliminar todos
+                  </button>
+                )}
+              </div>
+            ) : (selectedImagePreview || selectedPdfName) ? (
               <div className="mb-1.5 p-2 px-3.5 bg-blue-50/90 border border-blue-200 rounded-2xl flex items-center justify-between shadow-2xs text-xs text-blue-900 animate-in fade-in">
                 <div className="flex items-center gap-2 truncate">
                   {selectedImagePreview && <ImageIcon size={15} className="text-[#005dff]" />}
@@ -1025,53 +1125,31 @@ const PatientChat = ({
                   <X size={14} />
                 </button>
               </div>
-            )}
+            ) : null}
 
             {/* Input Capsule */}
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!isLoading && (inputMessage.trim() || selectedImagePreview || selectedPdfName)) {
+                const hasAttached = (attachments && attachments.length > 0) || selectedImagePreview || selectedPdfName;
+                if (!isLoading && (inputMessage.trim() || hasAttached)) {
                   setIsNewConsultation(false);
                   handleSend();
                 }
               }}
+              onPaste={handlePaste}
               className="w-full bg-white rounded-full border border-slate-200/90 shadow-sm py-1.5 sm:py-2 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 hover:border-slate-300 focus-within:border-[#005dff] focus-within:ring-2 focus-within:ring-[#005dff]/20 transition-all"
             >
-              {/* Paperclip button */}
+              {/* Paperclip button - Direct Native File Selector for ANY file */}
               <div className="relative">
                 <button 
                   type="button" 
-                  onClick={() => setShowAttachMenu(prev => !prev)} 
+                  onClick={() => fileInputRef.current?.click()} 
                   className="w-8 h-8 rounded-full bg-slate-100/90 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
-                  title="Adjuntar archivo o imagen médica"
+                  title="Adjuntar imágenes o documentos clínicos"
                 >
                   <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
                 </button>
-
-                {showAttachMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowAttachMenu(false)} />
-                    <div className="absolute left-0 bottom-full mb-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50 animate-in fade-in zoom-in-95">
-                      <button 
-                        type="button" 
-                        onClick={() => { setShowAttachMenu(false); actualImageRef.current?.click(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
-                      >
-                        <ImageIcon size={16} className="text-[#005dff]" />
-                        <span>Adjuntar imagen</span>
-                      </button>
-                      <button 
-                        type="button" 
-                        onClick={() => { setShowAttachMenu(false); actualPdfRef.current?.click(); }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
-                      >
-                        <FileText size={16} className="text-teal-600" />
-                        <span>Adjuntar PDF / Informe</span>
-                      </button>
-                    </div>
-                  </>
-                )}
               </div>
 
               {/* Text Input */}
@@ -1079,7 +1157,8 @@ const PatientChat = ({
                 type="text" 
                 value={inputMessage} 
                 onChange={(e) => setInputMessage(e.target.value)} 
-                placeholder="Escribe tu mensaje aquí..." 
+                onPaste={handlePaste}
+                placeholder="Escribe tu mensaje o pega una captura aquí..." 
                 disabled={isLoading}
                 className="w-full bg-transparent text-xs sm:text-sm xl:text-[14.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
               />
@@ -1101,7 +1180,7 @@ const PatientChat = ({
               {/* Send Button (Vibrant blue circle with arrow) */}
               <button 
                 type="submit" 
-                disabled={isLoading || (!inputMessage.trim() && !selectedImagePreview && !selectedPdfName)}
+                disabled={isLoading || (!inputMessage.trim() && !(attachments?.length > 0) && !selectedImagePreview && !selectedPdfName)}
                 className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:pointer-events-none cursor-pointer shrink-0"
                 title="Enviar mensaje"
               >
@@ -1112,6 +1191,14 @@ const PatientChat = ({
                 )}
               </button>
 
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFilesSelected} 
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif,image/*,application/pdf" 
+                multiple 
+                className="hidden" 
+              />
               <input type="file" ref={actualImageRef} onChange={handleImageChange} accept="image/jpeg,image/png,image/webp" className="hidden" />
               <input type="file" ref={actualPdfRef} onChange={handlePdfChange} accept="application/pdf" className="hidden" />
             </form>

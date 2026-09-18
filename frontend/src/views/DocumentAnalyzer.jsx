@@ -278,6 +278,7 @@ const DocumentAnalyzer = ({
   const [sortOrder, setSortOrder] = useState('desc'); // 'desc' | 'asc'
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [openDocMenuId, setOpenDocMenuId] = useState(null);
+  const [analyzingCount, setAnalyzingCount] = useState(1);
 
   const safeNavigate = (screen) => {
     if (onNavigate) {
@@ -380,21 +381,35 @@ const DocumentAnalyzer = ({
   const totalMb = 500;
   const usedPercentage = Math.min(Math.round((usedMb / totalMb) * 100), 100);
 
-  const uploadAndAnalyze = async (file) => {
-    if (!file) return;
-    if (!ACCEPTED_MIME.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp|heic|bmp|gif)$/i)) {
-      setError(t("unsupported_format", { fileName: file.name }));
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) { setError(t("file_too_large")); return; }
+  const uploadAndAnalyze = async (filesInput) => {
+    if (!filesInput) return;
+    const files = Array.isArray(filesInput) 
+      ? filesInput 
+      : (filesInput instanceof FileList ? Array.from(filesInput) : [filesInput]);
+    if (files.length === 0) return;
 
+    for (const file of files) {
+      if (!ACCEPTED_MIME.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|webp|heic|bmp|gif)$/i)) {
+        setError(t("unsupported_format", { fileName: file.name }));
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { 
+        setError(`El archivo '${file.name}' excede el tamaño máximo permitido de 10MB.`); 
+        return; 
+      }
+    }
+
+    setAnalyzingCount(files.length);
     setStep('analyzing');
     setError(null);
     setAnalysisResult(null);
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      files.forEach(f => formData.append('files', f));
+      if (files.length === 1) {
+        formData.append('file', files[0]);
+      }
       if (language) formData.append('language', language);
 
       const res = await fetch(`${apiUrl}/api/documents/upload`, {
@@ -414,7 +429,8 @@ const DocumentAnalyzer = ({
         throw new Error(t("text_extraction_failed"));
       }
 
-      setAnalysisResult({ ...data, filename: file.name });
+      const combinedFilename = files.map(f => f.name).join(', ');
+      setAnalysisResult({ ...data, filename: data.filename || combinedFilename });
       setStep('results');
 
       // Refresh history list
@@ -429,10 +445,43 @@ const DocumentAnalyzer = ({
     }
   };
 
-  const handleFileChange = (e) => { if (e.target.files?.[0]) uploadAndAnalyze(e.target.files[0]); };
+  const handleFileChange = (e) => { 
+    if (e.target.files && e.target.files.length > 0) {
+      uploadAndAnalyze(Array.from(e.target.files)); 
+      e.target.value = '';
+    }
+  };
   const onDragOver = useCallback((e) => { e.preventDefault(); setIsDragging(true); }, []);
   const onDragLeave = useCallback((e) => { e.preventDefault(); setIsDragging(false); }, []);
-  const onDrop = useCallback((e) => { e.preventDefault(); setIsDragging(false); uploadAndAnalyze(e.dataTransfer.files[0]); }, []);
+  const onDrop = useCallback((e) => { 
+    e.preventDefault(); 
+    setIsDragging(false); 
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      uploadAndAnalyze(Array.from(e.dataTransfer.files)); 
+    }
+  }, []);
+
+  const handleAnalyzerPaste = useCallback((e) => {
+    if (step !== 'upload') return;
+    const items = e.clipboardData?.items;
+    if (!items || items.length === 0) return;
+    const pastedFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file') {
+        const f = items[i].getAsFile();
+        if (f) pastedFiles.push(f);
+      }
+    }
+    if (pastedFiles.length > 0) {
+      e.preventDefault();
+      uploadAndAnalyze(pastedFiles);
+    }
+  }, [step]);
+
+  useEffect(() => {
+    window.addEventListener('paste', handleAnalyzerPaste);
+    return () => window.removeEventListener('paste', handleAnalyzerPaste);
+  }, [handleAnalyzerPaste]);
 
   const handleHistoryClick = (doc) => {
     if (doc.analysis_result) {
@@ -736,6 +785,7 @@ const DocumentAnalyzer = ({
                     onChange={handleFileChange} 
                     className="hidden" 
                     accept={ACCEPTED_TYPES} 
+                    multiple
                   />
 
                   {/* Icono de Nube Azul en Círculo */}
@@ -747,11 +797,11 @@ const DocumentAnalyzer = ({
                     Arrastra tus archivos aquí
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 mb-2">
-                    o haz clic para seleccionarlos
+                    o haz clic para seleccionarlos (puedes subir varias imágenes a la vez o pegar con Ctrl+V)
                   </p>
                   
                   <p className="text-[11px] text-slate-400 font-medium max-w-sm mb-5">
-                    Puedes subir archivos en formato PDF, JPG, PNG, DICOM. Tamaño máximo 10 MB por archivo.
+                    Puedes subir uno o varios archivos en formato PDF, JPG, PNG, WEBP. Tamaño máximo 10 MB por archivo.
                   </p>
 
                   <button 
@@ -1166,10 +1216,14 @@ const DocumentAnalyzer = ({
 
             <div>
               <h3 className="text-xl font-black text-black">
-                MIVOR.ai está leyendo tu documento
+                {analyzingCount > 1 
+                  ? `MIVOR.ai está analizando tus ${analyzingCount} archivos` 
+                  : 'MIVOR.ai está leyendo tu documento'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
-                Extrayendo biomarcadores, diagnósticos y generando un informe médico claro.
+                {analyzingCount > 1
+                  ? 'Correlacionando hallazgos visuales, biomarcadores y redactando informe conjunto.'
+                  : 'Extrayendo biomarcadores, diagnósticos y generando un informe médico claro.'}
               </p>
             </div>
 

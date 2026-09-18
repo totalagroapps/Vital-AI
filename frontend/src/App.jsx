@@ -410,13 +410,46 @@ export default function App() {
   }, [engineSettings]);
 
   
-  // File attachments
+  // File attachments (Multi-attachment state + legacy compatibility)
+  const [attachments, setAttachments] = useState([]); // [{ id, file, name, type: 'image'|'pdf', previewUrl }]
   const [selectedImage, setSelectedImage] = useState(null); // base64
   const [selectedImagePreview, setSelectedImagePreview] = useState(null);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
   const [selectedPdf, setSelectedPdf] = useState(null); // base64
   const [selectedPdfName, setSelectedPdfName] = useState(null);
   const [selectedPdfFile, setSelectedPdfFile] = useState(null);
+
+  const addAttachments = (newFiles) => {
+    const fileList = Array.isArray(newFiles) ? newFiles : Array.from(newFiles || []);
+    if (fileList.length === 0) return;
+
+    fileList.forEach(file => {
+      const isImg = file.type.startsWith('image/') || file.name?.match(/\.(jpg|jpeg|png|webp|heic|bmp|gif)$/i);
+      const isPdf = file.type === 'application/pdf' || file.name?.match(/\.pdf$/i);
+      if (!isImg && !isPdf) return;
+
+      const id = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      if (isImg) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setAttachments(prev => [
+            ...prev,
+            { id, file, name: file.name || `imagen_${Date.now()}.png`, type: 'image', previewUrl: e.target.result }
+          ]);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setAttachments(prev => [
+          ...prev,
+          { id, file, name: file.name || `documento_${Date.now()}.pdf`, type: 'pdf', previewUrl: null }
+        ]);
+      }
+    });
+  };
+
+  const removeAttachment = (id) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
+  };
   
   // UI states
   const [selectedEngine, setSelectedEngine] = useState('Local (Ollama)');
@@ -680,17 +713,20 @@ ${text}`], {type: 'text/plain'});
 
 
   const clearAttachments = () => {
+    setAttachments([]);
     setSelectedImage(null);
     setSelectedImagePreview(null);
     setSelectedImageFile(null);
     setSelectedPdf(null);
     setSelectedPdfName("");
+    setSelectedPdfFile(null);
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    addAttachments([file]);
     setSelectedImageFile(file);
     setSelectedImage(true); // Keeping this flag for logic checks
     
@@ -702,9 +738,10 @@ ${text}`], {type: 'text/plain'});
   };
 
   const handlePdfChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
+    addAttachments([file]);
     setSelectedPdfFile(file);
     setSelectedPdf(true); // Keeping this flag for logic checks
     setSelectedPdfName(file.name);
@@ -714,30 +751,96 @@ ${text}`], {type: 'text/plain'});
   const handleSendGeneral = async (e, customText = null) => {
     if (e && e.preventDefault) e.preventDefault();
     const textToSend = (customText !== null && customText !== undefined) ? customText : inputMessage;
-    if (!textToSend.trim() && !selectedImagePreview && !selectedPdfName) return;
+    const hasAttachments = attachments.length > 0;
+    if (!textToSend.trim() && !hasAttachments && !selectedImagePreview && !selectedPdfName) return;
+
+    const attachedImages = attachments.filter(a => a.type === 'image');
+    const attachedPdfs = attachments.filter(a => a.type === 'pdf');
+
+    let defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos:';
+    if (attachedImages.length > 0 && attachedPdfs.length === 0) {
+      defaultPrompt = attachedImages.length > 1 
+        ? 'Por favor, analiza y explícame estas radiografías/imágenes médicas en conjunto:' 
+        : 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+    } else if (attachedPdfs.length > 0) {
+      defaultPrompt = 'Por favor, explícame este documento clínico:';
+    }
+
+    const finalUserText = textToSend.trim() || defaultPrompt;
 
     const userMsg = { 
       type: "user", 
-      text: textToSend,
-      image: selectedImagePreview,
-      pdf: selectedPdfName
+      text: finalUserText,
+      attachments: attachments.map(a => ({ name: a.name, type: a.type, previewUrl: a.previewUrl })),
+      image: attachedImages.length > 0 ? attachedImages[0].previewUrl : selectedImagePreview,
+      pdf: attachedPdfs.length > 0 || !!selectedPdfName
     };
     
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInputMessage("");
     setIsLoading(true);
+
+    const filesToSend = attachments.map(a => a.file).filter(Boolean);
+    if (filesToSend.length === 0 && selectedImageFile) filesToSend.push(selectedImageFile);
+    if (filesToSend.length === 0 && selectedPdfFile) filesToSend.push(selectedPdfFile);
+
     clearAttachments();
 
     try {
+      let documentContext = "";
+
+      if (filesToSend.length > 0) {
+        setMessages(prev => [...prev, { 
+          id: Date.now() + 2, 
+          type: 'ai', 
+          text: filesToSend.length > 1 ? `Analizando ${filesToSend.length} archivos adjuntos con OCR y Visión IA...` : t('analyzing_ocr'), 
+          phiScrubbed: false 
+        }]);
+
+        const formData = new FormData();
+        filesToSend.forEach(f => formData.append('files', f));
+        if (filesToSend.length === 1) formData.append('file', filesToSend[0]);
+        if (language) formData.append('language', language);
+
+        const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
+          method: 'POST',
+          headers: authHeaders,
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          let errText = t('error_unknown');
+          try {
+            const errData = await uploadRes.json();
+            errText = errData.detail || errText;
+          } catch (e) {}
+          throw new Error(`Fallo al analizar los archivos: ${errText}`);
+        }
+
+        const uploadData = await uploadRes.json();
+        documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
+        await fetchPatientProfile();
+      }
+
+      const chatPayload = newMessages.map((m, idx) => {
+        if (idx === newMessages.length - 1 && documentContext) {
+          return {
+            role: "user",
+            content: m.text + documentContext
+          };
+        }
+        return {
+          role: m.type === "user" ? "user" : "assistant",
+          content: m.text
+        };
+      });
+
       const response = await fetch(`${API_URL}/api/chat/general`, {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: newMessages.map(m => ({
-            role: m.type === "user" ? "user" : "assistant",
-            content: m.text
-          })),
+          messages: chatPayload,
           language: language,
           session_id: currentSessionId
         })
@@ -809,16 +912,34 @@ ${text}`], {type: 'text/plain'});
 
   const handleSend = async (e) => {
     e?.preventDefault();
-    if ((!inputMessage.trim() && !selectedImage && !selectedPdf) || isLoading) return;
+    const hasAttachments = attachments.length > 0;
+    if ((!inputMessage.trim() && !hasAttachments && !selectedImage && !selectedPdf) || isLoading) return;
 
-    const userText = inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:' : 'Por favor, explícame el siguiente documento clínico:');
+    const attachedImages = attachments.filter(a => a.type === 'image');
+    const attachedPdfs = attachments.filter(a => a.type === 'pdf');
+
+    let defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos:';
+    if (attachedImages.length > 0 && attachedPdfs.length === 0) {
+      defaultPrompt = attachedImages.length > 1 
+        ? 'Por favor, analiza y explícame estas radiografías/imágenes médicas en conjunto:' 
+        : 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+    } else if (attachedPdfs.length > 0) {
+      defaultPrompt = 'Por favor, explícame este documento clínico:';
+    } else if (selectedImage || selectedImageFile) {
+      defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+    } else if (selectedPdf) {
+      defaultPrompt = 'Por favor, explícame el siguiente documento clínico:';
+    }
+
+    const userText = inputMessage.trim() || defaultPrompt;
     
     const tempUserMsg = {
       id: Date.now(),
       type: 'user',
-      text: inputMessage.trim() || ((selectedImage || selectedImageFile) ? 'Por favor, explícame esta radiografía.' : 'Por favor, explícame este documento.'),
-      image: selectedImagePreview,
-      pdf: !!selectedPdf,
+      text: userText,
+      attachments: attachments.map(a => ({ name: a.name, type: a.type, previewUrl: a.previewUrl })),
+      image: attachedImages.length > 0 ? attachedImages[0].previewUrl : selectedImagePreview,
+      pdf: attachedPdfs.length > 0 || !!selectedPdf,
       phiScrubbed: false
     };
 
@@ -826,59 +947,49 @@ ${text}`], {type: 'text/plain'});
     setInputMessage('');
     setIsLoading(true); // Se usa para la animación inicial
 
-    const payload = {
-      message: userText,
-      image_base64: selectedImage,
-      pdf_base64: selectedPdf,
-      session_id: currentSessionId,
-      patient_name: username || 'Paciente Anónimo',
-      ...engineSettings
-    };
+    const filesToSend = attachments.map(a => a.file).filter(Boolean);
+    if (filesToSend.length === 0 && selectedImageFile) filesToSend.push(selectedImageFile);
+    if (filesToSend.length === 0 && selectedPdfFile) filesToSend.push(selectedPdfFile);
 
-    setSelectedImage(null);
-    setSelectedImagePreview(null);
-    setSelectedImageFile(null);
-    setSelectedPdf(null);
-    setSelectedPdfName(null);
-    setSelectedPdfFile(null);
+    clearAttachments();
 
     try {
       let documentContext = "";
 
       // Si hay archivo, subimos a /api/documents/upload
-      if (selectedImage || selectedPdf) {
+      if (filesToSend.length > 0) {
         setIsLoading(true);
-        setMessages((prev) => [...prev, { id: Date.now() + 2, type: 'ai', text: t('analyzing_ocr'), phiScrubbed: false }]);
+        setMessages((prev) => [...prev, { 
+          id: Date.now() + 2, 
+          type: 'ai', 
+          text: filesToSend.length > 1 ? `Analizando ${filesToSend.length} archivos adjuntos con OCR y Visión IA...` : t('analyzing_ocr'), 
+          phiScrubbed: false 
+        }]);
         
         const formData = new FormData();
-        if (selectedImageFile) {
-            formData.append('file', selectedImageFile);
-        } else if (selectedPdfFile) {
-            formData.append('file', selectedPdfFile);
-        }
+        filesToSend.forEach(f => formData.append('files', f));
+        if (filesToSend.length === 1) formData.append('file', filesToSend[0]);
+        if (language) formData.append('language', language);
 
         try {
           const uploadRes = await fetch(`${API_URL}/api/documents/upload`, {
-              method: 'POST',
-              headers: authHeaders,
-              body: formData
-            });
+            method: 'POST',
+            headers: authHeaders,
+            body: formData
+          });
 
           if (!uploadRes.ok) {
-            // Attempt to parse JSON error, fallback if CORS blocked it
             let errText = t('error_unknown');
             try {
-                const errData = await uploadRes.json();
-                errText = errData.detail || errText;
+              const errData = await uploadRes.json();
+              errText = errData.detail || errText;
             } catch (e) {}
-            throw new Error(`Fallo al analizar el documento: ${errText}`);
+            throw new Error(`Fallo al analizar los archivos: ${errText}`);
           }
 
           const uploadData = await uploadRes.json();
-            documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
-            
-            // Refrescar el perfil del paciente porque el backend acaba de auto-perfilarlo con los datos del documento
-            await fetchPatientProfile();
+          documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
+          await fetchPatientProfile();
         } catch (uploadErr) {
           throw new Error(`Error de subida: ${uploadErr.message}`);
         }
@@ -1425,16 +1536,17 @@ ${text}`], {type: 'text/plain'});
           handleSend={handleSendGeneral}
           isLoading={isLoading}
           onBack={() => navigate('/paciente')}
+          attachments={attachments}
+          onAddAttachments={addAttachments}
+          onRemoveAttachment={removeAttachment}
+          onClearAttachments={clearAttachments}
           imageInputRef={imageInputRef}
           pdfInputRef={pdfInputRef}
           handleImageChange={handleImageChange}
           handlePdfChange={handlePdfChange}
           selectedImagePreview={selectedImagePreview}
           selectedPdfName={selectedPdfName}
-          onClearAttachment={() => {
-            setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
-            setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
-          }}
+          onClearAttachment={clearAttachments}
           loadSession={loadSession}
           deleteSession={deleteSession}
           startNewSession={startNewSession}
@@ -1465,16 +1577,17 @@ ${text}`], {type: 'text/plain'});
           handleSend={handleSend}
           isLoading={isLoading}
           onBack={() => navigate('/paciente')}
+          attachments={attachments}
+          onAddAttachments={addAttachments}
+          onRemoveAttachment={removeAttachment}
+          onClearAttachments={clearAttachments}
           imageInputRef={imageInputRef}
           pdfInputRef={pdfInputRef}
           handleImageChange={handleImageChange}
           handlePdfChange={handlePdfChange}
           selectedImagePreview={selectedImagePreview}
           selectedPdfName={selectedPdfName}
-          onClearAttachment={() => {
-            setSelectedImage(null); setSelectedImagePreview(null); setSelectedImageFile(null);
-            setSelectedPdf(null); setSelectedPdfName(null); setSelectedPdfFile(null);
-          }}
+          onClearAttachment={clearAttachments}
           loadSession={loadSession}
           deleteSession={deleteSession}
           startNewSession={startNewSession}
