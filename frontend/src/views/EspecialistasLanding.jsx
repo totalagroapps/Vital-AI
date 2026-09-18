@@ -20,7 +20,7 @@ const EspecialistasLanding = ({
   const { t } = useLanguage();
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] lg:min-h-screen lg:max-h-none bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col justify-between overflow-hidden lg:overflow-auto pb-16 sm:pb-20 lg:pb-0">
+    <div className="h-[100dvh] max-h-[100dvh] lg:min-h-screen lg:max-h-none bg-[#f8fafc] font-sans antialiased text-slate-800 flex flex-col justify-between overflow-hidden lg:overflow-auto pb-[82px] sm:pb-[88px] lg:pb-0">
       
       {/* ================= TOP NAVBAR SUPERIOR UNIFICADO ================= */}
       <PatientTopNav
@@ -48,7 +48,7 @@ const EspecialistasLanding = ({
             <h1 className="text-lg sm:text-2xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
               Conéctate con <span className="text-[#0d9488]">médicos especialistas</span>
             </h1>
-            <p className="text-[11px] sm:text-xs lg:text-sm text-slate-500 font-medium mt-0.5 sm:mt-1 max-w-xl leading-relaxed">
+            <p className="text-[11.5px] sm:text-xs lg:text-sm text-slate-500 font-medium mt-0.5 sm:mt-1 max-w-xl leading-relaxed">
               Elige la opción que mejor se adapte a tus necesidades y encuentra atención médica de calidad.
             </p>
           </div>
@@ -79,7 +79,7 @@ const EspecialistasLanding = ({
           {/* Tarjeta Móvil 1: Cita Presencial */}
           <div 
             onClick={() => onSelectPresencial({})}
-            className="bg-[#f4fbf7] border border-[#bbf7d0] rounded-2xl p-2.5 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
+            className="bg-[#f4fbf7] border-2 border-[#bbf7d0] rounded-2xl p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
           >
             <div className="min-h-0 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1.5">
@@ -92,23 +92,23 @@ const EspecialistasLanding = ({
               </div>
 
               {/* Imagen thumbnail compacta */}
-              <div className="w-full h-18 sm:h-24 rounded-xl overflow-hidden mb-2 bg-emerald-50 relative shrink-0">
+              <div className="w-full h-20 sm:h-24 rounded-xl overflow-hidden mb-2 bg-emerald-50 relative shrink-0">
                 <img 
                   src="/images/especialistas_presencial_card.png" 
                   alt="Consulta Presencial" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.target.src = "/images/in-person.png"; }}
                 />
-                <span className="absolute bottom-1 left-1 bg-white/90 backdrop-blur-xs text-[9px] font-extrabold text-[#0d9488] px-1.5 py-0.5 rounded-md shadow-2xs">
+                <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#0d9488] px-1.5 py-0.5 rounded-md shadow-2xs">
                   Cerca de ti
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                <h3 className="text-[13.5px] sm:text-base font-black text-slate-900 leading-tight">
                   Cita presencial
                 </h3>
-                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium line-clamp-2 mt-0.5 leading-snug">
+                <p className="text-[11px] sm:text-xs text-slate-600 font-semibold line-clamp-2 mt-0.5 leading-snug">
                   Especialistas en consulta médica cerca de tu ubicación.
                 </p>
               </div>
@@ -117,17 +117,17 @@ const EspecialistasLanding = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSelectPresencial({}); }}
-              className="w-full mt-2 py-2 px-2 bg-[#0d9488] active:bg-[#0f766e] text-white font-extrabold text-[10px] sm:text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="w-full mt-2.5 py-2.5 px-2 bg-[#0d9488] active:bg-[#0f766e] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <span>Buscar presencial</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={13} />
             </button>
           </div>
 
           {/* Tarjeta Móvil 2: Videollamada */}
           <div 
             onClick={() => onSelectVideo({})}
-            className="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-2.5 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
+            className="bg-[#eff6ff] border-2 border-[#bfdbfe] rounded-2xl p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between active:scale-[0.98] cursor-pointer group"
           >
             <div className="min-h-0 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-1.5">
@@ -140,23 +140,23 @@ const EspecialistasLanding = ({
               </div>
 
               {/* Imagen thumbnail compacta */}
-              <div className="w-full h-18 sm:h-24 rounded-xl overflow-hidden mb-2 bg-blue-50 relative shrink-0">
+              <div className="w-full h-20 sm:h-24 rounded-xl overflow-hidden mb-2 bg-blue-50 relative shrink-0">
                 <img 
                   src="/images/especialistas_video_card.png" 
                   alt="Videollamada médica" 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.target.src = "/images/video-call.png"; }}
                 />
-                <span className="absolute bottom-1 left-1 bg-white/90 backdrop-blur-xs text-[9px] font-extrabold text-[#2563eb] px-1.5 py-0.5 rounded-md shadow-2xs">
+                <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#2563eb] px-1.5 py-0.5 rounded-md shadow-2xs">
                   Online
                 </span>
               </div>
 
               <div>
-                <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight">
+                <h3 className="text-[13.5px] sm:text-base font-black text-slate-900 leading-tight">
                   Videollamada
                 </h3>
-                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium line-clamp-2 mt-0.5 leading-snug">
+                <p className="text-[11px] sm:text-xs text-slate-600 font-semibold line-clamp-2 mt-0.5 leading-snug">
                   Atención online inmediata estés donde estés.
                 </p>
               </div>
@@ -165,10 +165,10 @@ const EspecialistasLanding = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSelectVideo({}); }}
-              className="w-full mt-2 py-2 px-2 bg-[#2563eb] active:bg-[#1d4ed8] text-white font-extrabold text-[10px] sm:text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="w-full mt-2.5 py-2.5 px-2 bg-[#2563eb] active:bg-[#1d4ed8] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <span>Solicitar video</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={13} />
             </button>
           </div>
 
