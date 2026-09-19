@@ -244,10 +244,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[13px] sm:text-[14.5px] font-black text-black leading-tight sm:leading-snug">
+                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
                   Explica tus pruebas médicas
                 </h3>
-                <p className="text-[10px] sm:text-[11.5px] text-slate-800 font-bold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-2">
+                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
                   Sube analíticas, recetas, radiografías o informes y comprende cada resultado.
                 </p>
               </div>
@@ -267,10 +267,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[13px] sm:text-[14.5px] font-black text-black leading-tight sm:leading-snug">
+                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
                   Organiza tu historial
                 </h3>
-                <p className="text-[10px] sm:text-[11.5px] text-slate-800 font-bold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-2">
+                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
                   Toda tu información médica reunida y disponible en un solo lugar.
                 </p>
               </div>
@@ -290,10 +290,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[13px] sm:text-[14.5px] font-black text-black leading-tight sm:leading-snug">
+                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
                   Últimos avances médicos
                 </h3>
-                <p className="text-[10px] sm:text-[11.5px] text-slate-800 font-bold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-2">
+                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
                   Conoce los tratamientos y novedades más recientes explicados con claridad.
                 </p>
               </div>
@@ -313,10 +313,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[13px] sm:text-[14.5px] font-black text-black leading-tight sm:leading-snug">
+                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[10px] sm:text-[11.5px] text-slate-800 font-bold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-2">
+                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
                   Especialistas para videollamada online inmediata o cita presencial.
                 </p>
               </div>
@@ -334,10 +334,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <img src="/images/icon_security_shield.png" alt="Seguridad" className="w-full h-full object-contain drop-shadow-xs" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11.5px] sm:text-[13px] font-black text-black leading-tight">
+                <p className="text-[12.5px] sm:text-[14px] font-black text-black leading-tight">
                   Tus datos están protegidos
                 </p>
-                <p className="text-[9.5px] sm:text-[11px] font-bold text-slate-700 leading-tight truncate">
+                <p className="text-[10.5px] sm:text-[12px] font-bold text-slate-700 leading-tight truncate">
                   Cifrado de nivel médico (ISO 27001, GDPR)
                 </p>
               </div>

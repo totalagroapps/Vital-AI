@@ -386,18 +386,18 @@ button{font:inherit}
 }
 
 .service-card h2{
-  margin:0 0 clamp(8px,1.1vh,14px);
-  font-size:clamp(15px,1.12vw,20px);
+  margin:0 0 clamp(8px,1vh,14px);
+  font-size:clamp(17px,1.25vw,22px);
   font-weight:800;
   line-height:1.22;
   color:var(--navy);
   letter-spacing:-.02em;
 }
 .service-card p{
-  margin:0 0 clamp(24px,3.6vh,50px);
+  margin:0 0 clamp(16px,2.2vh,36px);
   color:var(--body-text);
-  font-size:clamp(12px,0.84vw,14.5px);
-  line-height:1.42;
+  font-size:clamp(13px,0.92vw,15.5px);
+  line-height:1.4;
   font-weight:500;
 }
 .service-arrow{
@@ -487,13 +487,13 @@ button{font:inherit}
     height: 25px !important;
   }
   .mivor-mobile-home .mobile-card h3 {
-    font-size: 12.5px !important;
-    line-height: 1.15 !important;
+    font-size: 14.5px !important;
+    line-height: 1.18 !important;
   }
   .mivor-mobile-home .mobile-card p {
-    font-size: 10px !important;
-    line-height: 1.18 !important;
-    -webkit-line-clamp: 2 !important;
+    font-size: 11.5px !important;
+    line-height: 1.25 !important;
+    -webkit-line-clamp: 3 !important;
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
@@ -531,12 +531,12 @@ button{font:inherit}
     height: 22px !important;
   }
   .mivor-mobile-home .mobile-card h3 {
-    font-size: 11.5px !important;
-    line-height: 1.15 !important;
+    font-size: 13px !important;
+    line-height: 1.16 !important;
   }
   .mivor-mobile-home .mobile-card p {
-    font-size: 9.5px !important;
-    line-height: 1.15 !important;
+    font-size: 10.5px !important;
+    line-height: 1.18 !important;
     -webkit-line-clamp: 2 !important;
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
@@ -583,12 +583,12 @@ button{font:inherit}
     height: 20px !important;
   }
   .mivor-mobile-home .mobile-card h3 {
-    font-size: 11px !important;
-    line-height: 1.1 !important;
+    font-size: 12px !important;
+    line-height: 1.15 !important;
   }
   .mivor-mobile-home .mobile-card p {
-    font-size: 9px !important;
-    line-height: 1.1 !important;
+    font-size: 10px !important;
+    line-height: 1.15 !important;
     -webkit-line-clamp: 1 !important;
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
