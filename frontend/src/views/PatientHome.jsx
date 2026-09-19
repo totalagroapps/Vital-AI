@@ -272,7 +272,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 1: Entiende tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
                 <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -286,11 +286,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
+              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Entiende tus<br />pruebas médicas
                 </h3>
-                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
                   Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.
                 </p>
               </div>
@@ -299,7 +299,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 2: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
                 <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -313,11 +313,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
+              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Organiza tu<br />historial de salud
                 </h3>
-                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
                   Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.
                 </p>
               </div>
@@ -326,7 +326,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 3: Descubre avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
                 <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -340,11 +340,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
+              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Descubre avances<br />médicos
                 </h3>
-                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
                   Accede a información actualizada sobre investigación, medicamentos y novedades científicas.
                 </p>
               </div>
@@ -353,7 +353,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 4: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
                 <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -367,11 +367,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
+              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
                   Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.
                 </p>
               </div>
