@@ -183,8 +183,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             </div>
 
             {/* Arte Hero Derecha: Emblema Circular con Glow */}
-            <div className="w-[92px] h-[92px] sm:w-[108px] sm:h-[108px] shrink-0 relative flex items-center justify-center mobile-hero-emblem">
-              <div className="absolute w-[86px] h-[86px] sm:w-[100px] sm:h-[100px] rounded-full bg-sky-300/40 blur-xl pointer-events-none" />
+            <div className="w-[82px] h-[82px] sm:w-[96px] sm:h-[96px] shrink-0 relative flex items-center justify-center mobile-hero-emblem">
+              <div className="absolute w-[76px] h-[76px] sm:w-[88px] sm:h-[88px] rounded-full bg-sky-300/40 blur-xl pointer-events-none" />
               <img 
                 src="/images/mivor_hero_circle_clean.png" 
                 alt="MIVOR.ai" 
@@ -272,25 +272,25 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 1: Entiende tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_entiende_pruebas.png" 
                     alt="Entiende tus pruebas médicas" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
+              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
                   Entiende tus<br />pruebas médicas
                 </h3>
-                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
+                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
                   Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.
                 </p>
               </div>
@@ -299,25 +299,25 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 2: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_organiza_historial.png" 
                     alt="Organiza tu historial de salud" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
+              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
                   Organiza tu<br />historial de salud
                 </h3>
-                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
+                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
                   Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.
                 </p>
               </div>
@@ -326,25 +326,25 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 3: Descubre avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_descubre_avances.png" 
                     alt="Descubre avances médicos" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
+              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
                   Descubre avances<br />médicos
                 </h3>
-                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
+                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
                   Accede a información actualizada sobre investigación, medicamentos y novedades científicas.
                 </p>
               </div>
@@ -353,25 +353,25 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 4: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_encuentra_medico.png" 
                     alt="Encuentra tu médico" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 sm:mt-2 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[16.8px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
+              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
+                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[11.3px] sm:text-[12px] text-black font-semibold leading-[1.18] mt-auto">
+                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
                   Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.
                 </p>
               </div>
