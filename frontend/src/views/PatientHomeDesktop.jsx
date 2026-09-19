@@ -146,7 +146,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_tech.png" 
-                alt="Tecnología que acompaña" 
+                alt="Tecnología que cuida" 
                 className="w-full h-full object-contain" 
               />
             </div>
@@ -154,7 +154,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               <h3>
                 TECNOLOGÍA
                 <br />
-                QUE ACOMPAÑA
+                QUE CUIDA
               </h3>
               <p>
                 Inteligencia artificial
