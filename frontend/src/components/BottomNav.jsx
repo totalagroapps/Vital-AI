@@ -84,9 +84,20 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           onClick={() => onTabChange('general_chat')}
           className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
-          <div className="w-5.5 h-5.5 rounded-full bg-gradient-to-tr from-[#0055ff] to-sky-400 flex items-center justify-center shadow-xs">
-            <MessageCircle size={13} className="text-white fill-white/20 stroke-[2.2]" />
-          </div>
+          <svg 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke={activeTab === 'general_chat' ? '#0055ff' : '#0f172a'} 
+            strokeWidth={activeTab === 'general_chat' ? 2.5 : 2.2} 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="w-5 h-5"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            <circle cx="9" cy="10" r="0.9" fill={activeTab === 'general_chat' ? '#0055ff' : '#0f172a'} />
+            <circle cx="12" cy="10" r="0.9" fill={activeTab === 'general_chat' ? '#0055ff' : '#0f172a'} />
+            <circle cx="15" cy="10" r="0.9" fill={activeTab === 'general_chat' ? '#0055ff' : '#0f172a'} />
+          </svg>
           <span className={`text-[10.5px] leading-tight ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Pregunta a MIVOR
           </span>
