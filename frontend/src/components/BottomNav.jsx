@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Clock, Calendar, Users, MoreHorizontal, Sparkles, Pill } from 'lucide-react';
+import { Home, Clock, Calendar, Users, MoreHorizontal, Sparkles, Pill, User, MessageCircle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
@@ -84,11 +84,8 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           onClick={() => onTabChange('general_chat')}
           className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
-          <div className="relative">
-            <Sparkles 
-              size={20} 
-              className={activeTab === 'general_chat' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
-            />
+          <div className="w-5.5 h-5.5 rounded-full bg-gradient-to-tr from-[#0055ff] to-sky-400 flex items-center justify-center shadow-xs">
+            <MessageCircle size={13} className="text-white fill-white/20 stroke-[2.2]" />
           </div>
           <span className={`text-[10.5px] leading-tight ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
             Pregunta a MIVOR
@@ -118,7 +115,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
           onClick={() => onTabChange('more')}
           className="flex flex-col items-center justify-center gap-0.5 py-0.5 transition-colors active:scale-95 focus:outline-none cursor-pointer"
         >
-          <Users 
+          <User 
             size={20} 
             className={activeTab === 'more' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />

@@ -152,39 +152,62 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           </div>
         </header>
 
-        {/* Contenedor Principal Móvil: Ajustado a la pantalla sin scroll vertical */}
+        {/* Contenedor Principal Móvil: Ajustado a la pantalla sin scroll vertical (Exacto al diseño) */}
         <main className="flex-1 min-h-0 flex flex-col justify-between px-3 sm:px-4 py-1.5 sm:py-2 gap-1.5 sm:gap-2 overflow-hidden mobile-main">
           
           {/* 2. Sección Hero Móvil */}
           <section 
             className="flex items-center justify-between gap-2 px-1 relative shrink-0 mobile-hero"
             style={{
-              backgroundImage: 'radial-gradient(circle at 85% 35%, rgba(186, 230, 253, 0.5) 0%, rgba(224, 242, 254, 0.2) 50%, rgba(255, 255, 255, 0) 80%)'
+              backgroundImage: 'radial-gradient(circle at 85% 35%, rgba(186, 230, 253, 0.45) 0%, rgba(224, 242, 254, 0.15) 50%, rgba(255, 255, 255, 0) 80%)'
             }}
           >
             {/* Texto Hero Izquierda */}
             <div className="flex-1 min-w-0 pr-1">
-              <h1 className="text-[14px] sm:text-[15.5px] font-black text-black leading-tight tracking-tight">
-                Tu salud, en manos de la <span className="text-[#0055ff]">IA médica más avanzada</span>
+              <h1 className="text-[16px] sm:text-[18px] font-black text-slate-900 leading-[1.14] tracking-tight">
+                Tu salud, <br />
+                en manos de la <br />
+                <span className="text-[#0055ff]">IA más avanzada <br />en medicina.</span>
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-600 font-bold leading-tight mt-0.5 truncate">
-                Más información. Mejores decisiones. Una vida más saludable.
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-bold leading-tight mt-1 truncate">
+                Más información. Una vida más saludable.
               </p>
             </div>
 
             {/* Arte Hero Derecha: Emblema Circular con Glow */}
-            <div className="w-10 h-10 sm:w-13 sm:h-13 shrink-0 relative flex items-center justify-center mobile-hero-emblem">
-              <div className="absolute w-10 h-10 rounded-full bg-sky-300/40 blur-lg pointer-events-none" />
+            <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 relative flex items-center justify-center mobile-hero-emblem">
+              <div className="absolute w-14 h-14 rounded-full bg-sky-300/40 blur-xl pointer-events-none" />
               <img 
-                src="/assets/mivor-emblem.png" 
+                src="/images/mivor-emblem.png" 
                 alt="MIVOR.ai" 
                 className="w-full h-auto object-contain relative z-1 mix-blend-multiply drop-shadow-xs select-none pointer-events-none" 
-                onError={(e) => { e.target.src = '/images/mivor-emblem.png'; }}
+                onError={(e) => { e.target.src = '/assets/mivor-emblem.png'; }}
               />
             </div>
           </section>
 
-          {/* 3. Buscador / Pregunta a MIVOR.ai con Micrófono y Clip Directo */}
+          {/* 3. Tira de Seguridad y Confianza (Directamente debajo del Hero como en el diseño) */}
+          <div 
+            onClick={() => setShowSecurityModal(true)}
+            className="bg-[#f0f8ff] hover:bg-[#e4f1fe] border border-[#cbe4fc] rounded-2xl px-2.5 sm:px-3 py-1.5 flex items-center justify-between gap-2 shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-security"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-xl bg-[#0055ff] text-white flex items-center justify-center shrink-0 shadow-xs mobile-security-icon">
+                <ShieldCheck size={16} className="stroke-[2.5]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-[11.5px] sm:text-[12.5px] font-black text-slate-900 leading-tight">
+                  Tus datos están protegidos
+                </h4>
+                <p className="text-[9.5px] sm:text-[10.5px] font-bold text-slate-500 leading-tight truncate">
+                  Cifrado de nivel médico (ISO 27001, GDPR)
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={17} className="text-[#0055ff] stroke-[2.8] shrink-0" />
+          </div>
+
+          {/* 4. Buscador / Pregunta a MIVOR.ai con Micrófono y Clip Directo */}
           <div className="shrink-0 mobile-search">
             <input
               type="file"
@@ -196,7 +219,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             />
             <div 
               onClick={() => onNavigate('general_chat')}
-              className="w-full bg-white border-2 border-[#8ec3f8] rounded-full py-1 sm:py-1.5 pl-3.5 pr-1.5 flex items-center gap-2 shadow-2xs hover:border-[#0055ff] active:scale-[0.99] transition-all cursor-pointer group"
+              className="w-full bg-white border border-[#c7e0fc] rounded-full py-1 sm:py-1.5 pl-3.5 pr-1.5 flex items-center gap-2 shadow-2xs hover:border-[#0055ff] active:scale-[0.99] transition-all cursor-pointer group"
             >
               <button
                 type="button"
@@ -204,13 +227,13 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   e.stopPropagation();
                   homeFileInputRef.current?.click();
                 }}
-                className="text-black p-0.5 hover:text-[#0055ff] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
+                className="text-slate-700 p-0.5 hover:text-[#0055ff] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
                 title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
               >
-                <Paperclip size={18} className="stroke-[2.5] -rotate-45" />
+                <Paperclip size={17} className="stroke-[2.5] -rotate-45" />
               </button>
-              <div className="h-3.5 w-[1.5px] bg-slate-300" />
-              <span className="flex-1 text-xs sm:text-[13px] text-black font-bold select-none truncate">
+              <div className="h-3.5 w-[1.5px] bg-slate-200" />
+              <span className="flex-1 text-[12.5px] sm:text-[13.5px] text-slate-500 font-medium select-none truncate">
                 Pregunta a MIVOR.ai...
               </span>
               <button 
@@ -219,36 +242,41 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   e.stopPropagation();
                   onNavigate('general_chat');
                 }}
-                className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs hover:bg-blue-700 active:scale-95 transition-all shrink-0 cursor-pointer"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs hover:bg-blue-700 active:scale-95 transition-all shrink-0 cursor-pointer"
                 title="Dictar pregunta"
               >
-                <Mic size={16} className="stroke-[2.4]" />
+                <Mic size={15} className="stroke-[2.4]" />
               </button>
+            </div>
+            {/* Chispita y subtítulo elegante */}
+            <div className="flex items-center justify-center gap-1.5 mt-0.5 text-[#0055ff] text-[10px] sm:text-[11px] font-bold">
+              <Sparkles size={11} className="stroke-[2.5]" />
+              <span>Resuelve tus dudas de salud con nuestra IA médica</span>
             </div>
           </div>
 
-          {/* 4. Cuadrícula 2x2 de Servicios (Flexible, llena la pantalla y letras agrandadas) */}
+          {/* 5. Cuadrícula 2x2 de Servicios */}
           <div className="grid grid-cols-2 gap-2 sm:gap-2.5 flex-1 min-h-0 items-stretch mobile-grid">
             
-            {/* Tarjeta 1: Explica tus pruebas médicas */}
+            {/* Tarjeta 1: Analiza tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#ddecfe] hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#f0f7ff] hover:bg-[#e6f2fd] border border-[#cce4fd] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
-                  <img src="/images/icon_card_explain.png" alt="Explica tus pruebas" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 mobile-card-icon">
+                  <img src="/images/icon_card_explain.png" alt="Analiza tus pruebas médicas" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
-                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={13} className="stroke-[2.8]" />
+                <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={12} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
-                  Explica tus pruebas médicas
+              <div className="mt-1 flex-1 min-h-0 flex flex-col justify-end">
+                <h3 className="text-[13.5px] sm:text-[14.5px] font-black text-slate-900 leading-tight">
+                  Analiza tus pruebas médicas
                 </h3>
-                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
-                  Sube analíticas, recetas, radiografías o informes y comprende cada resultado.
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-2">
+                  Sube y analiza tus análisis, radiografías, TAC, etc.
                 </p>
               </div>
             </div>
@@ -256,22 +284,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 2: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#d2f7eb] hover:bg-[#c0f2e2] border-2 border-[#6ae0b7] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edfcf7] hover:bg-[#dff8ef] border border-[#bbf0de] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 mobile-card-icon">
                   <img src="/images/icon_card_history.png" alt="Organiza tu historial" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
-                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#009b78] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={13} className="stroke-[2.8]" />
+                <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={12} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
-                  Organiza tu historial
+              <div className="mt-1 flex-1 min-h-0 flex flex-col justify-end">
+                <h3 className="text-[13.5px] sm:text-[14.5px] font-black text-slate-900 leading-tight">
+                  Organiza tu historial de salud
                 </h3>
-                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
-                  Toda tu información médica reunida y disponible en un solo lugar.
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-2">
+                  Toda tu información en un solo lugar.
                 </p>
               </div>
             </div>
@@ -279,22 +307,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 3: Últimos avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#ffe8d6] hover:bg-[#ffdcc1] border-2 border-[#fba86f] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#fff7f0] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 mobile-card-icon">
                   <img src="/images/icon_card_advances.png" alt="Últimos avances médicos" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
-                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={13} className="stroke-[2.8]" />
+                <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={12} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
+              <div className="mt-1 flex-1 min-h-0 flex flex-col justify-end">
+                <h3 className="text-[13.5px] sm:text-[14.5px] font-black text-slate-900 leading-tight">
                   Últimos avances médicos
                 </h3>
-                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
-                  Conoce los tratamientos y novedades más recientes explicados con claridad.
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-2">
+                  Conoce los tratamientos y novedades más recientes.
                 </p>
               </div>
             </div>
@@ -302,47 +330,38 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 4: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#ede0fe] hover:bg-[#e2cefd] border-2 border-[#be8efb] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between shadow-xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#f9f4ff] hover:bg-[#f1e5fe] border border-[#e6d2fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-11 h-11 flex items-center justify-center shrink-0 mobile-card-icon">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 mobile-card-icon">
                   <img src="/images/icon_card_doctors.png" alt="Encuentra tu médico" className="w-full h-full object-contain drop-shadow-xs group-hover:scale-105 transition-transform" />
                 </div>
-                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#7116e0] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={13} className="stroke-[2.8]" />
+                <div className="w-6 h-6 sm:w-6.5 sm:h-6.5 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={12} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1 sm:mt-2 flex-1 min-h-0 flex flex-col justify-end">
-                <h3 className="text-[15px] sm:text-[16.5px] font-black text-black leading-tight sm:leading-snug">
+              <div className="mt-1 flex-1 min-h-0 flex flex-col justify-end">
+                <h3 className="text-[13.5px] sm:text-[14.5px] font-black text-slate-900 leading-tight">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[11.5px] sm:text-[13px] text-slate-800 font-semibold leading-tight sm:leading-snug mt-0.5 sm:mt-1 line-clamp-3">
-                  Especialistas para videollamada online inmediata o cita presencial.
+                <p className="text-[10px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-2">
+                  Busca un especialista y consulta por video o en persona.
                 </p>
               </div>
             </div>
 
           </div>
 
-          {/* 5. Tira de Seguridad y Confianza (100% visible, nunca tapada por la barra inferior) */}
+          {/* 6. Banner de Medicina Preventiva y Longevidad */}
           <div 
-            onClick={() => setShowSecurityModal(true)}
-            className="bg-[#ddecfe]/90 hover:bg-[#d0e5fd] border-2 border-[#8ec3f8] rounded-xl px-3 py-1.5 sm:py-2 flex items-center justify-between gap-2.5 shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-security"
+            onClick={() => onNavigate('search')}
+            className="w-full rounded-2xl border border-sky-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner bg-white"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center shrink-0 mobile-security-icon">
-                <img src="/images/icon_security_shield.png" alt="Seguridad" className="w-full h-full object-contain drop-shadow-xs" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[12.5px] sm:text-[14px] font-black text-black leading-tight">
-                  Tus datos están protegidos
-                </p>
-                <p className="text-[10.5px] sm:text-[12px] font-bold text-slate-700 leading-tight truncate">
-                  Cifrado de nivel médico (ISO 27001, GDPR)
-                </p>
-              </div>
-            </div>
-            <ChevronRight size={17} className="text-black stroke-[2.8] shrink-0" />
+            <img 
+              src="/images/banner_preventive_mobile.png" 
+              alt="Medicina preventiva y longevidad" 
+              className="w-full aspect-[412/128] object-contain block" 
+            />
           </div>
 
         </main>
