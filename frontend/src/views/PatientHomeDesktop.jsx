@@ -167,15 +167,15 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_people.png" 
-                alt="Personas que importan" 
+                alt="Para ti y para quienes más quieres" 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h3>
-                PERSONAS
+                PARA TI Y PARA
                 <br />
-                QUE IMPORTAN
+                QUIENES MÁS QUIERES
               </h3>
               <p>
                 Una atención más humana,
