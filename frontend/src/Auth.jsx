@@ -152,8 +152,8 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
     title: isVerifier ? t("verifier_login_title", "Portal de Verificación y Auditoría") : (isDoc ? t("doctor_login_title") : t("patient_portal_title")),
     Icon: isVerifier ? ShieldCheck : (isDoc ? Stethoscope : HeartPulse),
     placeholder: isVerifier ? t("verifier_placeholder", "ej. auditor_medico") : (isDoc ? t("doctor_placeholder") : t("patient_placeholder")),
-    // Solo el portal de paciente pide explícitamente un email; doctor/verificador aceptan un username libre.
-    usernameInputType: (!isDoc && !isVerifier) ? 'email' : 'text'
+    // Acepta username o correo electrónico sin forzar validación HTML5 de formato email
+    usernameInputType: 'text'
   };
 
   return (
@@ -206,6 +206,9 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
                 <input
                   type={theme.usernameInputType}
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className={`w-full bg-white/80 border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm text-brand-dark font-medium focus:outline-none focus:ring-2 focus:bg-white transition-all placeholder:text-gray-400 placeholder:font-normal shadow-inner ${theme.focusRing}`}
