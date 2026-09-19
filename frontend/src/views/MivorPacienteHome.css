@@ -462,6 +462,13 @@ button{font:inherit}
   justify-content: center;
   flex-shrink: 0;
 }
+.mivor-mobile-home .mobile-card-icon img,
+.mivor-mobile-home .mobile-security-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
 .mivor-mobile-home .mobile-card-icon svg {
   width: 18px;
   height: 18px;

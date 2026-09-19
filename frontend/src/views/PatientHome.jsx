@@ -199,8 +199,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             className="bg-[#edf5fe] hover:bg-[#e4f1fe] border border-[#d2e7fc] rounded-2xl px-3 py-1.5 flex items-center justify-between gap-2 shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-security"
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-[#0055ff] text-white flex items-center justify-center shrink-0 shadow-xs mobile-security-icon">
-                <ShieldCheck size={18} className="stroke-[2.5]" />
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 shadow-2xs mobile-security-icon">
+                <img 
+                  src="/assets/patient_cards/logo_datos_protegidos.png" 
+                  alt="Tus datos están protegidos" 
+                  className="w-full h-full object-contain pointer-events-none select-none" 
+                />
               </div>
               <div className="min-w-0">
                 <h4 className="text-[12.5px] sm:text-[13px] font-bold text-slate-900 leading-tight">
@@ -271,13 +275,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full bg-[#dbeafe] flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#0055ff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[19px] h-[19px]">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <circle cx="10" cy="13" r="1.5" />
-                    <path d="m18 19-3.5-4.5-2.5 3-1.5-2L7 19" />
-                  </svg>
+                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                  <img 
+                    src="/assets/patient_cards/logo_entiende_pruebas.png" 
+                    alt="Entiende tus pruebas médicas" 
+                    className="w-full h-full object-contain pointer-events-none select-none" 
+                  />
                 </div>
                 <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -299,10 +302,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full bg-[#d1fae5] flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#00ab84" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[19px] h-[19px]">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                  </svg>
+                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                  <img 
+                    src="/assets/patient_cards/logo_organiza_historial.png" 
+                    alt="Organiza tu historial de salud" 
+                    className="w-full h-full object-contain pointer-events-none select-none" 
+                  />
                 </div>
                 <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -324,12 +329,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full bg-[#ffedd5] flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#f25500" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[19px] h-[19px]">
-                    <path d="M9 18h6" />
-                    <path d="M10 22h4" />
-                    <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z" />
-                  </svg>
+                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                  <img 
+                    src="/assets/patient_cards/logo_descubre_avances.png" 
+                    alt="Descubre avances médicos" 
+                    className="w-full h-full object-contain pointer-events-none select-none" 
+                  />
                 </div>
                 <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
@@ -351,13 +356,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2.5 sm:p-3 flex flex-col justify-start shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
               <div className="flex items-center justify-between shrink-0">
-                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full bg-[#f3e8ff] flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#8527e8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-[19px] h-[19px]">
-                    <circle cx="12" cy="7" r="4" />
-                    <path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
-                    <path d="M9 13v2a3 3 0 0 0 6 0v-2" />
-                    <circle cx="15" cy="15" r="1" fill="#8527e8" />
-                  </svg>
+                <div className="w-8.5 h-8.5 sm:w-9.5 sm:h-9.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+                  <img 
+                    src="/assets/patient_cards/logo_encuentra_medico.png" 
+                    alt="Encuentra tu médico" 
+                    className="w-full h-full object-contain pointer-events-none select-none" 
+                  />
                 </div>
                 <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
                   <ArrowRight size={14} className="stroke-[2.8]" />
