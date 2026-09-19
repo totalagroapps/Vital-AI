@@ -206,8 +206,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <h4 className="text-[12.5px] sm:text-[13px] font-bold text-slate-900 leading-tight">
                   Tus datos están protegidos
                 </h4>
-                <p className="text-[9.5px] sm:text-[10.5px] text-slate-600 font-medium leading-tight mt-0.5">
-                  Cifrado de nivel médico y máxima seguridad para tu tranquilidad.
+                <p className="text-[9px] sm:text-[10px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-1 sm:line-clamp-2">
+                  Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).
                 </p>
               </div>
             </div>
@@ -284,11 +284,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16.5px] sm:text-[18px] font-black text-slate-900 leading-[1.12] tracking-tight">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Entiende tus<br />pruebas médicas
                 </h3>
-                <p className="text-[11px] sm:text-[12px] text-slate-600 font-medium leading-[1.26] mt-1">
-                  Comprende la información de tus análisis, informes y documentos médicos.
+                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                  Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.
                 </p>
               </div>
             </div>
@@ -309,11 +309,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16.5px] sm:text-[18px] font-black text-slate-900 leading-[1.12] tracking-tight">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Organiza tu<br />historial de salud
                 </h3>
-                <p className="text-[11px] sm:text-[12px] text-slate-600 font-medium leading-[1.26] mt-1">
-                  Toda tu información médica en un solo lugar.
+                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                  Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.
                 </p>
               </div>
             </div>
@@ -336,10 +336,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16.5px] sm:text-[18px] font-black text-slate-900 leading-[1.12] tracking-tight">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Descubre avances<br />médicos
                 </h3>
-                <p className="text-[11px] sm:text-[12px] text-slate-600 font-medium leading-[1.26] mt-1">
+                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
                   Accede a información actualizada sobre investigación, medicamentos y novedades científicas.
                 </p>
               </div>
@@ -364,11 +364,11 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </div>
               </div>
               <div className="mt-2 sm:mt-2.5 flex-1 min-h-0 flex flex-col justify-start">
-                <h3 className="text-[16.5px] sm:text-[18px] font-black text-slate-900 leading-[1.12] tracking-tight">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-slate-900 leading-[1.12] tracking-tight">
                   Encuentra tu médico
                 </h3>
-                <p className="text-[11px] sm:text-[12px] text-slate-600 font-medium leading-[1.26] mt-1">
-                  Busca un especialista y consulta por video o en persona.
+                <p className="text-[10.5px] sm:text-[11.2px] text-slate-600 font-medium leading-[1.24] mt-1">
+                  Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.
                 </p>
               </div>
             </div>

@@ -113,13 +113,16 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
         <div className="hero-copy">
           <h1>
-            {tr('hero_title_p1', 'Tu salud,').trim().replace(/\s+,/g, ',')}<br />
-            {tr('hero_title_p2', 'en manos de la')}<br />
+            Tu salud,<br />
+            con el apoyo de la<br />
             <strong>
-              {tr('hero_title_p3', 'IA más avanzada')}<br />
-              {tr('hero_title_p4', 'en medicina.')}
+              inteligencia artificial<br />
+              más avanzada.
             </strong>
           </h1>
+          <p className="hero-subtitle">
+            Más información. Más claridad. Una vida más saludable.
+          </p>
           <div className="protection-card" onClick={() => setShowSecurityModal(true)}>
             <div className="shield">
               <img 
@@ -129,8 +132,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               />
             </div>
             <div>
-              <h3>{tr('hero_security_title', 'Tus datos están protegidos')}</h3>
-              <p>{tr('hero_security_desc', 'Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).')}</p>
+              <h3>Tus datos están protegidos</h3>
+              <p>Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).</p>
             </div>
           </div>
         </div>
@@ -143,20 +146,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_tech.png" 
-                alt="Tecnología que cuida" 
+                alt="Tecnología que acompaña" 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h3>
-                {tr('pillar_tech_line1', 'TECNOLOGÍA')}
+                TECNOLOGÍA
                 <br />
-                {tr('pillar_tech_line2', 'QUE CUIDA')}
+                QUE ACOMPAÑA
               </h3>
               <p>
-                {tr('pillar_tech_desc_line1', 'Inteligencia artificial')}
+                Inteligencia artificial
                 <br />
-                {tr('pillar_tech_desc_line2', 'al servicio de tu salud.')}
+                al servicio de tu salud.
               </p>
             </div>
           </div>
@@ -170,14 +173,14 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
             <div>
               <h3>
-                {tr('pillar_people_line1', 'PERSONAS')}
+                PERSONAS
                 <br />
-                {tr('pillar_people_line2', 'QUE IMPORTAN')}
+                QUE IMPORTAN
               </h3>
               <p>
-                {tr('pillar_people_desc_line1', 'Una atención más humana,')}
+                Una atención más humana,
                 <br />
-                {tr('pillar_people_desc_line2', 'cercana y personalizada.')}
+                cercana y personalizada.
               </p>
             </div>
           </div>
@@ -191,14 +194,14 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
             <div>
               <h3>
-                {tr('pillar_future_line1', 'UN FUTURO')}
+                UN FUTURO
                 <br />
-                {tr('pillar_future_line2', 'MÁS SALUDABLE')}
+                MÁS SALUDABLE
               </h3>
               <p>
-                {tr('pillar_future_desc_line1', 'Innovación hoy,')}
+                Innovación hoy,
                 <br />
-                {tr('pillar_future_desc_line2', 'para una vida mejor mañana.')}
+                para una vida mejor mañana.
               </p>
             </div>
           </div>
@@ -216,24 +219,24 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>{tr('card_ask_title', 'Pregunta a MIVOR.ai')}</h2>
-          <p>{tr('card_ask_desc', 'Resuelve tus dudas de salud, entiende tus síntomas y descubre información médica con la ayuda de una IA médica avanzada.')}</p>
+          <h2>Pregunta a MIVOR.ai</h2>
+          <p>Resuelve tus dudas sobre salud, comprende tus síntomas y obtén información clara con la ayuda de la inteligencia artificial.</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
         </button>
 
-        {/* Tarjeta 2: Explica tus pruebas médicas */}
+        {/* Tarjeta 2: Entiende tus pruebas médicas */}
         <button className="service-card blue" onClick={() => onNavigate('documents')}>
           <div className="service-icon">
             <img 
               src="/images/icon_card_explain.png" 
-              alt="Explica tus pruebas médicas" 
+              alt="Entiende tus pruebas médicas" 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>{tr('card_analyze_title', 'Explica tus pruebas médicas')}</h2>
-          <p>{tr('card_analyze_desc', 'Descubre qué dicen tus pruebas. MIVOR.ai traduce y explica términos clínicos y analíticas para facilitarte su comprensión a ti y a tu médico de forma clara y sencilla.')}</p>
+          <h2>Entiende tus pruebas médicas</h2>
+          <p>Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -248,24 +251,24 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>{tr('card_history_title', 'Organiza tu historial de salud')}</h2>
-          <p>{tr('card_history_desc', 'Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis facilitarla de forma segura a un médico cuando la necesitéis.')}</p>
+          <h2>Organiza tu historial de salud</h2>
+          <p>Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
         </button>
 
-        {/* Tarjeta 4: Últimos avances médicos */}
+        {/* Tarjeta 4: Descubre avances médicos */}
         <button className="service-card orange" onClick={() => onNavigate('search')}>
           <div className="service-icon">
             <img 
               src="/images/icon_card_advances.png" 
-              alt="Últimos avances médicos" 
+              alt="Descubre avances médicos" 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>{tr('card_advances_title', 'Últimos avances médicos')}</h2>
-          <p>{tr('card_advances_desc', 'Descubre los últimos avances médicos y científicos sobre enfermedades, tratamientos y salud, explicados de forma clara y actualizada.')}</p>
+          <h2>Descubre avances médicos</h2>
+          <p>Accede a información actualizada sobre investigación, medicamentos y novedades científicas.</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -280,8 +283,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>{tr('card_doctors_title', 'Encuentra tu médico')}</h2>
-          <p>{tr('card_doctors_desc', 'Busca un médico por especialidad y encuentra la opción que mejor se adapte a ti: una consulta cerca de donde estás o una videoconferencia rápida desde cualquier lugar.')}</p>
+          <h2>Encuentra tu médico</h2>
+          <p>Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
