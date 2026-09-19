@@ -274,24 +274,24 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               onClick={() => onNavigate('documents')}
               className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
-              <div className="flex items-center justify-between shrink-0">
-                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+              <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_entiende_pruebas.png" 
                     alt="Entiende tus pruebas médicas" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={14} className="stroke-[2.8]" />
+                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
+              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Entiende tus<br />pruebas médicas
                 </h3>
-                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
-                  Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.
+                <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
+                  Comprende tus análisis, informes y documentos clínicos con explicaciones médicas sencillas, claras y comprensibles.
                 </p>
               </div>
             </div>
@@ -301,24 +301,24 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               onClick={() => onNavigate('history')}
               className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
-              <div className="flex items-center justify-between shrink-0">
-                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+              <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_organiza_historial.png" 
                     alt="Organiza tu historial de salud" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={14} className="stroke-[2.8]" />
+                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#00ab84] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
+              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Organiza tu<br />historial de salud
                 </h3>
-                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
-                  Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.
+                <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
+                  Toda tu información médica reunida en un solo lugar para consultarla o compartirla cuando tú decidas.
                 </p>
               </div>
             </div>
@@ -328,24 +328,24 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               onClick={() => onNavigate('search')}
               className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
-              <div className="flex items-center justify-between shrink-0">
-                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+              <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_descubre_avances.png" 
                     alt="Descubre avances médicos" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={14} className="stroke-[2.8]" />
+                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#f25500] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
+              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                   Descubre avances<br />médicos
                 </h3>
-                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
-                  Accede a información actualizada sobre investigación, medicamentos y novedades científicas.
+                <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
+                  Accede a información científica actualizada sobre tratamientos innovadores, salud preventiva y nuevos medicamentos.
                 </p>
               </div>
             </div>
@@ -355,24 +355,24 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               onClick={() => onNavigate('doctors')}
               className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
             >
-              <div className="flex items-center justify-between shrink-0">
-                <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
+              <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_encuentra_medico.png" 
                     alt="Encuentra tu médico" 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
-                <div className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
-                  <ArrowRight size={14} className="stroke-[2.8]" />
+                <div className="w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-full bg-[#8527e8] text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform shrink-0 mobile-card-arrow">
+                  <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="mt-1.5 flex-1 min-h-0 flex flex-col justify-between">
-                <h3 className="text-[18.2px] sm:text-[19px] font-black text-black leading-[1.1] tracking-tight">
-                  Encuentra tu médico
+              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
+                  Encuentra tu<br />médico
                 </h3>
-                <p className="text-[12.3px] sm:text-[12.8px] text-black font-semibold leading-[1.2] mt-auto">
-                  Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.
+                <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
+                  Localiza profesionales sanitarios por especialidad y agenda tu consulta presencial o por videollamada.
                 </p>
               </div>
             </div>
