@@ -1,3 +1,4 @@
+import { useLanguage } from '../contexts/LanguageContext';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight, ArrowLeft, Brain, Users, Lock, Headphones, Image as ImageIcon, Video, FileText, MapPin, Phone, Globe, UploadCloud, Info, User, UserSquare2, Activity } from 'lucide-react';
@@ -11,6 +12,7 @@ const steps = [
 ];
 
 const DoctorOnboarding = ({ onNavigateLogin }) => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,19 +66,19 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       const pwd = formData.password || '';
       const name = (formData.name || formData.fullName || '').trim();
       if (!email || !pwd || !name) {
-        setSubmitError('Por favor completa los campos obligatorios: Nombre, Correo y Contraseña.');
+        setSubmitError(t('doctoronboarding_por_favor_completa_los_campos'));
         return;
       }
       if (pwd.length < 6) {
-        setSubmitError('La contraseña debe tener al menos 6 caracteres.');
+        setSubmitError(t('doctoronboarding_la_contrasena_debe_tener_al'));
         return;
       }
       if (formData.confirmPassword && pwd !== formData.confirmPassword) {
-        setSubmitError('Las contraseñas no coinciden.');
+        setSubmitError(t('doctoronboarding_las_contrasenas_no_coinciden'));
         return;
       }
       if (!formData.termsAccepted) {
-        setSubmitError('Debes aceptar los Términos de Servicio y la Política de Privacidad.');
+        setSubmitError(t('doctoronboarding_debes_aceptar_los_terminos_de'));
         return;
       }
     }
@@ -105,7 +107,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       const computedLocation = [formData.clinicName, formData.city, formData.country].filter(Boolean).join(', ') || 'España';
       form.append('location', computedLocation);
       form.append('languages', formData.languages || 'Español');
-      form.append('bio', formData.bio || `Especialista en ${formData.specialty || 'Medicina General'} con dedicación a la atención clínica personalizada.`);
+      form.append('bio', formData.bio || t('doctoronboarding_especialista_en_con_dedicacion_a', { value: formData.specialty || 'Medicina General' }));
       
       if (formData.idDocFile) form.append('id_doc_file', formData.idDocFile);
       if (formData.diplomaFile) form.append('diploma_file', formData.diplomaFile);
@@ -128,7 +130,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
       }
     } catch (e) {
       console.error(e);
-      setSubmitError('Error de conexión con el servidor. Intenta de nuevo.');
+      setSubmitError(t('doctoronboarding_error_de_conexion_con_el'));
     }
     
     setIsSubmitting(false);
@@ -156,7 +158,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                MIVOR<span className="text-teal-600">.ai</span>
              </span>
           </div>
-          <span className="text-[10px] text-teal-700 font-bold tracking-widest uppercase ml-9">MÉDICOS</span>
+          <span className="text-[10px] text-teal-700 font-bold tracking-widest uppercase ml-9">{t('doctors')}</span>
         </div>
 
                 {/* Stepper */}
@@ -187,9 +189,9 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-[10px] text-gray-500 font-medium">¿Ya tienes cuenta?</span>
+          <span className="text-[10px] text-gray-500 font-medium">{t('doctoronboarding_ya_tienes_cuenta')}</span>
           <button onClick={onNavigateLogin} className="text-sm font-bold text-brand-purple flex items-center gap-1 hover:text-purple-700">
-            Iniciar sesión <ArrowRight size={14} />
+           {t('doctoronboarding_iniciar_sesion')} <ArrowRight size={14} />
           </button>
         </div>
       </header>
@@ -202,31 +204,31 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
             {/* Left Col - Benefits */}
             <div className="hidden lg:flex lg:col-span-3 flex-col pt-12">
-              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">Únete a<br/><span className="text-teal-600">MIVOR.ai</span></h2>
+              <h2 className="text-3xl font-bold text-brand-dark leading-tight mb-4">{t('doctoronboarding_unete_a')}<br/><span className="text-teal-600">MIVOR.ai</span></h2>
               <p className="text-sm text-gray-500 mb-10 pr-4 leading-relaxed">
-                La plataforma de IA médica hecha para profesionales como tú.
+               {t('join_mivor_subtitle')}
               </p>
               
               <div className="space-y-6">
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0 text-brand-purple"><Brain size={20}/></div>
                   <div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-1">IA clínica avanzada</h4>
-                    <p className="text-xs text-gray-500">Resúmenes inteligentes, análisis y apoyo en decisiones médicas.</p>
+                    <h4 className="font-bold text-sm text-brand-dark mb-1">{t('clinical_ai_adv')}</h4>
+                    <p className="text-xs text-gray-500">{t('doctoronboarding_resumenes_inteligentes_analisis_y_ap')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 text-blue-500"><Users size={20}/></div>
                   <div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-1">Gestiona tus pacientes</h4>
-                    <p className="text-xs text-gray-500">Historiales completos, pruebas, medicación y consultas en un solo lugar.</p>
+                    <h4 className="font-bold text-sm text-brand-dark mb-1">{t('manage_patients_feat')}</h4>
+                    <p className="text-xs text-gray-500">{t('doctoronboarding_historiales_completos_pruebas_medica')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0 text-brand-green"><Lock size={20}/></div>
                   <div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-1">Seguro y confidencial</h4>
-                    <p className="text-xs text-gray-500">Cumplimos con los más altos estándares de seguridad y privacidad.</p>
+                    <h4 className="font-bold text-sm text-brand-dark mb-1">{t('safe_confidential')}</h4>
+                    <p className="text-xs text-gray-500">{t('doctoronboarding_cumplimos_con_los_mas_altos')}</p>
                   </div>
                 </div>
               </div>
@@ -234,16 +236,16 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
               <div className="mt-auto pt-10 flex gap-3 items-center">
                  <Headphones className="text-gray-400" size={24}/>
                  <div>
-                   <h4 className="font-bold text-xs text-brand-dark">¿Necesitas ayuda?</h4>
-                   <p className="text-xs text-gray-500">Escríbenos a <a href="#" className="text-teal-600 font-semibold">soporte@mivor.ai</a></p>
+                   <h4 className="font-bold text-xs text-brand-dark">{t('patienttopnav_necesitas_ayuda')}</h4>
+                   <p className="text-xs text-gray-500">{t('step2professional_escribenos_a')} <a href="#" className="text-teal-600 font-semibold">soporte@mivor.ai</a></p>
                  </div>
               </div>
             </div>
 
             {/* Middle Col - Forms */}
             <div className="col-span-1 lg:col-span-6 flex flex-col">
-              <h1 className="text-2xl font-bold text-brand-dark mb-2">Crea tu cuenta profesional</h1>
-              <p className="text-sm text-gray-500 mb-8">El proceso es rápido, seguro y 100% confidencial.</p>
+              <h1 className="text-2xl font-bold text-brand-dark mb-2">{t('doctoronboarding_crea_tu_cuenta_profesional')}</h1>
+              <p className="text-sm text-gray-500 mb-8">{t('step1personal_el_proceso_es_rapido_seguro')}</p>
 
               {/* Data Sections */}
               <div className="space-y-6">
@@ -257,26 +259,26 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
 
                 {/* 1. Datos personales */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                  <h3 className="font-bold text-brand-purple mb-4">1. Datos personales</h3>
+                  <h3 className="font-bold text-brand-purple mb-4">{t('doctoronboarding_1_datos_personales')}</h3>
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nombre *</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('doctoronboarding_nombre')}</label>
                       <input 
                         type="text" 
                         value={formData.name}
                         onChange={(e) => updateField('name', e.target.value)}
-                        placeholder="Ingresa tu nombre" 
+                        placeholder={t('step1personal_ingresa_tu_nombre')} 
                         className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Apellidos</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step1personal_apellidos')}</label>
                       <input 
                         type="text" 
                         value={formData.surname}
                         onChange={(e) => updateField('surname', e.target.value)}
-                        placeholder="Ingresa tus apellidos" 
+                        placeholder={t('step1personal_ingresa_tus_apellidos')} 
                         className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                       />
                     </div>
@@ -284,7 +286,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                   
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Fecha de nacimiento</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step1personal_fecha_de_nacimiento')}</label>
                       <input 
                         type="date" 
                         value={formData.dateOfBirth}
@@ -293,25 +295,25 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">País de residencia</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step1personal_pais_de_residencia')}</label>
                       <select 
                         value={formData.country}
                         onChange={(e) => updateField('country', e.target.value)}
                         className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
                       >
-                        <option value="España">España</option>
-                        <option value="México">México</option>
-                        <option value="Colombia">Colombia</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Chile">Chile</option>
-                        <option value="Estados Unidos">Estados Unidos</option>
+                        <option value="España">{t('doctoronboarding_espana')}</option>
+                        <option value="México">{t('doctoronboarding_mexico')}</option>
+                        <option value="Colombia">{t('doctoronboarding_colombia')}</option>
+                        <option value="Argentina">{t('doctoronboarding_argentina')}</option>
+                        <option value="Chile">{t('doctoronboarding_chile')}</option>
+                        <option value="Estados Unidos">{t('doctoronboarding_estados_unidos')}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Correo electrónico *</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('doctoronboarding_correo_electronico')}</label>
                       <input 
                         type="email" 
                         value={formData.email}
@@ -321,7 +323,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Teléfono</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('profile_phone')}</label>
                       <div className="flex gap-2">
                         <select className="w-24 border border-gray-200 rounded-lg p-2.5 text-sm bg-gray-50 text-gray-700 outline-none">
                           <option>🇪🇸 +34</option>
@@ -343,30 +345,30 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
 
                 {/* 2. Contraseña */}
                 <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-                  <h3 className="font-bold text-brand-purple mb-4">2. Crea tu contraseña</h3>
+                  <h3 className="font-bold text-brand-purple mb-4">{t('step1personal_2_crea_tu_contrasena')}</h3>
                   <div className="grid grid-cols-2 gap-4 mb-2">
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Crea una contraseña segura *</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('doctoronboarding_crea_una_contrasena_segura')}</label>
                       <input 
                         type="password" 
                         value={formData.password}
                         onChange={(e) => updateField('password', e.target.value)}
-                        placeholder="Crea una contraseña segura" 
+                        placeholder={t('step1personal_crea_una_contrasena_segura')} 
                         className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Confirma tu contraseña *</label>
+                      <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('doctoronboarding_confirma_tu_contrasena')}</label>
                       <input 
                         type="password" 
                         value={formData.confirmPassword}
                         onChange={(e) => updateField('confirmPassword', e.target.value)}
-                        placeholder="Repite tu contraseña" 
+                        placeholder={t('step1personal_repite_tu_contrasena')} 
                         className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                       />
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-400">Mínimo 6 caracteres, incluye números o letras.</p>
+                  <p className="text-[10px] text-gray-400">{t('doctoronboarding_minimo_6_caracteres_incluye_numeros')}</p>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 pb-12">
@@ -377,10 +379,10 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                        onChange={(e) => updateField('termsAccepted', e.target.checked)}
                        className="w-4 h-4 rounded border-gray-300 text-brand-purple focus:ring-brand-purple" 
                      />
-                     <span className="text-xs text-gray-600 font-medium">He leído y acepto los <span className="text-brand-purple">Términos de servicio</span> y la <span className="text-brand-purple">Política de privacidad</span>.</span>
+                     <span className="text-xs text-gray-600 font-medium">{t('doctoronboarding_he_leido_y_acepto_los')} <span className="text-brand-purple">{t('doctoronboarding_terminos_de_servicio')}</span> {t('doctoronboarding_y_la')} <span className="text-brand-purple">{t('patient_privacy_policy')}</span>.</span>
                    </label>
                    <button onClick={handleNext} className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md">
-                     Continuar <ArrowRight size={16} />
+                    {t('continue')} <ArrowRight size={16} />
                    </button>
                 </div>
               </div>
@@ -390,21 +392,21 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
             <div className="hidden lg:flex lg:col-span-3 flex-col bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
                <img src="/images/abstract_woman_bg.jpg" className="w-full h-64 object-cover object-top" />
                <div className="p-6">
-                 <h3 className="text-xl font-bold text-brand-dark mb-4 leading-tight">La <span className="text-brand-purple">inteligencia artificial</span> que acompaña tu práctica médica.</h3>
-                 <p className="text-xs text-gray-500 mb-6 leading-relaxed">Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente.</p>
+                 <h3 className="text-xl font-bold text-brand-dark mb-4 leading-tight">{t('step1personal_la')} <span className="text-brand-purple">{t('artificial_intelligence')}</span> {t('step1personal_que_acompana_tu_practica_medica')}</h3>
+                 <p className="text-xs text-gray-500 mb-6 leading-relaxed">{t('save_time_make_better_decisions')}</p>
                  
                  <div className="space-y-4">
                    <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center flex-shrink-0"><Brain size={16}/></div>
-                     <p className="text-[11px] text-gray-600 font-medium">Inteligencia que entiende tu contexto clínico</p>
+                     <p className="text-[11px] text-gray-600 font-medium">{t('step1personal_inteligencia_que_entiende_tu_context')}</p>
                    </div>
                    <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><Lock size={16}/></div>
-                     <p className="text-[11px] text-gray-600 font-medium">Información confiable y basada en evidencia</p>
+                     <p className="text-[11px] text-gray-600 font-medium">{t('step1personal_informacion_confiable_y_basada_en')}</p>
                    </div>
                    <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-green-50 text-brand-green flex items-center justify-center flex-shrink-0"><Activity size={16}/></div>
-                     <p className="text-[11px] text-gray-600 font-medium">Análisis que te ayuda a decidir mejor</p>
+                     <p className="text-[11px] text-gray-600 font-medium">{t('step1personal_analisis_que_te_ayuda_a')}</p>
                    </div>
                  </div>
                </div>
@@ -420,22 +422,22 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm pb-6">
                  <img src="/images/abstract_woman_bg.jpg" className="w-full h-48 object-cover object-top" />
                  <div className="px-5 pt-4">
-                   <h3 className="text-lg font-bold text-brand-dark mb-2 leading-tight">La <span className="text-brand-purple">inteligencia artificial</span> que acompaña tu práctica médica.</h3>
-                   <p className="text-[10px] text-gray-500 mb-4 leading-relaxed">Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente.</p>
+                   <h3 className="text-lg font-bold text-brand-dark mb-2 leading-tight">{t('step1personal_la')} <span className="text-brand-purple">{t('artificial_intelligence')}</span> {t('step1personal_que_acompana_tu_practica_medica')}</h3>
+                   <p className="text-[10px] text-gray-500 mb-4 leading-relaxed">{t('save_time_make_better_decisions')}</p>
                    
                    <div className="space-y-3">
                      <div className="flex items-center gap-2">
                        <div className="w-6 h-6 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center flex-shrink-0"><Brain size={12}/></div>
                        <div>
-                         <p className="text-[10px] font-bold text-gray-700">IA clínica avanzada</p>
-                         <p className="text-[9px] text-gray-400">Resúmenes inteligentes, evidencia médica.</p>
+                         <p className="text-[10px] font-bold text-gray-700">{t('clinical_ai_adv')}</p>
+                         <p className="text-[9px] text-gray-400">{t('doctoronboarding_resumenes_inteligentes_evidencia_med')}</p>
                        </div>
                      </div>
                      <div className="flex items-center gap-2">
                        <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0"><Users size={12}/></div>
                        <div>
-                         <p className="text-[10px] font-bold text-gray-700">Gestiona tus pacientes</p>
-                         <p className="text-[9px] text-gray-400">Historiales completos, consultas en un solo lugar.</p>
+                         <p className="text-[10px] font-bold text-gray-700">{t('manage_patients_feat')}</p>
+                         <p className="text-[9px] text-gray-400">{t('doctoronboarding_historiales_completos_consultas_en_u')}</p>
                        </div>
                      </div>
                    </div>
@@ -447,51 +449,51 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
             <div className="col-span-1 lg:col-span-8 lg:col-start-5 flex flex-col pt-4">
               <div className="flex items-center mb-6">
                 <button onClick={handleBack} className="text-brand-purple flex items-center gap-2 font-bold text-sm hover:text-purple-700">
-                  <ArrowLeft size={16} /> Volver
+                  <ArrowLeft size={16} /> {t('returning')}
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm mb-12">
-                <h3 className="font-bold text-brand-dark text-lg mb-1">Información profesional</h3>
-                <p className="text-xs text-gray-500 mb-6">Cuéntanos más sobre tu práctica médica.</p>
+                <h3 className="font-bold text-brand-dark text-lg mb-1">{t('step_professional_info')}</h3>
+                <p className="text-xs text-gray-500 mb-6">{t('step2professional_cuentanos_mas_sobre_tu_practica')}</p>
                 
                 <div className="grid grid-cols-3 gap-6 mb-6">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Especialidad principal</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step3professional_especialidad_principal')}</label>
                     <select 
                       value={formData.specialty}
                       onChange={(e) => updateField('specialty', e.target.value)}
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
                     >
-                      <option value="Medicina General">Medicina General</option>
-                      <option value="Cardiología">Cardiología</option>
-                      <option value="Dermatología">Dermatología</option>
-                      <option value="Traumatología">Traumatología</option>
-                      <option value="Pediatría">Pediatría</option>
-                      <option value="Neurología">Neurología</option>
-                      <option value="Ginecología">Ginecología</option>
-                      <option value="Oftalmología">Oftalmología</option>
-                      <option value="Psiquiatría">Psiquiatría</option>
-                      <option value="Endocrinología">Endocrinología</option>
+                      <option value="Medicina General">{t('doctoronboarding_medicina_general')}</option>
+                      <option value="Cardiología">{t('doctoronboarding_cardiologia')}</option>
+                      <option value="Dermatología">{t('doctoronboarding_dermatologia')}</option>
+                      <option value="Traumatología">{t('doctoronboarding_traumatologia')}</option>
+                      <option value="Pediatría">{t('doctoronboarding_pediatria')}</option>
+                      <option value="Neurología">{t('doctoronboarding_neurologia')}</option>
+                      <option value="Ginecología">{t('doctoronboarding_ginecologia')}</option>
+                      <option value="Oftalmología">{t('doctoronboarding_oftalmologia')}</option>
+                      <option value="Psiquiatría">{t('doctoronboarding_psiquiatria')}</option>
+                      <option value="Endocrinología">{t('doctoronboarding_endocrinologia')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nº de colegiado</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_n_de_colegiado')}</label>
                     <input 
                       type="text" 
                       value={formData.license}
                       onChange={(e) => updateField('license', e.target.value)}
-                      placeholder="Ingresa tu número" 
+                      placeholder={t('doctoronboarding_ingresa_tu_numero')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Colegio profesional</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_colegio_profesional')}</label>
                     <input 
                       type="text" 
                       value={formData.college}
                       onChange={(e) => updateField('college', e.target.value)}
-                      placeholder="Ej. Colegio Oficial de Médicos" 
+                      placeholder={t('doctoronboarding_ej_colegio_oficial_de_medicos')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
@@ -499,76 +501,76 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
 
                 <div className="grid grid-cols-3 gap-6 mb-8">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">País del colegio</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_pais_del_colegio')}</label>
                     <select 
                       value={formData.collegeCountry}
                       onChange={(e) => updateField('collegeCountry', e.target.value)}
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
                     >
-                      <option value="España">España</option>
-                      <option value="México">México</option>
-                      <option value="Colombia">Colombia</option>
-                      <option value="Argentina">Argentina</option>
+                      <option value="España">{t('doctoronboarding_espana')}</option>
+                      <option value="México">{t('doctoronboarding_mexico')}</option>
+                      <option value="Colombia">{t('doctoronboarding_colombia')}</option>
+                      <option value="Argentina">{t('doctoronboarding_argentina')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Años de experiencia</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('profile_years_experience')}</label>
                     <select 
                       value={formData.experience}
                       onChange={(e) => updateField('experience', e.target.value)}
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none text-gray-700 bg-white"
                     >
-                      <option value="1">1 año</option>
-                      <option value="3">2 a 4 años</option>
-                      <option value="5">5 a 9 años</option>
-                      <option value="10">10 a 14 años</option>
-                      <option value="15">15 o más años</option>
+                      <option value="1">{t('doctoronboarding_1_ano')}</option>
+                      <option value="3">{t('doctoronboarding_2_a_4_anos')}</option>
+                      <option value="5">{t('doctoronboarding_5_a_9_anos')}</option>
+                      <option value="10">{t('doctoronboarding_10_a_14_anos')}</option>
+                      <option value="15">{t('doctoronboarding_15_o_mas_anos')}</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Idiomas de consulta</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('doctordirectorymod_idiomas_de_consulta')}</label>
                     <input 
                       type="text" 
                       value={formData.languages}
                       onChange={(e) => updateField('languages', e.target.value)}
-                      placeholder="Español, Inglés..." 
+                      placeholder={t('doctoronboarding_espanol_ingles')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                 </div>
 
-                <h4 className="font-bold text-brand-dark text-sm mb-3">Sobre ti (opcional)</h4>
+                <h4 className="font-bold text-brand-dark text-sm mb-3">{t('doctoronboarding_sobre_ti_opcional')}</h4>
                 <div className="mb-8">
-                  <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Breve descripción profesional</label>
+                  <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_breve_descripcion_profesional')}</label>
                   <textarea 
                     rows="4" 
                     value={formData.bio}
                     onChange={(e) => updateField('bio', e.target.value)}
-                    placeholder="Cuéntanos brevemente sobre tu trayectoria profesional, áreas de interés..." 
+                    placeholder={t('doctoronboarding_cuentanos_brevemente_sobre_tu_trayec')} 
                     className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none resize-none"
                   />
                   <div className="text-right text-[10px] text-gray-400 mt-1">{(formData.bio || '').length}/300</div>
                 </div>
 
-                <h4 className="font-bold text-brand-dark text-sm mb-3">Dirección profesional</h4>
+                <h4 className="font-bold text-brand-dark text-sm mb-3">{t('doctoronboarding_direccion_profesional')}</h4>
                 <div className="grid grid-cols-2 gap-6 mb-4">
                    <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Nombre de la clínica / centro</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_nombre_de_la_clinica_centro')}</label>
                     <input 
                       type="text" 
                       value={formData.clinicName}
                       onChange={(e) => updateField('clinicName', e.target.value)}
-                      placeholder="Ingresa el nombre de tu centro" 
+                      placeholder={t('doctoronboarding_ingresa_el_nombre_de_tu')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Dirección</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('profile_address')}</label>
                     <input 
                       type="text" 
                       value={formData.clinicAddress}
                       onChange={(e) => updateField('clinicAddress', e.target.value)}
-                      placeholder="Ingresa la dirección" 
+                      placeholder={t('doctoronboarding_ingresa_la_direccion')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
@@ -576,42 +578,42 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 
                 <div className="grid grid-cols-4 gap-6 mb-8">
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Ciudad</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_ciudad')}</label>
                     <input 
                       type="text" 
                       value={formData.city}
                       onChange={(e) => updateField('city', e.target.value)}
-                      placeholder="Ciudad" 
+                      placeholder={t('step2professional_ciudad')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Código postal</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('zip_code_label')}</label>
                     <input 
                       type="text" 
                       value={formData.postalCode}
                       onChange={(e) => updateField('postalCode', e.target.value)}
-                      placeholder="Postal" 
+                      placeholder={t('doctoronboarding_postal')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Teléfono de consulta</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('step2professional_telefono_de_consulta')}</label>
                     <input 
                       type="text" 
                       value={formData.clinicPhone}
                       onChange={(e) => updateField('clinicPhone', e.target.value)}
-                      placeholder="Teléfono" 
+                      placeholder={t('profile_phone')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">Sitio web (opcional)</label>
+                    <label className="block text-[11px] font-bold text-gray-700 mb-1.5">{t('website_label')}</label>
                     <input 
                       type="text" 
                       value={formData.website}
                       onChange={(e) => updateField('website', e.target.value)}
-                      placeholder="www.tusitio.com" 
+                      placeholder={t('step2professional_www_tusitio_com')} 
                       className="w-full border border-gray-200 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-brand-purple/20 outline-none" 
                     />
                   </div>
@@ -619,10 +621,10 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                    <button onClick={handleBack} className="bg-white border border-brand-purple text-brand-purple px-8 py-2.5 rounded-lg font-bold text-sm hover:bg-purple-50 transition-colors">
-                     Volver
+                    {t('returning')}
                    </button>
                    <button onClick={handleNext} className="bg-brand-purple text-white px-8 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors">
-                     Continuar <ArrowRight size={16} />
+                    {t('continue')} <ArrowRight size={16} />
                    </button>
                 </div>
               </div>
@@ -636,13 +638,13 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
             <div className="flex flex-col max-w-4xl mx-auto pt-4 h-full">
               <div className="flex items-center mb-6">
                 <button onClick={handleBack} className="text-brand-purple flex items-center gap-2 font-bold text-sm hover:text-purple-700">
-                  <ArrowLeft size={16} /> Volver
+                  <ArrowLeft size={16} /> {t('returning')}
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm mb-12">
-                <h3 className="font-bold text-brand-dark text-lg mb-1">Verificación profesional</h3>
-                <p className="text-xs text-gray-500 mb-8">Sube tus documentos para validar tu identidad y credenciales. Es 100% seguro.</p>
+                <h3 className="font-bold text-brand-dark text-lg mb-1">{t('doctoronboarding_verificacion_profesional')}</h3>
+                <p className="text-xs text-gray-500 mb-8">{t('doctoronboarding_sube_tus_documentos_para_validar')}</p>
                 
                 {submitError && (
                   <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium flex items-center gap-2 mb-6">
@@ -681,8 +683,8 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                     <div className="w-12 h-12 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <UserSquare2 size={24}/>
                     </div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-2">Documento de identidad</h4>
-                    <p className="text-xs text-gray-500 mb-4 px-4">DNI, pasaporte o documento oficial válido.</p>
+                    <h4 className="font-bold text-sm text-brand-dark mb-2">{t('step1personal_documento_de_identidad')}</h4>
+                    <p className="text-xs text-gray-500 mb-4 px-4">{t('doctoronboarding_dni_pasaporte_o_documento_oficial')}</p>
                     <button type="button" className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors shadow-sm">
                       <UploadCloud size={14}/> {formData.idDocFile ? 'Cambiar archivo' : 'Subir archivo'}
                     </button>
@@ -691,7 +693,7 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                         <Check size={14} className="text-green-600"/> {formData.idDocFile.name}
                       </p>
                     ) : (
-                      <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                      <p className="text-[10px] text-gray-400 mt-4">{t('doctoronboarding_jpg_png_o_pdf_max')}</p>
                     )}
                   </div>
 
@@ -704,8 +706,8 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                     <div className="w-12 h-12 rounded-full bg-purple-50 text-brand-purple flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <FileText size={24}/>
                     </div>
-                    <h4 className="font-bold text-sm text-brand-dark mb-2">Diploma o Certificado de Colegiación</h4>
-                    <p className="text-xs text-gray-500 mb-4 px-4">Certificado vigente de tu colegio médico o título.</p>
+                    <h4 className="font-bold text-sm text-brand-dark mb-2">{t('doctoronboarding_diploma_o_certificado_de_colegiacion')}</h4>
+                    <p className="text-xs text-gray-500 mb-4 px-4">{t('doctoronboarding_certificado_vigente_de_tu_colegio')}</p>
                     <button type="button" className="border border-brand-purple text-brand-purple bg-white px-6 py-2 rounded-lg font-bold text-xs flex items-center gap-2 hover:bg-purple-50 transition-colors shadow-sm">
                       <UploadCloud size={14}/> {formData.diplomaFile ? 'Cambiar archivo' : 'Subir archivo'}
                     </button>
@@ -714,18 +716,18 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                         <Check size={14} className="text-green-600"/> {formData.diplomaFile.name}
                       </p>
                     ) : (
-                      <p className="text-[10px] text-gray-400 mt-4">JPG, PNG o PDF. Máx. 10MB</p>
+                      <p className="text-[10px] text-gray-400 mt-4">{t('doctoronboarding_jpg_png_o_pdf_max')}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-brand-green mb-8 bg-green-50/50 p-4 rounded-lg">
-                   <Lock size={16}/> Tu información está protegida mediante encriptación y se almacena de forma segura en la nube.
+                   <Lock size={16}/> {t('doctoronboarding_tu_informacion_esta_protegida_median')}
                 </div>
                 
                 <div className="flex items-center justify-end pt-4 border-t border-gray-100">
                    <button onClick={handleNext} className="bg-brand-purple text-white px-10 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md">
-                     Verificar y continuar <ArrowRight size={16} />
+                    {t('doctoronboarding_verificar_y_continuar')} <ArrowRight size={16} />
                    </button>
                 </div>
               </div>
@@ -739,17 +741,17 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
             <div className="col-span-1 lg:col-span-8 flex flex-col pt-4">
               <div className="flex items-center mb-6">
                 <button onClick={handleBack} className="text-brand-purple flex items-center gap-2 font-bold text-sm hover:text-purple-700">
-                  <ArrowLeft size={16} /> Volver
+                  <ArrowLeft size={16} /> {t('returning')}
                 </button>
               </div>
 
               <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm mb-12">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="bg-purple-100 text-brand-purple p-1.5 rounded-full"><Brain size={14}/></div>
-                  <span className="text-xs font-bold text-brand-purple uppercase tracking-wider">Opcional</span>
+                  <span className="text-xs font-bold text-brand-purple uppercase tracking-wider">{t('step4professional_opcional')}</span>
                 </div>
-                <h3 className="font-bold text-brand-dark text-2xl mb-2">Completa tu perfil profesional</h3>
-                <p className="text-sm text-gray-500 mb-6">Ayuda a tus pacientes a conocerte mejor. Añade información adicional si deseas ofrecer una experiencia más cercana y personalizada.</p>
+                <h3 className="font-bold text-brand-dark text-2xl mb-2">{t('complete_prof_profile')}</h3>
+                <p className="text-sm text-gray-500 mb-6">{t('doctoronboarding_ayuda_a_tus_pacientes_a')}</p>
                 
                 {submitError && (
                   <div className="p-4 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl font-medium flex items-center gap-2 mb-6">
@@ -775,10 +777,10 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                       <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-brand-purple"><User size={20}/></div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-brand-dark">Foto profesional</h4>
-                          <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">OPCIONAL</span>
+                          <h4 className="font-bold text-sm text-brand-dark">{t('prof_photo_label')}</h4>
+                          <span className="text-[9px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold">{t('optional_badge')}</span>
                         </div>
-                        <p className="text-xs text-gray-500">Añade una foto para que los pacientes puedan reconocerte.</p>
+                        <p className="text-xs text-gray-500">{t('doctoronboarding_anade_una_foto_para_que')}</p>
                         {formData.profilePicFile && (
                           <p className="text-xs text-green-700 font-semibold mt-1 flex items-center gap-1">
                             <Check size={12} className="text-green-600"/> {formData.profilePicFile.name}
@@ -798,14 +800,14 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 
                 <div className="flex items-center justify-between pt-10">
                    <button onClick={handleNext} disabled={isSubmitting} className="text-gray-500 font-bold text-sm hover:text-gray-700">
-                     Omitir y finalizar
+                    {t('skip_and_finish')}
                    </button>
                    <button 
                      onClick={handleNext} 
                      disabled={isSubmitting}
                      className="bg-brand-purple text-white px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-md disabled:opacity-50"
                    >
-                     {isSubmitting ? 'Registrando...' : 'Finalizar inscripción'} <ArrowRight size={16} />
+                     {isSubmitting ? t('doctoronboarding_registrando') : t('doctoronboarding_finalizar_inscripcion')} <ArrowRight size={16} />
                    </button>
                 </div>
               </div>
@@ -816,22 +818,22 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                <div className="bg-[#f8f9fc] rounded-3xl overflow-hidden shadow-sm h-full flex flex-col p-8">
                  <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400" className="w-full h-48 object-cover rounded-xl mb-6 shadow-md border-4 border-white" />
                  
-                 <h3 className="text-xl font-bold text-brand-dark mb-4 leading-tight">Tu perfil, tu mejor carta de presentación</h3>
-                 <p className="text-sm text-gray-600 mb-8 leading-relaxed">Conecta con más pacientes y genera más confianza mostrando quién eres y dónde trabajas.</p>
+                 <h3 className="text-xl font-bold text-brand-dark mb-4 leading-tight">{t('step4professional_tu_perfil_tu_mejor_carta')}</h3>
+                 <p className="text-sm text-gray-600 mb-8 leading-relaxed">{t('step4professional_conecta_con_mas_pacientes_y')}</p>
                  
                  <div className="space-y-6 flex-1">
                    <div className="flex items-start gap-3">
                      <div className="w-8 h-8 rounded-full bg-white text-brand-purple flex items-center justify-center flex-shrink-0 shadow-sm"><User size={16}/></div>
                      <div>
-                       <p className="text-xs font-bold text-gray-800">Muestra tu foto profesional</p>
-                       <p className="text-[11px] text-gray-500 mt-0.5">Haz que los pacientes te reconozcan.</p>
+                       <p className="text-xs font-bold text-gray-800">{t('step4professional_muestra_tu_foto_profesional')}</p>
+                       <p className="text-[11px] text-gray-500 mt-0.5">{t('step4professional_haz_que_los_pacientes_te')}</p>
                      </div>
                    </div>
                  </div>
 
                  <div className="bg-white/60 rounded-xl p-4 flex gap-3 items-start mt-6">
                    <Info size={16} className="text-brand-purple mt-0.5 flex-shrink-0"/>
-                   <p className="text-[10px] text-gray-600">Esta información es opcional y podrás completarla cuando quieras desde "Mi perfil".</p>
+                   <p className="text-[10px] text-gray-600">{t('doctoronboarding_esta_informacion_es_opcional_y')}</p>
                  </div>
                </div>
             </div>
@@ -853,32 +855,32 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 <div className="absolute bottom-4 left-[-10px] w-3 h-3 bg-brand-blue rounded-full"></div>
               </div>
 
-              <h1 className="text-4xl font-black text-brand-dark mb-4">¡Cuenta creada con éxito!</h1>
-              <p className="text-lg text-gray-600 mb-8">Tu cuenta profesional de médico en MIVOR.ai ya está lista.</p>
+              <h1 className="text-4xl font-black text-brand-dark mb-4">{t('account_created_success')}</h1>
+              <p className="text-lg text-gray-600 mb-8">{t('doctoronboarding_tu_cuenta_profesional_de_medico')}</p>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-10">
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-brand-purple mb-4">
                     <UserSquare2 size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Acceso Inmediato</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Puedes ingresar a tu dashboard y explorar el historial de pacientes y el Copiloto IA.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">{t('doctoronboarding_acceso_inmediato')}</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctoronboarding_puedes_ingresar_a_tu_dashboard')}</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 mb-4">
                     <Globe size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Visibilidad de Especialista</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Tu perfil se lista en el directorio para consultas y derivaciones de pacientes orientados en la plataforma.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">{t('doctoronboarding_visibilidad_de_especialista')}</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctoronboarding_tu_perfil_se_lista_en')}</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 p-6 rounded-2xl shadow-sm text-left">
                   <div className="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-brand-green mb-4">
                     <Lock size={20} />
                   </div>
-                  <h4 className="font-bold text-sm text-brand-dark mb-2">Máxima Seguridad</h4>
-                  <p className="text-[11px] text-gray-500 leading-relaxed">Tus diplomas y datos están protegidos en nuestra nube médica con encriptación.</p>
+                  <h4 className="font-bold text-sm text-brand-dark mb-2">{t('doctoronboarding_maxima_seguridad')}</h4>
+                  <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctoronboarding_tus_diplomas_y_datos_estan')}</p>
                 </div>
               </div>
 
@@ -889,14 +891,14 @@ const DoctorOnboarding = ({ onNavigateLogin }) => {
                 }} 
                 className="bg-brand-purple text-white px-12 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-purple-700 transition-colors shadow-lg hover:shadow-purple-500/30 mb-4"
               >
-                Entrar a mi Panel Médico <ArrowRight size={20} />
+               {t('doctoronboarding_entrar_a_mi_panel_medico')} <ArrowRight size={20} />
               </button>
               
               <button 
                 onClick={() => window.location.href = '/'} 
                 className="text-gray-500 hover:text-gray-700 font-semibold text-sm"
               >
-                Ir al inicio
+               {t('doctoronboarding_ir_al_inicio')}
               </button>
 
             </div>

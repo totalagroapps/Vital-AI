@@ -40,9 +40,14 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
       const data = await res.json();
 
       if (res.ok) {
-        const finalRole = selectedRole || data.role || 'patient';
+        // El rol lo decide el servidor, no el portal elegido en pantalla.
+        const serverRole = data.role || 'patient';
+        const allowedInPortal = serverRole === selectedRole || serverRole === 'admin';
+        const finalRole = serverRole === 'admin' ? (selectedRole || 'verifier') : serverRole;
         const jwt = data.token ? data.token : data.access_token;
-        if (!jwt) {
+        if (selectedRole && !allowedInPortal) {
+          setError(t("portal_role_mismatch", "Esta cuenta no pertenece a este portal. Vuelve atrás y elige el portal correcto."));
+        } else if (!jwt) {
           // El backend respondió OK pero sin token de sesión: evita dejar al usuario
           // con un token "undefined" que provoca un cierre de sesión silencioso.
           setError(t("server_connection_error"));
@@ -248,6 +253,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
             </button>
           </form>
 
+          {!isVerifier && (
           <div className="mt-8 pt-6 border-t border-gray-100 text-center relative z-10">
             <button 
               type="button"
@@ -261,6 +267,7 @@ export default function Auth({ onLogin, apiUrl, onNavigateDoctorRegister }) {
                 : t("no_account_register")}
             </button>
           </div>
+          )}
         </div>
       </div>
     </div>

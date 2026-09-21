@@ -35,7 +35,7 @@ const InfoCard = ({ icon, title, children }) => (
 );
 
 const EspecialistaDetail = ({ apiUrl, doctorId, doctor: doctorProp, distanceKm, onBack, isOwnProfile, onEditProfile, onBook }) => {
-  const { t, language } = useLanguage();
+  const { t, language, locale: uiLocale } = useLanguage();
   const [doctor, setDoctor] = useState(doctorProp || null);
   const [isLoading, setIsLoading] = useState(!doctorProp);
   const [error, setError] = useState('');
@@ -47,7 +47,7 @@ const EspecialistaDetail = ({ apiUrl, doctorId, doctor: doctorProp, distanceKm, 
     setError('');
     fetch(`${apiUrl}/api/doctors/${doctorId}`)
       .then((res) => {
-        if (!res.ok) throw new Error('not found');
+        if (!res.ok) throw new Error(t('especialistadetail_not_found'));
         return res.json();
       })
       .then((data) => { if (!cancelled) setDoctor(data); })
@@ -90,7 +90,7 @@ const EspecialistaDetail = ({ apiUrl, doctorId, doctor: doctorProp, distanceKm, 
     );
   }
 
-  const locale = language === 'es' ? 'es-ES' : 'en-US';
+  const locale = uiLocale;
   const wip = () => alert(t('detail_action_wip'));
   // defense in depth against javascript: URLs
   const isSafeHttpUrl = (url) => {

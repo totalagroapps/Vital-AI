@@ -50,7 +50,7 @@ export default function PatientTopNav({
     };
   }, []);
 
-  const displayName = userProfile?.full_name || username || 'María Pérez';
+  const displayName = userProfile?.full_name || username || t('default_patient_name');
   
   const getInitials = (name) => {
     if (!name) return 'MP';
@@ -60,12 +60,12 @@ export default function PatientTopNav({
   };
 
   const navTabs = [
-    { id: 'home', label: 'Inicio', shortLabel: 'Inicio', icon: Home, screen: 'home' },
-    { id: 'citas', label: 'Mis consultas', shortLabel: 'Consultas', icon: Calendar, screen: 'citas' },
-    { id: 'documents', label: 'Mis documentos', shortLabel: 'Documentos', icon: FileText, screen: 'documents' },
-    { id: 'treatments', label: 'Mi salud', shortLabel: 'Mi salud', icon: Heart, screen: 'treatments' },
-    { id: 'specialists', label: 'Conectar con especialistas', shortLabel: 'Especialistas', icon: Users, screen: 'specialists' },
-    { id: 'history', label: 'Mi perfil', shortLabel: 'Mi perfil', icon: User, screen: 'history' },
+    { id: 'home', label: t('home'), shortLabel: t('home'), icon: Home, screen: 'home' },
+    { id: 'citas', label: t('patienttopnav_mis_consultas'), shortLabel: t('nav_short_consultations'), icon: Calendar, screen: 'citas' },
+    { id: 'documents', label: t('patienttopnav_mis_documentos'), shortLabel: t('nav_short_documents'), icon: FileText, screen: 'documents' },
+    { id: 'treatments', label: t('patienttopnav_mi_salud'), shortLabel: t('patienttopnav_mi_salud'), icon: Heart, screen: 'treatments' },
+    { id: 'specialists', label: t('patienttopnav_conectar_con_especialistas'), shortLabel: t('nav_short_specialists'), icon: Users, screen: 'specialists' },
+    { id: 'history', label: t('patienttopnav_mi_perfil'), shortLabel: t('patienttopnav_mi_perfil'), icon: User, screen: 'history' },
   ];
 
   const handleTabClick = (screen) => {
@@ -87,7 +87,7 @@ export default function PatientTopNav({
           <div 
             onClick={() => handleTabClick('home')} 
             className="flex items-center cursor-pointer select-none shrink-0 group"
-            title="MIVOR.ai - Inicio"
+            title={t('patienttopnav_mivor_ai_inicio')}
           >
             <img 
               src="/images/mivor-logo.png" 
@@ -139,10 +139,10 @@ export default function PatientTopNav({
             type="button"
             onClick={handleOpenHelp}
             className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#0284c7] transition-colors cursor-pointer py-1.5 px-2 rounded-xl hover:bg-slate-50"
-            title="¿Necesitas ayuda? Escríbenos por WhatsApp"
+            title={t('patienttopnav_necesitas_ayuda_escribenos_por_whats')}
           >
             <HelpCircle size={17} className="stroke-[2.2] text-slate-500" />
-            <span className="hidden xl:inline">¿Necesitas ayuda?</span>
+            <span className="hidden xl:inline">{t('patienttopnav_necesitas_ayuda')}</span>
           </button>
 
           {/* Campana de Notificaciones */}
@@ -150,7 +150,7 @@ export default function PatientTopNav({
             type="button"
             onClick={() => handleTabClick('search')}
             className="relative w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer" 
-            title="Notificaciones y avisos de salud"
+            title={t('patienttopnav_notificaciones_y_avisos_de_salud')}
           >
             <Bell size={18} className="stroke-[2.2]" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
@@ -184,7 +184,7 @@ export default function PatientTopNav({
                 <div className="px-4 py-2.5 border-b border-slate-100 mb-1">
                   <p className="text-xs font-black text-slate-900 truncate">{displayName}</p>
                   <p className="text-[11px] text-slate-400 font-medium truncate">
-                    {userProfile?.email || username || 'Paciente activo'}
+                    {userProfile?.email || username || t('patienttopnav_paciente_activo')}
                   </p>
                 </div>
 
@@ -196,7 +196,7 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <User size={15} className="text-teal-600" />
-                    <span>Mi perfil clínico</span>
+                    <span>{t('patienttopnav_mi_perfil_clinico')}</span>
                   </button>
 
                   {onOpenEmergencyPassport && (
@@ -206,7 +206,7 @@ export default function PatientTopNav({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
                     >
                       <QrCode size={15} className="text-red-500" />
-                      <span>Pasaporte QR de emergencia</span>
+                      <span>{t('patienttopnav_pasaporte_qr_de_emergencia')}</span>
                     </button>
                   )}
 
@@ -216,7 +216,7 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <Calendar size={15} className="text-sky-600" />
-                    <span>Mis consultas y citas</span>
+                    <span>{t('patienttopnav_mis_consultas_y_citas')}</span>
                   </button>
 
                   <button
@@ -225,7 +225,7 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <FileText size={15} className="text-blue-600" />
-                    <span>Mis documentos médicos</span>
+                    <span>{t('patienttopnav_mis_documentos_medicos')}</span>
                   </button>
 
                   <button
@@ -234,7 +234,7 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <Pill size={15} className="text-rose-500" />
-                    <span>Mi salud y medicación</span>
+                    <span>{t('patienttopnav_mi_salud_y_medicacion')}</span>
                   </button>
 
                   <button
@@ -243,13 +243,13 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <Users size={15} className="text-emerald-600" />
-                    <span>Conectar con especialistas</span>
+                    <span>{t('patienttopnav_conectar_con_especialistas')}</span>
                   </button>
                 </div>
 
                 {/* Mobile Language Selector */}
                 <div className="sm:hidden px-3 py-2 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500">Idioma:</span>
+                  <span className="text-[11px] font-bold text-slate-500">{t('patienttopnav_idioma')}</span>
                   <LanguageSelector variant="pill" />
                 </div>
 
@@ -262,7 +262,7 @@ export default function PatientTopNav({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors text-left cursor-pointer"
                     >
                       <LogOut size={15} />
-                      <span>Cerrar sesión</span>
+                      <span>{t('patient_menu_logout_title')}</span>
                     </button>
                   </div>
                 )}

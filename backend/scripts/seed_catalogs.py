@@ -205,7 +205,13 @@ DEMO_DOCTORS = [
 ]
 
 
-async def seed_catalogs():
+def demo_seed_enabled() -> bool:
+    """Los datos de demostración (médicos ficticios, pacientes, citas) solo en desarrollo o con ENABLE_DEMO_SEED=true."""
+    env = os.environ.get("ENVIRONMENT", os.environ.get("RAILWAY_ENVIRONMENT", "development")).lower()
+    return env == "development" or os.environ.get("ENABLE_DEMO_SEED", "false").lower() in ("true", "1")
+
+
+async def seed_catalogs(seed_demo: bool = False):
     async with database.AsyncSessionLocal() as db:
         # 1. Specialties
         for spec_name in SPECIALTIES:
@@ -235,7 +241,7 @@ async def seed_catalogs():
 
         # 4. Demo Doctors Profiles
         existing_doc_count = await db.scalar(select(func.count(models.DoctorProfile.id)))
-        if not existing_doc_count:
+        if seed_demo and not existing_doc_count:
             logger.info("Seeding demo specialist doctor profiles...")
             for d in DEMO_DOCTORS:
                 # Get or create user for this doctor
@@ -299,8 +305,8 @@ async def seed_catalogs():
                     db.add(sched)
 
         await db.commit()
-        logger.info("Catalogs and demo specialist profiles verified.")
+        logger.info("Catalogs verified%s.", " (demo doctors included)" if seed_demo else "")
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_catalogs())
+    asyncio.run(seed_catalogs(seed_demo=demo_seed_enabled()))

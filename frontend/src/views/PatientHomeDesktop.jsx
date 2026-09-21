@@ -83,8 +83,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
   }, [showAboutModal, showHowModal, showContactModal, showSecurityModal]);
 
   const languages = [
-    { code: 'es', label: 'Español' },
-    { code: 'en', label: 'English' },
+    { code: 'es', label: t('step1personal_espanol') },
+    { code: 'en', label: t('patienthomedesktop_english') },
     { code: 'fr', label: 'Français' },
     { code: 'ar', label: 'العربية' },
   ];
@@ -113,27 +113,27 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
         <div className="hero-copy">
           <h1>
-            Tu salud,<br />
-            con el apoyo de la<br />
+            {t('hero_title_p1')}<br />
+            {t('patienthome_con_el_apoyo_de_la')}<br />
             <strong>
-              inteligencia artificial<br />
-              más avanzada.
+              {t('artificial_intelligence')}<br />
+              {t('patienthome_mas_avanzada')}
             </strong>
           </h1>
           <p className="hero-subtitle">
-            Más información. Más claridad. Una vida más saludable.
+            {t('patienthomedesktop_mas_informacion_mas_claridad_una')}
           </p>
           <div className="protection-card" onClick={() => setShowSecurityModal(true)}>
             <div className="shield">
               <img 
                 src="/images/icon_security_shield.png" 
-                alt="Seguridad" 
+                alt={t('tab_security')} 
                 className="w-full h-full object-contain drop-shadow-xs" 
               />
             </div>
             <div>
-              <h3>Tus datos están protegidos</h3>
-              <p>Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).</p>
+              <h3>{t('patient_data_protected')}</h3>
+              <p>{t('hero_security_desc')}</p>
             </div>
           </div>
         </div>
@@ -146,20 +146,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_tech.png" 
-                alt="Tecnología que cuida" 
+                alt={t('patienthomedesktop_tecnologia_que_cuida')} 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h3>
-                TECNOLOGÍA
+                {t('pillar_tech_line1')}
                 <br />
-                QUE CUIDA
+                {t('pillar_tech_line2')}
               </h3>
               <p>
-                Inteligencia artificial
+                {t('pillar_tech_desc_line1')}
                 <br />
-                al servicio de tu salud.
+                {t('pillar_tech_desc_line2')}
               </p>
             </div>
           </div>
@@ -167,20 +167,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_people.png" 
-                alt="Para ti y para quienes más quieres" 
+                alt={t('patienthomedesktop_para_ti_y_para_quienes')} 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h3>
-                PARA TI Y PARA
+                {t('patienthomedesktop_para_ti_y_para')}
                 <br />
-                QUIENES MÁS QUIERES
+                {t('patienthomedesktop_quienes_mas_quieres')}
               </h3>
               <p>
-                Una atención más humana,
+                {t('pillar_people_desc_line1')}
                 <br />
-                cercana y personalizada.
+                {t('pillar_people_desc_line2')}
               </p>
             </div>
           </div>
@@ -188,20 +188,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             <div className="feature-icon">
               <img 
                 src="/images/icon_pillar_future.png" 
-                alt="Un futuro más saludable" 
+                alt={t('patienthomedesktop_un_futuro_mas_saludable')} 
                 className="w-full h-full object-contain" 
               />
             </div>
             <div>
               <h3>
-                UN FUTURO
+                {t('pillar_future_line1')}
                 <br />
-                MÁS SALUDABLE
+                {t('pillar_future_line2')}
               </h3>
               <p>
-                Innovación hoy,
+                {t('pillar_future_desc_line1')}
                 <br />
-                para una vida mejor mañana.
+                {t('pillar_future_desc_line2')}
               </p>
             </div>
           </div>
@@ -215,12 +215,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <div className="service-icon">
             <img 
               src="/images/icon_card_ask.png" 
-              alt="Pregunta a MIVOR.ai" 
+              alt={t('ask_vitalai')} 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>Pregunta a MIVOR.ai</h2>
-          <p>Resuelve tus dudas sobre salud, comprende tus síntomas y obtén información clara con la ayuda de la inteligencia artificial.</p>
+          <h2>{t('ask_vitalai')}</h2>
+          <p>{t('patienthomedesktop_resuelve_tus_dudas_sobre_salud')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -231,12 +231,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <div className="service-icon">
             <img 
               src="/images/icon_card_explain.png" 
-              alt="Entiende tus pruebas médicas" 
+              alt={t('patienthome_entiende_tus_pruebas_medicas')} 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>Entiende tus pruebas médicas</h2>
-          <p>Comprende la información de tus análisis, informes y documentos médicos con explicaciones sencillas y claras.</p>
+          <h2>{t('patienthome_entiende_tus_pruebas_medicas')}</h2>
+          <p>{t('patienthomedesktop_comprende_la_informacion_de_tus')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -247,12 +247,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <div className="service-icon">
             <img 
               src="/images/icon_card_history.png" 
-              alt="Organiza tu historial de salud" 
+              alt={t('organize_your_health_history')} 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>Organiza tu historial de salud</h2>
-          <p>Toda tu información médica en un solo lugar, para que tú o un familiar autorizado podáis consultarla de forma segura cuando la necesitéis.</p>
+          <h2>{t('organize_your_health_history')}</h2>
+          <p>{t('patienthomedesktop_toda_tu_informacion_medica_en')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -263,12 +263,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <div className="service-icon">
             <img 
               src="/images/icon_card_advances.png" 
-              alt="Descubre avances médicos" 
+              alt={t('patienthome_descubre_avances_medicos')} 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>Descubre avances médicos</h2>
-          <p>Accede a información actualizada sobre investigación, medicamentos y novedades científicas.</p>
+          <h2>{t('patienthome_descubre_avances_medicos')}</h2>
+          <p>{t('patienthomedesktop_accede_a_informacion_actualizada_sob')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -279,12 +279,12 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
           <div className="service-icon">
             <img 
               src="/images/icon_card_doctors.png" 
-              alt="Encuentra tu médico" 
+              alt={t('patient_card5_title')} 
               className="w-full h-full object-contain" 
             />
           </div>
-          <h2>Encuentra tu médico</h2>
-          <p>Busca un profesional sanitario por especialidad y encuentra la opción que mejor se adapte a ti: una consulta por videollamada o en persona.</p>
+          <h2>{t('patient_card5_title')}</h2>
+          <p>{t('patienthomedesktop_busca_un_profesional_sanitario_por')}</p>
           <span className="service-arrow">
             <ArrowRight size={22} className="text-white" strokeWidth={2.6} />
           </span>
@@ -318,20 +318,20 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
             <div className="py-4 space-y-3.5 text-sm text-slate-600 leading-relaxed">
               <p>
-                <strong>MIVOR.ai</strong> es una plataforma de salud impulsada por inteligencia artificial clínica de última generación, diseñada para acompañar tanto a pacientes como a médicos en la toma de decisiones informadas.
+                <strong>MIVOR.ai</strong> {t('patienthomedesktop_es_una_plataforma_de_salud')}
               </p>
               <div className="bg-slate-50 rounded-2xl p-4 space-y-2 border border-slate-100">
                 <div className="flex items-start gap-2.5">
                   <ShieldCheck size={18} className="text-teal-600 shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-700">Privacidad y cifrado de grado médico conforme a normativas GDPR e ISO 27001.</span>
+                  <span className="text-xs text-slate-700">{t('patienthomedesktop_privacidad_y_cifrado_de_grado')}</span>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <Heart size={18} className="text-rose-500 shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-700">Enfoque centrado en humanizar la medicina y optimizar tiempos de respuesta.</span>
+                  <span className="text-xs text-slate-700">{t('patienthomedesktop_enfoque_centrado_en_humanizar_la')}</span>
                 </div>
               </div>
               <p className="text-xs text-slate-500 italic">
-                Nota: MIVOR.ai es una herramienta de orientación y soporte clínico. No sustituye el diagnóstico ni la prescripción directa de un médico colegiado.
+                {t('patienthomedesktop_nota_mivor_ai_es_una')}
               </p>
             </div>
 
@@ -381,24 +381,24 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-blue-100 text-[#005dff] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-900">Orientación Inteligente de Salud</h5>
-                    <p className="text-[11px] text-slate-500">Expresa tus síntomas y recibe una guía explicativa clara para comprender lo que sientes y preparar tu consulta médica.</p>
+                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_orientacion_inteligente_de_salud')}</h5>
+                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_expresa_tus_sintomas_y_recibe')}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-900">Explicación de Pruebas y Analíticas</h5>
-                    <p className="text-[11px] text-slate-500">Sube analíticas, recetas e informes en PDF o foto para traducir y comprender términos clínicos tanto para ti como para tu médico.</p>
+                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_explicacion_de_pruebas_y_analiticas')}</h5>
+                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_sube_analiticas_recetas_e_informes')}</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                   <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
                   <div>
-                    <h5 className="font-bold text-xs text-slate-900">Historial y Directorio Médico</h5>
-                    <p className="text-[11px] text-slate-500">Todo tu historial consolidado y conexión directa con especialistas médicos verificados.</p>
+                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_historial_y_directorio_medico')}</h5>
+                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_todo_tu_historial_consolidado_y')}</p>
                   </div>
                 </div>
               </div>
@@ -442,7 +442,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
             </div>
 
             <div className="py-4 space-y-3 text-sm text-slate-600">
-              <p>Estamos disponibles las 24 horas para resolver cualquier duda médica o técnica sobre el uso de la plataforma.</p>
+              <p>{t('patienthomedesktop_estamos_disponibles_las_24_horas')}</p>
               
               <div className="space-y-2.5 pt-1">
                 <a 
@@ -453,8 +453,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 >
                   <MessageCircle size={18} className="text-emerald-600 shrink-0" />
                   <div className="text-xs">
-                    <p className="font-bold">Chat de WhatsApp 24/7</p>
-                    <p className="text-slate-500">Atención inmediata a pacientes</p>
+                    <p className="font-bold">{t('patienthomedesktop_chat_de_whatsapp_24_7')}</p>
+                    <p className="text-slate-500">{t('patienthomedesktop_atencion_inmediata_a_pacientes')}</p>
                   </div>
                 </a>
 
@@ -465,7 +465,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                   <Mail size={18} className="text-[#005dff] shrink-0" />
                   <div className="text-xs">
                     <p className="font-bold">soporte@mivor.ai</p>
-                    <p className="text-slate-500">Consultas técnicas e institucionales</p>
+                    <p className="text-slate-500">{t('patienthomedesktop_consultas_tecnicas_e_institucionales')}</p>
                   </div>
                 </a>
               </div>
@@ -500,7 +500,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-slate-900 leading-tight">{t('patient_data_protected') || 'Tus datos están protegidos'}</h3>
-                  <p className="text-[11px] text-slate-500 font-medium">Seguridad de grado hospitalario y privacidad clínica</p>
+                  <p className="text-[11px] text-slate-500 font-medium">{t('patienthomedesktop_seguridad_de_grado_hospitalario_y')}</p>
                 </div>
               </div>
               <button 
@@ -513,16 +513,16 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
 
             <div className="py-4 space-y-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
               <p>
-                En <strong>MIVOR.ai</strong>, la confidencialidad y protección de tu información de salud es nuestra máxima prioridad:
+                {t('patienthome_en')} <strong>MIVOR.ai</strong>{t('patienthome_la_confidencialidad_y_proteccion_de')}
               </p>
 
               <div className="space-y-2.5">
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
                   <Lock size={18} className="text-[#005dff] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900">Cifrado de extremo a extremo</h4>
+                    <h4 className="font-bold text-xs text-slate-900">{t('patienthome_cifrado_de_extremo_a_extremo')}</h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Todos los datos, análisis clínicos e imágenes médicas se transmiten y almacenan bajo cifrado militar AES-256.
+                      {t('patienthomedesktop_todos_los_datos_analisis_clinicos')}
                     </p>
                   </div>
                 </div>
@@ -530,9 +530,9 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
                   <CheckCircle2 size={18} className="text-teal-600 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900">Cumplimiento ISO 27001 & RGPD</h4>
+                    <h4 className="font-bold text-xs text-slate-900">{t('patienthome_cumplimiento_iso_27001_rgpd')}</h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Auditorías continuas de seguridad de la información conforme a estándares internacionales y normativa europea de protección de datos.
+                      {t('patienthomedesktop_auditorias_continuas_de_seguridad_de')}
                     </p>
                   </div>
                 </div>
@@ -540,9 +540,9 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3">
                   <ShieldCheck size={18} className="text-indigo-600 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-xs text-slate-900">Privacidad absoluta de tus consultas</h4>
+                    <h4 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_privacidad_absoluta_de_tus_consultas')}</h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Tus informes y consultas médicas jamás son compartidos ni utilizados para entrenar modelos públicos de inteligencia artificial.
+                      {t('patienthomedesktop_tus_informes_y_consultas_medicas')}
                     </p>
                   </div>
                 </div>

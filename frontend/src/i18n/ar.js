@@ -1,4 +1,6 @@
 export const ar = {
+  change_language: "تغيير اللغة",
+  search_language: "ابحث عن لغة…",
   new_version_available: "تحديث جديد متاح!",
   new_version_desc: "تحديث جديد لـ MIVOR.ai جاهز للتثبيت.",
   update_now: "تحديث الآن",

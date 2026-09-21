@@ -11,6 +11,7 @@ from sqlalchemy import select
 import database
 import models
 import security
+from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user, require_role
 from main import TriageRequest, logger, scrub_phi, TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
@@ -22,14 +23,7 @@ router = APIRouter()
 
 @router.post('/api/triage/chat')
 async def triage_chat(request: TriageRequest, current_user: models.User=Depends(get_current_user)):
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
-    target_lang = lang_map.get(request.language, 'Spanish (Español)')
-    lang_instruction = f'''
-
-CRITICAL LANGUAGE DIRECTIVE:
-You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
-DO NOT respond in English or Spanish if {target_lang} is French or Arabic.
-Formulate all medical responses, questions, and guidance directly in {target_lang}.'''
+    lang_instruction = language_directive(request.language, request.country, 'patient')
     messages_payload = [{'role': 'system', 'content': TRIAGE_SYSTEM_PROMPT + lang_instruction}]
     for msg in request.messages:
         messages_payload.append({'role': msg.role, 'content': msg.content})
@@ -70,7 +64,7 @@ async def get_triage_session(session_id: int, db: AsyncSession=Depends(get_db), 
     session = result.scalars().first()
     if (not session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
-    if session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+    if session.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(status_code=403, detail='No autorizado para ver esta sesión de orientación')
     return {'session_id': session.id, 'status': session.status, 'questions_asked': session.questions_asked, 'final_report': session.final_report}
 
@@ -86,7 +80,7 @@ async def send_triage_message(session_id: int, request: TriageRequest, db: Async
     t_session = result.scalars().first()
     if (not t_session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
-    if t_session.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+    if t_session.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(status_code=403, detail='No autorizado para interactuar en esta sesión de orientación')
     if (t_session.status != 'in_progress'):
         raise HTTPException(status_code=400, detail='Esta sesión de orientación ya está cerrada.')
@@ -97,14 +91,7 @@ async def send_triage_message(session_id: int, request: TriageRequest, db: Async
             sanitized_messages.append({'role': 'user', 'content': scrubbed_content})
         else:
             sanitized_messages.append({'role': msg.role, 'content': msg.content})
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
-    target_lang = (lang_map.get(request.language, request.language) if request.language else 'Spanish (Español)')
-    lang_instruction = f'''
-
-CRITICAL LANGUAGE DIRECTIVE:
-You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
-DO NOT respond in English or Spanish if {target_lang} is French or Arabic.
-Formulate all medical responses, questions, and guidance directly in {target_lang}.'''
+    lang_instruction = language_directive(request.language, request.country, 'patient')
     messages_payload = ([{'role': 'system', 'content': (TRIAGE_SYSTEM_PROMPT_V2 + lang_instruction)}] + sanitized_messages)
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 

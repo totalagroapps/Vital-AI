@@ -24,7 +24,7 @@ export const getVideoEmbedUrl = (url) => {
 };
 
 export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfile, onLogout }) {
-  const { t, language } = useLanguage();
+  const { t, language, isRtl } = useLanguage();
   const fileInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
@@ -325,7 +325,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
   }
 
   return (
-    <div className="flex-1 bg-slate-50/50 p-6 md:p-10 font-sans text-slate-800" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="flex-1 bg-slate-50/50 p-6 md:p-10 font-sans text-slate-800" dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* BARRA SUPERIOR DE NAVEGACIÓN */}
@@ -357,7 +357,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
               {uploadingImage ? (
                 <Loader2 className="animate-spin text-blue-600" size={24} />
               ) : avatarUrl ? (
-                <img src={avatarUrl} alt="Foto de perfil" className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt={t('profile_avatar_url')} className="w-full h-full object-cover" />
               ) : (
                 <span>{formData.first_name?.[0] || 'D'}{formData.last_name?.[0] || 'R'}</span>
               )}
@@ -388,7 +388,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
               <p className="text-sm text-slate-500 mt-0.5">{formData.specialty || t('main_specialty_label', 'Especialidad médica')}</p>
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-2">
                 <span className="flex items-center gap-1.5"><Mail size={14} /> {formData.email || 'Sin correo'}</span>
-                <span className="flex items-center gap-1.5"><Phone size={14} /> {formData.phone || 'Sin teléfono'}</span>
+                <span className="flex items-center gap-1.5"><Phone size={14} /> {formData.phone || t('doctorprofile_sin_telefono')}</span>
               </div>
             </div>
           </div>
@@ -550,7 +550,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       onChange={({ latitude, longitude }) => setFormData(prev => ({ ...prev, latitude, longitude }))}
                       readOnly={!isEditing}
                       height="280px"
-                      title={isEditing ? 'Ajustar punto de atención médica en el mapa' : 'Ubicación registrada en mapa'}
+                      title={isEditing ? t('doctorprofile_ajustar_punto_de_atencion_medica') : t('doctorprofile_ubicacion_registrada_en_mapa')}
                     />
                   </div>
 
@@ -560,7 +560,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         <Info size={18} />
                       </div>
                       <p className="text-xs text-slate-600 font-medium">
-                        Mantén tu información actualizada para ofrecer la mejor atención a tus pacientes.
+                        {t('doctorprofile_manten_tu_informacion_actualizada_pa')}
                       </p>
                     </div>
                     {isEditing && (
@@ -599,10 +599,10 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       </div>
                       <div>
                         <label className="text-xs font-bold text-slate-700 block mb-1">{t('subspecialty_label', 'Subespecialidades')}</label>
-                        <input type="text" name="subspecialties" value={formData.subspecialties} onChange={handleChange} className="w-full text-xs p-2.5 rounded-xl border border-slate-200 outline-none" placeholder="Ej. Cardiología Pediátrica" />
+                        <input type="text" name="subspecialties" value={formData.subspecialties} onChange={handleChange} className="w-full text-xs p-2.5 rounded-xl border border-slate-200 outline-none" placeholder={t('doctorprofile_ej_cardiologia_pediatrica')} />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-slate-700 block mb-1">Idiomas</label>
+                        <label className="text-xs font-bold text-slate-700 block mb-1">{t('detail_languages')}</label>
                         <input type="text" name="languages" value={formData.languages} onChange={handleChange} className="w-full text-xs p-2.5 rounded-xl border border-slate-200 outline-none" />
                       </div>
                       <div className="sm:col-span-2 flex justify-end pt-2">
@@ -623,7 +623,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       </div>
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('years_exp_label', 'Años de experiencia')}</label>
-                        <p className="text-xs font-bold text-slate-800">{formData.years_experience ? `${formData.years_experience} años` : 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.years_experience ? t('doctorprofile_anos', { years_experience: formData.years_experience }) : t('medicalhistory_sin_especificar')}</p>
                       </div>
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('professional_college_label', 'Colegio profesional')}</label>
@@ -642,10 +642,10 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-slate-900">
-                          Vídeo de Presentación y de la Clínica
+                          {t('doctorprofile_video_de_presentacion_y_de')}
                         </h3>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          Muestra tu trayectoria y las instalaciones de tu consultorio a los pacientes.
+                          {t('doctorprofile_muestra_tu_trayectoria_y_las')}
                         </p>
                       </div>
                     </div>
@@ -661,25 +661,25 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
                         <label className="text-xs font-bold text-slate-800 flex items-center gap-2">
                           <Film size={14} className="text-indigo-600" />
-                          Vídeo de Presentación Personal (URL)
+                          {t('doctorprofile_video_de_presentacion_personal_url')}
                         </label>
                         <input
                           type="url"
                           name="presentation_video_url"
                           value={formData.presentation_video_url}
                           onChange={handleChange}
-                          placeholder="https://www.youtube.com/watch?v=... o Vimeo"
+                          placeholder={t('doctorprofile_https_www_youtube_com_watch')}
                           className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                         />
                         <p className="text-[11px] text-slate-500">
-                          Preséntate a tus pacientes, explica tu filosofía médica y tus áreas de especialización.
+                          {t('doctorprofile_presentate_a_tus_pacientes_explica')}
                         </p>
                         {formData.presentation_video_url && (
                           <div className="mt-3 aspect-video max-w-md rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                             {getVideoEmbedUrl(formData.presentation_video_url)?.includes('embed') ? (
                               <iframe
                                 src={getVideoEmbedUrl(formData.presentation_video_url)}
-                                title="Vista previa vídeo de presentación"
+                                title={t('doctorprofile_vista_previa_video_de_presentacion')}
                                 className="w-full h-full"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
@@ -694,25 +694,25 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-2">
                         <label className="text-xs font-bold text-slate-800 flex items-center gap-2">
                           <Building2 size={14} className="text-teal-600" />
-                          Vídeo de la Clínica / Instalaciones (URL)
+                          {t('doctorprofile_video_de_la_clinica_instalaciones')}
                         </label>
                         <input
                           type="url"
                           name="clinic_video_url"
                           value={formData.clinic_video_url}
                           onChange={handleChange}
-                          placeholder="https://www.youtube.com/watch?v=... o Vimeo"
+                          placeholder={t('doctorprofile_https_www_youtube_com_watch')}
                           className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                         />
                         <p className="text-[11px] text-slate-500">
-                          Recorrido virtual por tus consultorios, tecnología diagnóstica o salas de atención.
+                          {t('doctorprofile_recorrido_virtual_por_tus_consultori')}
                         </p>
                         {formData.clinic_video_url && (
                           <div className="mt-3 aspect-video max-w-md rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                             {getVideoEmbedUrl(formData.clinic_video_url)?.includes('embed') ? (
                               <iframe
                                 src={getVideoEmbedUrl(formData.clinic_video_url)}
-                                title="Vista previa vídeo de la clínica"
+                                title={t('doctorprofile_vista_previa_video_de_la')}
                                 className="w-full h-full"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                 allowFullScreen
@@ -731,7 +731,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                           disabled={saving}
                           className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-all flex items-center gap-2"
                         >
-                          {saving && <Loader2 size={14} className="animate-spin" />} Guardar vídeos
+                          {saving && <Loader2 size={14} className="animate-spin" />} {t('doctorprofile_guardar_videos')}
                         </button>
                       </div>
                     </div>
@@ -744,14 +744,14 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                             <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
                               <Film size={13} />
                             </span>
-                            <h4 className="text-xs font-bold text-slate-800">Vídeo de Presentación</h4>
+                            <h4 className="text-xs font-bold text-slate-800">{t('doctorprofile_video_de_presentacion')}</h4>
                           </div>
                           {formData.presentation_video_url ? (
                             <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 mt-2 shadow-xs">
                               {getVideoEmbedUrl(formData.presentation_video_url)?.includes('embed') ? (
                                 <iframe
                                   src={getVideoEmbedUrl(formData.presentation_video_url)}
-                                  title="Vídeo de presentación"
+                                  title={t('step4professional_video_de_presentacion')}
                                   className="w-full h-full"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                   allowFullScreen
@@ -762,7 +762,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                             </div>
                           ) : (
                             <p className="text-xs text-slate-400 italic mt-3 py-4 text-center">
-                              No has añadido aún un vídeo de presentación.
+                              {t('doctorprofile_no_has_anadido_aun_un')}
                             </p>
                           )}
                         </div>
@@ -775,14 +775,14 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                             <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">
                               <Building2 size={13} />
                             </span>
-                            <h4 className="text-xs font-bold text-slate-800">Vídeo de la Clínica</h4>
+                            <h4 className="text-xs font-bold text-slate-800">{t('doctorprofile_video_de_la_clinica')}</h4>
                           </div>
                           {formData.clinic_video_url ? (
                             <div className="aspect-video w-full rounded-xl overflow-hidden border border-slate-200 mt-2 shadow-xs">
                               {getVideoEmbedUrl(formData.clinic_video_url)?.includes('embed') ? (
                                 <iframe
                                   src={getVideoEmbedUrl(formData.clinic_video_url)}
-                                  title="Vídeo de la clínica"
+                                  title={t('doctordirectorymod_video_de_la_clinica')}
                                   className="w-full h-full"
                                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                   allowFullScreen
@@ -793,7 +793,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                             </div>
                           ) : (
                             <p className="text-xs text-slate-400 italic mt-3 py-4 text-center">
-                              No has añadido aún un vídeo de la clínica o instalaciones.
+                              {t('doctorprofile_no_has_anadido_aun_un_2')}
                             </p>
                           )}
                         </div>
@@ -807,7 +807,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-base font-bold text-slate-900">{t('academic_history', 'Historial de Estudios')}</h3>
-                      <p className="text-xs text-slate-500 mt-0.5">Agrega tus títulos académicos y certificaciones.</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{t('doctorprofile_agrega_tus_titulos_academicos_y')}</p>
                     </div>
                     <button onClick={() => setShowEduForm(!showEduForm)} className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 font-bold text-xs rounded-xl transition-all cursor-pointer">
                       <Plus size={15} /> {t('add_study', 'Añadir estudio')}
@@ -826,7 +826,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         <input type="number" name="end_year" placeholder={t('end_year', 'Año fin')} value={eduData.end_year} onChange={handleEduChange} className="w-full text-xs p-2.5 rounded-xl border border-slate-200 outline-none" />
                       </div>
                       <div className="flex justify-end gap-2 pt-2">
-                        <button type="button" onClick={() => setShowEduForm(false)} className="px-3.5 py-1.5 text-xs text-slate-500 hover:bg-slate-200 rounded-lg cursor-pointer">Cancelar</button>
+                        <button type="button" onClick={() => setShowEduForm(false)} className="px-3.5 py-1.5 text-xs text-slate-500 hover:bg-slate-200 rounded-lg cursor-pointer">{t('cancel')}</button>
                         <button type="submit" disabled={saving} className="px-4 py-1.5 text-xs bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 cursor-pointer">{t('save_changes', 'Guardar')}</button>
                       </div>
                     </form>
@@ -852,7 +852,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       ))
                     ) : (
                       <p className="text-xs text-slate-400 text-center py-6 border border-dashed border-slate-200 rounded-2xl">
-                        No has registrado estudios académicos aún.
+                        {t('doctorprofile_no_has_registrado_estudios_academico')}
                       </p>
                     )}
                   </div>
@@ -865,7 +865,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
               <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
                 <div>
                   <h3 className="text-base font-bold text-slate-900">{t('tab_documents', 'Documentos y Verificación')}</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Gestión de archivos de soporte legal y multimedia.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t('doctorprofile_gestion_de_archivos_de_soporte')}</p>
                 </div>
 
                 <div className="space-y-3">
@@ -880,7 +880,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         <div>
                           <p className="text-xs font-bold text-slate-800">{t('identity_doc', 'Documento de Identidad')}</p>
                           <span className="text-[10px] font-semibold text-slate-500">
-                            {identityDoc ? 'Cargado correctamente' : 'Pendiente por subir'}
+                            {identityDoc ? t('doctorprofile_cargado_correctamente') : t('doctorprofile_pendiente_por_subir')}
                           </span>
                         </div>
                       </div>
@@ -895,7 +895,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         <div>
                           <p className="text-xs font-bold text-slate-800">{t('colegiation_cert', 'Certificado de Colegiación')}</p>
                           <span className="text-[10px] font-semibold text-slate-500">
-                            {colegiationCert ? 'Cargado correctamente' : 'Pendiente por subir'}
+                            {colegiationCert ? t('doctorprofile_cargado_correctamente') : t('doctorprofile_pendiente_por_subir')}
                           </span>
                         </div>
                       </div>
@@ -908,7 +908,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t('clinic_gallery', 'Galería de fotos y videos')}</h4>
-                      <p className="text-xs text-slate-500 mt-1">Anexa imágenes o videos de tu centro médico.</p>
+                      <p className="text-xs text-slate-500 mt-1">{t('doctorprofile_anexa_imagenes_o_videos_de')}</p>
                     </div>
                     
                     <div className="flex items-center gap-2">
@@ -917,8 +917,8 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         onChange={(e) => setSelectedMediaType(e.target.value)}
                         className="text-xs border border-slate-200 rounded-xl px-2.5 py-1.5 outline-none bg-white font-medium cursor-pointer"
                       >
-                        <option value="gallery">Imagen clínica</option>
-                        <option value="video">Video presentación</option>
+                        <option value="gallery">{t('doctorprofile_imagen_clinica')}</option>
+                        <option value="video">{t('doctorprofile_video_presentacion')}</option>
                       </select>
                       <button 
                         onClick={() => galleryInputRef.current?.click()}
@@ -938,7 +938,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                         {media.media_type === 'video' || media.mime_type?.includes('video') ? (
                           <video src={getMediaUrl(media.file_url)} className="w-full h-full object-cover" />
                         ) : (
-                          <img src={getMediaUrl(media.file_url)} alt="Media" className="w-full h-full object-cover" />
+                          <img src={getMediaUrl(media.file_url)} alt={t('doctorprofile_media')} className="w-full h-full object-cover" />
                         )}
 
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -959,15 +959,15 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                 <h3 className="text-base font-bold text-slate-900">{t('tab_security', 'Seguridad')}</h3>
                 <div className="space-y-4 max-w-md">
                   <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Contraseña actual</label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">{t('doctorprofile_contrasena_actual')}</label>
                     <input type="password" className="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none" placeholder="••••••••" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-700 block mb-1">Nueva contraseña</label>
+                    <label className="text-xs font-bold text-slate-700 block mb-1">{t('doctorprofile_nueva_contrasena')}</label>
                     <input type="password" className="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none" placeholder="••••••••" />
                   </div>
-                  <button onClick={() => alert('Para cambiar tu contraseña contacta a soporte o usa la opción de recuperación de cuenta.')} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition-all">
-                    Actualizar contraseña
+                  <button onClick={() => alert(t('doctorprofile_para_cambiar_tu_contrasena_contacta'))} className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition-all">
+                    {t('doctorprofile_actualizar_contrasena')}
                   </button>
                 </div>
               </div>
@@ -983,7 +983,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
                 <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold overflow-hidden shrink-0">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="Doctor" className="w-full h-full object-cover" />
+                    <img src={avatarUrl} alt={t('doctorprofile_doctor')} className="w-full h-full object-cover" />
                   ) : (
                     <User size={22} />
                   )}
@@ -1028,7 +1028,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('years_exp_label', 'Años de experiencia')}</p>
                     <p className="text-xs font-bold text-slate-800 truncate">
-                      {formData.years_experience ? `${formData.years_experience} años` : 'Pendiente'}
+                      {formData.years_experience ? t('doctorprofile_anos', { years_experience: formData.years_experience }) : t('status_pending')}
                     </p>
                   </div>
                 </div>
@@ -1061,7 +1061,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                     <Globe size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Idiomas</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('detail_languages')}</p>
                     <p className="text-xs font-bold text-slate-800 truncate">{formData.languages || 'Sin idiomas registrados'}</p>
                   </div>
                 </div>
@@ -1072,7 +1072,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                     <ShieldCheck size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Estado de verificación</p>
+                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('doctorprofile_estado_de_verificacion')}</p>
                     {profile?.verification_status === 'verified' ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
                         <CheckCircle2 size={12} /> {t('status_verified', 'Verificado')}
@@ -1132,8 +1132,8 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   profileCompletion === 100 ? 'text-emerald-700' : 'text-amber-700'
                 }`}>
                   {profileCompletion === 100 
-                    ? '¡Excelente! Todos tus datos están guardados.' 
-                    : 'Completa tus datos personales, profesionales y foto para alcanzar el 100%.'}
+                    ? t('doctorprofile_excelente_todos_tus_datos_estan') 
+                    : t('doctorprofile_completa_tus_datos_personales_profes')}
                 </p>
               </div>
 
@@ -1145,4 +1145,4 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
       </div>
     </div>
   );
-}
+}

@@ -127,7 +127,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 MIVOR<span className="text-[#00ab84]">.ai</span>
               </div>
               <span className="text-[6.8px] sm:text-[7.4px] font-black tracking-[0.22em] text-[#0055ff] uppercase mt-0.5 leading-none">
-                TU SALUD, MÁS CLARA
+               {t('patienthome_tu_salud_mas_clara')}
               </span>
             </div>
           </div>
@@ -139,7 +139,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             <button 
               onClick={() => setShowContactModal(true)} 
               className="w-8 h-8 rounded-full border border-slate-300 bg-white flex items-center justify-center text-black relative active:scale-95 transition-all cursor-pointer shadow-2xs"
-              title="Notificaciones"
+              title={t('patientchat_notificaciones')}
             >
               <Bell size={16} className="stroke-[2.2]" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
@@ -148,10 +148,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             <button 
               onClick={() => setShowDrawer(true)} 
               className="w-8 h-8 rounded-full border border-slate-200 bg-blue-50 text-[#0062ff] flex items-center justify-center active:scale-95 transition-all cursor-pointer overflow-hidden shadow-2xs"
-              title="Mi cuenta"
+              title={t('patient_nav_my_account')}
             >
               {userProfile?.photo_url ? (
-                <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
+                <img src={userProfile.photo_url} alt={t('doctor_section_profile')} className="w-full h-full object-cover" />
               ) : (
                 <User size={17} className="stroke-[2.2]" />
               )}
@@ -172,13 +172,13 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Texto Hero Izquierda */}
             <div className="flex-1 min-w-0 pr-1">
               <h1 className="text-[17px] sm:text-[19px] font-black text-slate-900 leading-[1.12] tracking-tight">
-                Tu salud, <br />
-                con el apoyo de la <br />
-                <span className="text-[#0055ff]">inteligencia artificial <br />más avanzada.</span>
+               {t('hero_title_p1')} <br />
+               {t('patienthome_con_el_apoyo_de_la')} <br />
+                <span className="text-[#0055ff]">{t('artificial_intelligence')} <br />{t('patienthome_mas_avanzada')}</span>
               </h1>
               <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 font-medium leading-tight mt-1.5">
-                Más información. Más claridad.<br />
-                Una vida más saludable.
+               {t('patienthome_mas_informacion_mas_claridad')}<br />
+               {t('patienthome_una_vida_mas_saludable')}
               </p>
             </div>
 
@@ -202,16 +202,16 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 shadow-2xs mobile-security-icon">
                 <img 
                   src="/assets/patient_cards/logo_datos_protegidos.png" 
-                  alt="Tus datos están protegidos" 
+                  alt={t('patient_data_protected')} 
                   className="w-full h-full object-contain pointer-events-none select-none" 
                 />
               </div>
               <div className="min-w-0">
                 <h4 className="text-[12.5px] sm:text-[13px] font-bold text-slate-900 leading-tight">
-                  Tus datos están protegidos
+                 {t('patient_data_protected')}
                 </h4>
                 <p className="text-[9px] sm:text-[10px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-1 sm:line-clamp-2">
-                  Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR y normativa sanitaria).
+                 {t('hero_security_desc')}
                 </p>
               </div>
             </div>
@@ -239,13 +239,13 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   homeFileInputRef.current?.click();
                 }}
                 className="text-slate-800 p-0.5 hover:text-[#0055ff] hover:scale-110 active:scale-95 transition-all cursor-pointer shrink-0"
-                title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+                title={t('doctorhome_adjuntar_cualquier_archivo_clinico_p')}
               >
                 <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
               </button>
               <div className="h-4 w-[1px] bg-slate-200" />
               <span className="flex-1 text-[13px] sm:text-[14px] text-slate-400 font-normal select-none truncate">
-                Pregunta a MIVOR.ai...
+               {t('patienthome_pregunta_a_mivor_ai')}
               </span>
               <button 
                 type="button"
@@ -254,7 +254,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   onNavigate('general_chat');
                 }}
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#0055ff] text-white flex items-center justify-center shadow-xs hover:bg-blue-700 active:scale-95 transition-all shrink-0 cursor-pointer"
-                title="Dictar pregunta"
+                title={t('patienthome_dictar_pregunta')}
               >
                 <Mic size={16} className="stroke-[2.2]" />
               </button>
@@ -262,7 +262,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Chispita y subtítulo elegante */}
             <div className="flex items-center justify-center gap-1.5 mt-1 text-[#0055ff] text-[10.5px] sm:text-[11.5px] font-semibold">
               <Sparkles size={12} className="stroke-[2.4]" />
-              <span>Resuelve tus dudas sobre salud con ayuda de MIVOR.ai</span>
+              <span>{t('patienthome_resuelve_tus_dudas_sobre_salud')}</span>
             </div>
           </div>
 
@@ -278,7 +278,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_entiende_pruebas.png" 
-                    alt="Entiende tus pruebas médicas" 
+                    alt={t('patienthome_entiende_tus_pruebas_medicas')} 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
@@ -288,10 +288,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </div>
               <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
-                  Entiende tus<br />pruebas médicas
+                 {t('patienthome_entiende_tus')}<br />{t('patienthome_pruebas_medicas')}
                 </h3>
                 <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
-                  Comprende tus análisis, informes y documentos clínicos con explicaciones médicas sencillas, claras y comprensibles.
+                 {t('patienthome_comprende_tus_analisis_informes_y')}
                 </p>
               </div>
             </div>
@@ -305,7 +305,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_organiza_historial.png" 
-                    alt="Organiza tu historial de salud" 
+                    alt={t('organize_your_health_history')} 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
@@ -315,10 +315,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </div>
               <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
-                  Organiza tu<br />historial de salud
+                 {t('patienthome_organiza_tu')}<br />{t('patienthome_historial_de_salud')}
                 </h3>
                 <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
-                  Toda tu información médica reunida en un solo lugar para consultarla o compartirla cuando tú decidas.
+                 {t('patienthome_toda_tu_informacion_medica_reunida')}
                 </p>
               </div>
             </div>
@@ -332,7 +332,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_descubre_avances.png" 
-                    alt="Descubre avances médicos" 
+                    alt={t('patienthome_descubre_avances_medicos')} 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
@@ -342,10 +342,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </div>
               <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
-                  Descubre avances<br />médicos
+                 {t('patienthome_descubre_avances')}<br />{t('patienthome_medicos')}
                 </h3>
                 <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
-                  Accede a información científica actualizada sobre tratamientos innovadores, salud preventiva y nuevos medicamentos.
+                 {t('patienthome_accede_a_informacion_cientifica_actu')}
                 </p>
               </div>
             </div>
@@ -359,7 +359,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
                   <img 
                     src="/assets/patient_cards/logo_encuentra_medico.png" 
-                    alt="Encuentra tu médico" 
+                    alt={t('patient_card5_title')} 
                     className="w-full h-full object-contain pointer-events-none select-none" 
                   />
                 </div>
@@ -369,10 +369,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </div>
               <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
-                  Encuentra tu<br />médico
+                 {t('patienthome_encuentra_tu')}<br />{t('patienthome_medico')}
                 </h3>
                 <p className="text-[11.8px] sm:text-[12.6px] text-black font-semibold leading-[1.24]">
-                  Localiza profesionales sanitarios por especialidad y agenda tu consulta presencial o por videollamada.
+                 {t('patienthome_localiza_profesionales_sanitarios_po')}
                 </p>
               </div>
             </div>
@@ -386,7 +386,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           >
             <img 
               src="/images/banner_preventive_mobile.png" 
-              alt="Medicina preventiva y longevidad" 
+              alt={t('patienthome_medicina_preventiva_y_longevidad')} 
               className="w-full aspect-[412/128] object-contain block" 
             />
           </div>
@@ -426,15 +426,15 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-300 shrink-0">
                     <img 
                       src={userProfile?.photo_url || "/images/mivor_avatar_default.png"} 
-                      alt="Perfil" 
+                      alt={t('doctor_section_profile')} 
                       className="w-full h-full object-cover" 
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-black text-sm text-black truncate">
-                      {userProfile?.full_name || username || "Mi cuenta"}
+                      {userProfile?.full_name || username || t('patient_nav_my_account')}
                     </h4>
-                    <p className="text-[11px] text-[#0055ff] font-bold">Ver Historial y Perfil →</p>
+                    <p className="text-[11px] text-[#0055ff] font-bold">{t('patienthome_ver_historial_y_perfil')}</p>
                   </div>
                 </div>
 
@@ -445,7 +445,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <Brain size={18} className="text-[#9333ea] stroke-[2.4]" />
-                    <span>Pregunta a MIVOR.ai</span>
+                    <span>{t('ask_vitalai')}</span>
                   </button>
 
                   <button 
@@ -453,7 +453,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <Activity size={18} className="text-[#0284c7] stroke-[2.4]" />
-                    <span>Explica tus pruebas médicas</span>
+                    <span>{t('analyze_your_medical_tests')}</span>
                   </button>
 
                   <button 
@@ -461,7 +461,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <Folder size={18} className="text-[#0d9488] stroke-[2.4]" />
-                    <span>Organiza tu historial de salud</span>
+                    <span>{t('organize_your_health_history')}</span>
                   </button>
 
                   <button 
@@ -469,7 +469,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <Lightbulb size={18} className="text-[#ea580c] stroke-[2.4]" />
-                    <span>Últimos avances médicos</span>
+                    <span>{t('patient_card4_title')}</span>
                   </button>
 
                   <button 
@@ -477,7 +477,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
                     <UserCheck size={18} className="text-[#7c3aed] stroke-[2.4]" />
-                    <span>Encuentra tu médico</span>
+                    <span>{t('patient_card5_title')}</span>
                   </button>
 
                   <button 
@@ -495,7 +495,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-bold text-black hover:bg-slate-50 transition-colors text-left cursor-pointer"
                   >
                     <MessageCircle size={17} className="text-emerald-600 stroke-[2.4]" />
-                    <span>Contacto y Soporte 24/7</span>
+                    <span>{t('patienthome_contacto_y_soporte_24_7')}</span>
                   </button>
                 </div>
               </div>
@@ -507,7 +507,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-rose-200 bg-rose-50/70 text-rose-700 text-xs font-bold hover:bg-rose-100 transition-colors"
                 >
                   <LogOut size={15} />
-                  <span>Cerrar sesión</span>
+                  <span>{t('patient_menu_logout_title')}</span>
                 </button>
               </div>
 
@@ -538,16 +538,16 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </div>
               <div className="py-3 space-y-2.5 text-[13px] text-black font-medium leading-relaxed">
                 <p>
-                  <strong>MIVOR.ai</strong> es una plataforma de salud impulsada por inteligencia artificial clínica de última generación, diseñada para acompañar a pacientes y médicos en la toma de decisiones informadas.
+                  <strong>MIVOR.ai</strong> {t('patienthome_es_una_plataforma_de_salud')}
                 </p>
                 <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-200 text-[12px] text-black">
                   <div className="flex items-start gap-2">
                     <ShieldCheck size={16} className="text-teal-600 shrink-0 mt-0.5" />
-                    <span className="font-semibold text-black">Cifrado de grado médico y cumplimiento estricto con normativas GDPR e ISO 27001.</span>
+                    <span className="font-semibold text-black">{t('patienthome_cifrado_de_grado_medico_y')}</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Heart size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                    <span className="font-semibold text-black">Juntos por una medicina más humana, accesible y eficiente.</span>
+                    <span className="font-semibold text-black">{t('patienthome_juntos_por_una_medicina_mas')}</span>
                   </div>
                 </div>
               </div>
@@ -584,15 +584,15 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               <div className="py-3 space-y-3 text-[13px] text-black font-medium leading-relaxed">
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p><strong className="text-black">Pregunta o sube tus informes:</strong> Escribe tus dudas de salud o sube tus análisis médicos en PDF o imagen.</p>
+                  <p><strong className="text-black">{t('patienthome_pregunta_o_sube_tus_informes')}</strong> {t('patienthome_escribe_tus_dudas_de_salud')}</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p><strong className="text-black">Análisis clínico con IA:</strong> Nuestro sistema traduce jerga técnica compleja a explicaciones comprensibles y seguras.</p>
+                  <p><strong className="text-black">{t('patienthome_analisis_clinico_con_ia')}</strong> {t('patienthome_nuestro_sistema_traduce_jerga_tecnic')}</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p><strong className="text-black">Conecta con profesionales:</strong> Encuentra especialistas y comparte tu historial de forma segura para consultas presenciales o telemáticas.</p>
+                  <p><strong className="text-black">{t('patienthome_conecta_con_profesionales')}</strong> {t('patienthome_encuentra_especialistas_y_comparte_t')}</p>
                 </div>
               </div>
               <div className="pt-2 flex justify-end">
@@ -630,7 +630,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   {t('patient_commitment_quote') || '"Juntos por una medicina más humana y eficiente."'}
                 </p>
                 <p className="text-black">
-                  En MIVOR.ai creemos que la tecnología debe empoderar al paciente y facilitar la labor del profesional médico, reduciendo la ansiedad provocada por la falta de información y agilizando la atención médica.
+                 {t('patienthome_en_mivor_ai_creemos_que')}
                 </p>
               </div>
               <div className="pt-2 flex justify-end">
@@ -664,7 +664,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 </button>
               </div>
               <div className="py-3 space-y-2.5 text-[13px] text-black">
-                <p className="font-bold text-black">Atención directa disponible 24/7:</p>
+                <p className="font-bold text-black">{t('patienthome_atencion_directa_disponible_24_7')}</p>
                 <a 
                   href="https://wa.me/34600000000" 
                   target="_blank" 
@@ -673,8 +673,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                 >
                   <MessageCircle size={20} className="text-emerald-700 stroke-[2.4] shrink-0" />
                   <div>
-                    <p className="text-[13px] text-black font-black">WhatsApp 24/7</p>
-                    <p className="text-[11.5px] text-black font-semibold">Respuesta inmediata</p>
+                    <p className="text-[13px] text-black font-black">{t('patienthome_whatsapp_24_7')}</p>
+                    <p className="text-[11.5px] text-black font-semibold">{t('documentanalyzer_respuesta_inmediata')}</p>
                   </div>
                 </a>
                 <a 
@@ -684,7 +684,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <Mail size={20} className="text-[#0055ff] stroke-[2.4] shrink-0" />
                   <div>
                     <p className="text-[13px] text-black font-black">soporte@mivor.ai</p>
-                    <p className="text-[11.5px] text-black font-semibold">Consultas médicas y técnicas</p>
+                    <p className="text-[11.5px] text-black font-semibold">{t('patienthome_consultas_medicas_y_tecnicas')}</p>
                   </div>
                 </a>
               </div>
@@ -714,7 +714,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   </div>
                   <div>
                     <h3 className="font-black text-base text-black leading-tight">{t('patient_data_protected') || 'Tus datos están protegidos'}</h3>
-                    <p className="text-[11px] text-black font-bold">Seguridad de grado hospitalario y privacidad</p>
+                    <p className="text-[11px] text-black font-bold">{t('patienthome_seguridad_de_grado_hospitalario_y')}</p>
                   </div>
                 </div>
                 <button 
@@ -727,16 +727,16 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
 
               <div className="py-3.5 space-y-2.5 text-[13px] text-black font-medium leading-relaxed">
                 <p>
-                  En <strong>MIVOR.ai</strong>, la confidencialidad y protección de tu información de salud es nuestra máxima prioridad:
+                 {t('patienthome_en')} <strong>MIVOR.ai</strong>{t('patienthome_la_confidencialidad_y_proteccion_de')}
                 </p>
 
                 <div className="space-y-2 pt-1">
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-2.5">
                     <Lock size={17} className="text-[#0055ff] stroke-[2.4] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-black text-[12.5px] text-black">Cifrado de extremo a extremo</h4>
+                      <h4 className="font-black text-[12.5px] text-black">{t('patienthome_cifrado_de_extremo_a_extremo')}</h4>
                       <p className="text-[11.5px] text-black font-medium mt-0.5">
-                        Todos tus datos, consultas e informes médicos se transmiten y almacenan bajo cifrado militar AES-256.
+                       {t('patienthome_todos_tus_datos_consultas_e')}
                       </p>
                     </div>
                   </div>
@@ -744,9 +744,9 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-2.5">
                     <CheckCircle2 size={17} className="text-teal-600 stroke-[2.4] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-black text-[12.5px] text-black">Cumplimiento ISO 27001 & RGPD</h4>
+                      <h4 className="font-black text-[12.5px] text-black">{t('patienthome_cumplimiento_iso_27001_rgpd')}</h4>
                       <p className="text-[11.5px] text-black font-medium mt-0.5">
-                        Auditorías continuas de seguridad de la información conforme a estándares internacionales y normativa europea sanitaria.
+                       {t('patienthome_auditorias_continuas_de_seguridad_de')}
                       </p>
                     </div>
                   </div>
@@ -754,9 +754,9 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-start gap-2.5">
                     <ShieldCheck size={17} className="text-indigo-600 stroke-[2.4] shrink-0 mt-0.5" />
                     <div>
-                      <h4 className="font-black text-[12.5px] text-black">Privacidad clínica absoluta</h4>
+                      <h4 className="font-black text-[12.5px] text-black">{t('patienthome_privacidad_clinica_absoluta')}</h4>
                       <p className="text-[11.5px] text-black font-medium mt-0.5">
-                        Tus informes jamás son compartidos ni comercializados ni usados para entrenar modelos públicos de IA.
+                       {t('patienthome_tus_informes_jamas_son_compartidos')}
                       </p>
                     </div>
                   </div>

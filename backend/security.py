@@ -138,6 +138,49 @@ def require_role(*allowed_roles: str):
         return current_user
     return role_checker
 
+async def _doctor_is_verified(db: AsyncSession, user_id: str) -> bool:
+    sp = (await db.execute(
+        select(models.SpecialistProfile).where(models.SpecialistProfile.user_id == user_id)
+    )).scalars().first()
+    if sp and (sp.is_verified or sp.verified):
+        return True
+    doc = (await db.execute(
+        select(models.Doctor).where(models.Doctor.user_id == user_id)
+    )).scalars().first()
+    return bool(doc and doc.verification_status == "verified")
+
+
+async def can_access_patient_data(db: AsyncSession, user: models.User) -> bool:
+    """True si el usuario es admin o médico con credenciales verificadas."""
+    if user.role == "admin":
+        return True
+    return user.role == "doctor" and await _doctor_is_verified(db, user.id)
+
+
+async def require_verified_doctor(
+    current_user: models.User = Depends(get_current_user),
+    db: AsyncSession = Depends(database.get_db),
+) -> models.User:
+    """
+    Acceso a datos clínicos de pacientes: solo médicos con credenciales verificadas
+    (o administradores). Un registro de médico recién creado queda en 'pending'.
+    """
+    if current_user.role == "admin":
+        return current_user
+    if current_user.role != "doctor":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso denegado. Se requiere rol de médico verificado.",
+        )
+    if not await _doctor_is_verified(db, current_user.id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tu cuenta médica está pendiente de verificación. Podrás acceder a los datos de pacientes cuando sea aprobada.",
+        )
+    return current_user
+
+
 require_doctor = require_role("doctor", "admin")
+require_verifier = require_role("admin", "verifier")
 require_patient = require_role("patient", "admin")
 require_admin = require_role("admin")

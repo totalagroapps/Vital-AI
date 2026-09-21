@@ -42,14 +42,14 @@ const EspecialistasLanding = ({
               className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-slate-500 hover:text-slate-900 transition-colors mb-0.5 sm:mb-2 cursor-pointer group"
             >
               <ArrowLeft size={13} className="group-hover:-translate-x-1 transition-transform" />
-              <span>Volver al inicio</span>
+              <span>{t('return_home')}</span>
             </button>
 
             <h1 className="text-lg sm:text-2xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              Conéctate con <span className="text-[#0d9488]">médicos especialistas</span>
+             {t('especialistaslandi_conectate_con')} <span className="text-[#0d9488]">{t('especialistaslandi_medicos_especialistas')}</span>
             </h1>
             <p className="text-[11.5px] sm:text-xs lg:text-sm text-slate-500 font-medium mt-0.5 sm:mt-1 max-w-xl leading-relaxed">
-              Elige la opción que mejor se adapte a tus necesidades y encuentra atención médica de calidad.
+             {t('especialistaslandi_elige_la_opcion_que_mejor')}
             </p>
           </div>
 
@@ -57,13 +57,13 @@ const EspecialistasLanding = ({
           <div className="hidden sm:flex items-center bg-white rounded-3xl p-3 pr-4 border border-slate-200/80 shadow-xs gap-4 shrink-0 max-w-md">
             <div className="pl-3">
               <div className="w-6 h-1 bg-teal-500 rounded-full mb-1.5" />
-              <h4 className="text-sm font-black text-slate-900 leading-tight">Tu salud, <br /> en buenas manos</h4>
-              <p className="text-[10px] text-slate-400 font-semibold mt-1">Especialistas verificados.<br />Atención cercana y segura.</p>
+              <h4 className="text-sm font-black text-slate-900 leading-tight">{t('hero_title_p1')} <br /> {t('especialistaslandi_en_buenas_manos')}</h4>
+              <p className="text-[10px] text-slate-400 font-semibold mt-1">{t('especialistaslandi_especialistas_verificados')}<br />{t('especialistaslandi_atencion_cercana_y_segura')}</p>
             </div>
             <div className="w-32 h-20 rounded-2xl overflow-hidden shrink-0 bg-teal-50">
               <img 
                 src="/images/especialistas_doctor_avatar.png" 
-                alt="Médicos especialistas verificados" 
+                alt={t('especialistaslandi_medicos_especialistas_verificados')} 
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   e.target.src = "/images/ai_doctor_bg.jpg";
@@ -74,7 +74,7 @@ const EspecialistasLanding = ({
         </div>
 
         {/* ================= MÓVIL: CUADRÍCULA 2 COLUMNAS COMPACTA (ZERO-SCROLL EN CUALQUIER SMARTPHONE) ================= */}
-        <div className="grid grid-cols-2 lg:hidden gap-2.5 sm:gap-4 flex-1 min-h-0 my-auto items-stretch">
+        <div className="grid grid-cols-2 lg:hidden gap-2.5 sm:gap-4 flex-1 min-h-0 my-auto items-stretch sm:flex-none sm:items-start sm:max-w-3xl sm:mx-auto sm:w-full">
           
           {/* Tarjeta Móvil 1: Cita Presencial */}
           <div 
@@ -92,24 +92,24 @@ const EspecialistasLanding = ({
               </div>
 
               {/* Imagen thumbnail compacta */}
-              <div className="w-full h-20 sm:h-24 rounded-xl overflow-hidden mb-2 bg-emerald-50 relative shrink-0">
+              <div className="w-full h-20 sm:h-36 rounded-xl overflow-hidden mb-2 bg-emerald-50 relative shrink-0">
                 <img 
                   src="/images/especialistas_presencial_card.png" 
-                  alt="Consulta Presencial" 
+                  alt={t('especialistaslandi_consulta_presencial')} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.target.src = "/images/in-person.png"; }}
                 />
                 <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#0d9488] px-1.5 py-0.5 rounded-md shadow-2xs">
-                  Cerca de ti
+                 {t('especialistaslandi_cerca_de_ti')}
                 </span>
               </div>
 
               <div>
                 <h3 className="text-[13.5px] sm:text-base font-black text-slate-900 leading-tight">
-                  Cita presencial
+                 {t('presencial_modality_label')}
                 </h3>
                 <p className="text-[11px] sm:text-xs text-slate-600 font-semibold line-clamp-2 mt-0.5 leading-snug">
-                  Especialistas en consulta médica cerca de tu ubicación.
+                 {t('especialistaslandi_especialistas_en_consulta_medica_cer')}
                 </p>
               </div>
             </div>
@@ -119,7 +119,7 @@ const EspecialistasLanding = ({
               onClick={(e) => { e.stopPropagation(); onSelectPresencial({}); }}
               className="w-full mt-2.5 py-2.5 px-2 bg-[#0d9488] active:bg-[#0f766e] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
-              <span>Buscar presencial</span>
+              <span>{t('especialistaslandi_buscar_presencial')}</span>
               <ArrowRight size={13} />
             </button>
           </div>
@@ -140,24 +140,24 @@ const EspecialistasLanding = ({
               </div>
 
               {/* Imagen thumbnail compacta */}
-              <div className="w-full h-20 sm:h-24 rounded-xl overflow-hidden mb-2 bg-blue-50 relative shrink-0">
+              <div className="w-full h-20 sm:h-36 rounded-xl overflow-hidden mb-2 bg-blue-50 relative shrink-0">
                 <img 
                   src="/images/especialistas_video_card.png" 
-                  alt="Videollamada médica" 
+                  alt={t('especialistaslandi_videollamada_medica')} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.target.src = "/images/video-call.png"; }}
                 />
                 <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#2563eb] px-1.5 py-0.5 rounded-md shadow-2xs">
-                  Online
+                 {t('especialistaslandi_online')}
                 </span>
               </div>
 
               <div>
                 <h3 className="text-[13.5px] sm:text-base font-black text-slate-900 leading-tight">
-                  Videollamada
+                 {t('book_modality_video')}
                 </h3>
                 <p className="text-[11px] sm:text-xs text-slate-600 font-semibold line-clamp-2 mt-0.5 leading-snug">
-                  Atención online inmediata estés donde estés.
+                 {t('especialistaslandi_atencion_online_inmediata_estes_dond')}
                 </p>
               </div>
             </div>
@@ -167,7 +167,7 @@ const EspecialistasLanding = ({
               onClick={(e) => { e.stopPropagation(); onSelectVideo({}); }}
               className="w-full mt-2.5 py-2.5 px-2 bg-[#2563eb] active:bg-[#1d4ed8] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
-              <span>Solicitar video</span>
+              <span>{t('especialistaslandi_solicitar_video')}</span>
               <ArrowRight size={13} />
             </button>
           </div>
@@ -187,25 +187,25 @@ const EspecialistasLanding = ({
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
-                  Quiero un médico cercano <br /> para una <span className="text-[#0d9488]">cita presencial</span>
+                 {t('especialistaslandi_quiero_un_medico_cercano')} <br /> {t('especialistaslandi_para_una')} <span className="text-[#0d9488]">{t('especialistaslandi_cita_presencial')}</span>
                 </h3>
                 
                 <p className="text-xs sm:text-sm text-slate-600 font-medium mt-2 mb-5 leading-relaxed">
-                  Encuentra médicos especialistas cerca de ti y reserva tu cita en su consulta.
+                 {t('land_option_presencial_desc')}
                 </p>
 
                 <ul className="space-y-2.5 mb-6">
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <MapPin size={16} className="text-[#0d9488] shrink-0" />
-                    <span>Atención presencial en tu zona</span>
+                    <span>{t('land_option_presencial_bullet1')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <Calendar size={16} className="text-[#0d9488] shrink-0" />
-                    <span>Elige el día y hora que te convenga</span>
+                    <span>{t('especialistaslandi_elige_el_dia_y_hora')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <ShieldCheck size={16} className="text-[#0d9488] shrink-0" />
-                    <span>Especialistas verificados</span>
+                    <span>{t('land_option_presencial_bullet3')}</span>
                   </li>
                 </ul>
 
@@ -213,7 +213,7 @@ const EspecialistasLanding = ({
                   onClick={() => onSelectPresencial({})}
                   className="px-6 py-3 bg-[#0d9488] hover:bg-[#0f766e] active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Buscar médicos cerca de mí</span>
+                  <span>{t('land_option_presencial_cta')}</span>
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -222,7 +222,7 @@ const EspecialistasLanding = ({
               <div className="w-full sm:w-48 h-44 sm:h-52 rounded-2xl overflow-hidden shrink-0 shadow-xs border border-emerald-100/80 bg-white relative">
                 <img 
                   src="/images/especialistas_presencial_card.png" 
-                  alt="Consulta Presencial" 
+                  alt={t('especialistaslandi_consulta_presencial')} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/images/in-person.png";
@@ -243,25 +243,25 @@ const EspecialistasLanding = ({
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
-                  Quiero una cita rápida con un médico <br /> por <span className="text-[#2563eb]">videollamada</span>
+                 {t('especialistaslandi_quiero_una_cita_rapida_con')} <br /> {t('especialistaslandi_por')} <span className="text-[#2563eb]">{t('especialistaslandi_videollamada')}</span>
                 </h3>
                 
                 <p className="text-xs sm:text-sm text-slate-600 font-medium mt-2 mb-5 leading-relaxed">
-                  Habla con un médico especialista por videollamada lo antes posible, estés donde estés.
+                 {t('land_option_video_desc')}
                 </p>
 
                 <ul className="space-y-2.5 mb-6">
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <Zap size={16} className="text-[#2563eb] shrink-0" />
-                    <span>Atención online inmediata</span>
+                    <span>{t('land_option_video_bullet1')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <Clock size={16} className="text-[#2563eb] shrink-0" />
-                    <span>Sin desplazamientos ni esperas</span>
+                    <span>{t('land_option_video_bullet2')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
                     <ShieldCheck size={16} className="text-[#2563eb] shrink-0" />
-                    <span>Médicos verificados</span>
+                    <span>{t('land_option_video_bullet3')}</span>
                   </li>
                 </ul>
 
@@ -269,7 +269,7 @@ const EspecialistasLanding = ({
                   onClick={() => onSelectVideo({})}
                   className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>Iniciar videollamada</span>
+                  <span>{t('land_option_video_cta')}</span>
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -278,7 +278,7 @@ const EspecialistasLanding = ({
               <div className="w-full sm:w-48 h-44 sm:h-52 rounded-2xl overflow-hidden shrink-0 shadow-xs border border-blue-100/80 bg-white relative">
                 <img 
                   src="/images/especialistas_video_card.png" 
-                  alt="Videollamada médica" 
+                  alt={t('especialistaslandi_videollamada_medica')} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/images/video-call.png";
@@ -297,9 +297,9 @@ const EspecialistasLanding = ({
             <ShieldCheck size={15} className="sm:w-[18px] sm:h-[18px]" />
           </div>
           <p className="text-[10px] sm:text-xs text-slate-600 leading-snug">
-            <span className="font-extrabold text-slate-900">Atención segura y confidencial</span>
+            <span className="font-extrabold text-slate-900">{t('land_security_title')}</span>
             <span className="mx-1.5 text-slate-300">|</span>
-            <span>Todos los médicos están verificados y tu información está protegida.</span>
+            <span>{t('land_security_desc')}</span>
           </p>
         </div>
 

@@ -5,6 +5,7 @@ Matching algorítmico por tipo de análisis, valores alterados y especialidad m�
 from typing import List, Dict, Any, Optional
 import re
 import logging
+from sqlalchemy import or_
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import models
@@ -174,130 +175,6 @@ SPECIALTY_RULES = [
     }
 ]
 
-# Directorio de respaldo con especialistas verificados de referencia
-FALLBACK_SPECIALISTS = [
-    {
-        "id": 103,
-        "user_id": "doc-dr-javier-torres",
-        "full_name": "Dr. Javier Torres",
-        "specialty": "Traumatología",
-        "license_number": "COL-330192",
-        "experience_years": 15,
-        "city": "Valencia, España",
-        "location": "Hospital Quirón / Consulta Traumatológica",
-        "photo_url": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 101,
-        "user_id": "doc-dr-carlos-mendoza",
-        "full_name": "Dr. Carlos Mendoza",
-        "specialty": "Cardiología",
-        "license_number": "COL-284910",
-        "experience_years": 12,
-        "city": "Madrid, España",
-        "location": "Centro Sanitas / Consulta Online",
-        "photo_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 107,
-        "user_id": "doc-dra-carmen-delvalle",
-        "full_name": "Dra. Carmen Del Valle",
-        "specialty": "Endocrinología",
-        "license_number": "COL-419203",
-        "experience_years": 11,
-        "city": "Madrid, España",
-        "location": "Clínica de Nutrición & Diabetes MIVOR",
-        "photo_url": "https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 108,
-        "user_id": "doc-dr-fernando-gil",
-        "full_name": "Dr. Fernando Gil",
-        "specialty": "Nefrología",
-        "license_number": "COL-501832",
-        "experience_years": 13,
-        "city": "Barcelona, España",
-        "location": "Unidad Renal MIVOR / Telemedicina",
-        "photo_url": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 109,
-        "user_id": "doc-dra-mariana-solis",
-        "full_name": "Dra. Mariana Solís",
-        "specialty": "Gastroenterología",
-        "license_number": "COL-382910",
-        "experience_years": 10,
-        "city": "Madrid, España",
-        "location": "Centro Digestivo y Endoscopia",
-        "photo_url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 110,
-        "user_id": "doc-dr-roberto-blanco",
-        "full_name": "Dr. Roberto Blanco",
-        "specialty": "Hematología",
-        "license_number": "COL-492019",
-        "experience_years": 14,
-        "city": "Sevilla, España",
-        "location": "Hospital Universitario / Hematología",
-        "photo_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 104,
-        "user_id": "doc-dra-sofia-valencia",
-        "full_name": "Dra. Sofía Valencia",
-        "specialty": "Dermatología",
-        "license_number": "COL-419082",
-        "experience_years": 8,
-        "city": "Sevilla, España",
-        "location": "Instituto Dermatológico Avanzado",
-        "photo_url": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 105,
-        "user_id": "doc-dr-mateo-herrera",
-        "full_name": "Dr. Mateo Herrera",
-        "specialty": "Neurología",
-        "license_number": "COL-482918",
-        "experience_years": 14,
-        "city": "Bilbao, España",
-        "location": "Hospital Clínico / Consulta Online",
-        "photo_url": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 106,
-        "user_id": "doc-dra-lucia-martinez",
-        "full_name": "Dra. Lucía Martínez",
-        "specialty": "Pediatría",
-        "license_number": "COL-391024",
-        "experience_years": 11,
-        "city": "Málaga, España",
-        "location": "Policlínica Materno-Infantil",
-        "photo_url": "https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    },
-    {
-        "id": 102,
-        "user_id": "doc-dra-elena-rodriguez",
-        "full_name": "Dra. Elena Rodríguez",
-        "specialty": "Medicina General",
-        "license_number": "COL-382901",
-        "experience_years": 9,
-        "city": "Barcelona, España",
-        "location": "Clínica Quirón / Telemedicina",
-        "photo_url": "https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400",
-        "is_verified": True
-    }
-]
-
 def match_specialty_from_clinical_data(
     diagnostics: Optional[List[str]] = None,
     anomalies: Optional[List[str]] = None,
@@ -403,7 +280,7 @@ async def get_recommended_specialists(
 ) -> List[Dict[str, Any]]:
     """
     Busca en el directorio de especialistas aquellos que coincidan con la especialidad recomendada.
-    Incluye fallback a especialistas certificados verificados en caso de que la BD no cuente con registros.
+    Solo devuelve médicos reales y verificados de la base de datos (sin directorio de respaldo ficticio).
     """
     specialists = []
     first_token = specialty.split()[0].lower().replace("ía", "").replace("ia", "")
@@ -411,7 +288,8 @@ async def get_recommended_specialists(
     if db is not None:
         try:
             stmt = select(models.SpecialistProfile).where(
-                models.SpecialistProfile.specialty.ilike(f"%{first_token}%")
+                models.SpecialistProfile.specialty.ilike(f"%{first_token}%"),
+                or_(models.SpecialistProfile.verified == True, models.SpecialistProfile.is_verified == True),
             ).limit(limit)
             result = await db.execute(stmt)
             db_specialists = result.scalars().all()
@@ -430,23 +308,6 @@ async def get_recommended_specialists(
                 })
         except Exception as e:
             logger.warning(f"Advertencia consultando SpecialistProfile en BD: {e}")
-
-    # Si faltan especialistas para cubrir el límite, complementar con el directorio de referencia
-    if len(specialists) < limit:
-        # Primero intentar coincidentes por especialidad
-        matching_fallbacks = [
-            fb for fb in FALLBACK_SPECIALISTS 
-            if first_token in fb["specialty"].lower() and fb["id"] not in [s["id"] for s in specialists]
-        ]
-        specialists.extend(matching_fallbacks)
-
-    if len(specialists) < limit:
-        # Completar con médicos generales o afines si todavía faltan
-        general_fallbacks = [
-            fb for fb in FALLBACK_SPECIALISTS 
-            if fb["id"] not in [s["id"] for s in specialists]
-        ]
-        specialists.extend(general_fallbacks[:limit - len(specialists)])
 
     return specialists[:limit]
 

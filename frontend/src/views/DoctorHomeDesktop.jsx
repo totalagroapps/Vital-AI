@@ -72,9 +72,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
     }
   };
 
-  const doctorName = doctorProfile?.full_name || 'Dr. Alejandro Ruiz';
-  const doctorSpecialty = doctorProfile?.specialty || 'Médico';
-  const doctorPhoto = doctorProfile?.photo_url || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
+  const doctorName = doctorProfile?.full_name || t('default_doctor_name');
+  const doctorSpecialty = doctorProfile?.specialty || t('presencial_unnamed');
+  const doctorPhoto = doctorProfile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(doctorName)}&background=0D8ABC&color=fff&size=150`;
 
   return (
     <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col selection:bg-brand-purple/20">
@@ -94,7 +94,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
               MIVOR<span className="text-teal-600">.ai</span>
             </span>
             <span className="text-[10px] font-bold text-teal-700 uppercase tracking-widest leading-none mt-1">
-              PORTAL MÉDICO
+             {t('doctorcreate_portal_medico')}
             </span>
           </div>
         </div>
@@ -105,45 +105,37 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
             onClick={() => onNavigate('home')} 
             className="text-brand-purple font-semibold border-b-2 border-brand-purple pb-1 transition-colors"
           >
-            Inicio
+           {t('home')}
           </button>
           <button 
             onClick={() => onNavigate('patients')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
-            Pacientes
+           {t('patients')}
           </button>
           <button 
             onClick={() => onNavigate('agenda')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
-            Agenda
+           {t('agenda')}
           </button>
           <button 
             onClick={() => onNavigate('copilot')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
-            Análisis
+           {t('doctorhomedesktop_analisis')}
           </button>
           <button 
             onClick={() => onNavigate('search')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
           >
-            Últimos Avances
-          </button>
-          <button 
-            onClick={() => onNavigate('verifier')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1 flex items-center gap-1"
-            title="Panel de Verificación Médica y Auditoría"
-          >
-            <ShieldCheck size={14} className="text-teal-600" />
-            Verificador
+           {t('doctorhomedesktop_ultimos_avances')}
           </button>
           <button 
             onClick={() => onNavigate('more')} 
             className="text-gray-600 hover:text-brand-purple transition-colors pb-1 flex items-center gap-1"
           >
-            Más <ChevronDown size={14} />
+           {t('more')} <ChevronDown size={14} />
           </button>
         </nav>
 
@@ -201,18 +193,11 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                     {t('view_doctor_profile', 'Ver Perfil Médico')}
                   </button>
                   <button 
-                    onClick={() => { setShowProfileMenu(false); onNavigate('verifier'); }}
-                    className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
-                  >
-                    <ShieldCheck size={13} className="text-teal-600" />
-                    {t('doctor_verification_title', 'Verificación Médica')}
-                  </button>
-                  <button 
                     onClick={onLogout}
                     className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                   >
                     <LogOut size={13} />
-                    Cerrar Sesión
+                   {t('logout')}
                   </button>
                 </div>
               </>
@@ -232,12 +217,12 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
           {/* Left Hero Text */}
           <div className="max-w-xl">
             <h1 className="text-[42px] lg:text-[46px] font-black text-brand-dark tracking-tight leading-[1.12] mb-3">
-              Tu práctica médica,<br />
-              potenciada por<br />
-              <span className="text-brand-purple">inteligencia artificial.</span>
+             {t('doctorhomedesktop_tu_practica_medica')}<br />
+             {t('enhanced_by_ai')}<br />
+              <span className="text-brand-purple">{t('doctorhomedesktop_inteligencia_artificial')}</span>
             </h1>
             <p className="text-sm lg:text-[15px] text-gray-500 leading-relaxed max-w-lg">
-              Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente.
+             {t('save_time_make_better_decisions')}
             </p>
           </div>
 
@@ -266,9 +251,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                 <Users size={24} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-1">Mis pacientes</h3>
+                <h3 className="text-base font-extrabold text-gray-900 mb-1">{t('my_patients')}</h3>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-sm">
-                  Busca, crea y gestiona pacientes. Accede a historial, medicación, pruebas e informes.
+                 {t('search_create_manage_patients')}
                 </p>
               </div>
             </div>
@@ -287,9 +272,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                 <Calendar size={24} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-1">Mi agenda</h3>
+                <h3 className="text-base font-extrabold text-gray-900 mb-1">{t('my_schedule')}</h3>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-sm">
-                  Gestiona tu agenda, consultas presenciales y videollamadas, citas, pagos y próximas consultas.
+                 {t('manage_schedule_consultations')}
                 </p>
               </div>
             </div>
@@ -308,9 +293,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                 <Sparkles size={24} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-1">Asistente clínico IA</h3>
+                <h3 className="text-base font-extrabold text-gray-900 mb-1">{t('ai_clinical_assistant')}</h3>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-sm">
-                  Resume expedientes, analiza información clínica, compara pruebas y apoya tu diagnóstico.
+                 {t('summarize_files_analyze_clinical_info')}
                 </p>
               </div>
             </div>
@@ -329,9 +314,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                 <BookOpen size={24} />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-gray-900 mb-1">Últimos Avances Médicos</h3>
+                <h3 className="text-base font-extrabold text-gray-900 mb-1">{t('medical_library_rag')}</h3>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-sm">
-                  Busca los últimos avances científicos, guías clínicas y ensayos en PubMed, ClinicalTrials y Cochrane.
+                 {t('doctorhomedesktop_busca_los_ultimos_avances_cientifico')}
                 </p>
               </div>
             </div>
@@ -351,8 +336,8 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
               <Sparkles size={18} />
             </div>
             <div>
-              <h4 className="text-sm font-extrabold text-gray-900">¿Qué necesitas hacer?</h4>
-              <p className="text-xs text-gray-500">Busca un paciente o pregunta a MIVOR.ai...</p>
+              <h4 className="text-sm font-extrabold text-gray-900">{t('what_do_you_need_to_do')}</h4>
+              <p className="text-xs text-gray-500">{t('search_patient_or_ask_vitalai')}</p>
             </div>
           </div>
 
@@ -369,7 +354,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
               type="button"
               onClick={() => doctorDesktopFileInputRef.current?.click()}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-brand-purple hover:bg-white transition-all ml-1 shrink-0 cursor-pointer shadow-2xs"
-              title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+              title={t('doctorhome_adjuntar_cualquier_archivo_clinico_p')}
             >
               <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
             </button>
@@ -380,7 +365,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder='Ej: "¿Buscar paciente Mohamed Amrani?" · "Resumen de su última analítica" · "Preparar consulta de hoy"'
+              placeholder={t('doctorhomedesktop_ej_buscar_paciente_mohamed_amrani')}
               className="flex-1 bg-transparent border-none text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 py-2.5"
             />
             <button 
@@ -391,7 +376,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
                   ? 'bg-red-500 text-white animate-pulse shadow-md' 
                   : 'bg-brand-purple text-white hover:bg-brand-purple/90 shadow-xs'
               }`}
-              title={isListening ? "Detener grabación" : "Dictar consulta con voz"}
+              title={isListening ? t('doctorhome_detener_grabacion') : t('doctorhomedesktop_dictar_consulta_con_voz')}
             >
               <Mic size={17} />
             </button>
@@ -402,9 +387,9 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
 
         {/* 5. FOOTER / NOVEDADES MÉDICAS */}
         <div className="text-center pt-2 pb-6">
-          <h4 className="text-sm font-extrabold text-gray-900 mb-1">Últimas novedades médicas</h4>
+          <h4 className="text-sm font-extrabold text-gray-900 mb-1">{t('doctorhomedesktop_ultimas_novedades_medicas')}</h4>
           <p className="text-xs text-gray-500">
-            Mantente al día con los últimos avances científicos y alertas relevantes para tu práctica.
+           {t('doctorhomedesktop_mantente_al_dia_con_los')}
           </p>
         </div>
 

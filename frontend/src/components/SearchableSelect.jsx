@@ -1,3 +1,4 @@
+import { useLanguage } from '../contexts/LanguageContext';
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Search, Check } from 'lucide-react';
 
@@ -6,6 +7,7 @@ import { ChevronDown, Search, Check } from 'lucide-react';
 const SearchableSelect = ({
   items, value, onChange, placeholder, renderLabel, renderIcon, clearLabel, className = '', multiple = false,
 }) => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const wrapperRef = useRef(null);
@@ -114,7 +116,7 @@ const SearchableSelect = ({
               </button>
             ))}
             {filtered.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-3">Sin resultados.</p>
+              <p className="text-xs text-gray-400 text-center py-3">{t('profile_no_results')}</p>
             )}
           </div>
         </div>

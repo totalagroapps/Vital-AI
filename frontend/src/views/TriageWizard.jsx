@@ -50,7 +50,7 @@ const TriageWizard = ({ onBack, onStartChat }) => {
       <div className="absolute top-0 right-0 w-[55%] md:w-[45%] lg:w-[40%] h-[380px] md:h-[500px] z-0 overflow-hidden pointer-events-none">
         <img 
           src="/images/abstract_woman_bg.jpg" 
-          alt="AI Hologram" 
+          alt={t('triagewizard_ai_hologram')} 
           className="absolute top-0 right-0 w-full h-full object-cover object-top opacity-60 mix-blend-multiply" 
           style={{ maskImage: "linear-gradient(to right, transparent 0%, transparent 30%, black 100%)", WebkitMaskImage: "linear-gradient(to right, transparent 0%, transparent 30%, black 100%)" }}
         />

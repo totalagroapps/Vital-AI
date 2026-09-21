@@ -14,6 +14,7 @@ from sqlalchemy.future import select
 
 import models
 import security
+from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user_id
 from main import StandardChatRequest, TriageRequest, logger
@@ -231,14 +232,7 @@ async def send_standard_chat_message(
     db.add(user_db_msg)
     
     system_prompt = NATURAL_CLINICAL_CHAT_PROMPT
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
-    target_lang = lang_map.get(request.language, 'Spanish (Español)')
-    lang_instruction = f'''
-
-CRITICAL LANGUAGE DIRECTIVE:
-You MUST communicate with the patient EXCLUSIVELY and ENTIRELY in {target_lang}.
-DO NOT speak or reply in English or Spanish unless {target_lang} is English or Spanish.
-Translate and compose all clinical findings, greetings, and advice directly in {target_lang}.'''
+    lang_instruction = language_directive(request.language, request.country, 'patient')
     
     messages_payload = [{'role': 'system', 'content': (system_prompt + lang_instruction)}]
     for msg in request.messages:
@@ -291,14 +285,7 @@ async def general_chat(
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     SYSTEM_PROMPT = NATURAL_CLINICAL_CHAT_PROMPT
     
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
-    target_lang = lang_map.get(request.language, 'Spanish (Español)')
-    lang_instruction = f'''
-
-CRITICAL LANGUAGE DIRECTIVE:
-You MUST communicate with the user EXCLUSIVELY and ENTIRELY in {target_lang}.
-DO NOT speak or reply in English or Spanish if {target_lang} is French or Arabic.
-Translate and compose your entire response strictly into {target_lang}.'''
+    lang_instruction = language_directive(request.language, request.country, 'user')
     
     SYSTEM_PROMPT += lang_instruction
 

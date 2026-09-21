@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import (
     APIRouter,
+    Request,
     Depends,
     HTTPException,
     status,
@@ -15,7 +16,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 
 from database import get_db
-from security import get_current_user, get_password_hash, require_role
+from security import get_current_user, get_password_hash, require_role, create_access_token
 from models import (
     User,
     Doctor,
@@ -53,12 +54,23 @@ router = APIRouter(
 )
 async def register_doctor(
     data: DoctorCreateRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """
     Registra un nuevo médico en la plataforma.
     Crea el usuario, perfil de doctor, especialidad y sincroniza con el directorio.
     """
+    from routers.auth import apply_register_rate_limit
+    apply_register_rate_limit(request.client.host if request.client else "unknown")
+
+    # La contraseña es obligatoria: no existe una contraseña por defecto.
+    if not data.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La contraseña es obligatoria (mínimo 6 caracteres).",
+        )
+
     # 1. Validar si el usuario ya existe
     stmt_user = select(User).where(User.username == data.email.strip().lower())
     res_user = await db.execute(stmt_user)
@@ -78,8 +90,7 @@ async def register_doctor(
         )
 
     # 3. Crear usuario
-    password = data.password or "MivorPass2026!"
-    hashed_pwd = get_password_hash(password)
+    hashed_pwd = get_password_hash(data.password)
     new_user = User(
         username=data.email.strip().lower(),
         hashed_password=hashed_pwd,
@@ -172,6 +183,7 @@ async def register_doctor(
     await db.commit()
 
     return DoctorProfileResponse(
+        access_token=create_access_token(data={'sub': new_user.id}),
         user_id=new_user.id,
         email=new_user.username,
         role=new_user.role,
@@ -513,9 +525,11 @@ async def upload_doctor_media(
     """
     Sube archivos asociados al doctor (foto de perfil, diploma, identidad, galería o video).
     """
-    target_user_id = user_id or (current_user.id if current_user else None)
-    if not target_user_id:
-        raise HTTPException(status_code=400, detail="Identificador de usuario no proporcionado")
+    target_user_id = current_user.id
+    if user_id and user_id != current_user.id:
+        if current_user.role not in ("admin", "verifier"):
+            raise HTTPException(status_code=403, detail="No tienes permisos para subir archivos a este perfil.")
+        target_user_id = user_id
 
     stmt = select(Doctor).where(Doctor.user_id == target_user_id)
     res = await db.execute(stmt)

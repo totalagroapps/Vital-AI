@@ -10,6 +10,7 @@ Estándar aplicado:
 """
 
 import base64
+import hashlib
 import os
 import logging
 from typing import Any
@@ -21,7 +22,8 @@ from sqlalchemy.types import TypeDecorator
 logger = logging.getLogger(__name__)
 
 # Clave fija de desarrollo si no existe PHI_ENCRYPTION_KEY configurada
-_DEV_FALLBACK_KEY = b"VitalAI_HIPAA_Safe_Key_32bytes!"
+# (SHA-256 garantiza exactamente 32 bytes; la cadena original medía 31 y AES-256 fallaba.)
+_DEV_FALLBACK_KEY = hashlib.sha256(b"VitalAI_HIPAA_Safe_Key_dev_only").digest()
 
 def _load_encryption_key() -> bytes:
     """

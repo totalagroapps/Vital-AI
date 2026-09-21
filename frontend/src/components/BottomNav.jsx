@@ -73,7 +73,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={activeTab === 'home' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
           <span className={`text-[10.5px] leading-tight ${activeTab === 'home' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
-            Inicio
+            {t('home')}
           </span>
           <span className={`w-5 h-[2px] rounded-full ${activeTab === 'home' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
@@ -99,7 +99,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             <circle cx="15" cy="10" r="0.9" fill={activeTab === 'general_chat' ? '#0055ff' : '#0f172a'} />
           </svg>
           <span className={`text-[10.5px] leading-tight ${activeTab === 'general_chat' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
-            Pregunta a MIVOR
+            {t('bottomnav_pregunta_a_mivor')}
           </span>
           <span className={`w-5 h-[2px] rounded-full ${activeTab === 'general_chat' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
@@ -115,7 +115,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={activeTab === 'treatments' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
           <span className={`text-[10.5px] leading-tight ${activeTab === 'treatments' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
-            Mi Tratamiento
+            {t('bottomnav_mi_tratamiento')}
           </span>
           <span className={`w-5 h-[2px] rounded-full ${activeTab === 'treatments' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>
@@ -131,7 +131,7 @@ const BottomNav = ({ activeTab, onTabChange, isDoctor }) => {
             className={activeTab === 'more' ? 'text-[#0055ff] stroke-[2.5]' : 'text-black stroke-[2.2]'} 
           />
           <span className={`text-[10.5px] leading-tight ${activeTab === 'more' ? 'font-black text-[#0055ff]' : 'font-bold text-black'}`}>
-            Mi cuenta
+            {t('patient_nav_my_account')}
           </span>
           <span className={`w-5 h-[2px] rounded-full ${activeTab === 'more' ? 'bg-[#0055ff]' : 'bg-transparent'}`} />
         </button>

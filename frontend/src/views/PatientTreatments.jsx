@@ -302,7 +302,7 @@ export default function PatientTreatments({
           <form onSubmit={handleAddMedication} onPaste={handlePaste} className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 mt-4 animate-fade-in-up">
             <h3 className="font-bold text-gray-900 mb-4">
               {t("new_medication")}
-              {medQueue.length > 0 && <span className="ml-2 text-xs font-normal text-teal-800 bg-teal-100/80 px-2 py-1 rounded-lg">+{medQueue.length} pendientes</span>}
+              {medQueue.length > 0 && <span className="ml-2 text-xs font-normal text-teal-800 bg-teal-100/80 px-2 py-1 rounded-lg">+{medQueue.length} {t('patienttreatments_pendientes')}</span>}
             </h3>
             
             <div className="mb-6 bg-teal-50 border border-teal-200/60 rounded-2xl p-4 text-center">
@@ -325,7 +325,7 @@ export default function PatientTreatments({
                 {isExtracting ? t("analyzing_with_ai") : "Adjuntar o pegar (Ctrl+V) receta(s)"}
               </button>
               <p className="text-[10px] text-teal-600/90 mt-1.5 font-medium">
-                Soporta varias imágenes o PDFs a la vez y pegado directo desde portapapeles
+               {t('patienttreatments_soporta_varias_imagenes_o_pdfs')}
               </p>
             </div>
             
@@ -346,7 +346,7 @@ export default function PatientTreatments({
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
                     <span>{t("dosage")}</span>
-                    {!newMed.dosage && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                    {!newMed.dosage && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">{t('patienttreatments_sugerido_rellenar')}</span>}
                   </label>
                   <input 
                     type="text" 
@@ -360,7 +360,7 @@ export default function PatientTreatments({
                 <div>
                   <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
                     <span>{t("schedule")}</span>
-                    {!newMed.time_of_day && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                    {!newMed.time_of_day && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">{t('patienttreatments_sugerido_rellenar')}</span>}
                   </label>
                   <input 
                     type="text" 
@@ -375,7 +375,7 @@ export default function PatientTreatments({
               <div>
                 <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
                   <span>{t("frequency")}</span>
-                  {!newMed.frequency && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">Sugerido rellenar</span>}
+                  {!newMed.frequency && <span className="text-[9px] text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full font-bold border border-amber-300">{t('patienttreatments_sugerido_rellenar')}</span>}
                 </label>
                 <input 
                   type="text" 

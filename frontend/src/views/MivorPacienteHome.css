@@ -437,6 +437,19 @@ button{font:inherit}
   .mivor-nav button{font-size:13px}
   .mivor-hero{grid-template-columns:40% 38% 22%}
 }
+/* Portátil pequeño / tablet horizontal (951-1250px): pilares, tarjetas y titular sin recortes */
+@media(min-width:951px) and (max-width:1250px){
+  .mivor-hero{grid-template-columns:35% 34% 31%}
+  .hero-copy h1{font-size:clamp(28px,3.2vw,40px);letter-spacing:-1.2px}
+  .hero-features{width:100%;max-width:100%;justify-self:stretch;margin-left:0;padding-left:8px;height:auto;max-height:100%;gap:clamp(6px,1.6vh,18px);justify-content:center}
+  .feature{gap:12px}
+  .feature-icon{width:clamp(48px,6vh,60px);height:clamp(48px,6vh,60px)}
+  .feature h3{font-size:clamp(13px,1.35vw,16px);white-space:normal}
+  .feature p{font-size:clamp(11.5px,1.15vw,13.5px);white-space:normal}
+  .service-card{height:auto;min-height:clamp(220px,33vh,325px);padding-bottom:68px}
+  .service-card h2{font-size:clamp(16px,1.7vw,20px)}
+  .service-card p{font-size:clamp(12px,1.25vw,14.5px)}
+}
 @media(max-width:950px){
   .mivor-page{height:auto;overflow-y:auto}
   .mivor-nav{display:none}
@@ -455,6 +468,12 @@ button{font:inherit}
   .service-grid{grid-template-columns:1fr}
 }
 @media(max-height:480px){.mivor-page{height:auto;overflow-y:auto}}
+/* Portátiles con poca altura útil de navegador (~650px): la página hace scroll en vez de solapar bloques */
+@media(min-width:951px) and (max-height:720px){
+  .mivor-page{height:auto;min-height:100vh;overflow:visible}
+  .mivor-hero{flex:none;min-height:430px}
+  .service-card{height:auto;min-height:250px}
+}
 
 /* ESTILOS BASE MÓVIL (ZERO-SCROLL) */
 .mivor-mobile-home .mobile-card {
@@ -682,3 +701,26 @@ button{font:inherit}
 }
 
 
+
+/* Teléfonos pequeños o en horizontal: se conserva el diseño, pero con scroll si no cabe en pantalla */
+@media (max-height: 660px) {
+  .mivor-mobile-home {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 100dvh;
+    overflow-y: auto !important;
+    justify-content: flex-start !important;
+    padding-bottom: 72px !important; /* deja libre la barra inferior fija */
+  }
+  .mivor-mobile-home .mobile-main {
+    flex: none !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+  .mivor-mobile-home .mobile-grid {
+    flex: none !important;
+  }
+  .mivor-mobile-home .mobile-card {
+    min-height: auto !important;
+  }
+}

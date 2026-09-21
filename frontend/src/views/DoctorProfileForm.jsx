@@ -507,7 +507,7 @@ const DoctorProfileForm = ({ apiUrl, authHeaders, existingProfile, onSaved, onBa
             </div>
             <div>
               <label className={labelClass}><Globe className="w-3 h-3 inline mr-1" />{t('profile_website')}</label>
-              <input type="url" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://" className={inputClass} />
+              <input type="url" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder={t('doctorprofileform_https')} className={inputClass} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -528,7 +528,7 @@ const DoctorProfileForm = ({ apiUrl, authHeaders, existingProfile, onSaved, onBa
                     type="url"
                     value={form.avatar_url}
                     onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                    placeholder="https://"
+                    placeholder={t('doctorprofileform_https')}
                     className={`${inputClass} flex-1`}
                   />
                   {isEditing && (

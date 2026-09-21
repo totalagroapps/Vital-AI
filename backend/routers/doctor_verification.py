@@ -22,7 +22,7 @@ router = APIRouter(
 @router.get("/doctors", response_model=List[DoctorVerificationDetailResponse])
 async def get_all_doctors_for_verification(
     include_all: bool = False,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(require_role("admin", "verifier")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -129,7 +129,7 @@ async def get_all_doctors_for_verification(
 async def update_doctor_verification_status(
     doctor_id: int,
     data: VerificationStatusUpdate,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(require_role("admin", "verifier")),
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -252,7 +252,7 @@ async def update_doctor_verification_status(
 @router.get("/doctors/{doctor_id}", response_model=DoctorVerificationDetailResponse)
 async def get_doctor_verification_detail(
     doctor_id: int,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(require_role("admin", "verifier")),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Doctor).where(Doctor.id == doctor_id).options(selectinload(Doctor.user))

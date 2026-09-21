@@ -100,6 +100,7 @@ class DoctorProfileUpdate(BaseModel):
 # ==========================================================
 
 class DoctorProfileResponse(BaseModel):
+    access_token: Optional[str] = None  # solo se rellena en el registro
     user_id: Union[str, int]
     email: str
     role: str

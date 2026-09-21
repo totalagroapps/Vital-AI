@@ -121,6 +121,24 @@ if (R2_ACCOUNT_ID and R2_ACCESS_KEY_ID):
 
 app = FastAPI(title='MIVOR.ai - Team API', version='2.0')
 
+def _ensure_missing_columns(sync_conn):
+    from sqlalchemy import inspect as sa_inspect
+    inspector = sa_inspect(sync_conn)
+    existing_tables = set(inspector.get_table_names())
+    added = []
+    for table in models.Base.metadata.sorted_tables:
+        if table.name not in existing_tables:
+            continue
+        present = {c['name'] for c in inspector.get_columns(table.name)}
+        for col in table.columns:
+            if col.name in present or col.primary_key or not col.nullable:
+                continue
+            col_type = col.type.compile(dialect=sync_conn.dialect)
+            sync_conn.execute(text(f'ALTER TABLE "{table.name}" ADD COLUMN "{col.name}" {col_type}'))
+            added.append(f'{table.name}.{col.name}')
+    return added
+
+
 @app.on_event('startup')
 async def on_startup():
     try:
@@ -130,9 +148,18 @@ async def on_startup():
     except Exception as e:
         logger.warning(f"Error initializing DB tables on startup: {e}")
 
+    # create_all no añade columnas nuevas a tablas ya existentes: se completan aquí (idempotente).
     try:
-        from scripts.seed_catalogs import seed_catalogs
-        await seed_catalogs()
+        async with database.engine.begin() as conn:
+            added = await conn.run_sync(_ensure_missing_columns)
+        if added:
+            logger.info(f"Added missing DB columns: {added}")
+    except Exception as e:
+        logger.warning(f"Error ensuring missing columns on startup: {e}")
+
+    try:
+        from scripts.seed_catalogs import seed_catalogs, demo_seed_enabled
+        await seed_catalogs(seed_demo=demo_seed_enabled())
     except Exception as e:
         logger.warning(f"Error seeding catalogs on startup: {e}")
 
@@ -316,6 +343,7 @@ class StandardChatMessage(BaseModel):
 class StandardChatRequest(BaseModel):
     messages: List[StandardChatMessage]
     language: Optional[str] = 'es'
+    country: Optional[str] = None
 
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -334,6 +362,7 @@ class ChatMessage(BaseModel):
 class TriageRequest(BaseModel):
     messages: List[ChatMessage]
     language: Optional[str] = 'es'
+    country: Optional[str] = None
     session_id: Optional[str] = None
 
 
@@ -379,6 +408,7 @@ class DoctorQueryRequest(BaseModel):
     patient_id: str
     text_model: str = 'llama3.1'
     language: Optional[str] = 'es'
+    country: Optional[str] = None
 
 
 from pydantic import BaseModel
@@ -439,3 +469,6 @@ from routers.doctors import router as doctors_router
 app.include_router(doctors_router)
 from routers.health_places import router as health_places_router
 app.include_router(health_places_router)
+
+from routers.i18n import router as i18n_router
+app.include_router(i18n_router)

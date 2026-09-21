@@ -597,3 +597,13 @@ class ScheduledAppointment(Base):
     patient = relationship("User", back_populates="scheduled_appointments")
     doctor = relationship("DoctorProfile")
 
+
+
+class UITranslation(Base):
+    """Traducción de la interfaz generada con IA para un idioma sin diccionario manual (caché compartida)."""
+    __tablename__ = "ui_translations"
+
+    lang = Column(String(8), primary_key=True)
+    strings = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

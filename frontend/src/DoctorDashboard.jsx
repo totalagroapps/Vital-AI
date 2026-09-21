@@ -3,7 +3,6 @@ import DoctorHome from './views/DoctorHome';
 import DoctorMore from './views/DoctorMore';
 import DoctorCalendarView from './views/DoctorCalendarView';
 import DoctorProfile from './views/DoctorProfile';
-import DoctorVerificationDetail from './views/VerificationDetail';
 import DoctorSchedule from './views/DoctorSchedule';
 import DoctorProfileForm from './views/DoctorProfileForm';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
@@ -20,9 +19,12 @@ import {
 } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
-  const { t, language } = useLanguage();
+  const { t, language, country } = useLanguage();
   const [doctorScreen, setDoctorScreen] = useState('home');
   const [patients, setPatients] = useState([]);
+  const [patientSearch, setPatientSearch] = useState('');
+  // En pantallas pequeñas solo se muestra un panel a la vez: 'list' | 'detail' | 'copilot'
+  const [mobilePane, setMobilePane] = useState('list');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [patientDetail, setPatientDetail] = useState(null);
   const [patientDocuments, setPatientDocuments] = useState([]);
@@ -112,7 +114,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         body: formData
       });
       if (!res.ok) {
-        throw new Error('Error al subir los estudios médicos');
+        throw new Error(t('doctordashboard_error_al_subir_los_estudios'));
       }
       await fetchPatientDetail(selectedPatient.user_id);
     } catch (err) {
@@ -178,13 +180,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   useEffect(() => {
     if (selectedPatient) {
       fetchPatientDetail(selectedPatient.user_id);
-      setCopilotMessages([{ role: 'assistant', content: `Hola Doctor. Soy su Copiloto Clínico IA (Fila 23). He indexado el expediente completo de ${selectedPatient.full_name} (orientaciones de salud, analíticas explicadas, valores alterados y medicación activa). ¿Qué desea consultar sobre este caso?` }]);
+      setCopilotMessages([{ role: 'assistant', content: t('doctordashboard_hola_doctor_soy_su_copiloto', { full_name: selectedPatient.full_name }) }]);
     }
   }, [selectedPatient]);
 
   useEffect(() => {
     copilotEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [copilotMessages, isCopilotThinking]);
+
+  useEffect(() => {
+    if (doctorScreen === 'copilot') setMobilePane('copilot');
+    else if (doctorScreen === 'patients') setMobilePane(selectedPatient ? 'detail' : 'list');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doctorScreen]);
 
   useEffect(() => {
     if (doctorScreen === 'copilot' && !selectedPatient && patients.length > 0) {
@@ -211,10 +219,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
     let triagesHtml = (patientDetail.triages || []).map(triageItem => `
       <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
-        <strong>Fecha:</strong> ${triageItem.created_at ? escapeHtml(new Date(triageItem.created_at).toLocaleString()) : '--'}<br/>
-        <strong>Categoría:</strong> ${escapeHtml(triageItem.category || 'N/A')} | <strong>Estado:</strong> ${escapeHtml(triageItem.status || '--')}<br/>
+        <stron${t('doctordashboard_fecha')}a:</strong> ${triageItem.created_at ? escapeHtml(new Date(triageItem.created_at).toLocaleString()) : '--'}<br/>
+        <strong${t('doctordashboard_categoria')}:</strong> ${escapeHtml(triageItem.category || 'N/A')} | <strong>${t('doctordashboard_estado')}</strong> ${escapeHtml(triageItem.status || '--')}<br/>
         ${triageItem.recommended_specialty ? `<strong>Especialidad sugerida:</strong> ${escapeHtml(triageItem.recommended_specialty)}<br/>` : ''}
-        <strong>Informe Clínico:</strong><br/>
+        <strong${t('doctordashboard_informe_clinico')}:</strong><br/>
         <div style="white-space: pre-wrap; font-size: 0.9em; color: #334155; margin-top: 4px;">${escapeHtml(triageItem.final_report || t('no_complete_report'))}</div>
       </div>
     `).join('');
@@ -232,55 +240,55 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     if (patientDetail.smart_referral?.matched) {
       referralHtml = `
         <div class="referral-box">
-          <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;">Derivación Inteligente Recomendada</h3>
-          <p style="margin: 0 0 5px 0;"><strong>Especialidad sugerida:</strong> ${escapeHtml(patientDetail.smart_referral.recommended_specialty)} (${escapeHtml(patientDetail.smart_referral.urgency?.toUpperCase() || '')})</p>
-          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong>Motivo clínico:</strong> ${escapeHtml(patientDetail.smart_referral.reason)}</p>
+          <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;${t('doctordashboard_derivacion_inteligente_recomendada')}da</h3>
+          <p style="margin: 0 0 5px 0;"><stro${t('doctordashboard_especialidad_sugerida_2')}da:</strong> ${escapeHtml(patientDetail.smart_referral.recommended_specialty)} (${escapeHtml(patientDetail.smart_referral.urgency?.toUpperCase() || '')})</p>
+          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong${t('doctordashboard_motivo_clinico')}:</strong> ${escapeHtml(patientDetail.smart_referral.reason)}</p>
         </div>
       `;
     }
 
     const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
-    const title = `Expediente Clínico - ${patientName}`;
+    const title = t('doctordashboard_expediente_clinico', { patientName });
     const bodyHtml = `
       <div class="header">
-        <h1><span class="brand">MIVOR.ai</span> · Expediente Clínico Oficial</h1>
-        <p>Historial Médico Integral del Paciente · ${escapeHtml(t('app_slogan'))}</p>
+        <h1><span class="brand">MIVOR.ai</span${t('doctordashboard_expediente_clinico_oficial')}al</h1>
+        ${t('doctordashboard_historial_medico_integral_del_pacien')}e · ${escapeHtml(t('app_slogan'))}</p>
       </div>
       
-      <h2>Ficha del Paciente</h2>
+      <${t('patient_record')}nte</h2>
       <div class="grid">
         <div><div class="label">${escapeHtml(t('name'))}</div><div class="value">${escapeHtml(patientName)}</div></div>
         <div><div class="label">${escapeHtml(t('date_of_birth'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.date_of_birth || '--')}</div></div>
         <div><div class="label">${escapeHtml(t('gender'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.gender || '--')}</div></div>
         <div><div class="label">${escapeHtml(t('blood_type_label'))}</div><div class="value" style="color: #e11d48;">${escapeHtml(patientDetail?.profile?.blood_type || 'N/A')}</div></div>
         <div><div class="label">${escapeHtml(t('allergies'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.allergies || 'Ninguna alergia registrada')}</div></div>
-        <div><div class="label">${escapeHtml(t('chronic_conditions_label'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.chronic_conditions || 'Sin condiciones crónicas registradas')}</div></div>
-        <div><div class="label">Altura / Peso</div><div class="value">${escapeHtml(patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--')} / ${escapeHtml(patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--')}</div></div>
-        <div><div class="label">Contacto de Emergencia</div><div class="value">${escapeHtml(patientDetail?.profile?.emergency_contact || '--')}</div></div>
+        <div><div class="label">${escapeHtml(t('chronic_conditions_label'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.chronic_conditions || t('doctordashboard_sin_condiciones_cronicas_registradas'))}</div></div>
+        <div><div class="label"${t('doctordashboard_altura_peso')}o</div><div class="value">${escapeHtml(patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--')} / ${escapeHtml(patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--')}</div></div>
+        <div><div class="label"${t('emergency_contact')}a</div><div class="value">${escapeHtml(patientDetail?.profile?.emergency_contact || '--')}</div></div>
       </div>
 
       ${referralHtml}
 
-      <h2>Tratamiento Farmacológico Activo</h2>
+      <h${t('doctordashboard_tratamiento_farmacologico_activo')}vo</h2>
       ${medicationsHtml ? `
         <table>
           <thead>
             <tr>
-              <th>Fármaco</th>
-              <th>Dosis</th>
-              <th>Frecuencia</th>
-              <th>Horario</th>
+              ${t('doctordashboard_farmaco')}maco</th>
+             ${t('dosage')}Dosis</th>
+            ${t('frequency')}uencia</th>
+           ${t('schedule')}Horario</th>
             </tr>
           </thead>
           <tbody>${medicationsHtml}</tbody>
         </table>
       ` : '<p style="color: #64748b; font-size: 0.9em;">No hay medicamentos activos pautados.</p>'}
       
-      <h2>Historial de Orientaciones de Salud</h2>
+      <h${t('clinical_history')}ud</h2>
       ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay orientaciones de salud registradas.</p>'}
       
       <div class="footer">
-        Documento emitido por MIVOR.ai Medical System · Fecha de impresión: ${escapeHtml(new Date().toLocaleString())}
+     ${t('doctordashboard_documento_emitido_por_mivor_ai')}ón: ${escapeHtml(new Date().toLocaleString())}
       </div>
     `;
 
@@ -289,8 +297,8 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
   const handleReferPatient = (specialist, referral) => {
     const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
-    const reason = referral?.reason || 'Valoración especializada';
-    const text = `Hola Dr(a). ${specialist.full_name}, le comparto la derivación clínica desde MIVOR.ai del paciente *${patientName}*.\n\n*Motivo de Derivación:* ${reason}\n*Especialidad requerida:* ${specialist.specialty}.\n\nQuedamos a su disposición para coordinar la consulta.`;
+    const reason = referral?.reason || t('doctordashboard_valoracion_especializada');
+    const text = t('doctordashboard_hola_dr_a_le_comparto', { full_name: specialist.full_name, patientName, reason, specialty: specialist.specialty });
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
   };
 
@@ -360,7 +368,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     e.preventDefault();
     if ((!copilotInput.trim() && copilotAttachments.length === 0) || isCopilotThinking || !selectedPatient) return;
 
-    const userText = copilotInput.trim() || (copilotAttachments.length > 0 ? "Por favor analiza los documentos o estudios adjuntos de este paciente." : "");
+    const userText = copilotInput.trim() || (copilotAttachments.length > 0 ? t('doctordashboard_por_favor_analiza_los_documentos') : "");
     const currentAttachmentsSnapshot = [...copilotAttachments];
 
     setCopilotMessages(prev => [...prev, { 
@@ -414,10 +422,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       const res = await fetch(`${apiUrl}/api/doctor/ask`, {
         method: 'POST',
         headers: { ...authHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: enrichedQuery, patient_id: selectedPatient.user_id, text_model: 'llama3.1', language: language })
+        body: JSON.stringify({ query: enrichedQuery, patient_id: selectedPatient.user_id, text_model: 'llama3.1', language: language, country: country || undefined })
       });
 
-      if (!res.ok) throw new Error("Error fetching copilot");
+      if (!res.ok) throw new Error(t('doctordashboard_error_fetching_copilot'));
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
@@ -440,7 +448,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       }
     } catch (err) {
       console.error(err);
-      setCopilotMessages(prev => [...prev, { role: 'assistant', content: "⚠️ Error conectando con el Copiloto IA." }]);
+      setCopilotMessages(prev => [...prev, { role: 'assistant', content: t('doctordashboard_error_conectando_con_el_copiloto') }]);
     }
     setIsCopilotThinking(false);
   };
@@ -485,15 +493,6 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       />
     );
   }
-  if (doctorScreen === 'verifier') {
-    return (
-      <DoctorVerificationDetail 
-        apiUrl={apiUrl} 
-        authHeaders={authHeaders} 
-        onBack={() => setDoctorScreen('home')} 
-      />
-    );
-  }
   if (doctorScreen === 'schedule' || doctorScreen === 'disponibilidad') {
     return (
       <DoctorSchedule 
@@ -516,12 +515,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       />
     );
   }
+  const filteredPatients = patients.filter(p =>
+    !patientSearch.trim() || String(p.full_name || '').toLowerCase().includes(patientSearch.trim().toLowerCase())
+  );
+
   if (doctorScreen === 'home') {
     return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
   }
 
   return (
-    <div className="flex w-full h-[100dvh] bg-base text-content-primary overflow-hidden font-sans relative">
+    <div className="flex flex-col lg:flex-row w-full h-[100dvh] bg-base text-content-primary overflow-hidden font-sans relative">
       {/* Fondo decorativo opcional */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
         <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand-teal/20 rounded-full blur-[120px]"></div>
@@ -529,48 +532,47 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       </div>
 
       {/* HEADER / SIDEBAR NAV (Leftmost) */}
-      <div className="w-20 bg-white/80 backdrop-blur-md border-r border-gray-100 shadow-sm flex flex-col items-center py-6 z-10 shrink-0">
-        <div className="w-12 h-12 bg-gradient-to-br from-brand-teal to-brand-blue rounded-xl flex items-center justify-center shadow-soft mb-8">
+      <div className="w-full lg:w-20 h-14 lg:h-auto bg-white/80 backdrop-blur-md border-b lg:border-b-0 lg:border-r border-gray-100 shadow-sm flex flex-row lg:flex-col items-center gap-1 px-3 lg:px-0 py-0 lg:py-6 z-10 shrink-0">
+        <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-brand-teal to-brand-blue rounded-xl flex items-center justify-center shadow-soft mb-0 lg:mb-8 shrink-0">
           <Activity className="text-white w-6 h-6" />
         </div>
         
-        <div className="flex-1 w-full flex flex-col items-center gap-4">
-          <button onClick={() => setDoctorScreen('patients')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'patients' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Pacientes">
+        <div className="flex-1 w-full flex flex-row lg:flex-col items-center justify-center lg:justify-start gap-2 lg:gap-4">
+          <button onClick={() => setDoctorScreen('patients')} className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'patients' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('patients')}>
             <Users className="w-6 h-6" />
           </button>
-          <button onClick={() => setDoctorScreen('agenda')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'agenda' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Mi Agenda">
+          <button onClick={() => setDoctorScreen('agenda')} className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'agenda' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('doctordashboard_mi_agenda')}>
             <Calendar className="w-6 h-6" />
           </button>
-          <button onClick={() => setDoctorScreen('profile')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'profile' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('my_profile') || 'Mi Perfil'}>
+          <button onClick={() => setDoctorScreen('profile')} className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'profile' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title={t('my_profile') || 'Mi Perfil'}>
             <User className="w-6 h-6" />
           </button>
-          <button onClick={() => setDoctorScreen('verifier')} className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${doctorScreen === 'verifier' ? 'bg-brand-teal/10 text-brand-teal' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`} title="Verificación Médica y Auditoría">
-            <ShieldCheck className="w-6 h-6" />
-          </button>
         </div>
 
 
-        <div className="mt-auto mb-3 flex flex-col items-center gap-2">
+        <div className="mt-0 lg:mt-auto mb-0 lg:mb-3 flex flex-col items-center gap-2">
           <LanguageSelector />
         </div>
-        <button onClick={() => setDoctorScreen('home')} className="w-12 h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mb-2" title={t('back_to_home')}>
+        <button onClick={() => setDoctorScreen('home')} className="w-10 h-10 lg:w-12 lg:h-12 text-gray-400 hover:bg-gray-50 hover:text-gray-600 rounded-xl flex items-center justify-center transition-all mb-0 lg:mb-2 shrink-0" title={t('back_to_home')}>
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button onClick={onLogout}
- className="w-12 h-12 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl flex items-center justify-center transition-all mt-auto" title="Cerrar Sesión">
+ className="w-10 h-10 lg:w-12 lg:h-12 text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-xl flex items-center justify-center transition-all mt-0 lg:mt-auto shrink-0" title={t('logout')}>
           <LogOut className="w-6 h-6" />
         </button>
       </div>
       
       {/* COLUMN 1: Patients List */}
-      <div className="w-80 bg-white/60 backdrop-blur-xl border-r border-gray-100 flex flex-col z-10 shrink-0">
+      <div className={`${mobilePane === 'list' ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-h-0 lg:flex-none w-full lg:w-72 xl:w-80 bg-white/60 backdrop-blur-xl border-r border-gray-100 z-10 shrink-0`}>
         <div className="p-6 pb-4">
           <h2 className="text-xl font-bold text-gray-900 mb-4">{t("patients_base")}</h2>
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Buscar paciente..." 
+              value={patientSearch}
+              onChange={(e) => setPatientSearch(e.target.value)}
+              placeholder={t('search_patient', 'Buscar paciente...')} 
               className="w-full bg-white border border-gray-200 rounded-xl py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-brand-teal focus:ring-1 focus:ring-brand-teal transition-all"
             />
           </div>
@@ -583,13 +585,13 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                  <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
                ))}
             </div>
-          ) : patients.length === 0 ? (
+          ) : filteredPatients.length === 0 ? (
             <div className="p-4 text-center text-sm text-gray-500">{t("no_patients")}</div>
           ) : (
-            patients.map(p => (
+            filteredPatients.map(p => (
               <button
                 key={p.user_id}
-                onClick={() => setSelectedPatient(p)}
+                onClick={() => { setSelectedPatient(p); setMobilePane('detail'); }}
                 className={`w-full text-left p-3 rounded-xl transition-all duration-200 flex items-center gap-3 ` + 
                   (selectedPatient?.user_id === p.user_id 
                     ? 'bg-brand-teal shadow-md text-white' 
@@ -602,7 +604,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="overflow-hidden flex-1">
                   <div className="font-semibold text-sm truncate">{p.full_name || 'Paciente'}</div>
                   <div className={`text-[11px] truncate ` + (selectedPatient?.user_id === p.user_id ? 'text-teal-100' : 'text-gray-400')}>
-                    ID: {String(p.user_id || '').split('-')[0]}
+                    {p.triage_category && p.triage_category !== 'Ninguno' ? p.triage_category : (p.gender || '')}
                   </div>
                 </div>
               </button>
@@ -612,7 +614,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       </div>
 
       {/* COLUMN 2: Patient Details Center */}
-      <div className="flex-1 flex flex-col min-w-0 z-10 relative">
+      <div className={`${mobilePane === 'detail' ? 'flex' : 'hidden'} lg:flex flex-col flex-1 min-w-0 min-h-0 z-10 relative`}>
         {isLoadingDetail ? (
           <div className="flex-1 flex flex-col items-center justify-center text-brand-teal">
             <Loader2 className="w-10 h-10 animate-spin mb-4" />
@@ -620,11 +622,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
           </div>
         ) : selectedPatient ? (
           patientDetail ? (
-            <div className="flex-1 overflow-y-auto hide-scrollbar p-8">
-              
-              <div className="flex justify-between items-start mb-8">
+            <div className="flex-1 overflow-y-auto hide-scrollbar p-4 sm:p-6 lg:p-8">
+              <div className="flex items-center justify-between gap-2 mb-4 xl:hidden">
+                <button onClick={() => setMobilePane('list')} className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-700 shadow-sm">
+                  <ArrowLeft className="w-4 h-4" /> {t('patients_base')}
+                </button>
+                <button onClick={() => setMobilePane('copilot')} className="ml-auto flex items-center gap-1.5 px-3 py-2 bg-brand-dark text-white rounded-xl text-sm font-semibold shadow-sm">
+                  <Sparkles className="w-4 h-4 text-brand-teal" /> {t('doctordashboard_copiloto_ia')}
+                </button>
+              </div>
+
+              <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</h1>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight break-words">{patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</h1>
                   <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail?.profile?.date_of_birth || t('no_birth_date')}</span>
                     &bull;
@@ -633,7 +643,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 </div>
                 <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
                   <Printer className="w-4 h-4 text-brand-teal" />
-                  Imprimir / PDF
+                 {t('print_pdf')}
                 </button>
               </div>
 
@@ -645,15 +655,15 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   </div>
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
                     <Heart className="w-5 h-5 text-brand-teal" />
-                    Signos Vitales y Biometría
+                   {t('vital_signs_biometry')}
                   </h3>
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6 relative z-10">
                     <div>
-                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Grupo Sanguíneo</p>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('doctordashboard_grupo_sanguineo')}</p>
                       <p className="font-bold text-gray-800 text-lg">{patientDetail?.profile?.blood_type || 'N/A'}</p>
                     </div>
                     <div>
-                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Altura / Peso</p>
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('doctordashboard_altura_peso')}</p>
                       <p className="font-bold text-gray-800 text-lg">
                         {patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--'} / {patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--'}
                       </p>
@@ -665,7 +675,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="glass-card rounded-[24px] p-6 relative overflow-hidden">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2 relative z-10">
                     <ShieldCheck className="w-5 h-5 text-brand-teal" />
-                    Antecedentes Clínicos
+                   {t('doctordashboard_antecedentes_clinicos')}
                   </h3>
                   <div className="space-y-4 relative z-10">
                     <div>
@@ -701,14 +711,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="font-extrabold text-gray-900 text-base">
-                            Derivación Inteligente a Especialista
+                           {t('doctordashboard_derivacion_inteligente_a_especialist')}
                           </h3>
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-teal/10 text-brand-teal border border-brand-teal/20">
-                            <Sparkles className="w-3 h-3" /> Fila 24 IA
+                            <Sparkles className="w-3 h-3" /> {t('doctordashboard_fila_24_ia')}
                           </span>
                         </div>
                         <p className="text-xs text-gray-600 mt-0.5">
-                          Sugerencia clínica algorítmica basada en los hallazgos y biomarcadores del paciente.
+                         {t('doctordashboard_sugerencia_clinica_algoritmica_basad')}
                         </p>
                       </div>
                     </div>
@@ -720,14 +730,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                         ? 'bg-amber-100 text-amber-800 border-amber-200'
                         : 'bg-teal-100 text-teal-700 border-teal-200'
                     }`}>
-                      Prioridad {patientDetail.smart_referral?.urgency || 'Normal'}
+                     {t('doctordashboard_prioridad')} {patientDetail.smart_referral?.urgency || 'Normal'}
                     </span>
                   </div>
 
                   {/* Recommendation Details */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-teal-100 shadow-xs mb-4">
                     <div className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">
-                      Especialidad Sugerida:
+                     {t('doctordashboard_especialidad_sugerida')}
                     </div>
                     <div className="text-lg font-extrabold text-brand-dark mb-2">
                       {patientDetail.smart_referral?.recommended_specialty || 'Especialidad'}
@@ -738,7 +748,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
                     {patientDetail.smart_referral?.matched_keywords?.length > 0 && (
                       <div className="mt-3 pt-2.5 border-t border-gray-100 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[11px] font-semibold text-gray-400">Marcadores detectados:</span>
+                        <span className="text-[11px] font-semibold text-gray-400">{t('doctordashboard_marcadores_detectados')}</span>
                         {patientDetail.smart_referral.matched_keywords.map((kw, i) => (
                           <span key={i} className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[11px] font-bold border border-teal-200/50">
                             #{kw}
@@ -753,7 +763,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     <div>
                       <h4 className="text-xs font-bold text-gray-800 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-brand-teal" />
-                        Especialistas Disponibles en Cuadro Médico:
+                       {t('doctordashboard_especialistas_disponibles_en_cuadro_')}
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {patientDetail.smart_referral.available_specialists.map((spec, idx) => (
@@ -776,10 +786,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                             <button
                               onClick={() => handleReferPatient(spec, patientDetail.smart_referral)}
                               className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs shrink-0 cursor-pointer"
-                              title="Derivar paciente por WhatsApp con informe prellenado"
+                              title={t('doctordashboard_derivar_paciente_por_whatsapp_con')}
                             >
                               <MessageSquare className="w-3.5 h-3.5" />
-                              <span>Derivar</span>
+                              <span>{t('doctordashboard_derivar')}</span>
                             </button>
                           </div>
                         ))}
@@ -794,16 +804,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
                     <Pill className="w-4 h-4 text-brand-teal" />
-                    Tratamiento Farmacológico Activo
+                   {t('doctordashboard_tratamiento_farmacologico_activo')}
                   </h3>
                   <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-brand-teal border border-teal-100">
-                    {(Array.isArray(patientDetail?.medications) ? patientDetail.medications : []).length} pautados
+                    {(Array.isArray(patientDetail?.medications) ? patientDetail.medications : []).length} {t('doctordashboard_pautados')}
                   </span>
                 </div>
 
                 {(!Array.isArray(patientDetail?.medications) || patientDetail.medications.length === 0) ? (
                   <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-sm text-gray-500 shadow-xs">
-                    El paciente no tiene recordatorios o tratamientos farmacológicos activos registrados en la plataforma.
+                   {t('doctordashboard_el_paciente_no_tiene_recordatorios')}
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -820,16 +830,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                           </div>
                           <h4 className="font-bold text-gray-900 text-sm mb-1">{med.medication_name || 'Medicamento'}</h4>
                           <p className="text-xs text-gray-600">
-                            <strong>Dosis:</strong> {med.dosage || 'No especificada'}
+                            <strong>{t('doctordashboard_dosis')}</strong> {med.dosage || 'No especificada'}
                           </p>
                           <p className="text-xs text-gray-600 mt-0.5">
-                            <strong>Frecuencia:</strong> {med.frequency || 'Según prescripción'}
+                            <strong>{t('doctordashboard_frecuencia')}</strong> {med.frequency || t('doctordashboard_segun_prescripcion')}
                           </p>
                         </div>
                         {med.time_of_day && (
                           <div className="mt-3 pt-2.5 border-t border-gray-50 flex items-center gap-1.5 text-[11px] text-gray-500 font-medium">
                             <Clock className="w-3 h-3 text-brand-teal" />
-                            <span>Horarios: {med.time_of_day}</span>
+                            <span>{t('doctordashboard_horarios')} {med.time_of_day}</span>
                           </div>
                         )}
                       </div>
@@ -845,12 +855,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider flex items-center gap-2">
                     <Activity className="w-4 h-4 text-brand-orange" />
-                    Historial de Orientaciones de Salud
+                   {t('clinical_history')}
                   </h3>
                   <div className="space-y-4">
                     {(patientDetail.triages || []).length === 0 ? (
                       <div className="bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
-                        No hay orientaciones de salud registradas para este paciente.
+                       {t('no_triages_registered')}
                       </div>
                     ) : (
                       (patientDetail.triages || []).map(triageItem => (
@@ -880,7 +890,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
                       <FolderOpen className="w-4 h-4 text-brand-teal" />
-                      Estudios, Analíticas y Documentos Clínicos con IA
+                     {t('doctordashboard_estudios_analiticas_y_documentos_cli')}
                     </h3>
                     <div className="flex items-center gap-2">
                       <input
@@ -896,17 +906,17 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                         onClick={() => doctorStudiesInputRef.current?.click()}
                         disabled={isUploadingStudies || !selectedPatient}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-teal-50 text-brand-teal hover:bg-brand-teal hover:text-white border border-teal-200/80 active:scale-95 transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
-                        title="Adjuntar cualquier archivo clínico (imágenes, PDF o analíticas)"
+                        title={t('doctordashboard_adjuntar_cualquier_archivo_clinico_i')}
                       >
                         {isUploadingStudies ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paperclip className="w-3.5 h-3.5 -rotate-45" />}
-                        <span>{isUploadingStudies ? 'Procesando con IA...' : 'Adjuntar Estudios'}</span>
+                        <span>{isUploadingStudies ? t('doctordashboard_procesando_con_ia') : t('doctordashboard_adjuntar_estudios')}</span>
                       </button>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {(patientDocuments || []).length === 0 ? (
                       <div className="col-span-full bg-gray-50 border border-gray-100 border-dashed rounded-2xl p-8 text-center text-sm text-gray-500">
-                        No hay documentos ni estudios adjuntos.
+                       {t('no_documents_attached')}
                       </div>
                     ) : (
                       (patientDocuments || []).map(doc => {
@@ -943,7 +953,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                                     {severity}
                                   </span>
                                   {doc.download_url && (
-                                    <a href={doc.download_url} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-brand-teal hover:text-white text-gray-400 rounded-lg transition-colors shrink-0" title="Descargar documento">
+                                    <a href={doc.download_url} target="_blank" rel="noreferrer" className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-brand-teal hover:text-white text-gray-400 rounded-lg transition-colors shrink-0" title={t('doctordashboard_descargar_documento')}>
                                       <Download className="w-4 h-4" />
                                     </a>
                                   )}
@@ -955,7 +965,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                                 <div className="mt-3 pt-2.5 border-t border-gray-100">
                                   <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-700 mb-1.5">
                                     <AlertTriangle className="w-3 h-3 text-red-500" />
-                                    <span>Valores Alterados / Hallazgos Patológicos:</span>
+                                    <span>{t('doctordashboard_valores_alterados_hallazgos_patologi')}</span>
                                   </div>
                                   <div className="flex flex-wrap gap-1.5">
                                     {anoms.map((a, idx) => (
@@ -970,7 +980,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               {/* Identified Diagnostics */}
                               {diags.length > 0 && (
                                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                                  <span className="text-[11px] font-semibold text-gray-400">Diagnósticos:</span>
+                                  <span className="text-[11px] font-semibold text-gray-400">{t('app_diagnosticos')}</span>
                                   {diags.map((d, idx) => (
                                     <span key={idx} className="px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200/60 text-[11px] font-medium">
                                       {d}
@@ -998,7 +1008,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center text-red-500 font-medium">
-              Error al cargar expediente.
+             {t('error_loading_record')}
             </div>
           )
         ) : (
@@ -1013,13 +1023,16 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       </div>
 
       {/* COLUMN 3: Copilot AI Right Panel */}
-      <div className="w-96 bg-white border-l border-gray-100 shadow-xl flex flex-col z-20 shrink-0 relative">
+      <div className={`${mobilePane === 'copilot' ? 'flex fixed inset-0 z-40 xl:relative xl:inset-auto xl:z-20' : 'hidden'} xl:flex flex-col w-full xl:w-96 bg-white border-l border-gray-100 shadow-xl shrink-0`}>
         <div className="p-4 border-b border-gray-100 bg-brand-dark relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-teal/20 rounded-full blur-2xl pointer-events-none"></div>
           <h2 className="font-bold text-white flex items-center gap-2 relative z-10 text-sm">
             <Sparkles className="w-4 h-4 text-brand-teal" />
-            Copiloto Clínico IA
+           {t('clinical_copilot_ai')}
           </h2>
+          <button onClick={() => setMobilePane(selectedPatient ? 'detail' : 'list')} className="xl:hidden absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center" aria-label={t('doctordashboard_cerrar_copiloto')}>
+            <X className="w-5 h-5" />
+          </button>
           <p className="text-[10px] text-gray-400 mt-1 relative z-10">{t('copilot_support_desc')}</p>
         </div>
         
@@ -1090,7 +1103,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     type="button"
                     onClick={() => removeCopilotAttachment(att.id)}
                     className="w-4 h-4 rounded-full bg-gray-300 hover:bg-red-500 text-white flex items-center justify-center transition-colors ml-0.5 cursor-pointer"
-                    title="Descartar adjunto"
+                    title={t('doctordashboard_descartar_adjunto')}
                   >
                     <X className="w-2.5 h-2.5" />
                   </button>
@@ -1103,7 +1116,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 onClick={clearCopilotAttachments}
                 className="text-[11px] font-bold text-red-600 hover:text-red-700 whitespace-nowrap pl-1 cursor-pointer"
               >
-                Eliminar todos
+               {t('doctordashboard_eliminar_todos')}
               </button>
             )}
           </div>
@@ -1124,8 +1137,8 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               type="button"
               onClick={() => copilotFileInputRef.current?.click()}
               disabled={!selectedPatient || isCopilotThinking}
-              className="absolute left-2.5 bottom-2.5 w-7.5 h-7.5 flex items-center justify-center rounded-xl bg-gray-200 text-gray-700 hover:bg-brand-teal hover:text-white transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
-              title="Adjuntar cualquier archivo clínico (PDF o imagen)"
+              className="absolute left-2.5 bottom-2.5 w-[30px] h-[30px] flex items-center justify-center rounded-xl bg-gray-200 text-gray-700 hover:bg-brand-teal hover:text-white transition-all disabled:opacity-50 cursor-pointer shadow-2xs"
+              title={t('doctordashboard_adjuntar_cualquier_archivo_clinico_p')}
             >
               <Paperclip className="w-4 h-4 -rotate-45 stroke-[2.2]" />
             </button>
@@ -1149,7 +1162,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
               type="button"
               onClick={toggleCopilotListening}
               className={`absolute right-11 bottom-2 w-8 h-8 flex items-center justify-center rounded-xl transition-all ${isCopilotListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-              title="Dictado por voz"
+              title={t('doctordashboard_dictado_por_voz')}
             >
               <Mic className="w-3.5 h-3.5" />
             </button>

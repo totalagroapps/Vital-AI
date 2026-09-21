@@ -18,9 +18,8 @@ const DoctorMore = ({ onNavigate, onLogout }) => {
       title: t('my_medical_practice'),
       items: [
         { icon: <Stethoscope size={20} />, title: t('my_office'), desc: t('manage_professional_info'), action: () => onNavigate('profile'), color: 'text-blue-500', bg: 'bg-blue-50' },
-        { icon: <Calendar size={20} />, title: 'Disponibilidad y Horarios', desc: 'Configurar agenda semanal y excepciones', action: () => onNavigate('schedule'), color: 'text-purple-500', bg: 'bg-purple-50' },
-        { icon: <User size={20} />, title: 'Perfil Público de Especialista', desc: 'Especialidades, biografía, idiomas y aseguradoras', action: () => onNavigate('public-profile'), color: 'text-amber-500', bg: 'bg-amber-50' },
-        { icon: <ShieldCheck size={20} />, title: 'Verificación Médica y Auditoría', desc: 'Panel de validación de colegiados y credenciales', action: () => onNavigate('verifier'), color: 'text-teal-600', bg: 'bg-teal-50' },
+        { icon: <Calendar size={20} />, title: t('app_disponibilidad_y_horarios'), desc: t('doctormore_configurar_agenda_semanal_y_excepcio'), action: () => onNavigate('schedule'), color: 'text-purple-500', bg: 'bg-purple-50' },
+        { icon: <User size={20} />, title: t('app_perfil_publico_de_especialista'), desc: t('doctormore_especialidades_biografia_idiomas_y_a'), action: () => onNavigate('public-profile'), color: 'text-amber-500', bg: 'bg-amber-50' },
         { icon: <Activity size={20} />, title: t('clinical_statistics'), desc: t('performance_and_reports'), action: () => handleFeature(t('clinical_statistics')), color: 'text-green-500', bg: 'bg-green-50' }
       ]
     },

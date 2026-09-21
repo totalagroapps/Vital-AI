@@ -1,4 +1,6 @@
 export const fr = {
+  change_language: "Changer de langue",
+  search_language: "Rechercher une langue…",
   new_version_available: "Nouvelle version disponible!",
   new_version_desc: "Une nouvelle mise à jour de MIVOR.ai est prête à ser installée.",
   update_now: "METTRE À JOUR",

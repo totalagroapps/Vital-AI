@@ -19,8 +19,8 @@ const dateKey = (iso, tz) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
 
 const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, onBooked, preview = false }) => {
-  const { t, language } = useLanguage();
-  const locale = language === 'es' ? 'es-ES' : 'en-US';
+  const { t, language, locale: uiLocale } = useLanguage();
+  const locale = uiLocale;
 
   const [doctor, setDoctor] = useState(doctorProp || null);
   const [slots, setSlots] = useState([]);

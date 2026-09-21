@@ -57,7 +57,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
                   <User size={18} />
                 </div>
-                <span>Datos personales</span>
+                <span>{t('step_personal_data')}</span>
               </div>
               <button
                 type="button"
@@ -65,51 +65,51 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all"
               >
                 <Pencil size={14} />
-                <span>Editar</span>
+                <span>{t('edit_btn')}</span>
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <User size={14} /> Nombre completo
+                  <User size={14} /> {t('step3professional_nombre_completo')}
                 </span>
                 <span className="font-semibold text-slate-800">
-                  {formData.firstName || formData.lastName ? `Dr. ${formData.firstName} ${formData.lastName}` : 'Dr. Juan Pérez López'}
+                  {formData.firstName || formData.lastName ? `Dr. ${formData.firstName} ${formData.lastName}` : t('not_specified')}
                 </span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Calendar size={14} /> Fecha de nacimiento
+                  <Calendar size={14} /> {t('step1personal_fecha_de_nacimiento')}
                 </span>
                 <span className="font-semibold text-slate-800">{formData.birthDate || '15 / 04 / 1985'}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Globe size={14} /> País de residencia
+                  <Globe size={14} /> {t('step1personal_pais_de_residencia')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.country || 'España'}</span>
+                <span className="font-semibold text-slate-800">{formData.country || t('not_specified')}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Mail size={14} /> Correo electrónico
+                  <Mail size={14} /> {t('step1personal_correo_electronico')}
                 </span>
                 <span className="font-semibold text-slate-800">{formData.email || 'juan.perez@email.com'}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Phone size={14} /> Teléfono
+                  <Phone size={14} /> {t('profile_phone')}
                 </span>
                 <span className="font-semibold text-slate-800">{formData.phone || '+34 600 123 456'}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Languages size={14} /> Idioma preferido
+                  <Languages size={14} /> {t('step1personal_idioma_preferido')}
                 </span>
                 <span className="font-semibold text-slate-800">{formData.language || 'Español'}</span>
               </div>
@@ -123,7 +123,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
                   <Stethoscope size={18} />
                 </div>
-                <span>Información profesional</span>
+                <span>{t('step_professional_info')}</span>
               </div>
               <button
                 type="button"
@@ -131,59 +131,59 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all"
               >
                 <Pencil size={14} />
-                <span>Editar</span>
+                <span>{t('edit_btn')}</span>
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Stethoscope size={14} /> Especialidad principal
+                  <Stethoscope size={14} /> {t('step3professional_especialidad_principal')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.specialty || 'Cardiología'}</span>
+                <span className="font-semibold text-slate-800">{formData.specialty || t('not_specified')}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <FileText size={14} /> Nº de colegiado
+                  <FileText size={14} /> {t('step2professional_n_de_colegiado')}
                 </span>
                 <span className="font-semibold text-slate-800">{formData.colegiatedNumber || '28/1234567'}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Building2 size={14} /> Colegio profesional
+                  <Building2 size={14} /> {t('step2professional_colegio_profesional')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.professionalCollege || 'Colegio Oficial de Médicos de Madrid'}</span>
+                <span className="font-semibold text-slate-800">{formData.professionalCollege || t('not_specified')}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Globe size={14} /> País del colegio
+                  <Globe size={14} /> {t('step2professional_pais_del_colegio')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.collegeCountry || 'España'}</span>
+                <span className="font-semibold text-slate-800">{formData.collegeCountry || t('not_specified')}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Award size={14} /> Años de experiencia
+                  <Award size={14} /> {t('profile_years_experience')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.experienceYears || '12 años'}</span>
+                <span className="font-semibold text-slate-800">{formData.experienceYears || t('not_specified')}</span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <Star size={14} /> Subespecialidad
+                  <Star size={14} /> {t('step2professional_subespecialidad')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.subspecialty || 'Cardiología intervencionista'}</span>
+                <span className="font-semibold text-slate-800">{formData.subspecialty || t('not_specified')}</span>
               </div>
 
               <div className="flex items-start">
                 <span className="w-48 text-slate-500 flex items-center gap-2 shrink-0 pt-0.5">
-                  <AlignLeft size={14} /> Descripción profesional
+                  <AlignLeft size={14} /> {t('step3professional_descripcion_profesional')}
                 </span>
                 <span className="font-medium text-slate-700 leading-relaxed">
-                  {formData.bio || 'Especialista en cardiología intervencionista con experiencia en hemodinámica, angioplastia y manejo de enfermedades coronarias.'}
+                  {formData.bio || t('not_specified')}
                 </span>
               </div>
 
@@ -191,10 +191,10 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
               <div className="pt-3 border-t border-slate-100 space-y-3">
                 <div className="flex items-center">
                   <span className="w-48 text-slate-500 flex items-center gap-2">
-                    <Building2 size={14} /> Dirección de consulta
+                    <Building2 size={14} /> {t('step3professional_direccion_de_consulta')}
                   </span>
                   <span className="font-semibold text-slate-800">
-                    {formData.address ? `${formData.address}${formData.city ? `, ${formData.city}` : ''}` : 'Sin dirección especificada'}
+                    {formData.address ? `${formData.address}${formData.city ? `, ${formData.city}` : ''}` : t('not_specified')}
                   </span>
                 </div>
 
@@ -207,7 +207,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                     country={formData.country || 'Colombia'}
                     readOnly={true}
                     height="200px"
-                    title="Ubicación geográfica confirmada"
+                    title={t('step3professional_ubicacion_geografica_confirmada')}
                   />
                 </div>
               </div>
@@ -221,7 +221,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
                   <ShieldCheck size={18} />
                 </div>
-                <span>Documentos enviados</span>
+                <span>{t('step3professional_documentos_enviados')}</span>
               </div>
               <button
                 type="button"
@@ -229,23 +229,23 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all"
               >
                 <Pencil size={14} />
-                <span>Editar</span>
+                <span>{t('edit_btn')}</span>
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-emerald-500" /> Documento de identidad
+                  <CheckCircle2 size={16} className="text-emerald-500" /> {t('step1personal_documento_de_identidad')}
                 </span>
                 <span className="font-medium text-slate-700">
-                  {formData.identityDoc ? formData.identityDoc.name : 'Pasaporte – Juan Pérez López'}
+                  {formData.identityDoc ? formData.identityDoc.name : t('not_specified')}
                 </span>
               </div>
 
               <div className="flex items-center">
                 <span className="w-48 text-slate-500 flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-emerald-500" /> Certificado de colegiación
+                  <CheckCircle2 size={16} className="text-emerald-500" /> {t('step1personal_certificado_de_colegiacion')}
                 </span>
                 <span className="font-medium text-slate-700">
                   {formData.colegiationCert ? formData.colegiationCert.name : 'Certificado vigente – COM Madrid'}
@@ -282,13 +282,13 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
           {/* Header con Imagen IA */}
           <div className="flex flex-col items-center text-center">
             <div className="w-28 h-28 rounded-full overflow-hidden mb-4 shadow-sm">
-              <img src={iaHeaderImg} alt="IA Médica" className="w-full h-full object-cover" />
+              <img src={iaHeaderImg} alt={t('step1personal_ia_medica')} className="w-full h-full object-cover" />
             </div>
             <h3 className="text-lg font-extrabold text-blue-950 leading-snug">
-              La <span className="text-blue-600">inteligencia artificial</span> que acompaña tu práctica médica.
+             {t('step1personal_la')} <span className="text-blue-600">{t('artificial_intelligence')}</span> {t('step1personal_que_acompana_tu_practica_medica')}
             </h3>
             <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-              Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente.
+             {t('save_time_make_better_decisions')}
             </p>
           </div>
 
@@ -330,8 +330,8 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
         <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-3">
           <HelpCircle className="text-blue-600 shrink-0" size={22} />
           <div className="text-xs">
-            <p className="font-bold text-slate-700">¿Necesitas ayuda?</p>
-            <p className="text-slate-500">Escríbenos a <span className="text-blue-600 font-medium">soporte@mivor.ai</span></p>
+            <p className="font-bold text-slate-700">{t('patienttopnav_necesitas_ayuda')}</p>
+            <p className="text-slate-500">{t('step2professional_escribenos_a')} <span className="text-blue-600 font-medium">soporte@mivor.ai</span></p>
           </div>
         </div>
       </aside>

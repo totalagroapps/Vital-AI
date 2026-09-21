@@ -29,140 +29,27 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const ACCEPTED_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif';
 const ACCEPTED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/bmp', 'image/gif'];
 
-// Documentos de demostración basados exactamente en el diseño aprobado por el jefe
-const DEFAULT_SAMPLE_DOCS = [
-  {
-    id: 'sample-1',
-    filename: 'Informe_analisis_sangre.pdf',
-    subtitle: 'Análisis de sangre',
-    category: 'analitica',
-    category_label: 'Analítica',
-    created_at: '2026-09-12T10:30:00Z',
-    file_size_label: '2,4 MB',
-    file_bytes: 2.4 * 1024 * 1024,
-    status: 'analizado',
-    icon_type: 'pdf-red',
-    analysis_result: JSON.stringify({
-      resumen: 'Perfil hematológico y bioquímico general. Se observa ligera elevación en niveles de glucosa basal (108 mg/dL) y colesterol LDL, manteniendo parámetros de función hepática y renal en rangos normales.',
-      severidad: 'amarillo',
-      biomarcadores: [
-        { parametro: 'Glucosa Basal', valor: '108', unidad: 'mg/dL', rango_referencia: '70 - 99', min_referencia: '70', max_referencia: '99', estado: 'elevado' },
-        { parametro: 'Colesterol Total', valor: '215', unidad: 'mg/dL', rango_referencia: '125 - 200', min_referencia: '125', max_referencia: '200', estado: 'elevado' },
-        { parametro: 'Hemoglobina', valor: '14.8', unidad: 'g/dL', rango_referencia: '13.5 - 17.5', min_referencia: '13.5', max_referencia: '17.5', estado: 'normal' },
-        { parametro: 'Creatinina', valor: '0.9', unidad: 'mg/dL', rango_referencia: '0.7 - 1.3', min_referencia: '0.7', max_referencia: '1.3', estado: 'normal' }
-      ],
-      hallazgos: ['Glucemia basal levemente por encima del rango óptimo', 'Perfil lipídico con discreta hipercolesterolemia'],
-      medicamentos: [],
-      preguntas_medico: ['¿Es necesario realizar una prueba de glucosa posprandial o hemoglobina glicosilada (HbA1c)?', '¿Qué pauta alimenticia conviene adoptar antes de iniciar medicación?']
-    })
-  },
-  {
-    id: 'sample-2',
-    filename: 'Radiografia_torax.jpg',
-    subtitle: 'Radiografía de tórax',
-    category: 'radiografia',
-    category_label: 'Radiografía',
-    created_at: '2026-09-04T15:20:00Z',
-    file_size_label: '1,8 MB',
-    file_bytes: 1.8 * 1024 * 1024,
-    status: 'analizado',
-    icon_type: 'jpg-blue',
-    document_type: 'medical_image',
-    analysis_result: JSON.stringify({
-      resumen: 'Radiografía posteroanterior de tórax. Campos pulmonares bien ventilados sin infiltrados focales ni consolidaciones agudas. Silueta cardiomediastínica de morfología y tamaño normal. Ángulos costofrénicos libres.',
-      severidad: 'verde',
-      hallazgos: ['Parénquima pulmonar sin alteraciones activas', 'Silueta cardiaca dentro de límites normales'],
-      medicamentos: [],
-      biomarcadores: [],
-      preguntas_medico: ['¿El estudio descarta procesos respiratorios agudos?']
-    })
-  },
-  {
-    id: 'sample-3',
-    filename: 'Receta_medicacion.pdf',
-    subtitle: 'Receta médica',
-    category: 'receta',
-    category_label: 'Receta',
-    created_at: '2026-09-04T09:15:00Z',
-    file_size_label: '320 KB',
-    file_bytes: 320 * 1024,
-    status: 'analizado',
-    icon_type: 'pdf-purple',
-    analysis_result: JSON.stringify({
-      resumen: 'Prescripción médica emitida para tratamiento de hiperreactividad bronquial y síntomas alérgicos estacionales. Pauta activa por 14 días.',
-      severidad: 'verde',
-      medicamentos: ['Salbutamol 100mcg (1 inhalación cada 8h)', 'Loratadina 10mg (1 comprimido cada 24h por la noche)'],
-      hallazgos: ['Pauta de medicación pautada para 14 días', 'Sin interacciones farmacológicas desfavorables detectadas'],
-      biomarcadores: [],
-      preguntas_medico: ['¿Debo suspender la medicación si los síntomas remiten antes de los 14 días?']
-    })
-  },
-  {
-    id: 'sample-4',
-    filename: 'Informe_medico_completo.pdf',
-    subtitle: 'Informe médico',
-    category: 'informe',
-    category_label: 'Informe',
-    created_at: '2026-09-01T11:45:00Z',
-    file_size_label: '3,1 MB',
-    file_bytes: 3.1 * 1024 * 1024,
-    status: 'analizado',
-    icon_type: 'pdf-green',
-    analysis_result: JSON.stringify({
-      resumen: 'Informe de revisión clínica anual y medicina preventiva. Evaluación cardiovascular y osteomuscular favorable. Tensión arterial 118/75 mmHg.',
-      severidad: 'verde',
-      hallazgos: ['Auscultación cardiopulmonar normal', 'Tensión arterial en rango óptimo'],
-      medicamentos: [],
-      biomarcadores: [],
-      preguntas_medico: ['¿Cuándo corresponde el próximo chequeo preventivo general?']
-    })
-  },
-  {
-    id: 'sample-5',
-    filename: 'Analisis_orina.jpg',
-    subtitle: 'Análisis de orina',
-    category: 'analitica',
-    category_label: 'Analítica',
-    created_at: '2026-08-28T08:00:00Z',
-    file_size_label: '1,2 MB',
-    file_bytes: 1.2 * 1024 * 1024,
-    status: 'analizado',
-    icon_type: 'jpg-blue',
-    document_type: 'medical_image',
-    analysis_result: JSON.stringify({
-      resumen: 'Sedimento y tira reactiva de orina. Densidad y pH en valores estándar. Ausencia de leucocitos, nitritos o bacterias patógenas.',
-      severidad: 'verde',
-      biomarcadores: [
-        { parametro: 'pH Urinario', valor: '6.2', unidad: '', rango_referencia: '4.5 - 8.0', min_referencia: '4.5', max_referencia: '8.0', estado: 'normal' },
-        { parametro: 'Densidad', valor: '1.020', unidad: '', rango_referencia: '1.005 - 1.030', min_referencia: '1.005', max_referencia: '1.030', estado: 'normal' }
-      ],
-      hallazgos: ['Sedimento urinario negativo para infección'],
-      medicamentos: [],
-      preguntas_medico: ['¿Los resultados descartan afecciones renales agudas?']
-    })
-  }
-];
-
 const BiomarkerRangeMeter = ({ bm }) => {
+  const { t } = useLanguage();
   const val = parseFloat(bm.valor);
   const isNum = !isNaN(val);
   const status = (bm.estado || 'normal').toLowerCase();
 
   let statusBadge = (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-      <CheckCircle2 size={11} /> Normal
+      <CheckCircle2 size={11} /> {t('normal')}
     </span>
   );
   if (status === 'elevado' || status === 'alto') {
     statusBadge = (
       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
-        <TrendingUp size={11} /> Elevado
+        <TrendingUp size={11} /> {t('documentanalyzer_elevado')}
       </span>
     );
   } else if (status === 'bajo') {
     statusBadge = (
       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-        <TrendingDown size={11} /> Bajo
+        <TrendingDown size={11} /> {t('documentanalyzer_bajo')}
       </span>
     );
   }
@@ -201,7 +88,7 @@ const BiomarkerRangeMeter = ({ bm }) => {
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <h4 className="text-xs font-bold text-slate-900 truncate">{bm.parametro}</h4>
-          <p className="text-[10px] text-slate-500">Ref: {bm.rango_referencia || 'No especificado'}</p>
+          <p className="text-[10px] text-slate-500">{t('documentanalyzer_ref')} {bm.rango_referencia || 'No especificado'}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-sm font-black text-slate-900">{bm.valor} <span className="text-[10px] font-normal text-slate-500">{bm.unidad}</span></span>
@@ -211,9 +98,9 @@ const BiomarkerRangeMeter = ({ bm }) => {
 
       <div className="relative pt-2 pb-1">
         <div className="h-2 w-full rounded-full bg-slate-200 flex overflow-hidden">
-          <div className="w-1/4 bg-blue-300" title="Bajo" />
-          <div className="w-1/2 bg-emerald-400" title="Normal" />
-          <div className="w-1/4 bg-rose-400" title="Elevado" />
+          <div className="w-1/4 bg-blue-300" title={t('documentanalyzer_bajo')} />
+          <div className="w-1/2 bg-emerald-400" title={t('normal')} />
+          <div className="w-1/4 bg-rose-400" title={t('documentanalyzer_elevado')} />
         </div>
         <div
           className="absolute top-0.5 -ml-2 flex flex-col items-center pointer-events-none transition-all duration-300"
@@ -224,9 +111,9 @@ const BiomarkerRangeMeter = ({ bm }) => {
           }`} />
         </div>
         <div className="flex justify-between text-[9px] text-slate-400 font-medium px-0.5 mt-1">
-          <span>Bajo</span>
-          <span className="text-emerald-700 font-semibold">Rango Óptimo</span>
-          <span>Elevado</span>
+          <span>{t('documentanalyzer_bajo')}</span>
+          <span className="text-emerald-700 font-semibold">{t('documentanalyzer_rango_optimo')}</span>
+          <span>{t('documentanalyzer_elevado')}</span>
         </div>
       </div>
     </div>
@@ -263,7 +150,7 @@ const DocumentAnalyzer = ({
   username,
   onLogout
 }) => {
-  const { t, language } = useLanguage();
+  const { t, language, locale: uiLocale } = useLanguage();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [step, setStep] = useState('upload'); // 'upload' | 'analyzing' | 'results'
@@ -306,7 +193,7 @@ const DocumentAnalyzer = ({
     else setLoadingDocs(false);
   }, [apiUrl, authHeaders]);
 
-  // Lista unificada: documentos reales subidos + muestras predeterminadas de la maqueta
+  // Documentos reales del usuario (sin documentos de muestra)
   const allDocuments = useMemo(() => {
     // Si el backend ya tiene documentos, los adaptamos
     const formattedRealDocs = documents.map(doc => {
@@ -339,19 +226,11 @@ const DocumentAnalyzer = ({
         category,
         category_label: categoryLabel,
         icon_type: iconType,
-        file_size_label: '2,0 MB',
-        file_bytes: 2 * 1024 * 1024,
         status: 'analizado'
       };
     });
 
-    // Si el usuario no tiene documentos en backend, usamos los 5 documentos exactos del diseño del jefe
-    if (formattedRealDocs.length === 0) {
-      return DEFAULT_SAMPLE_DOCS;
-    }
-
-    // Si el usuario tiene documentos reales, los mostramos primero y agregamos los de muestra que no se repitan
-    return [...formattedRealDocs, ...DEFAULT_SAMPLE_DOCS.filter(s => !formattedRealDocs.some(r => r.filename === s.filename))];
+    return formattedRealDocs;
   }, [documents]);
 
   // Filtrado por buscador y categoría
@@ -372,15 +251,6 @@ const DocumentAnalyzer = ({
     });
   }, [allDocuments, searchTerm, selectedCategory, sortOrder]);
 
-  // Espacio utilizado calculado
-  const totalBytesUsed = useMemo(() => {
-    return allDocuments.reduce((acc, doc) => acc + (doc.file_bytes || 1.5 * 1024 * 1024), 0);
-  }, [allDocuments]);
-
-  const usedMb = (totalBytesUsed / (1024 * 1024)).toFixed(0);
-  const totalMb = 500;
-  const usedPercentage = Math.min(Math.round((usedMb / totalMb) * 100), 100);
-
   const uploadAndAnalyze = async (filesInput) => {
     if (!filesInput) return;
     const files = Array.isArray(filesInput) 
@@ -394,7 +264,7 @@ const DocumentAnalyzer = ({
         return;
       }
       if (file.size > 10 * 1024 * 1024) { 
-        setError(`El archivo '${file.name}' excede el tamaño máximo permitido de 10MB.`); 
+        setError(t('documentanalyzer_el_archivo_excede_el_tamano', { name: file.name })); 
         return; 
       }
     }
@@ -638,20 +508,20 @@ const DocumentAnalyzer = ({
   const renderCategoryPill = (cat) => {
     switch (cat) {
       case 'analitica':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">Analítica</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">{t('documentanalyzer_analitica')}</span>;
       case 'radiografia':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0055ff] border border-blue-200/70">Radiografía</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0055ff] border border-blue-200/70">{t('documentanalyzer_radiografia')}</span>;
       case 'receta':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200/70">Receta</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200/70">{t('documentanalyzer_receta')}</span>;
       case 'informe':
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/70">Informe</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/70">{t('documentanalyzer_informe')}</span>;
       default:
-        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/70">Documento</span>;
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200/70">{t('document')}</span>;
     }
   };
 
   const patientInitials = useMemo(() => {
-    const name = userProfile?.full_name || username || 'María Pérez';
+    const name = userProfile?.full_name || username || t('default_patient_name');
     const parts = name.trim().split(' ');
     if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     return name.slice(0, 2).toUpperCase();
@@ -702,7 +572,7 @@ const DocumentAnalyzer = ({
               className="w-9 h-9 rounded-full bg-[#8b5cf6] text-white font-bold text-xs flex items-center justify-center shadow-xs overflow-hidden border border-white cursor-pointer"
             >
               {userProfile?.photo_url ? (
-                <img src={userProfile.photo_url} alt="Perfil" className="w-full h-full object-cover" />
+                <img src={userProfile.photo_url} alt={t('doctor_section_profile')} className="w-full h-full object-cover" />
               ) : (
                 <span>{patientInitials}</span>
               )}
@@ -725,10 +595,10 @@ const DocumentAnalyzer = ({
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
-                  Mis documentos médicos
+                  {t('patienttopnav_mis_documentos_medicos')}
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
-                  Sube y gestiona tus informes, pruebas y documentos para que estén disponibles en tus consultas.
+                  {t('documentanalyzer_sube_y_gestiona_tus_informes')}
                 </p>
               </div>
 
@@ -739,10 +609,10 @@ const DocumentAnalyzer = ({
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-black leading-tight">
-                    Tu información está segura
+                    {t('documentanalyzer_tu_informacion_esta_segura')}
                   </h4>
                   <p className="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">
-                    Tus documentos están protegidos con los más altos estándares de seguridad y privacidad.
+                    {t('documentanalyzer_tus_documentos_estan_protegidos_con')}
                   </p>
                 </div>
               </div>
@@ -794,14 +664,14 @@ const DocumentAnalyzer = ({
                   </div>
 
                   <h3 className="text-base sm:text-lg font-black text-black">
-                    Arrastra tus archivos aquí
+                    {t('documentanalyzer_arrastra_tus_archivos_aqui')}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5 mb-2">
-                    o haz clic para seleccionarlos (puedes subir varias imágenes a la vez o pegar con Ctrl+V)
+                    {t('documentanalyzer_o_haz_clic_para_seleccionarlos')}
                   </p>
                   
                   <p className="text-[11px] text-slate-400 font-medium max-w-sm mb-5">
-                    Puedes subir uno o varios archivos en formato PDF, JPG, PNG, WEBP. Tamaño máximo 10 MB por archivo.
+                    {t('documentanalyzer_puedes_subir_uno_o_varios')}
                   </p>
 
                   <button 
@@ -813,7 +683,7 @@ const DocumentAnalyzer = ({
                     className="bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs sm:text-sm py-2.5 px-6 rounded-xl shadow-md shadow-blue-500/20 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <FileText size={16} className="stroke-[2.4]" />
-                    <span>Seleccionar archivos</span>
+                    <span>{t('documentanalyzer_seleccionar_archivos')}</span>
                   </button>
                 </div>
 
@@ -822,10 +692,10 @@ const DocumentAnalyzer = ({
                   
                   <div className="flex items-center gap-3">
                     <h2 className="text-lg sm:text-xl font-black text-black">
-                      Mis documentos
+                      {t('patienttopnav_mis_documentos')}
                     </h2>
                     <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff] text-xs font-bold border border-blue-200/80">
-                      {filteredDocuments.length} archivos
+                      {filteredDocuments.length} {t('documentanalyzer_archivos')}
                     </span>
                   </div>
 
@@ -837,7 +707,7 @@ const DocumentAnalyzer = ({
                         type="text"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Buscar documento, fecha o tipo..."
+                        placeholder={t('documentanalyzer_buscar_documento_fecha_o_tipo')}
                         className="w-full pl-9 pr-3.5 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-black placeholder:text-slate-400 focus:outline-none focus:border-[#0055ff] shadow-2xs"
                       />
                     </div>
@@ -860,19 +730,19 @@ const DocumentAnalyzer = ({
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-slate-50/70 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Nombre del archivo</th>
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Tipo</th>
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Fecha</th>
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Tamaño</th>
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600">Estado</th>
-                        <th className="py-3.5 px-4 font-extrabold text-slate-600 text-center">Acciones</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">{t('documentanalyzer_nombre_del_archivo')}</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">{t('documentanalyzer_tipo')}</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">{t('col_date')}</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">{t('documentanalyzer_tamano')}</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600">{t('col_status')}</th>
+                        <th className="py-3.5 px-4 font-extrabold text-slate-600 text-center">{t('documentanalyzer_acciones')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-xs">
                       {filteredDocuments.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="py-10 text-center text-slate-400 font-medium">
-                            No se encontraron documentos con los filtros aplicados.
+                            {documents.length === 0 ? t('documentanalyzer_no_documents_yet') : t('documentanalyzer_no_se_encontraron_documentos_con')}
                           </td>
                         </tr>
                       ) : (
@@ -904,19 +774,19 @@ const DocumentAnalyzer = ({
 
                             {/* Fecha */}
                             <td className="py-3 px-4 text-slate-600 font-semibold text-[11.5px]">
-                              {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '12 sept 2026'}
+                              {doc.created_at ? new Date(doc.created_at).toLocaleDateString(uiLocale, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
                             </td>
 
                             {/* Tamaño */}
                             <td className="py-3 px-4 text-slate-500 font-medium text-[11.5px]">
-                              {doc.file_size_label || '2,4 MB'}
+                              {doc.file_size_label || '—'}
                             </td>
 
                             {/* Estado Analizado */}
                             <td className="py-3 px-4">
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#ebfaf3] text-[#028a4c] border border-[#c6f3db]">
                                 <CheckCircle2 size={13} className="stroke-[2.5]" />
-                                <span>Analizado</span>
+                                <span>{t('analyzed')}</span>
                               </span>
                             </td>
 
@@ -927,7 +797,7 @@ const DocumentAnalyzer = ({
                                   type="button"
                                   onClick={() => handleHistoryClick(doc)}
                                   className="w-8 h-8 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-[#0055ff] flex items-center justify-center transition-colors cursor-pointer"
-                                  title="Ver Análisis Clínico"
+                                  title={t('documentanalyzer_ver_analisis_clinico')}
                                 >
                                   <Eye size={16} className="stroke-[2.2]" />
                                 </button>
@@ -938,7 +808,7 @@ const DocumentAnalyzer = ({
                                     handleHistoryClick(doc);
                                   }}
                                   className="w-8 h-8 rounded-lg hover:bg-blue-50 text-slate-500 hover:text-[#0055ff] flex items-center justify-center transition-colors cursor-pointer"
-                                  title="Descargar Informe"
+                                  title={t('documentanalyzer_descargar_informe')}
                                 >
                                   <Download size={16} className="stroke-[2.2]" />
                                 </button>
@@ -958,13 +828,13 @@ const DocumentAnalyzer = ({
                                         onClick={() => { setOpenDocMenuId(null); handleHistoryClick(doc); }}
                                         className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
                                       >
-                                        <Eye size={14} /> Ver análisis
+                                        <Eye size={14} /> {t('documentanalyzer_ver_analisis')}
                                       </button>
                                       <button 
                                         onClick={() => { setOpenDocMenuId(null); handleHistoryClick(doc); }}
                                         className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
                                       >
-                                        <Download size={14} /> Descargar PDF
+                                        <Download size={14} /> {t('documentanalyzer_descargar_pdf')}
                                       </button>
                                       <button 
                                         onClick={() => {
@@ -973,7 +843,7 @@ const DocumentAnalyzer = ({
                                         }}
                                         className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#0055ff] flex items-center gap-2"
                                       >
-                                        <MessageSquare size={14} /> Preguntar a MIVOR
+                                        <MessageSquare size={14} /> {t('documentanalyzer_preguntar_a_mivor')}
                                       </button>
                                     </div>
                                   )}
@@ -1003,7 +873,7 @@ const DocumentAnalyzer = ({
                             {doc.filename}
                           </h4>
                           <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                            {doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '12 sept 2026'} · {doc.file_size_label || '2,4 MB'}
+                            {doc.created_at ? new Date(doc.created_at).toLocaleDateString(uiLocale, { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}{doc.file_size_label ? ` · ${doc.file_size_label}` : ''}
                           </p>
                         </div>
                       </div>
@@ -1011,7 +881,7 @@ const DocumentAnalyzer = ({
                       <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-[#ebfaf3] text-[#028a4c] border border-[#c6f3db]">
                           <CheckCircle2 size={12} className="stroke-[2.5]" />
-                          <span>Analizado</span>
+                          <span>{t('analyzed')}</span>
                         </span>
 
                         <button 
@@ -1035,14 +905,14 @@ const DocumentAnalyzer = ({
                 <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-black text-black">
-                      Tipos de documentos
+                      {t('documentanalyzer_tipos_de_documentos')}
                     </h3>
                     {selectedCategory !== 'all' && (
                       <button 
                         onClick={() => setSelectedCategory('all')} 
                         className="text-[11px] text-[#0055ff] font-bold hover:underline"
                       >
-                        Ver todos
+                        {t('documentanalyzer_ver_todos')}
                       </button>
                     )}
                   </div>
@@ -1062,7 +932,7 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5">
                         <FileText size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Informes</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('reports')}</span>
                       <span className="text-[10px] text-slate-400 font-medium">PDF</span>
                     </button>
 
@@ -1079,7 +949,7 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center mb-1.5">
                         <ImageIcon size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Radiografías</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('x_rays')}</span>
                       <span className="text-[10px] text-slate-400 font-medium">JPG, PNG</span>
                     </button>
 
@@ -1096,8 +966,8 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-1.5">
                         <Pill size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Recetas</span>
-                      <span className="text-[10px] text-slate-400 font-medium">PDF, Foto</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('prescriptions')}</span>
+                      <span className="text-[10px] text-slate-400 font-medium">{t('documentanalyzer_pdf_foto')}</span>
                     </button>
 
                     {/* 4. Analíticas */}
@@ -1113,7 +983,7 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-1.5">
                         <Activity size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Analíticas</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('analytics')}</span>
                       <span className="text-[10px] text-slate-400 font-medium">PDF</span>
                     </button>
 
@@ -1130,8 +1000,8 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-1.5">
                         <FileText size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Incapacidades</span>
-                      <span className="text-[10px] text-slate-400 font-medium">PDF, Foto</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('disabilities')}</span>
+                      <span className="text-[10px] text-slate-400 font-medium">{t('documentanalyzer_pdf_foto')}</span>
                     </button>
 
                     {/* 6. Otros */}
@@ -1147,38 +1017,10 @@ const DocumentAnalyzer = ({
                       <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center mb-1.5">
                         <MoreHorizontal size={18} className="stroke-[2.2]" />
                       </div>
-                      <span className="text-xs font-bold text-black leading-tight">Otros</span>
+                      <span className="text-xs font-bold text-black leading-tight">{t('documentanalyzer_otros')}</span>
                       <span className="text-[10px] text-slate-400 font-medium">PDF, JPG, PNG</span>
                     </button>
 
-                  </div>
-                </div>
-
-                {/* Card 2: Espacio Utilizado */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0055ff] flex items-center justify-center border border-blue-100">
-                        <Database size={20} className="stroke-[2.2]" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-extrabold text-black">Espacio utilizado</h4>
-                        <p className="text-xs font-bold text-slate-500 mt-0.5">
-                          {usedMb} MB de {totalMb} MB
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold text-slate-400">
-                      {usedPercentage}%
-                    </span>
-                  </div>
-
-                  {/* Barra de Progreso Azul */}
-                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="bg-[#0055ff] h-full rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(usedPercentage, 5)}%` }}
-                    />
                   </div>
                 </div>
 
@@ -1188,9 +1030,9 @@ const DocumentAnalyzer = ({
                     <Info size={18} className="stroke-[2.4]" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="text-xs font-black text-black">Consejo</h4>
+                    <h4 className="text-xs font-black text-black">{t('documentanalyzer_consejo')}</h4>
                     <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                      Mantén tus documentos organizados y actualizados para que tu médico pueda ofrecerte una mejor atención.
+                      {t('documentanalyzer_manten_tus_documentos_organizados_y')}
                     </p>
                   </div>
                 </div>
@@ -1254,7 +1096,7 @@ const DocumentAnalyzer = ({
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-black font-bold text-xs hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
               >
                 <ArrowLeft size={16} />
-                <span>Volver a Mis documentos</span>
+                <span>{t('documentanalyzer_volver_a_mis_documentos')}</span>
               </button>
 
               <button
@@ -1264,7 +1106,7 @@ const DocumentAnalyzer = ({
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isGeneratingPdf ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
-                <span>Descargar Informe PDF</span>
+                <span>{t('documentanalyzer_descargar_informe_pdf')}</span>
               </button>
             </div>
 
@@ -1292,7 +1134,7 @@ const DocumentAnalyzer = ({
               <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-2.5">
                 <div className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-wider">
                   <Stethoscope size={15} className="text-[#0055ff]" />
-                  <span>Resumen Clínico</span>
+                  <span>{t('app_resumen_clinico')}</span>
                 </div>
                 <p className="text-sm text-black font-medium leading-relaxed">
                   {analysisResult.summary}
@@ -1307,11 +1149,11 @@ const DocumentAnalyzer = ({
                   <div className="flex items-center gap-2">
                     <Activity size={18} className="text-[#0055ff]" />
                     <h3 className="text-sm font-black text-black uppercase tracking-wider">
-                      Biomarcadores y Parámetros Analíticos
+                      {t('documentanalyzer_biomarcadores_y_parametros_analitico')}
                     </h3>
                   </div>
                   <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff] border border-blue-200">
-                    {analysisResult.biomarcadores.length} parámetros
+                    {analysisResult.biomarcadores.length} {t('documentanalyzer_parametros')}
                   </span>
                 </div>
 
@@ -1330,11 +1172,11 @@ const DocumentAnalyzer = ({
                   <div className="flex items-center gap-2">
                     <BarChart3 size={18} className="text-[#0055ff]" />
                     <h3 className="text-sm font-black text-black uppercase tracking-wider">
-                      Evolución y Comparativa Histórica
+                      {t('documentanalyzer_evolucion_y_comparativa_historica')}
                     </h3>
                   </div>
                   <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055ff]">
-                    {analysisResult.comparativa_historica.length} vinculados
+                    {analysisResult.comparativa_historica.length} {t('documentanalyzer_vinculados')}
                   </span>
                 </div>
 
@@ -1344,13 +1186,13 @@ const DocumentAnalyzer = ({
                       labels: analysisResult.comparativa_historica.map(item => item.parametro),
                       datasets: [
                         {
-                          label: 'Estudio Anterior',
+                          label: t('documentanalyzer_estudio_anterior'),
                           data: analysisResult.comparativa_historica.map(item => item.valor_anterior),
                           backgroundColor: 'rgba(148, 163, 184, 0.85)',
                           borderRadius: 6,
                         },
                         {
-                          label: 'Estudio Actual',
+                          label: t('documentanalyzer_estudio_actual'),
                           data: analysisResult.comparativa_historica.map(item => item.valor_actual),
                           backgroundColor: 'rgba(0, 85, 255, 0.9)',
                           borderRadius: 6,
@@ -1378,7 +1220,7 @@ const DocumentAnalyzer = ({
               <div className="bg-amber-50/80 rounded-3xl p-6 border border-amber-200/90 space-y-3">
                 <div className="flex items-center gap-2 text-xs font-black text-amber-800 uppercase tracking-wider">
                   <Pill size={16} />
-                  <span>Medicamentos y Pautas Detectadas</span>
+                  <span>{t('documentanalyzer_medicamentos_y_pautas_detectadas')}</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {analysisResult.medicamentos.map((m, i) => (
@@ -1413,17 +1255,17 @@ const DocumentAnalyzer = ({
                       </div>
                       <div>
                         <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0055ff]">
-                          Recomendación Especialista
+                          {t('documentanalyzer_recomendacion_especialista')}
                         </span>
                         <h4 className="text-base font-extrabold text-black mt-0.5">
-                          Derivación Sugerida: <span className="text-[#0055ff]">{specialty}</span>
+                          {t('documentanalyzer_derivacion_sugerida')} <span className="text-[#0055ff]">{specialty}</span>
                         </h4>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-blue-100 text-xs font-bold text-slate-700 shadow-2xs">
                       <Sparkles size={14} className="text-[#0055ff]" />
-                      <span>Matching MIVOR.ai</span>
+                      <span>{t('documentanalyzer_matching_mivor_ai')}</span>
                     </div>
                   </div>
 
@@ -1434,7 +1276,7 @@ const DocumentAnalyzer = ({
                       className="w-full py-3 px-4 rounded-xl bg-[#0055ff] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                     >
                       <Calendar size={16} />
-                      <span>Agendar Cita con {specialty}</span>
+                      <span>{t('documentanalyzer_agendar_cita_con')} {specialty}</span>
                     </button>
 
                     <button
@@ -1446,7 +1288,7 @@ const DocumentAnalyzer = ({
                       className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
                     >
                       <MessageSquare size={16} />
-                      <span>Consultar WhatsApp Especialista</span>
+                      <span>{t('documentanalyzer_consultar_whatsapp_especialista')}</span>
                     </button>
                   </div>
                 </div>
@@ -1458,7 +1300,7 @@ const DocumentAnalyzer = ({
               <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs space-y-3">
                 <div className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-wider">
                   <HelpCircle size={16} className="text-[#0055ff]" />
-                  <span>Preguntas recomendadas para tu médico</span>
+                  <span>{t('documentanalyzer_preguntas_recomendadas_para_tu_medic')}</span>
                 </div>
 
                 <div className="space-y-2">
@@ -1486,12 +1328,12 @@ const DocumentAnalyzer = ({
                     {copiedQuestions ? (
                       <>
                         <Check size={15} className="text-emerald-600" />
-                        <span className="text-emerald-700">¡Copiadas al portapapeles!</span>
+                        <span className="text-emerald-700">{t('documentanalyzer_copiadas_al_portapapeles')}</span>
                       </>
                     ) : (
                       <>
                         <Copy size={15} />
-                        <span>Copiar preguntas</span>
+                        <span>{t('documentanalyzer_copiar_preguntas')}</span>
                       </>
                     )}
                   </button>
@@ -1506,7 +1348,7 @@ const DocumentAnalyzer = ({
                     className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Share2 size={15} />
-                    <span>Compartir por WhatsApp</span>
+                    <span>{t('documentanalyzer_compartir_por_whatsapp')}</span>
                   </button>
                 </div>
               </div>
@@ -1515,7 +1357,7 @@ const DocumentAnalyzer = ({
             {/* Aviso Informativo Regulatorio (EU MDR Non-Device) */}
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
               <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-                🛡️ <strong>Aviso Informativo:</strong> MIVOR.ai es una herramienta explicativa e informativa de apoyo en salud. Facilita la comprensión de términos clínicos y documentos tanto para pacientes como para profesionales de la salud. No realiza diagnósticos médicos ni sustituye la consulta personalizada con un profesional sanitario colegiado.
+                🛡️ <strong>{t('documentanalyzer_aviso_informativo')}</strong> {t('documentanalyzer_mivor_ai_es_una_herramienta')}
               </p>
             </div>
 
@@ -1527,7 +1369,7 @@ const DocumentAnalyzer = ({
                 className="w-full py-3.5 px-6 rounded-2xl bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 active:scale-98 transition-all cursor-pointer"
               >
                 <MessageSquare size={18} />
-                <span>Preguntar dudas a la IA sobre este documento</span>
+                <span>{t('documentanalyzer_preguntar_dudas_a_la_ia')}</span>
               </button>
 
               <button
@@ -1536,7 +1378,7 @@ const DocumentAnalyzer = ({
                 className="w-full py-3 px-6 rounded-2xl bg-white border border-slate-200 text-black font-bold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <RotateCcw size={15} />
-                <span>Analizar otro documento</span>
+                <span>{t('analyze_another_document')}</span>
               </button>
             </div>
 
@@ -1562,7 +1404,7 @@ const DocumentAnalyzer = ({
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center">
                   <HelpCircle size={20} className="stroke-[2.2]" />
                 </div>
-                <h3 className="font-black text-base text-black">Centro de Ayuda MIVOR.ai</h3>
+                <h3 className="font-black text-base text-black">{t('documentanalyzer_centro_de_ayuda_mivor_ai')}</h3>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)} 
@@ -1573,7 +1415,7 @@ const DocumentAnalyzer = ({
             </div>
 
             <p className="text-xs text-slate-600 font-medium leading-relaxed">
-              ¿Tienes dudas subiendo o comprendiendo las explicaciones de tus análisis? Nuestro equipo de soporte técnico y orientación está disponible 24/7.
+              {t('documentanalyzer_tienes_dudas_subiendo_o_comprendiend')}
             </p>
 
             <div className="space-y-2.5">
@@ -1585,8 +1427,8 @@ const DocumentAnalyzer = ({
               >
                 <MessageSquare size={18} className="text-emerald-700 stroke-[2.4]" />
                 <div>
-                  <p className="font-black text-black text-xs">WhatsApp de Soporte 24/7</p>
-                  <p className="text-[11px] text-slate-500 font-medium">Respuesta inmediata</p>
+                  <p className="font-black text-black text-xs">{t('documentanalyzer_whatsapp_de_soporte_24_7')}</p>
+                  <p className="text-[11px] text-slate-500 font-medium">{t('documentanalyzer_respuesta_inmediata')}</p>
                 </div>
               </a>
 
@@ -1596,8 +1438,8 @@ const DocumentAnalyzer = ({
               >
                 <Sparkles size={18} className="text-[#0055ff] stroke-[2.4]" />
                 <div>
-                  <p className="font-black text-black text-xs">Consultar con la IA Médica</p>
-                  <p className="text-[11px] text-slate-500 font-medium">Resuelve dudas sobre tus síntomas o estudios</p>
+                  <p className="font-black text-black text-xs">{t('documentanalyzer_consultar_con_la_ia_medica')}</p>
+                  <p className="text-[11px] text-slate-500 font-medium">{t('documentanalyzer_resuelve_dudas_sobre_tus_sintomas')}</p>
                 </div>
               </button>
             </div>
@@ -1607,7 +1449,7 @@ const DocumentAnalyzer = ({
                 onClick={() => setShowHelpModal(false)} 
                 className="bg-slate-100 hover:bg-slate-200 text-black font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer"
               >
-                Cerrar
+                {t('patient_close')}
               </button>
             </div>
           </div>
@@ -1628,7 +1470,7 @@ const DocumentAnalyzer = ({
           >
             <Home size={20} className="text-black stroke-[2.2]" />
             <span className="text-[10.5px] font-bold text-black">
-              Inicio
+              {t('home')}
             </span>
           </button>
 
@@ -1640,7 +1482,7 @@ const DocumentAnalyzer = ({
           >
             <Calendar size={20} className="text-black stroke-[2.2]" />
             <span className="text-[10.5px] font-bold text-black">
-              Mis consultas
+              {t('patienttopnav_mis_consultas')}
             </span>
           </button>
 
@@ -1652,7 +1494,7 @@ const DocumentAnalyzer = ({
           >
             <FileText size={21} className="text-[#0055ff] stroke-[2.5]" />
             <span className="text-[10.5px] font-black text-[#0055ff]">
-              Mis documentos
+              {t('patienttopnav_mis_documentos')}
             </span>
             <span className="w-6 h-[2px] rounded-full bg-[#0055ff]" />
           </button>
@@ -1665,7 +1507,7 @@ const DocumentAnalyzer = ({
           >
             <Heart size={20} className="text-black stroke-[2.2]" />
             <span className="text-[10.5px] font-bold text-black">
-              Mi salud
+              {t('patienttopnav_mi_salud')}
             </span>
           </button>
 
@@ -1677,7 +1519,7 @@ const DocumentAnalyzer = ({
           >
             <User size={20} className="text-black stroke-[2.2]" />
             <span className="text-[10.5px] font-bold text-black">
-              Mi perfil
+              {t('patienttopnav_mi_perfil')}
             </span>
           </button>
 

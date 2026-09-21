@@ -9,139 +9,8 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useLanguage } from '../contexts/LanguageContext';
+import { emergencyNumber } from '../utils/locale';
 import LanguageSelector from '../components/LanguageSelector';
-
-const DEFAULT_CONVERSATIONS = [
-  { id: 'c1', title: 'Dolor abdominal', time: '10:24', preview: 'He tenido dolor en la parte..' },
-  { id: 'c2', title: 'Resultados analítica', time: '09/09', preview: '¿Puedes explicarme estos...' },
-  { id: 'c3', title: 'Dudas medicación', time: '08/09', preview: '¿Es seguro tomar...' },
-  { id: 'c4', title: 'Informe TAC', time: '06/09', preview: 'Te adjunto el informe...' },
-  { id: 'c5', title: 'Control de tensión', time: '04/09', preview: 'Mis últimas mediciones son...' },
-  { id: 'c6', title: 'Vacunas para viajar', time: '02/09', preview: '¿Qué vacunas necesito...' },
-  { id: 'c7', title: 'Chequeo general', time: '01/09', preview: '¿Qué pruebas me recomiendas...' },
-  { id: 'c8', title: 'Colesterol', time: '28/08', preview: '¿Cómo puedo mejorarlo...' }
-];
-
-const DEMO_CONVERSATIONS_MESSAGES = {
-  'c1': [
-    {
-      id: 'm1',
-      type: 'user',
-      text: 'Hola, llevo unos días con dolor en la parte baja del abdomen.\n¿A qué puede deberse?',
-      time: '10:24'
-    },
-    {
-      id: 'm2',
-      type: 'assistant',
-      text: 'Hola Antonio,\n\nEl dolor en la parte baja del abdomen puede tener varias causas, y para orientarte mejor necesito conocer algunos detalles. Puede estar relacionado con problemas digestivos, urinarios, musculares o, en algunos casos, con otras condiciones médicas.\n\nPara ayudarte de forma más precisa, ¿podrías indicarme:\n\n* Desde cuándo tienes el dolor?\n* Cómo describirías el dolor (punzante, continuo, intermitente, leve o intenso)?\n* ¿Se acompaña de otros síntomas como fiebre, náuseas, cambios en el hábito intestinal o al orinar?\n* ¿Hay alguna situación que lo empeore o lo alivie?\n\nCon esta información podré darte una orientación más completa.',
-      time: '10:25'
-    },
-    {
-      id: 'm3',
-      type: 'user',
-      text: 'El dolor comenzó hace 3 días, es intermitente y se siente más al final del día. También tengo algo de hinchazón. No tengo fiebre.',
-      time: '10:26'
-    }
-  ],
-  'c2': [
-    {
-      id: 'm2_1',
-      type: 'user',
-      text: 'Hola MIVOR, me acaban de entregar los resultados de mi análisis de sangre. ¿Podrías ayudarme a comprenderlos y explicármelos?',
-      time: '09:15'
-    },
-    {
-      id: 'm2_2',
-      type: 'assistant',
-      text: '¡Hola Antonio! Con gusto te explico tu analítica sanguínea para que la comprendas perfectamente tanto tú como tu médico.\n\nPuedes indicarme o adjuntar los valores principales que llamen tu atención (como glucosa, colesterol, hemoglobina, leucocitos o transaminasas) junto con sus rangos de referencia para darte una explicación clara, orientativa y didáctica paso a paso.',
-      time: '09:16'
-    }
-  ],
-  'c3': [
-    {
-      id: 'm3_1',
-      type: 'user',
-      text: 'Tengo dudas sobre cómo tomar el omeprazol. ¿Debe ser antes o después del desayuno?',
-      time: '08:47'
-    },
-    {
-      id: 'm3_2',
-      type: 'assistant',
-      text: 'Hola Antonio.\n\nPor regla general, el **omeprazol** se recomienda tomar en ayunas, aproximadamente **30 a 60 minutos antes del desayuno** con un vaso de agua.\n\n* De esta manera, el fármaco se absorbe adecuadamente antes de que las células del estómago comiencen a producir ácido con la comida.\n* Evita masticar o triturar las cápsulas.\n* Si tienes otra pauta prescrita por tu médico de cabecera, siempre sigue prioritariamente su indicación.',
-      time: '08:48'
-    }
-  ],
-  'c4': [
-    {
-      id: 'm4_1',
-      type: 'user',
-      text: 'Te adjunto el informe de mi TAC abdominal. En la conclusión indica: "Sin hallazgos de significación patológica aguda". ¿Qué significa?',
-      time: '18:32'
-    },
-    {
-      id: 'm4_2',
-      type: 'assistant',
-      text: 'Hola Antonio.\n\nEsa conclusión es **muy tranquilizadora**:\n\n* Significa que en las imágenes no se observan inflamaciones agudas, hemorragias, perforaciones ni lesiones de urgencia en los órganos examinados.\n* Es el equivalente a que el examen no detectó problemas médicos urgentes.\n* Tu médico tratante correlacionará este resultado con tus síntomas para darte el alta o el seguimiento adecuado.',
-      time: '18:34'
-    }
-  ],
-  'c5': [
-    {
-      id: 'm5_1',
-      type: 'user',
-      text: 'Mis últimas mediciones de tensión han sido 138/88 mmHg. ¿Se considera hipertensión?',
-      time: '16:20'
-    },
-    {
-      id: 'm5_2',
-      type: 'assistant',
-      text: 'Hola Antonio.\n\nValores de 138/88 mmHg se clasifican como **presión arterial normal-alta** (o prehipertensión):\n\n* Una sola toma no confirma diagnóstico; la tensión varía con estrés, café o cansancio.\n* Se aconseja registrar mediciones durante 5 a 7 días, por la mañana y por la tarde en reposo.\n* Moderar la sal, mantenerte activo y comentar el registro con tu médico te ayudará a prevenir elevaciones futuras.',
-      time: '16:22'
-    }
-  ],
-  'c6': [
-    {
-      id: 'm6_1',
-      type: 'user',
-      text: 'Voy a viajar a Tailandia el próximo mes. ¿Qué vacunas o precauciones sanitarias son recomendables?',
-      time: '12:14'
-    },
-    {
-      id: 'm6_2',
-      type: 'assistant',
-      text: '¡Hola Antonio! Excelente destino. Para viajar a Tailandia se suele recomendar:\n\n* Actualizar vacunas del calendario general (tétanos/difteria, triple vírica).\n* Vacunas específicas para viajes: **Hepatitis A** y en ocasiones **Fiebre Tifoidea**.\n* Protección estricta contra mosquitos (repelente con DEET) para prevenir dengue.\n* Beber siempre agua embotellada y consultar a un Centro de Vacunación Internacional 4 semanas antes.',
-      time: '12:16'
-    }
-  ],
-  'c7': [
-    {
-      id: 'm7_1',
-      type: 'user',
-      text: '¿Qué pruebas médicas son las más recomendadas para un chequeo de rutina preventivo?',
-      time: '09:09'
-    },
-    {
-      id: 'm7_2',
-      type: 'assistant',
-      text: 'Hola Antonio.\n\nPara un chequeo médico preventivo anual en adultos se suele pautar:\n\n* **Analítica general de sangre:** hemograma, glucosa, perfil lipídico (colesterol total, HDL, LDL, triglicéridos), función renal y hepática.\n* **Análisis de orina:** descartar infecciones o proteinuria.\n* **Examen físico:** control de tensión arterial, peso e índice de masa corporal.\n* Pruebas complementarias según edad y antecedentes (ej. electrocardiograma o cribado colorrectal).',
-      time: '09:11'
-    }
-  ],
-  'c8': [
-    {
-      id: 'm8_1',
-      type: 'user',
-      text: 'Tengo el colesterol LDL algo alto (145 mg/dL). ¿Cómo puedo mejorarlo de forma natural?',
-      time: '07/09'
-    },
-    {
-      id: 'm8_2',
-      type: 'assistant',
-      text: 'Hola Antonio.\n\nUn valor de LDL en 145 mg/dL puede responder muy favorablemente a cambios en el estilo de vida:\n\n* **Aumenta fibra soluble:** avena, lentejas, manzanas y semillas de chía ayudan a atrapar el colesterol en el intestino.\n* **Prioriza grasas saludables:** aceite de oliva virgen extra, frutos secos y pescado azul (rico en omega-3).\n* **Reduce ultraprocesados:** bollería, fritos y embutidos.\n* **Ejercicio aeróbico:** al menos 150 minutos semanales de caminata rápida o bicicleta.',
-      time: '07/09'
-    }
-  ]
-};
 
 const PatientChat = ({
   messages = [],
@@ -182,7 +51,7 @@ const PatientChat = ({
   const [feedbacks, setFeedbacks] = useState({});
   const [localMessages, setLocalMessages] = useState([]);
 
-  const { t, language } = useLanguage();
+  const { t, language, country } = useLanguage();
   const fileInputRef = useRef(null);
   const internalImageRef = useRef(null);
   const internalPdfRef = useRef(null);
@@ -232,8 +101,8 @@ const PatientChat = ({
     }
   };
 
-  const displayName = patientProfile?.full_name || username || "Antonio Villena";
-  const firstName = displayName.split(' ')[0] || "Antonio";
+  const displayName = patientProfile?.full_name || username || t('default_patient_name');
+  const firstName = displayName.split(' ')[0] || displayName;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -341,39 +210,24 @@ const PatientChat = ({
     }
   }, [messages]);
 
-  // Determine conversation items to display in sidebar: real sessions if available, or demo items
+  // Conversaciones reales del usuario (sin datos de ejemplo)
   const hasRealSessions = Array.isArray(sessions) && sessions.length > 0;
   const conversationList = hasRealSessions
     ? sessions.map(s => ({
         id: s.id,
-        title: s.title || 'Consulta Médica',
+        title: s.title || t('patientchat_consulta_medica'),
         time: formatSessionTime(s.created_at),
-        preview: s.preview || 'Consulta con MIVOR.ai',
+        preview: s.preview || t('patientchat_consulta_con_mivor_ai'),
         isReal: true
       }))
-    : DEFAULT_CONVERSATIONS.map(d => ({ ...d, isReal: false }));
+    : [];
 
   const handleSelectConversation = (item) => {
     setSelectedConversationId(item.id);
     setIsNewConsultation(false);
-
-    if (item.isReal) {
-      setLocalMessages([]);
-      if (loadSession) {
-        loadSession(item.id);
-      }
-    } else {
-      // Demo item: reset global messages so demo localMessages takes over
-      if (startNewSession) startNewSession();
-      setTimeout(() => {
-        setSelectedConversationId(item.id);
-        setIsNewConsultation(false);
-        if (DEMO_CONVERSATIONS_MESSAGES[item.id]) {
-          setLocalMessages(DEMO_CONVERSATIONS_MESSAGES[item.id]);
-        } else {
-          setLocalMessages([]);
-        }
-      }, 30);
+    setLocalMessages([]);
+    if (loadSession) {
+      loadSession(item.id);
     }
     setMobileSidebarOpen(false);
   };
@@ -401,7 +255,7 @@ const PatientChat = ({
       
       {/* 1. TOP NAVBAR */}
       <header className="w-full shrink-0 border-b border-slate-100/90 bg-white/95 backdrop-blur-xs z-40">
-        <div className="w-full px-3 sm:px-5 lg:px-7 py-2 flex items-center justify-between">
+        <div className="w-full px-2 min-[360px]:px-3 sm:px-5 lg:px-7 py-2 flex items-center justify-between">
           
           {/* Brand Logo */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
@@ -410,7 +264,7 @@ const PatientChat = ({
               type="button"
               onClick={() => setMobileSidebarOpen(prev => !prev)}
               className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
-              title="Abrir conversaciones"
+              title={t('patientchat_abrir_conversaciones')}
             >
               <Menu size={18} />
             </button>
@@ -437,7 +291,7 @@ const PatientChat = ({
               className="relative flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-semibold text-[#005dff] transition-colors cursor-pointer group whitespace-nowrap shrink-0"
             >
               <MessageSquare size={15} className="stroke-[2.2]" />
-              <span>Nueva consulta</span>
+              <span>{t('patientchat_nueva_consulta')}</span>
               <span className="absolute -bottom-2.5 left-0 right-0 h-[2px] bg-[#005dff] rounded-full" />
             </button>
 
@@ -448,7 +302,7 @@ const PatientChat = ({
               className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               <FileText size={15} className="stroke-[2]" />
-              <span>Subir análisis</span>
+              <span>{t('patientchat_subir_analisis')}</span>
             </button>
 
             {/* Tab 3: Encontrar médico */}
@@ -458,7 +312,7 @@ const PatientChat = ({
               className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               <User size={15} className="stroke-[2]" />
-              <span>Encontrar médico</span>
+              <span>{t('patientchat_encontrar_medico')}</span>
             </button>
 
             {/* Tab 4: Mi historial */}
@@ -468,20 +322,20 @@ const PatientChat = ({
               className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
               <Clock size={15} className="stroke-[2]" />
-              <span>Mi historial</span>
+              <span>{t('patientchat_mi_historial')}</span>
             </button>
           </nav>
 
           {/* Right Controls: Idioma, Help, Bell, User profile */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2.5 shrink-0">
             <LanguageSelector variant="pill" />
 
             {/* Help Button */}
             <button 
               type="button"
               onClick={() => setShowHelpModal(true)}
-              className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
-              title="Ayuda y soporte"
+              className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+              title={t('patientchat_ayuda_y_soporte')}
             >
               <HelpCircle size={14} className="text-slate-700" />
             </button>
@@ -491,8 +345,8 @@ const PatientChat = ({
               <button 
                 type="button"
                 onClick={() => onNavigate ? onNavigate('search') : null} 
-                className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
-                title="Notificaciones"
+                className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+                title={t('patientchat_notificaciones')}
               >
                 <Bell size={14} className="text-slate-700" />
               </button>
@@ -503,12 +357,12 @@ const PatientChat = ({
             <div className="relative">
               <div 
                 onClick={() => setShowUserMenu(prev => !prev)}
-                className="flex items-center gap-1.5 sm:gap-2 pl-1 pr-2 py-0.5 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
+                className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-1 pr-0 sm:pr-2 py-0.5 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
               >
-                <div className="w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
+                <div className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
                   <img 
                     src={patientProfile?.photo_url || "/images/mivor_avatar_default.png"} 
-                    alt="Perfil" 
+                    alt={t('doctor_section_profile')} 
                     className="w-full h-full object-cover" 
                     onError={(e) => { e.target.src = '/logo.png'; }}
                   />
@@ -519,10 +373,10 @@ const PatientChat = ({
                   </span>
                   <span className="text-[9.5px] text-emerald-600 font-semibold flex items-center gap-1 leading-none mt-0.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                    Identidad verificada
+                   {t('patientchat_identidad_verificada')}
                   </span>
                 </div>
-                <ChevronDown size={13} className="text-slate-400" />
+                <ChevronDown size={13} className="hidden sm:block text-slate-400" />
               </div>
 
               {/* User Dropdown Menu */}
@@ -536,7 +390,7 @@ const PatientChat = ({
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
                       <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
-                      <p className="text-[11px] text-slate-500 truncate">{patientProfile?.email || "Paciente verificado"}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{patientProfile?.email || t('patientchat_paciente_verificado')}</p>
                     </div>
 
                     <button 
@@ -601,14 +455,14 @@ const PatientChat = ({
               className="w-full bg-[#005dff] hover:bg-[#0052e0] active:scale-[0.99] text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-xl sm:rounded-2xl flex items-center justify-center gap-2.5 shadow-xs transition-all cursor-pointer"
             >
               <Plus size={18} className="stroke-[2.5]" />
-              <span>Nueva consulta</span>
+              <span>{t('patientchat_nueva_consulta')}</span>
             </button>
           </div>
 
           {/* Sidebar Header */}
           <div className="px-4 sm:px-5 pt-1.5 pb-2">
             <h3 className="text-xs sm:text-sm xl:text-[14.5px] font-bold text-slate-900 tracking-tight">
-              Últimas conversaciones
+             {t('patientchat_ultimas_conversaciones')}
             </h3>
           </div>
 
@@ -619,7 +473,7 @@ const PatientChat = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar conversaciones..."
+                placeholder={t('patientchat_buscar_conversaciones')}
                 className="w-full bg-white border border-slate-200/90 rounded-xl px-3.5 sm:px-4 py-2.5 pr-9 text-xs sm:text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#005dff] focus:ring-1 focus:ring-[#005dff] transition-all"
               />
               <Search size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -629,7 +483,7 @@ const PatientChat = ({
           {/* Conversations Flat List */}
           <div className="flex-1 overflow-y-auto px-2.5 sm:px-3 pb-4 space-y-1 sm:space-y-1.5">
             {filteredConversations.length === 0 ? (
-              <p className="text-xs sm:text-sm text-center text-slate-400 py-6">No se encontraron conversaciones.</p>
+              <p className="text-xs sm:text-sm text-center text-slate-400 py-6 px-3">{hasRealSessions ? t('patientchat_no_se_encontraron_conversaciones') : t('patientchat_no_conversations_yet')}</p>
             ) : (
               filteredConversations.map((item) => {
                 const isActive = selectedConversationId === item.id;
@@ -662,12 +516,12 @@ const PatientChat = ({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (window.confirm('¿Deseas eliminar esta consulta del historial?')) {
+                                if (window.confirm(t('patientchat_deseas_eliminar_esta_consulta_del'))) {
                                   deleteSession(item.id);
                                 }
                               }}
                               className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-rose-50 hover:text-rose-600 text-slate-400 rounded-md transition-all cursor-pointer"
-                              title="Eliminar conversación"
+                              title={t('patientchat_eliminar_conversacion')}
                             >
                               <Trash2 size={13.5} />
                             </button>
@@ -758,17 +612,17 @@ const PatientChat = ({
                     MIVOR<span className="text-[#005dff]">.ai</span>
                   </h2>
                   <p className="text-[9px] sm:text-[10px] md:text-[11px] font-extrabold tracking-[0.25em] sm:tracking-[0.28em] text-slate-400 uppercase mt-0.5 sm:mt-1">
-                    BETTER HEALTH. BRIGHTER LIVES.
+                   {t('patientchat_better_health_brighter_lives')}
                   </p>
                   
                   <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-[#0f172a] tracking-tight mt-1 sm:mt-2">
-                    Hola, <span className="text-[#005dff]">{firstName}</span>
+                   {t('patientchat_hola')} <span className="text-[#005dff]">{firstName}</span>
                   </h1>
                   <p className="text-[17px] sm:text-[19px] md:text-[21px] lg:text-[23px] font-bold text-[#0f172a] mt-0.5">
-                    ¿En qué puedo ayudarte hoy?
+                   {t('patientchat_en_que_puedo_ayudarte_hoy')}
                   </p>
                   <p className="text-xs sm:text-[13px] md:text-sm lg:text-[15px] text-slate-500 font-medium mt-0.5">
-                    Tu asistente de salud con inteligencia artificial avanzada.
+                   {t('patientchat_tu_asistente_de_salud_con')}
                   </p>
                 </div>
 
@@ -778,7 +632,7 @@ const PatientChat = ({
                     
                     {/* Card 1: ¿Qué puede significar este resultado? */}
                     <div 
-                      onClick={() => setInputMessage('¿Qué puede significar este resultado en mis análisis médicos?')}
+                      onClick={() => setInputMessage(t('patientchat_que_puede_significar_este_resultado'))}
                       className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-purple-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
@@ -786,10 +640,10 @@ const PatientChat = ({
                           <Brain className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
                         <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
-                          ¿Qué puede significar este resultado?
+                         {t('patientchat_que_puede_significar_este_resultado_2')}
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Te explico con claridad tus análisis, pruebas e informes médicos para ti y tu médico.
+                         {t('patientchat_te_explico_con_claridad_tus')}
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#8e44ad] group-hover:text-white group-hover:border-[#8e44ad] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -802,8 +656,8 @@ const PatientChat = ({
                       onClick={() => {
                         setIsNewConsultation(false);
                         const prompt = inputMessage.trim() 
-                          ? `Hola MIVOR, quiero consultar estos síntomas para recibir orientación de salud: ${inputMessage.trim()}`
-                          : 'Hola MIVOR, quiero consultar unos síntomas que tengo para saber posibles causas y qué dudas preparar para mi médico.';
+                          ? t('patientchat_hola_mivor_quiero_consultar_estos', { value: inputMessage.trim() })
+                          : t('patientchat_hola_mivor_quiero_consultar_unos');
                         handleSend(null, prompt);
                       }}
                       className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-blue-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
@@ -813,10 +667,10 @@ const PatientChat = ({
                           <Search className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
                         <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
-                          ¿Cuáles pueden ser las causas de este síntoma?
+                         {t('patientchat_cuales_pueden_ser_las_causas')}
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Te oriento sobre tus síntomas y te explico las posibles causas y pasos recomendados para preparar tu consulta médica.
+                         {t('patientchat_te_oriento_sobre_tus_sintomas')}
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#005dff] group-hover:text-white group-hover:border-[#005dff] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -827,7 +681,7 @@ const PatientChat = ({
                     {/* Card 3: Explícame este informe médico */}
                     <div 
                       onClick={() => {
-                        setInputMessage('Por favor, explícame este informe médico en un lenguaje claro y comprensible:');
+                        setInputMessage(t('patientchat_por_favor_explicame_este_informe'));
                         actualPdfRef.current?.click();
                       }}
                       className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-teal-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
@@ -837,10 +691,10 @@ const PatientChat = ({
                           <FileText className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
                         <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
-                          Explícame este informe médico
+                         {t('patientchat_explicame_este_informe_medico')}
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Te ayudo a entender tus informes médicos de forma clara y sencilla.
+                         {t('patientchat_te_ayudo_a_entender_tus')}
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#00b074] group-hover:text-white group-hover:border-[#00b074] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -850,7 +704,7 @@ const PatientChat = ({
 
                     {/* Card 4: ¿Qué tratamientos existen para esta enfermedad? */}
                     <div 
-                      onClick={() => setInputMessage('¿Qué tratamientos y opciones terapéuticas basadas en evidencia científica existen para ')}
+                      onClick={() => setInputMessage(t('patientchat_que_tratamientos_y_opciones_terapeut'))}
                       className="bg-white rounded-2xl xl:rounded-3xl border border-slate-200/90 hover:border-orange-300 p-4 sm:p-5 flex flex-col justify-between min-h-[145px] sm:min-h-[160px] lg:min-h-[175px] xl:min-h-[185px] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all cursor-pointer group w-full"
                     >
                       <div>
@@ -858,10 +712,10 @@ const PatientChat = ({
                           <Pill className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.2]" />
                         </div>
                         <h3 className="font-bold text-xs sm:text-sm lg:text-[15px] xl:text-[16px] text-slate-900 mb-1 leading-snug">
-                          ¿Qué tratamientos existen para esta enfermedad?
+                         {t('patientchat_que_tratamientos_existen_para_esta')}
                         </h3>
                         <p className="text-[11px] sm:text-xs lg:text-[13px] xl:text-[13.5px] text-slate-500 leading-relaxed font-normal line-clamp-3">
-                          Te informo sobre las opciones de tratamiento más actuales, basadas en evidencia científica.
+                         {t('patientchat_te_informo_sobre_las_opciones')}
                         </p>
                       </div>
                       <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-200 text-slate-400 group-hover:bg-[#f76a1a] group-hover:text-white group-hover:border-[#f76a1a] flex items-center justify-center shadow-2xs self-end mt-2 transition-all shrink-0">
@@ -973,11 +827,11 @@ const PatientChat = ({
                             {Boolean(
                               (msg.text || msg.content) && (
                                 (msg.text || msg.content).includes("Resumen Explicativo") ||
-                                (msg.text || msg.content).includes("Informe de Prediagnóstico") ||
-                                (msg.text || msg.content).includes("Prediagnóstico y Triaje") ||
+                                (msg.text || msg.content).includes(t('patientchat_informe_de_prediagnostico')) ||
+                                (msg.text || msg.content).includes(t('patientchat_prediagnostico_y_triaje')) ||
                                 (msg.text || msg.content).includes("Especialidad sugerida") ||
-                                (msg.text || msg.content).includes("Especialidad a la que debería acudir") ||
-                                (msg.text || msg.content).includes("Nivel de atención") ||
+                                (msg.text || msg.content).includes(t('patientchat_especialidad_a_la_que_deberia')) ||
+                                (msg.text || msg.content).includes(t('patientchat_nivel_de_atencion')) ||
                                 (msg.text || msg.content).includes("Nivel de urgencia")
                               )
                             ) && (
@@ -988,15 +842,15 @@ const PatientChat = ({
                                   </div>
                                   <div>
                                     <span className="text-xs font-bold text-slate-900 block">
-                                      Orientación de Salud Finalizada
+                                     {t('patientchat_orientacion_de_salud_finalizada')}
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-[#005dff]">
-                                      Especialidad sugerida para tu consulta: {extractSpecialty(msg.text || msg.content)}
+                                     {t('patientchat_especialidad_sugerida_para_tu_consul')} {extractSpecialty(msg.text || msg.content)}
                                     </span>
                                   </div>
                                 </div>
                                 <p className="text-[11px] text-slate-600 mb-3 leading-relaxed">
-                                  Puedes conectar con profesionales sanitarios colegiados para recibir una valoración médica personalizada o agendar tu consulta.
+                                 {t('patientchat_puedes_conectar_con_profesionales_sa')}
                                 </p>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <button
@@ -1005,19 +859,19 @@ const PatientChat = ({
                                     className="px-3.5 py-2 rounded-xl bg-[#005dff] hover:bg-[#0052e0] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
                                   >
                                     <Stethoscope size={14} />
-                                    <span>Ver Especialistas ({extractSpecialty(msg.text || msg.content)})</span>
+                                    <span>{t('patientchat_ver_especialistas')}{extractSpecialty(msg.text || msg.content)})</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => {
                                       const spec = extractSpecialty(msg.text || msg.content);
-                                      const whatsappText = encodeURIComponent(`Hola, acabo de recibir una orientación informativa en MIVOR.ai con sugerencia hacia la especialidad de ${spec}. Deseo consultar disponibilidad para una consulta médica. Muchas gracias.`);
+                                      const whatsappText = encodeURIComponent(t('patientchat_hola_acabo_de_recibir_una', { spec }));
                                       window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
                                     }}
                                     className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
                                   >
                                     <MessageCircle size={14} />
-                                    <span>WhatsApp Inmediato</span>
+                                    <span>{t('patientchat_whatsapp_inmediato')}</span>
                                   </button>
                                 </div>
                               </div>
@@ -1030,7 +884,7 @@ const PatientChat = ({
                                 type="button" 
                                 onClick={() => handleFeedback(idx, 'up')}
                                 className={`p-1 rounded-md transition-colors cursor-pointer ${feedbacks[idx] === 'up' ? 'text-[#005dff] bg-blue-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
-                                title="Respuesta útil"
+                                title={t('patientchat_respuesta_util')}
                               >
                                 <ThumbsUp size={13.5} className="stroke-[1.8]" />
                               </button>
@@ -1038,7 +892,7 @@ const PatientChat = ({
                                 type="button" 
                                 onClick={() => handleFeedback(idx, 'down')}
                                 className={`p-1 rounded-md transition-colors cursor-pointer ${feedbacks[idx] === 'down' ? 'text-rose-500 bg-rose-50' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
-                                title="Respuesta no útil"
+                                title={t('patientchat_respuesta_no_util')}
                               >
                                 <ThumbsDown size={13.5} className="stroke-[1.8]" />
                               </button>
@@ -1057,7 +911,7 @@ const PatientChat = ({
                     </div>
                     <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs flex items-center gap-2.5 text-slate-500">
                       <Loader2 size={16} className="animate-spin text-[#005dff]" />
-                      <span className="text-xs font-semibold text-slate-600">MIVOR.ai está analizando tu consulta...</span>
+                      <span className="text-xs font-semibold text-slate-600">{t('patientchat_mivor_ai_esta_analizando_tu')}</span>
                     </div>
                   </div>
                 )}
@@ -1094,7 +948,7 @@ const PatientChat = ({
                       type="button" 
                       onClick={() => onRemoveAttachment ? onRemoveAttachment(att.id) : onClearAttachment?.()} 
                       className="p-0.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-rose-600 cursor-pointer"
-                      title="Quitar archivo"
+                      title={t('patientchat_quitar_archivo')}
                     >
                       <X size={12} />
                     </button>
@@ -1106,7 +960,7 @@ const PatientChat = ({
                     onClick={onClearAttachments || onClearAttachment} 
                     className="text-[11px] font-bold text-slate-500 hover:text-rose-600 px-1.5 py-0.5 transition-colors cursor-pointer ml-auto"
                   >
-                    Eliminar todos
+                   {t('doctordashboard_eliminar_todos')}
                   </button>
                 )}
               </div>
@@ -1146,7 +1000,7 @@ const PatientChat = ({
                   type="button" 
                   onClick={() => fileInputRef.current?.click()} 
                   className="w-8 h-8 rounded-full bg-slate-100/90 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition-colors cursor-pointer"
-                  title="Adjuntar imágenes o documentos clínicos"
+                  title={t('patientchat_adjuntar_imagenes_o_documentos_clini')}
                 >
                   <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
                 </button>
@@ -1158,7 +1012,7 @@ const PatientChat = ({
                 value={inputMessage} 
                 onChange={(e) => setInputMessage(e.target.value)} 
                 onPaste={handlePaste}
-                placeholder="Escribe tu mensaje o pega una captura aquí..." 
+                placeholder={t('patientchat_escribe_tu_mensaje_o_pega')} 
                 disabled={isLoading}
                 className="w-full bg-transparent text-xs sm:text-sm xl:text-[14.5px] text-slate-900 placeholder:text-slate-400 focus:outline-none px-1"
               />
@@ -1172,7 +1026,7 @@ const PatientChat = ({
                     ? 'bg-red-500 text-white animate-pulse shadow-xs' 
                     : 'text-[#005dff] hover:bg-blue-50'
                 }`}
-                title={isListening ? "Detener dictado" : "Dictar por voz"}
+                title={isListening ? t('patientchat_detener_dictado') : t('patientchat_dictar_por_voz')}
               >
                 <Mic size={18} className="stroke-[2.2] xl:w-5 xl:h-5" />
               </button>
@@ -1182,7 +1036,7 @@ const PatientChat = ({
                 type="submit" 
                 disabled={isLoading || (!inputMessage.trim() && !(attachments?.length > 0) && !selectedImagePreview && !selectedPdfName)}
                 className="w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full bg-[#005dff] hover:bg-[#0052e0] active:scale-95 text-white flex items-center justify-center transition-all shadow-xs disabled:pointer-events-none cursor-pointer shrink-0"
-                title="Enviar mensaje"
+                title={t('patientchat_enviar_mensaje')}
               >
                 {isLoading ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -1206,7 +1060,7 @@ const PatientChat = ({
             {/* Bottom Security Note */}
             <div className="py-1 text-center text-[10px] sm:text-[11px] text-slate-500 flex items-center justify-center gap-1.5 select-none font-medium">
               <Lock size={12} className="text-slate-500 shrink-0" />
-              <span>Tus datos están protegidos. Cifrado de nivel médico y cumplimiento con los más altos estándares de seguridad (ISO 27001, GDPR).</span>
+              <span>{t('patientchat_tus_datos_estan_protegidos_cifrado')}</span>
             </div>
           </div>
 
@@ -1227,7 +1081,7 @@ const PatientChat = ({
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#005dff] flex items-center justify-center">
                   <HelpCircle size={20} />
                 </div>
-                <h3 className="font-bold text-base text-slate-900">¿Cómo funciona MIVOR.ai?</h3>
+                <h3 className="font-bold text-base text-slate-900">{t('patientchat_como_funciona_mivor_ai')}</h3>
               </div>
               <button 
                 onClick={() => setShowHelpModal(false)}
@@ -1239,16 +1093,16 @@ const PatientChat = ({
             
             <div className="py-4 space-y-3 text-xs text-slate-600 leading-relaxed">
               <p>
-                <strong>MIVOR.ai</strong> es tu asistente médico impulsado por inteligencia artificial clínica avanzada.
+                <strong>MIVOR.ai</strong> {t('patientchat_es_tu_asistente_medico_impulsado')}
               </p>
               <ul className="space-y-2 list-disc list-inside text-slate-600">
-                <li>Puedes consultar dudas sobre síntomas, analíticas, informes o tratamientos.</li>
-                <li>Adjunta imágenes o informes en PDF usando el icono de clip.</li>
-                <li>Dicta por voz con el botón de micrófono en cualquier momento.</li>
-                <li>Tus consultas están protegidas con cifrado de grado médico y privacidad estricta.</li>
+                <li>{t('patientchat_puedes_consultar_dudas_sobre_sintoma')}</li>
+                <li>{t('patientchat_adjunta_imagenes_o_informes_en')}</li>
+                <li>{t('patientchat_dicta_por_voz_con_el')}</li>
+                <li>{t('patientchat_tus_consultas_estan_protegidas_con')}</li>
               </ul>
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/60 text-[11px] text-amber-800">
-                <strong>Aviso clínico:</strong> MIVOR.ai ofrece orientación clínica informativa. En caso de emergencia médica real, contacta inmediatamente al 112 o al centro de urgencias más cercano.
+                <strong>{t('patientchat_aviso_clinico')}</strong> {t('patientchat_mivor_ai_ofrece_orientacion_clinica', { number: emergencyNumber(country) })}
               </div>
             </div>
 
@@ -1257,7 +1111,7 @@ const PatientChat = ({
               onClick={() => setShowHelpModal(false)}
               className="w-full py-2.5 bg-[#005dff] hover:bg-[#0052e0] text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer mt-2"
             >
-              Entendido
+             {t('patient_understood')}
             </button>
           </div>
         </div>

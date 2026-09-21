@@ -87,10 +87,10 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-slate-800">Foto profesional</h3>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">Opcional</span>
+                  <h3 className="text-xs font-bold text-slate-800">{t('prof_photo_label')}</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">{t('step4professional_opcional')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Añade una foto profesional para que los pacientes puedan reconocerte.</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_anade_una_foto_profesional_para')}</p>
               </div>
             </div>
             <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-all">
@@ -108,15 +108,15 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-slate-800">Imágenes de tu clínica o consulta</h3>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">Opcional</span>
+                  <h3 className="text-xs font-bold text-slate-800">{t('step4professional_imagenes_de_tu_clinica_o')}</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">{t('step4professional_opcional')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Comparte imágenes de tu consulta, instalaciones o equipo profesional.</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_comparte_imagenes_de_tu_consulta')}</p>
               </div>
             </div>
             <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-all">
               <Upload size={14} />
-              <span>Añadir imágenes</span>
+              <span>{t('step4professional_anadir_imagenes')}</span>
               <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFileUpload(e, 'clinicImages')} />
             </label>
           </div>
@@ -129,15 +129,15 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-slate-800">Vídeo de presentación</h3>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">Opcional</span>
+                  <h3 className="text-xs font-bold text-slate-800">{t('step4professional_video_de_presentacion')}</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">{t('step4professional_opcional')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Sube un breve vídeo presentándote y cuéntales a tus pacientes sobre ti.</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_sube_un_breve_video_presentandote')}</p>
               </div>
             </div>
             <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-all">
               <Upload size={14} />
-              <span>{presentationVideo ? presentationVideo.name.slice(0, 12) + '...' : 'Subir vídeo'}</span>
+              <span>{presentationVideo ? presentationVideo.name.slice(0, 12) + '...' : t('step4professional_subir_video')}</span>
               <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'presentationVideo')} />
             </label>
           </div>
@@ -150,10 +150,10 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-slate-800">Información adicional</h3>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">Opcional</span>
+                  <h3 className="text-xs font-bold text-slate-800">{t('step4professional_informacion_adicional')}</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">{t('step4professional_opcional')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Añade información sobre tu experiencia, idiomas, áreas de interés, etc.</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_anade_informacion_sobre_tu_experienc')}</p>
               </div>
             </div>
             <button
@@ -161,7 +161,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer"
             >
               <Pencil size={14} />
-              <span>Completar</span>
+              <span>{t('step4professional_completar')}</span>
             </button>
           </div>
 
@@ -173,10 +173,10 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-slate-800">Vista previa de tu perfil</h3>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">Opcional</span>
+                  <h3 className="text-xs font-bold text-slate-800">{t('step4professional_vista_previa_de_tu_perfil')}</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-bold text-slate-500 uppercase">{t('step4professional_opcional')}</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">Así es como verán los pacientes tu perfil con la información que añadas.</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_asi_es_como_veran_los')}</p>
               </div>
             </div>
             <button
@@ -184,7 +184,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
               className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 transition-all cursor-pointer"
             >
               <Eye size={14} />
-              <span>Ver vista previa</span>
+              <span>{t('step4professional_ver_vista_previa')}</span>
             </button>
           </div>
 
@@ -229,7 +229,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md mb-2">
               <img 
                 src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop" 
-                alt="Doctor Profile Preview" 
+                alt={t('step4professional_doctor_profile_preview')} 
                 className="w-full h-full object-cover"
               />
             </div>
@@ -237,10 +237,10 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
 
           <div>
             <h3 className="text-base font-extrabold text-slate-900 leading-snug">
-              Tu perfil, tu mejor carta de presentación
+             {t('step4professional_tu_perfil_tu_mejor_carta')}
             </h3>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              Conecta con más pacientes y genera más confianza mostrando quién eres y dónde trabajas.
+             {t('step4professional_conecta_con_mas_pacientes_y')}
             </p>
           </div>
 
@@ -248,32 +248,32 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
             <div className="flex items-start gap-3">
               <User size={18} className="text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-slate-800">Muestra tu foto profesional</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Haz que los pacientes te reconozcan.</p>
+                <h4 className="font-bold text-slate-800">{t('step4professional_muestra_tu_foto_profesional')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_haz_que_los_pacientes_te')}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <ImageIcon size={18} className="text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-slate-800">Comparte imágenes de tu consulta</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Muéstrales tu espacio y tu equipo.</p>
+                <h4 className="font-bold text-slate-800">{t('step4professional_comparte_imagenes_de_tu_consulta_2')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_muestrales_tu_espacio_y_tu')}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <Video size={18} className="text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-slate-800">Añade un vídeo de presentación</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Cuéntales quién eres y qué te mueve.</p>
+                <h4 className="font-bold text-slate-800">{t('step4professional_anade_un_video_de_presentacion')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_cuentales_quien_eres_y_que')}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
               <Star size={18} className="text-blue-600 shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-bold text-slate-800">Destaca tu experiencia</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Idiomas, especialidades, trayectoria...</p>
+                <h4 className="font-bold text-slate-800">{t('step4professional_destaca_tu_experiencia')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">{t('step4professional_idiomas_especialidades_trayectoria')}</p>
               </div>
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600">
           <Info size={18} className="text-slate-400 shrink-0 mt-0.5" />
           <p className="text-[11px] leading-relaxed">
-            <span className="font-bold text-slate-700">Esta información es opcional</span> y podrás completarla cuando quieras desde "Mi perfil".
+            <span className="font-bold text-slate-700">{t('step4professional_esta_informacion_es_opcional')}</span> {t('step4professional_y_podras_completarla_cuando_quieras')}
           </p>
         </div>
       </aside>

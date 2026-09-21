@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, Home, ShieldAlert } from 'lucide-react';
+import { LanguageContext } from '../contexts/LanguageContext';
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -11,9 +12,14 @@ export default class ErrorBoundary extends React.Component {
     };
   }
 
+  static contextType = LanguageContext;
+
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+
+  // el ErrorBoundary es un componente de clase: usa el contexto de idioma sin hooks
+  tr = (key) => (this.context && this.context.t ? this.context.t(key) : key);
 
   componentDidCatch(error, errorInfo) {
     console.error('ErrorBoundary capturo un error:', error, errorInfo);
@@ -49,15 +55,15 @@ export default class ErrorBoundary extends React.Component {
             </div>
 
             <h2 className="text-lg font-bold text-slate-900 mb-1">
-              {this.props.title || 'Ha ocurrido un error inesperado'}
+              {this.props.title || this.tr('error_boundary_title')}
             </h2>
             <p className="text-xs text-slate-500 mb-6 leading-relaxed">
-              {this.props.message || 'Se produjo un problema al renderizar este modulo. Los datos de su sesion permanecen seguros.'}
+              {this.props.message || this.tr('error_boundary_message')}
             </p>
 
             {this.state.error && (
               <div className="mb-6 text-left bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 font-mono overflow-x-auto max-h-32">
-                <span className="font-bold text-red-600">Error:</span> {this.state.error.toString()}
+                <span className="font-bold text-red-600">{this.tr('error_boundary_error_label')}</span> {this.state.error.toString()}
               </div>
             )}
 
@@ -68,7 +74,7 @@ export default class ErrorBoundary extends React.Component {
                 className="w-full sm:flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <RefreshCw size={14} />
-                <span>Reintentar</span>
+                <span>{this.tr('error_boundary_retry')}</span>
               </button>
               <button
                 type="button"
@@ -76,7 +82,7 @@ export default class ErrorBoundary extends React.Component {
                 className="w-full sm:flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer border border-slate-200"
               >
                 <Home size={14} />
-                <span>Ir al Inicio</span>
+                <span>{this.tr('error_boundary_go_home')}</span>
               </button>
             </div>
           </div>

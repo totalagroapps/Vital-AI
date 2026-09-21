@@ -6,10 +6,12 @@ import json
 import logging
 import uuid
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import StreamingResponse
+from openai import AsyncOpenAI
 from pydantic import BaseModel
 from sqlalchemy.future import select
 from sqlalchemy import text, or_
@@ -18,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import database
 import models
 import security
+from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user, require_role, get_current_user_id
 
@@ -26,6 +29,7 @@ from main import (
     TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate,
     s3_client, R2_BUCKET_NAME, logger
 )
+from services import appointment_service, doctor_service
 from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
 
 router = APIRouter()
@@ -33,30 +37,30 @@ router = APIRouter()
 
 
 @router.get('/api/doctor/me')
-async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_user_id: str=Depends(get_current_user_id)):
+async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_user: models.User=Depends(require_role("doctor", "admin"))):
     """
     Recupera el perfil del médico autenticado (Fila 20 / Fila 26).
     """
     from sqlalchemy.future import select
+    current_user_id = current_user.id
     result = await db.execute(select(models.SpecialistProfile).where(models.SpecialistProfile.user_id == current_user_id))
     profile = result.scalars().first()
 
     if not profile:
-        user_res = await db.execute(select(models.User).where(models.User.id == current_user_id))
-        user = user_res.scalars().first()
-        raw_name = user.username if user else "Dr. Alejandro Ruiz"
+        # Sin perfil aún: se devuelve un perfil mínimo y honesto (nunca datos inventados ni "verificado").
+        raw_name = current_user.username or ""
         clean_name = raw_name if raw_name.lower().startswith("dr") else f"Dr. {raw_name.capitalize()}"
         return {
             "user_id": current_user_id,
             "full_name": clean_name,
-            "specialty": "Médico",
-            "license_number": "COL-482910",
-            "city": "Madrid, España",
-            "location": "Consulta MIVOR.ai",
-            "photo_url": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
-            "is_verified": True,
-            "experience_years": 8,
-            "bio": "Especialista clínico en MIVOR.ai."
+            "specialty": "",
+            "license_number": "",
+            "city": "",
+            "location": "",
+            "photo_url": None,
+            "is_verified": False,
+            "experience_years": 0,
+            "bio": ""
         }
 
     photo = profile.photo_url or profile.profile_pic_url
@@ -74,12 +78,12 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
         "user_id": profile.user_id,
         "full_name": profile.full_name or "Dr. Alejandro Ruiz",
         "specialty": profile.specialty or "Médico",
-        "license_number": profile.license_number or "COL-482910",
-        "city": profile.city or profile.location or "Madrid, España",
-        "location": profile.location or profile.city or "Consulta MIVOR.ai",
-        "photo_url": photo or "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80",
+        "license_number": profile.license_number or "",
+        "city": profile.city or profile.location or "",
+        "location": profile.location or profile.city or "",
+        "photo_url": photo or None,
         "is_verified": bool(profile.is_verified or profile.verified),
-        "experience_years": profile.experience_years or 8,
+        "experience_years": profile.experience_years or 0,
         "bio": profile.bio or ""
     }
 
@@ -87,7 +91,7 @@ async def get_current_doctor_profile(db: AsyncSession=Depends(get_db), current_u
 @router.get('/api/doctor/patients')
 async def get_all_patients(
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(require_role("doctor", "admin"))
+    current_user: models.User = Depends(security.require_verified_doctor)
 ):
     """
     Lista todos los pacientes y su triaje más reciente para el portal médico.
@@ -180,6 +184,53 @@ async def trigger_seed_demo(current_user: models.User = Depends(require_role("ad
         logger.error(f"Error al ejecutar seed_demo: {e}")
         return {"status": "error", "message": str(e)}
 
+
+_SCHEDULED_TO_LEGACY_STATUS = {
+    "pending": "confirmada",
+    "confirmed": "confirmada",
+    "completed": "completada",
+    "no_show": "cancelada",
+    "cancelled": "cancelada",
+}
+_LEGACY_TO_SCHEDULED_STATUS = {
+    "confirmada": models.AppointmentStatus.confirmed,
+    "en_espera": models.AppointmentStatus.confirmed,
+    "completada": models.AppointmentStatus.completed,
+    "cancelada": models.AppointmentStatus.cancelled,
+}
+
+
+def _scheduled_to_legacy(a: "models.ScheduledAppointment", tz_name: Optional[str]) -> dict:
+    """Adapta una cita reservada por un paciente (ScheduledAppointment) al formato de la agenda del médico."""
+    try:
+        tz = ZoneInfo(tz_name or "Europe/Madrid")
+    except Exception:
+        tz = ZoneInfo("Europe/Madrid")
+    start = a.scheduled_at if a.scheduled_at.tzinfo else a.scheduled_at.replace(tzinfo=timezone.utc)
+    local = start.astimezone(tz)
+    profile = a.patient.patient_profile if a.patient else None
+    modality = a.modality.value if hasattr(a.modality, "value") else str(a.modality)
+    status_value = a.status.value if hasattr(a.status, "value") else str(a.status)
+    return {
+        "id": f"s:{a.id}",
+        "doctor_id": str(a.doctor_id),
+        "patient_id": a.patient_id,
+        "patient_name": (profile.full_name if profile and profile.full_name else (a.patient.username if a.patient else "Paciente")),
+        "patient_age": None,
+        "patient_gender": profile.gender if profile else None,
+        "blood_type": profile.blood_type if profile else None,
+        "appointment_date": local.strftime("%Y-%m-%d"),
+        "appointment_time": local.strftime("%H:%M"),
+        "duration_minutes": a.duration_minutes,
+        "reason": a.reason or "",
+        "appointment_type": "teleconsulta" if modality == "video" else "presencial",
+        "status": _SCHEDULED_TO_LEGACY_STATUS.get(status_value, "confirmada"),
+        "triage_category": "Verde",
+        "notes": a.cancellation_reason,
+        "created_at": a.created_at.isoformat() if a.created_at else None,
+    }
+
+
 @router.get('/api/doctor/appointments')
 async def get_doctor_appointments(
     date: Optional[str] = None,
@@ -205,7 +256,7 @@ async def get_doctor_appointments(
     result = await db.execute(stmt)
     appointments = result.scalars().all()
 
-    return [
+    response = [
         {
             "id": a.id,
             "doctor_id": a.doctor_id,
@@ -226,6 +277,19 @@ async def get_doctor_appointments(
         }
         for a in appointments
     ]
+
+    # Citas que los pacientes reservan desde "Especialistas" (tabla ScheduledAppointment)
+    if current_user.role != "admin":
+        my_profile = await doctor_service.get_my_profile(db, current_user.id)
+        if my_profile is not None:
+            scheduled = await appointment_service.list_doctor_appointments(db, my_profile.id)
+            for sa in scheduled:
+                item = _scheduled_to_legacy(sa, my_profile.timezone)
+                if date and item["appointment_date"] != date:
+                    continue
+                response.append(item)
+            response.sort(key=lambda x: (x["appointment_date"] or "", x["appointment_time"] or ""))
+    return response
 
 @router.post('/api/doctor/appointments')
 async def create_doctor_appointment(
@@ -265,11 +329,29 @@ async def create_doctor_appointment(
 
 @router.patch('/api/doctor/appointments/{appointment_id}/status')
 async def update_appointment_status(
-    appointment_id: int,
+    appointment_id: str,
     req: AppointmentStatusUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(require_role("doctor", "admin"))
 ):
+    if appointment_id.startswith("s:"):
+        try:
+            sched_id = uuid.UUID(appointment_id[2:])
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Cita no encontrada")
+        sched = await appointment_service.get_appointment(db, sched_id)
+        my_profile = await doctor_service.get_my_profile(db, current_user.id)
+        if not sched or (current_user.role != "admin" and (my_profile is None or sched.doctor_id != my_profile.id)):
+            raise HTTPException(status_code=404, detail="Cita no encontrada")
+        new_status = _LEGACY_TO_SCHEDULED_STATUS.get(req.status)
+        if new_status is None:
+            raise HTTPException(status_code=400, detail="Estado no válido")
+        sched.status = new_status
+        await db.commit()
+        return {"id": appointment_id, "status": req.status, "message": f"Estado actualizado a {req.status}"}
+    if not appointment_id.isdigit():
+        raise HTTPException(status_code=404, detail="Cita no encontrada")
+    appointment_id = int(appointment_id)
     result = await db.execute(select(models.Appointment).where(models.Appointment.id == appointment_id))
     appt = result.scalars().first()
     if not appt:
@@ -326,7 +408,7 @@ async def match_referral(req: SmartReferralRequest, db: AsyncSession=Depends(get
 async def ask_doctor_copilot(
     request: DoctorQueryRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(require_role("doctor", "admin"))
+    current_user: models.User = Depends(security.require_verified_doctor)
 ):
     """
     Copiloto Clínico IA para Doctores (Fila 23).
@@ -450,14 +532,7 @@ Si la información requerida no figura en el expediente, acláralo explícitamen
 
 {context_text}
 '''
-    lang_map = {'es': 'Spanish (Español)', 'en': 'English', 'fr': 'French (Français)', 'ar': 'Arabic (العربية)'}
-    target_lang = lang_map.get(request.language, 'Spanish (Español)')
-    lang_instruction = f'''
-
-CRITICAL LANGUAGE DIRECTIVE:
-You MUST communicate with the doctor EXCLUSIVELY and ENTIRELY in {target_lang}.
-DO NOT speak or reply in English or Spanish if {target_lang} is French or Arabic.
-Translate and compose your entire response strictly into {target_lang}.'''
+    lang_instruction = language_directive(request.language, request.country, 'doctor')
 
     system_prompt += lang_instruction
     try:
@@ -471,7 +546,7 @@ Translate and compose your entire response strictly into {target_lang}.'''
         return StreamingResponse(generate(), media_type='text/plain')
     except Exception as e:
         logging.error(f'Doctor Copilot OpenAI Error: {e}')
-        return StreamingResponse(iter([f'Error: No se pudo procesar la respuesta del modelo de IA. {str(e)}']), media_type='text/plain')
+        return StreamingResponse(iter(['Error: No se pudo procesar la respuesta del modelo de IA. Inténtalo de nuevo en unos minutos.']), media_type='text/plain')
 
 
 
@@ -482,7 +557,8 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
     Recupera la lista de especialistas médicos con perfiles completos y fotos.
     """
     from sqlalchemy import or_
-    stmt = select(models.SpecialistProfile)
+    # Solo médicos verificados aparecen en el directorio público
+    stmt = select(models.SpecialistProfile).where(or_(models.SpecialistProfile.verified == True, models.SpecialistProfile.is_verified == True))
     if specialty and specialty.lower() != 'todos':
         stmt = stmt.where(models.SpecialistProfile.specialty.ilike(f'%{specialty}%'))
     if city:
@@ -518,134 +594,22 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
             'user_id': s.user_id,
             'full_name': s.full_name,
             'specialty': s.specialty,
-            'city': s.city or s.location or 'Consulta Online / Presencial',
-            'location': s.location or s.city or 'Consulta Online / Presencial',
+            'city': s.city or s.location or '',
+            'location': s.location or s.city or '',
             'experience_years': s.experience_years or 0,
-            'languages': s.languages or 'Español',
-            'bio': s.bio or f'Especialista en {s.specialty} con experiencia en atención clínica personalizada.',
-            'verified': bool(s.verified or s.is_verified),
-            'photo_url': photo or f"https://api.dicebear.com/7.x/bottts/svg?seed={s.full_name or 'Dr'}",
-            'availability_schedule': (s.availability_schedule or {'dias': 'Lunes a Viernes', 'horario': '09:00 - 18:00'}),
+            'languages': s.languages or '',
+            'bio': s.bio or '',
+            'verified': True,
+            'photo_url': photo or None,
+            'availability_schedule': s.availability_schedule or None,
             'presentation_video_url': presentation_video,
             'clinic_video_url': clinic_video,
-            'professional_college': college or 'Colegio Oficial de Médicos',
-            'license_number': license_no or f'COL-{s.id:05d}',
+            'professional_college': college or None,
+            'license_number': license_no or None,
             'educations': educations_list,
             'clinic_photos': clinic_photos_list,
         })
 
-    # Si aún no hay especialistas registrados en la base de datos, proveer defaults para que la plataforma sea 100% interactiva en la demo
-    if not output:
-        default_docs = [
-            {
-                'id': 101,
-                'user_id': 'doc-dr-carlos-mendoza',
-                'full_name': 'Dr. Carlos Mendoza',
-                'specialty': 'Cardiología',
-                'city': 'Madrid, España',
-                'location': 'Centro Médico Sanitas / Consulta Online',
-                'experience_years': 12,
-                'languages': 'Español, Inglés',
-                'bio': 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias. Miembro de la Sociedad Española de Cardiología (SEC).',
-                'verified': True,
-                'license_number': 'COL-28084592',
-                'professional_college': 'Ilustre Colegio Oficial de Médicos de Madrid (ICOMEM)',
-                'photo_url': 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400',
-                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-                'availability_schedule': {'dias': 'Lun, Mié, Vie', 'horario': '10:00 - 18:00'},
-                'educations': [
-                    {'degree': 'Licenciatura en Medicina y Cirugía', 'institution': 'Universidad Complutense de Madrid', 'start_year': 2006, 'end_year': 2012},
-                    {'degree': 'Especialidad en Cardiología Clínica', 'institution': 'Hospital Universitario La Paz', 'start_year': 2012, 'end_year': 2017},
-                    {'degree': 'Máster en Prevención y Rehabilitación Cardíaca', 'institution': 'Universidad de Barcelona', 'start_year': 2018, 'end_year': 2019}
-                ],
-                'clinic_photos': [
-                    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600',
-                    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
-                ]
-            },
-            {
-                'id': 102,
-                'user_id': 'doc-dra-elena-rodriguez',
-                'full_name': 'Dra. Elena Rodríguez',
-                'specialty': 'Medicina General',
-                'city': 'Barcelona, España',
-                'location': 'Clínica Quirón / Telemedicina',
-                'experience_years': 9,
-                'languages': 'Español, Francés',
-                'bio': 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención holística de la salud.',
-                'verified': True,
-                'license_number': 'COL-08051239',
-                'professional_college': 'Col·legi Oficial de Metges de Barcelona (COMB)',
-                'photo_url': 'https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400',
-                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-                'availability_schedule': {'dias': 'Lun - Sáb', 'horario': '08:30 - 16:30'},
-                'educations': [
-                    {'degree': 'Grado en Medicina', 'institution': 'Universitat de Barcelona', 'start_year': 2009, 'end_year': 2015},
-                    {'degree': 'Especialista en Medicina Familiar y Comunitaria', 'institution': 'Hospital Clínic de Barcelona', 'start_year': 2015, 'end_year': 2019}
-                ],
-                'clinic_photos': [
-                    'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
-                ]
-            },
-            {
-                'id': 103,
-                'user_id': 'doc-dr-javier-torres',
-                'full_name': 'Dr. Javier Torres',
-                'specialty': 'Traumatología',
-                'city': 'Valencia, España',
-                'location': 'Hospital Universitario / Consulta Privada',
-                'experience_years': 15,
-                'languages': 'Español, Inglés',
-                'bio': 'Especialista en lesiones articulares, cirugía mínimamente invasiva, columna vertebral y medicina deportiva de alto rendimiento.',
-                'verified': True,
-                'license_number': 'COL-46098214',
-                'professional_college': 'Colegio Oficial de Médicos de Valencia (COMV)',
-                'photo_url': 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400',
-                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-                'availability_schedule': {'dias': 'Mar, Jue', 'horario': '11:00 - 19:00'},
-                'educations': [
-                    {'degree': 'Licenciatura en Medicina', 'institution': 'Universitat de València', 'start_year': 2003, 'end_year': 2009},
-                    {'degree': 'Especialidad Cirugía Ortopédica y Traumatología', 'institution': 'Hospital Universitari i Politècnic La Fe', 'start_year': 2009, 'end_year': 2014}
-                ],
-                'clinic_photos': [
-                    'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
-                ]
-            },
-            {
-                'id': 104,
-                'user_id': 'doc-dra-sofia-valencia',
-                'full_name': 'Dra. Sofía Valencia',
-                'specialty': 'Dermatología',
-                'city': 'Sevilla, España',
-                'location': 'Instituto Dermatológico Avanzado',
-                'experience_years': 8,
-                'languages': 'Español, Inglés',
-                'bio': 'Especialista en dermatoscopia digital, control de lesiones cutáneas, acné complejo y tratamientos dermatológicos de precisión.',
-                'verified': True,
-                'license_number': 'COL-41033481',
-                'professional_college': 'Real e Ilustre Colegio Oficial de Médicos de Sevilla (RICOMS)',
-                'photo_url': 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400',
-                'presentation_video_url': 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-                'clinic_video_url': 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-                'availability_schedule': {'dias': 'Lunes a Viernes', 'horario': '09:00 - 17:00'},
-                'educations': [
-                    {'degree': 'Grado en Medicina', 'institution': 'Universidad de Sevilla', 'start_year': 2010, 'end_year': 2016},
-                    {'degree': 'Especialidad en Dermatología Médico-Quirúrgica', 'institution': 'Hospital Universitario Virgen del Rocío', 'start_year': 2016, 'end_year': 2020}
-                ],
-                'clinic_photos': [
-                    'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
-                ]
-            }
-        ]
-        if specialty and specialty.lower() != 'todos':
-            output = [d for d in default_docs if specialty.lower() in d['specialty'].lower()]
-            if not output:
-                output = default_docs
-        else:
-            output = default_docs
-
     return output
+
 

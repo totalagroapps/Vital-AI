@@ -18,7 +18,7 @@ import models
 import security
 from database import get_db
 from security import get_current_user, require_role, get_current_user_id
-from main import PatientProfileSchema, logger
+from main import PatientProfileSchema, logger, s3_client, R2_BUCKET_NAME
 
 router = APIRouter()
 
@@ -98,9 +98,9 @@ async def get_public_emergency_profile(
         'date_of_birth': profile.date_of_birth or '',
         'gender': profile.gender or 'No especificado',
         'blood_type': profile.blood_type or 'N/D',
-        'allergies': profile.allergies or 'Ninguna conocida',
-        'chronic_conditions': profile.chronic_conditions or 'Ninguna registrada',
-        'current_medications': profile.current_medications or 'Ninguna registrada',
+        'allergies': profile.allergies or 'No registradas',
+        'chronic_conditions': profile.chronic_conditions or 'No registradas',
+        'current_medications': profile.current_medications or 'No registrada',
         'emergency_contact': profile.emergency_contact or 'No especificado',
         'height': profile.height or '--',
         'weight': profile.weight or '--',
@@ -191,7 +191,7 @@ async def update_patient_profile(profile_data: PatientProfileSchema, db: AsyncSe
 async def get_patient_detail(
     patient_id: str,
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(require_role("doctor", "admin"))
+    current_user: models.User = Depends(security.require_verified_doctor)
 ):
     import json
     from sqlalchemy.future import select
@@ -392,7 +392,7 @@ async def get_patient_history(
     # Control de Autorización estricto (Prevención de IDOR / BOLA):
     # Un paciente solo puede ver su propio historial clínico.
     # Los médicos y administradores pueden acceder al historial de pacientes.
-    if current_user.role not in ("doctor", "admin") and patient.user_id != current_user.id:
+    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso denegado: No tienes autorización para consultar el historial médico de otro paciente."

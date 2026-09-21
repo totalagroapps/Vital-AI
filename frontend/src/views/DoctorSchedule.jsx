@@ -51,8 +51,8 @@ const normExc = (list) => JSON.stringify(
 );
 
 const DoctorSchedule = ({ apiUrl, authHeaders, doctorProfile, onProfileUpdated, onBack, headerExtra }) => {
-  const { t, language } = useLanguage();
-  const locale = language === 'es' ? 'es-ES' : 'en-US';
+  const { t, language, locale: uiLocale } = useLanguage();
+  const locale = uiLocale;
   const json = { ...authHeaders, 'Content-Type': 'application/json' };
 
   const allowedModalities = useMemo(() => {
@@ -338,14 +338,14 @@ const DoctorSchedule = ({ apiUrl, authHeaders, doctorProfile, onProfileUpdated, 
                               key={keyOf(b)}
                               onClick={() => openEdit(b)}
                               title={t('sched_edit_hint')}
-                              className={`inline-flex items-center gap-1.5 text-[13px] font-bold px-3 py-1.5 rounded-xl border transition-colors ${
+                              className={`inline-flex flex-wrap items-center gap-x-1.5 text-[13px] font-bold px-3 py-1.5 rounded-xl border transition-colors ${
                                 edit && edit.key === keyOf(b)
                                   ? 'bg-brand-blue text-white border-brand-blue'
                                   : 'bg-brand-blue/10 text-brand-blue border-transparent hover:border-brand-blue/40'
                               }`}
                             >
-                              {hhmm(b.start_time)}–{hhmm(b.end_time)}
-                              <span className="font-medium opacity-80">· {modalityLabel(b.modality)}</span>
+                              <span className="whitespace-nowrap">{hhmm(b.start_time)}–{hhmm(b.end_time)}</span>
+                              <span className="font-medium opacity-80 whitespace-nowrap">· {modalityLabel(b.modality)}</span>
                             </button>
                           ))}
                           {!isFormHere && (

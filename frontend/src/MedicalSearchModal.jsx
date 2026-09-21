@@ -56,7 +56,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
         },
         body: formData
       });
-      if (!res.ok) throw new Error('Error al procesar el documento para búsqueda');
+      if (!res.ok) throw new Error(t('medicalsearchmodal_error_al_procesar_el_documento'));
       const data = await res.json();
       setAttachedDocName(data.filename || 'Documento adjunto');
       let searchTerms = '';
@@ -73,7 +73,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
       }
     } catch (err) {
       console.error(err);
-      setError('No se pudo extraer términos clínicos del documento.');
+      setError(t('medicalsearchmodal_no_se_pudo_extraer_terminos'));
     } finally {
       setIsAnalyzingDoc(false);
       if (searchFileInputRef.current) searchFileInputRef.current.value = '';
@@ -149,7 +149,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
       });
 
       if (!response.ok) {
-        let errMsg = 'Ocurrió un error al buscar';
+        let errMsg = t('medicalsearchmodal_ocurrio_un_error_al_buscar');
         try {
           const errData = await response.json();
           errMsg = errData.detail || errMsg;
@@ -169,7 +169,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   useEffect(() => {
     if (isOpen) {
       const condition = userProfile?.chronic_conditions?.split(',')?.[0]?.trim();
-      const defaultQuery = language === 'en' ? 'preventive health' : language === 'fr' ? 'santé préventive' : language === 'ar' ? 'الوقاية الصحية' : 'salud preventiva';
+      const defaultQuery = language === 'es' ? 'salud preventiva' : language === 'fr' ? 'santé préventive' : language === 'ar' ? 'الوقاية الصحية' : 'preventive health';
       const initialQuery = condition && condition.toLowerCase() !== 'ninguna' && condition.toLowerCase() !== 'none' ? condition : defaultQuery;
       setQuery(initialQuery);
       fetchResults(initialQuery);
@@ -257,7 +257,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                   {t('latest_medical_advances') || 'Últimos Avances Médicos'}
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 px-2 py-0.5 rounded-full uppercase">
-                  <CheckCircle2 size={11} className="text-teal-600" /> RAG Multi-fuente
+                  <CheckCircle2 size={11} className="text-teal-600" /> {t('medicalsearchmodal_rag_multi_fuente')}
                 </span>
               </div>
               <p className="text-xs md:text-sm text-slate-500 mt-0.5">
@@ -269,7 +269,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
             <LanguageSelector />
             <button 
               onClick={onClose} 
-              aria-label="Cerrar modal"
+              aria-label={t('medicalsearchmodal_cerrar_modal')}
               className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
             >
               <X className="w-5 h-5" />
@@ -296,7 +296,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                 onClick={() => searchFileInputRef.current?.click()}
                 disabled={isAnalyzingDoc || loading}
                 className="p-1 rounded-lg text-slate-500 hover:text-brand hover:bg-slate-100 transition-all cursor-pointer"
-                title="Adjuntar informe o imagen para buscar estudios automáticamente"
+                title={t('medicalsearchmodal_adjuntar_informe_o_imagen_para')}
               >
                 {isAnalyzingDoc ? <Loader2 size={18} className="animate-spin text-brand" /> : <Paperclip size={18} className="-rotate-45 stroke-[2.2]" />}
               </button>
@@ -307,7 +307,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
               onPaste={handleSearchPaste}
               style={{ color: "#0f172a", backgroundColor: "#ffffff" }}
               className="block w-full pl-20 pr-36 py-3.5 bg-white border-2 border-slate-300 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition-all shadow-sm text-sm md:text-base font-semibold"
-              placeholder={isAnalyzingDoc ? 'Analizando documento con IA para buscar...' : (t('search_studies_placeholder') || 'Buscar por enfermedad o adjuntar informe con el clip...')}
+              placeholder={isAnalyzingDoc ? t('medicalsearchmodal_analizando_documento_con_ia_para') : (t('search_studies_placeholder') || t('medicalsearchmodal_buscar_por_enfermedad_o_adjuntar'))}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -316,7 +316,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                 type="button"
                 onClick={() => { setQuery(''); setAttachedDocName(''); }}
                 className="absolute inset-y-0 right-28 pr-2 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
-                aria-label="Limpiar búsqueda"
+                aria-label={t('medicalsearchmodal_limpiar_busqueda')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -333,7 +333,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {attachedDocName && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-700 font-medium">
               <FileText size={14} className="shrink-0" />
-              <span className="truncate">Analizado para búsqueda: <strong>{attachedDocName}</strong></span>
+              <span className="truncate">{t('medicalsearchmodal_analizado_para_busqueda')} <strong>{attachedDocName}</strong></span>
               <button 
                 type="button" 
                 onClick={() => setAttachedDocName('')} 
@@ -444,7 +444,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                 </h3>
                 {query && (
                   <span className="text-xs text-slate-400 font-medium">
-                    Búsqueda: <strong className="text-slate-700">"{query}"</strong>
+                   {t('medicalsearchmodal_busqueda')} <strong className="text-slate-700">"{query}"</strong>
                   </span>
                 )}
               </div>
@@ -483,9 +483,9 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                           className="mt-1.5 text-xs font-bold text-brand hover:underline flex items-center gap-1 inline-block"
                         >
                           {isExpanded ? (
-                            <>Mostrar menos <ChevronUp size={13} /></>
+                            <>{t('medicalsearchmodal_mostrar_menos')} <ChevronUp size={13} /></>
                           ) : (
-                            <>Leer resumen completo <ChevronDown size={13} /></>
+                            <>{t('medicalsearchmodal_leer_resumen_completo')} <ChevronDown size={13} /></>
                           )}
                         </button>
                       )}
@@ -518,13 +518,13 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {!loading && !error && filteredResults.length === 0 && results.length > 0 && (
             <div className="text-center text-slate-500 py-12 px-4 bg-white rounded-2xl border border-slate-200">
               <Layers className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm font-bold text-slate-700">No hay avances en la fuente seleccionada.</p>
+              <p className="text-sm font-bold text-slate-700">{t('medicalsearchmodal_no_hay_avances_en_la')}</p>
               <button 
                 type="button"
                 onClick={() => setSelectedSource('all')}
                 className="mt-3 text-xs font-bold text-brand hover:underline"
               >
-                Ver todos los resultados ({results.length})
+               {t('medicalsearchmodal_ver_todos_los_resultados')}{results.length})
               </button>
             </div>
           )}
@@ -551,7 +551,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                 <p className="text-sm font-bold text-slate-800 animate-pulse">
                   {t('searching_latest_research') || 'Buscando los últimos avances médicos en PubMed, ClinicalTrials y Cochrane...'}
                 </p>
-                <p className="text-xs text-slate-400 mt-1">Conectando con literatura científica internacional</p>
+                <p className="text-xs text-slate-400 mt-1">{t('medicalsearchmodal_conectando_con_literatura_cientifica')}</p>
               </div>
             </div>
           )}

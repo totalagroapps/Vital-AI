@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Search, ShieldCheck, MapPin, Calendar, Clock, 
@@ -21,161 +22,6 @@ export const getVideoEmbedUrl = (url) => {
   return str;
 };
 
-const DEFAULT_SPECIALISTS = [
-  {
-    id: 101,
-    user_id: 'doc-dr-carlos-mendoza',
-    full_name: 'Dr. Carlos Mendoza',
-    specialty: 'Cardiología',
-    city: 'Madrid, España',
-    location: 'Centro Médico Sanitas / Consulta Online',
-    experience_years: 12,
-    languages: 'Español, Inglés',
-    bio: 'Cardiólogo clínico especializado en prevención cardiovascular, hipertensión y arritmias. Miembro activo de la Sociedad Española de Cardiología.',
-    verified: true,
-    license_number: 'COL-28084592',
-    professional_college: 'Ilustre Colegio Oficial de Médicos de Madrid (ICOMEM)',
-    photo_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Lun, Mié, Vie', horario: '10:00 - 18:00' },
-    educations: [
-      { degree: 'Licenciatura en Medicina y Cirugía', institution: 'Universidad Complutense de Madrid', start_year: 2006, end_year: 2012 },
-      { degree: 'Especialidad en Cardiología Clínica', institution: 'Hospital Universitario La Paz', start_year: 2012, end_year: 2017 },
-      { degree: 'Máster en Prevención y Rehabilitación Cardíaca', institution: 'Universidad de Barcelona', start_year: 2018, end_year: 2019 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
-    ]
-  },
-  {
-    id: 102,
-    user_id: 'doc-dra-elena-rodriguez',
-    full_name: 'Dra. Elena Rodríguez',
-    specialty: 'Medicina General',
-    city: 'Barcelona, España',
-    location: 'Clínica Quirón / Telemedicina',
-    experience_years: 9,
-    languages: 'Español, Francés',
-    bio: 'Médica de familia con enfoque en diagnóstico integral, seguimiento crónico y prevención holística de la salud.',
-    verified: true,
-    license_number: 'COL-08051239',
-    professional_college: 'Col·legi Oficial de Metges de Barcelona (COMB)',
-    photo_url: 'https://images.unsplash.com/photo-1594824813629-9e793ac3d3e6?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Lun - Sáb', horario: '08:30 - 16:30' },
-    educations: [
-      { degree: 'Grado en Medicina', institution: 'Universitat de Barcelona', start_year: 2009, end_year: 2015 },
-      { degree: 'Especialista en Medicina Familiar y Comunitaria', institution: 'Hospital Clínic de Barcelona', start_year: 2015, end_year: 2019 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
-    ]
-  },
-  {
-    id: 103,
-    user_id: 'doc-dr-javier-torres',
-    full_name: 'Dr. Javier Torres',
-    specialty: 'Traumatología',
-    city: 'Valencia, España',
-    location: 'Hospital Universitario / Consulta Privada',
-    experience_years: 15,
-    languages: 'Español, Inglés',
-    bio: 'Especialista en lesiones articulares, cirugía mínimamente invasiva, columna vertebral y rehabilitación deportiva.',
-    verified: true,
-    license_number: 'COL-46098214',
-    professional_college: 'Colegio Oficial de Médicos de Valencia (COMV)',
-    photo_url: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Mar, Jue', horario: '11:00 - 19:00' },
-    educations: [
-      { degree: 'Licenciatura en Medicina', institution: 'Universitat de València', start_year: 2003, end_year: 2009 },
-      { degree: 'Especialidad Cirugía Ortopédica y Traumatología', institution: 'Hospital Universitari La Fe', start_year: 2009, end_year: 2014 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
-    ]
-  },
-  {
-    id: 104,
-    user_id: 'doc-dra-sofia-valencia',
-    full_name: 'Dra. Sofía Valencia',
-    specialty: 'Dermatología',
-    city: 'Sevilla, España',
-    location: 'Instituto Dermatológico Avanzado',
-    experience_years: 8,
-    languages: 'Español, Inglés',
-    bio: 'Especialista en salud de la piel, control digital de lesiones pigmentadas, acné y tratamientos dermatológicos médicos.',
-    verified: true,
-    license_number: 'COL-41033481',
-    professional_college: 'Real e Ilustre Colegio Oficial de Médicos de Sevilla (RICOMS)',
-    photo_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Lunes a Viernes', horario: '09:00 - 17:00' },
-    educations: [
-      { degree: 'Grado en Medicina', institution: 'Universidad de Sevilla', start_year: 2010, end_year: 2016 },
-      { degree: 'Especialidad en Dermatología', institution: 'Hospital Universitario Virgen del Rocío', start_year: 2016, end_year: 2020 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=600'
-    ]
-  },
-  {
-    id: 105,
-    user_id: 'doc-dr-mateo-herrera',
-    full_name: 'Dr. Mateo Herrera',
-    specialty: 'Neurología',
-    city: 'Bilbao, España',
-    location: 'Hospital Clínico / Consulta Online',
-    experience_years: 14,
-    languages: 'Español, Inglés, Euskera',
-    bio: 'Neurólogo especialista en cefaleas complejas, migrañas, trastornos del sueño y neurorehabilitación.',
-    verified: true,
-    license_number: 'COL-48092174',
-    professional_college: 'Colegio Oficial de Médicos de Bizkaia (CMB)',
-    photo_url: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Lun, Mié, Jue', horario: '09:30 - 15:30' },
-    educations: [
-      { degree: 'Licenciatura en Medicina', institution: 'Universidad del País Vasco (UPV/EHU)', start_year: 2004, end_year: 2010 },
-      { degree: 'Especialidad en Neurología', institution: 'Hospital Universitario de Cruces', start_year: 2010, end_year: 2014 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=600'
-    ]
-  },
-  {
-    id: 106,
-    user_id: 'doc-dra-lucia-martinez',
-    full_name: 'Dra. Lucía Martínez',
-    specialty: 'Pediatría',
-    city: 'Málaga, España',
-    location: 'Policlínica Materno-Infantil',
-    experience_years: 11,
-    languages: 'Español, Francés',
-    bio: 'Atención pediátrica integral, desarrollo infantil, nutrición, prevención y vacunación infantil.',
-    verified: true,
-    license_number: 'COL-29074125',
-    professional_college: 'Colegio Oficial de Médicos de Málaga (COMMÁLAGA)',
-    photo_url: 'https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&q=80&w=400',
-    presentation_video_url: 'https://www.youtube.com/watch?v=ScMzIvxBSi4',
-    clinic_video_url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ',
-    availability_schedule: { dias: 'Lun - Vie', horario: '10:00 - 19:00' },
-    educations: [
-      { degree: 'Licenciatura en Medicina', institution: 'Universidad de Málaga', start_year: 2007, end_year: 2013 },
-      { degree: 'Especialidad en Pediatría y sus Áreas Específicas', institution: 'Hospital Materno Infantil de Málaga', start_year: 2013, end_year: 2017 }
-    ],
-    clinic_photos: [
-      'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=600'
-    ]
-  }
-];
-
 const SPECIALTIES_LIST = [
   'Todos',
   'Medicina General',
@@ -198,16 +44,12 @@ export default function DoctorDirectoryModal({
   triageReport = ''
 }) {
   const { t, language } = useLanguage();
-  const [specialists, setSpecialists] = useState(DEFAULT_SPECIALISTS);
+  const [specialists, setSpecialists] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('Todos');
-  const [bookingDoctor, setBookingDoctor] = useState(null);
-  const [bookingDate, setBookingDate] = useState('');
-  const [bookingShift, setBookingShift] = useState('morning');
-  const [bookingType, setBookingType] = useState('online');
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState(null);
   const [selectedDoctorDetail, setSelectedDoctorDetail] = useState(null);
   const [detailTab, setDetailTab] = useState('video');
 
@@ -250,16 +92,16 @@ export default function DoctorDirectoryModal({
     const fetchDoctors = async () => {
       setLoading(true);
       try {
+        setLoadError(false);
         const base = apiUrl || (typeof window !== 'undefined' ? window.location.origin : '');
         const res = await fetch(`${base}/api/specialists`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setSpecialists(data);
-          }
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setSpecialists(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.warn('Usando directorio de especialistas local de respaldo:', err);
+        console.warn('No se pudo cargar el directorio de especialistas:', err);
+        setSpecialists([]);
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -304,18 +146,11 @@ export default function DoctorDirectoryModal({
     window.open(url, '_blank');
   };
 
-  const handleConfirmBooking = (e) => {
-    e.preventDefault();
-    if (!bookingDoctor) return;
-
-    setBookingSuccess({
-      doctor: bookingDoctor,
-      date: bookingDate || 'Próxima fecha disponible',
-      shift: bookingShift === 'morning' ? 'Turno Mañana (09:00 - 13:00)' : 'Turno Tarde (14:00 - 19:00)',
-      type: bookingType === 'online' ? 'Videoconsulta Online' : 'Consulta Presencial'
-    });
-    setBookingDoctor(null);
-    setBookingNotes('');
+  // Las citas se reservan en el flujo real (horarios y disponibilidad del médico), no aquí
+  const handleRequestAppointment = () => {
+    setSelectedDoctorDetail(null);
+    onClose();
+    navigate('/paciente/especialistas');
   };
 
   if (!isOpen) return null;
@@ -335,14 +170,14 @@ export default function DoctorDirectoryModal({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-slate-800">
-                  Directorio de Especialistas
+                  {t('doctordirectorymod_directorio_de_especialistas')}
                 </h2>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <ShieldCheck size={12} /> Verificados
+                  <ShieldCheck size={12} /> {t('doctordirectorymod_verificados')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Conéctate al instante con médicos especialistas colegiados y certificados
+                {t('doctordirectorymod_conectate_al_instante_con_medicos')}
               </p>
             </div>
           </div>
@@ -362,7 +197,7 @@ export default function DoctorDirectoryModal({
                 <Sparkles size={16} />
               </div>
               <div className="text-xs">
-                <span className="font-bold text-brand-purple">Especialidad Sugerida en tu Consulta: </span>
+                <span className="font-bold text-brand-purple">{t('doctordirectorymod_especialidad_sugerida_en_tu_consulta')} </span>
                 <span className="font-semibold text-slate-700">{recommendedSpecialty}</span>
               </div>
             </div>
@@ -370,7 +205,7 @@ export default function DoctorDirectoryModal({
               onClick={() => setSelectedSpecialty(recommendedSpecialty)}
               className="text-[11px] font-bold text-brand-purple hover:underline flex-shrink-0"
             >
-              Filtrar recomendados
+              {t('doctordirectorymod_filtrar_recomendados')}
             </button>
           </div>
         )}
@@ -383,7 +218,7 @@ export default function DoctorDirectoryModal({
               type="text"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Buscar por nombre, especialidad, ciudad o clínica..."
+              placeholder={t('doctordirectorymod_buscar_por_nombre_especialidad_ciuda')}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200 focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 rounded-xl text-sm text-slate-800 transition-all outline-none"
             />
             {searchTerm && (
@@ -421,50 +256,27 @@ export default function DoctorDirectoryModal({
           </div>
         </div>
 
-        {/* Notificación de Reserva Exitosa */}
-        {bookingSuccess && (
-          <div className="m-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start justify-between gap-3 animate-fadeIn">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
-                <CheckCircle size={18} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-emerald-900">
-                  ¡Solicitud de Cita Confirmada!
-                </h4>
-                <p className="text-xs text-emerald-800 mt-0.5">
-                  Hemos enviado tu solicitud al consultorio de <strong>{bookingSuccess.doctor.full_name}</strong> ({bookingSuccess.doctor.specialty}).
-                </p>
-                <div className="mt-2 text-[11px] font-medium text-emerald-700 bg-white/80 px-2.5 py-1.5 rounded-lg inline-flex items-center gap-2 border border-emerald-200">
-                  <span>📅 {bookingSuccess.date}</span>
-                  <span>•</span>
-                  <span>⏰ {bookingSuccess.shift}</span>
-                  <span>•</span>
-                  <span>📍 {bookingSuccess.type}</span>
-                </div>
-              </div>
-            </div>
-            <button 
-              onClick={() => setBookingSuccess(null)}
-              className="text-emerald-600 hover:text-emerald-900 text-xs font-bold"
-            >
-              Cerrar
-            </button>
-          </div>
-        )}
-
         {/* Lista de Médicos */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {filteredSpecialists.length === 0 ? (
+          {loading && specialists.length === 0 ? (
+            <div className="py-12 text-center text-sm font-semibold text-slate-500">{t('directory_loading')}</div>
+          ) : loadError ? (
+            <div className="py-12 text-center text-sm font-semibold text-rose-600">{t('directory_load_error')}</div>
+          ) : specialists.length === 0 ? (
             <div className="py-12 text-center text-slate-400 flex flex-col items-center">
               <Stethoscope size={48} className="text-slate-300 mb-2" />
-              <p className="text-sm font-semibold text-slate-600">No encontramos especialistas con ese criterio</p>
-              <p className="text-xs text-slate-400 mt-1">Intenta buscar con otra especialidad o eliminar los filtros</p>
+              <p className="text-sm font-semibold text-slate-600">{t('directory_empty')}</p>
+            </div>
+          ) : filteredSpecialists.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 flex flex-col items-center">
+              <Stethoscope size={48} className="text-slate-300 mb-2" />
+              <p className="text-sm font-semibold text-slate-600">{t('doctordirectorymod_no_encontramos_especialistas_con_ese')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('doctordirectorymod_intenta_buscar_con_otra_especialidad')}</p>
               <button 
                 onClick={() => { setSelectedSpecialty('Todos'); setSearchTerm(''); }}
                 className="mt-3 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
               >
-                Ver todos los médicos
+                {t('doctordirectorymod_ver_todos_los_medicos')}
               </button>
             </div>
           ) : (
@@ -487,7 +299,7 @@ export default function DoctorDirectoryModal({
                           }}
                         />
                         {doc.verified && (
-                          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center border-2 border-white shadow-xs" title="Verificado">
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center border-2 border-white shadow-xs" title={t('status_verified')}>
                             <ShieldCheck size={12} />
                           </div>
                         )}
@@ -507,7 +319,7 @@ export default function DoctorDirectoryModal({
                         <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-500">
                           <span className="flex items-center gap-1">
                             <Award size={13} className="text-amber-500" />
-                            {doc.experience_years} años exp.
+                            {doc.experience_years} {t('doctordirectorymod_anos_exp')}
                           </span>
                           <span>•</span>
                           <span className="flex items-center gap-1 truncate">
@@ -547,7 +359,7 @@ export default function DoctorDirectoryModal({
                       className="w-full py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100/80 text-brand-purple border border-purple-200/70 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer group/btn"
                     >
                       <Play size={13} className="text-brand-purple fill-brand-purple group-hover/btn:scale-110 transition-transform" />
-                      <span>Ver Perfil, Vídeos y Currículum</span>
+                      <span>{t('doctordirectorymod_ver_perfil_videos_y_curriculum')}</span>
                       <ChevronRight size={14} className="text-brand-purple/70" />
                     </button>
 
@@ -561,11 +373,11 @@ export default function DoctorDirectoryModal({
                       </button>
 
                       <button
-                        onClick={() => setBookingDoctor(doc)}
+                        onClick={handleRequestAppointment}
                         className="w-full py-2 px-3 rounded-xl bg-brand-purple hover:bg-brand-purple/90 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-purple-200 transition-all cursor-pointer"
                       >
                         <Calendar size={15} />
-                        <span>Solicitar Cita</span>
+                        <span>{t('doctordirectorymod_solicitar_cita')}</span>
                       </button>
                     </div>
                   </div>
@@ -574,138 +386,6 @@ export default function DoctorDirectoryModal({
             </div>
           )}
         </div>
-
-        {/* Modal Sub-capa: Solicitar Cita */}
-        {bookingDoctor && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
-            <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 border border-slate-100 animate-scaleUp">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center">
-                    <Calendar size={20} />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-800">Solicitar Cita Médica</h3>
-                    <p className="text-xs text-slate-500">{bookingDoctor.full_name} ({bookingDoctor.specialty})</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setBookingDoctor(null)}
-                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <form onSubmit={handleConfirmBooking} className="space-y-3.5">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Fecha deseada
-                  </label>
-                  <input 
-                    type="date"
-                    value={bookingDate}
-                    onChange={e => setBookingDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
-                    required
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Turno de preferencia
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBookingShift('morning')}
-                      className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        bookingShift === 'morning'
-                          ? 'border-brand-purple bg-purple-50 text-brand-purple'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Clock size={13} />
-                      Mañana (09:00 - 13:00)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBookingShift('afternoon')}
-                      className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        bookingShift === 'afternoon'
-                          ? 'border-brand-purple bg-purple-50 text-brand-purple'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Clock size={13} />
-                      Tarde (14:00 - 19:00)
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Modalidad de consulta
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setBookingType('online')}
-                      className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        bookingType === 'online'
-                          ? 'border-brand-purple bg-purple-50 text-brand-purple'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      💻 Videoconsulta
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBookingType('in_person')}
-                      className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                        bookingType === 'in_person'
-                          ? 'border-brand-purple bg-purple-50 text-brand-purple'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      🏥 Presencial
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Motivo o notas para el especialista (opcional)
-                  </label>
-                  <textarea 
-                    value={bookingNotes}
-                    onChange={e => setBookingNotes(e.target.value)}
-                    rows={2}
-                    placeholder="Describe brevemente tus síntomas o si cuentas con análisis previos..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-brand-purple focus:ring-1 focus:ring-brand-purple outline-none resize-none"
-                  />
-                </div>
-
-                <div className="pt-2 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setBookingDoctor(null)}
-                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-brand-purple text-white font-bold text-xs hover:bg-brand-purple/90 shadow-md shadow-purple-200"
-                  >
-                    Confirmar Cita
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
 
         {/* Modal Sub-capa: Perfil Extendido del Especialista (Fila 20 MVP) */}
         {selectedDoctorDetail && (
@@ -724,7 +404,7 @@ export default function DoctorDirectoryModal({
                       className="w-16 h-16 rounded-2xl object-cover border-2 border-white shadow-md"
                     />
                     {selectedDoctorDetail.verified && (
-                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center border-2 border-white shadow-xs" title="Médico Colegiado Verificado">
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center border-2 border-white shadow-xs" title={t('doctordirectorymod_medico_colegiado_verificado')}>
                         <ShieldCheck size={14} />
                       </div>
                     )}
@@ -739,11 +419,13 @@ export default function DoctorDirectoryModal({
                     </div>
 
                     <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 flex-wrap">
-                      <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 inline-flex items-center gap-1">
-                        <ShieldCheck size={12} /> {selectedDoctorDetail.license_number || 'Colegiado Acreditado'}
-                      </span>
-                      <span>•</span>
-                      <span>{selectedDoctorDetail.professional_college || 'Colegio Oficial de Médicos'}</span>
+                      {selectedDoctorDetail.license_number && (
+                        <span className="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60 inline-flex items-center gap-1">
+                          <ShieldCheck size={12} /> {selectedDoctorDetail.license_number}
+                        </span>
+                      )}
+                      {selectedDoctorDetail.license_number && selectedDoctorDetail.professional_college && <span>•</span>}
+                      {selectedDoctorDetail.professional_college && <span>{selectedDoctorDetail.professional_college}</span>}
                     </div>
 
                     <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
@@ -751,7 +433,7 @@ export default function DoctorDirectoryModal({
                       {selectedDoctorDetail.city || selectedDoctorDetail.location}
                       <span className="mx-1.5">•</span>
                       <Award size={12} className="text-amber-500" />
-                      {selectedDoctorDetail.experience_years} años de experiencia clínica
+                      {selectedDoctorDetail.experience_years} {t('doctordirectorymod_anos_de_experiencia_clinica')}
                     </p>
                   </div>
                 </div>
@@ -775,7 +457,7 @@ export default function DoctorDirectoryModal({
                   }`}
                 >
                   <Video size={14} />
-                  <span>Vídeos Oficiales</span>
+                  <span>{t('doctordirectorymod_videos_oficiales')}</span>
                 </button>
 
                 <button
@@ -787,7 +469,7 @@ export default function DoctorDirectoryModal({
                   }`}
                 >
                   <GraduationCap size={14} />
-                  <span>Trayectoria y Currículum</span>
+                  <span>{t('doctordirectorymod_trayectoria_y_curriculum')}</span>
                 </button>
 
                 {selectedDoctorDetail.clinic_photos?.length > 0 && (
@@ -800,7 +482,7 @@ export default function DoctorDirectoryModal({
                     }`}
                   >
                     <Building2 size={14} />
-                    <span>Instalaciones Clínicas ({selectedDoctorDetail.clinic_photos.length})</span>
+                    <span>{t('doctordirectorymod_instalaciones_clinicas')}{selectedDoctorDetail.clinic_photos.length})</span>
                   </button>
                 )}
               </div>
@@ -816,7 +498,7 @@ export default function DoctorDirectoryModal({
                         <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
                           <Film size={13} />
                         </span>
-                        <h4 className="text-xs font-bold text-slate-800">Vídeo de Presentación del Médico</h4>
+                        <h4 className="text-xs font-bold text-slate-800">{t('doctordirectorymod_video_de_presentacion_del_medico')}</h4>
                       </div>
 
                       {selectedDoctorDetail.presentation_video_url ? (
@@ -835,7 +517,7 @@ export default function DoctorDirectoryModal({
                         </div>
                       ) : (
                         <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
-                          Este especialista aún no ha subido su vídeo de presentación.
+                          {t('doctordirectorymod_este_especialista_aun_no_ha')}
                         </div>
                       )}
                     </div>
@@ -847,13 +529,13 @@ export default function DoctorDirectoryModal({
                           <span className="w-6 h-6 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
                             <Building2 size={13} />
                           </span>
-                          <h4 className="text-xs font-bold text-slate-800">Vídeo de la Clínica e Instalaciones</h4>
+                          <h4 className="text-xs font-bold text-slate-800">{t('doctordirectorymod_video_de_la_clinica_e')}</h4>
                         </div>
                         <div className="aspect-video w-full rounded-2xl overflow-hidden border border-slate-200 bg-black shadow-md">
                           {getVideoEmbedUrl(selectedDoctorDetail.clinic_video_url)?.includes('embed') ? (
                             <iframe
                               src={getVideoEmbedUrl(selectedDoctorDetail.clinic_video_url)}
-                              title="Vídeo de la clínica"
+                              title={t('doctordirectorymod_video_de_la_clinica')}
                               className="w-full h-full"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
@@ -867,7 +549,7 @@ export default function DoctorDirectoryModal({
 
                     {/* Biografía profesional */}
                     <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Acerca del especialista</h5>
+                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('doctordirectorymod_acerca_del_especialista')}</h5>
                       <p className="text-xs text-slate-700 leading-relaxed">{selectedDoctorDetail.bio}</p>
                     </div>
                   </div>
@@ -877,14 +559,14 @@ export default function DoctorDirectoryModal({
                 {detailTab === 'curriculum' && (
                   <div className="space-y-4">
                     <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Resumen Profesional</h5>
+                      <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{t('doctordirectorymod_resumen_profesional')}</h5>
                       <p className="text-xs text-slate-700 leading-relaxed">{selectedDoctorDetail.bio}</p>
                     </div>
 
                     <div>
                       <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 mb-3">
                         <GraduationCap size={15} className="text-brand-purple" />
-                        <span>Formación Académica y Títulos Médicos</span>
+                        <span>{t('doctordirectorymod_formacion_academica_y_titulos_medico')}</span>
                       </h4>
 
                       {selectedDoctorDetail.educations?.length > 0 ? (
@@ -907,19 +589,21 @@ export default function DoctorDirectoryModal({
                           ))}
                         </div>
                       ) : (
+                        selectedDoctorDetail.professional_college ? (
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 text-center">
-                          Título oficial en {selectedDoctorDetail.specialty} verificado por {selectedDoctorDetail.professional_college || 'Colegio Oficial de Médicos'}.
+                          {t('doctordirectorymod_titulo_oficial_en_verificado_por', { specialty: selectedDoctorDetail.specialty })} {selectedDoctorDetail.professional_college}.
                         </div>
+                        ) : null
                       )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Experiencia</span>
-                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.experience_years} años de ejercicio clínico</p>
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">{t('detail_experience')}</span>
+                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.experience_years} {t('doctordirectorymod_anos_de_ejercicio_clinico')}</p>
                       </div>
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Idiomas de consulta</span>
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">{t('doctordirectorymod_idiomas_de_consulta')}</span>
                         <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.languages || 'Español'}</p>
                       </div>
                     </div>
@@ -931,7 +615,7 @@ export default function DoctorDirectoryModal({
                   <div className="space-y-3">
                     <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                       <Building2 size={15} className="text-teal-600" />
-                      <span>Instalaciones del Consultorio / Centro Médico</span>
+                      <span>{t('doctordirectorymod_instalaciones_del_consultorio_centro')}</span>
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {selectedDoctorDetail.clinic_photos?.map((photoUrl, idx) => (
@@ -951,7 +635,7 @@ export default function DoctorDirectoryModal({
                   onClick={() => setSelectedDoctorDetail(null)}
                   className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
                 >
-                  Cerrar
+                  {t('patient_close')}
                 </button>
 
                 <div className="flex items-center gap-2">
@@ -968,15 +652,11 @@ export default function DoctorDirectoryModal({
                   </button>
 
                   <button
-                    onClick={() => {
-                      const doc = selectedDoctorDetail;
-                      setSelectedDoctorDetail(null);
-                      setBookingDoctor(doc);
-                    }}
+                    onClick={handleRequestAppointment}
                     className="py-2.5 px-4 rounded-xl bg-brand-purple hover:bg-brand-purple/90 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-purple-200 transition-all cursor-pointer"
                   >
                     <Calendar size={15} />
-                    <span>Solicitar Cita</span>
+                    <span>{t('doctordirectorymod_solicitar_cita')}</span>
                   </button>
                 </div>
               </div>
@@ -986,12 +666,12 @@ export default function DoctorDirectoryModal({
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
-          <span>{filteredSpecialists.length} especialistas encontrados</span>
+          <span>{filteredSpecialists.length} {t('doctordirectorymod_especialistas_encontrados')}</span>
           <button 
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold transition-colors"
           >
-            Cerrar Directorio
+            {t('doctordirectorymod_cerrar_directorio')}
           </button>
         </div>
       </div>

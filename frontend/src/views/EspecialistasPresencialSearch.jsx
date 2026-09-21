@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip, CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
+import { KeepSize } from '../components/DoctorLocationMap';
 import { ArrowLeft, LocateFixed, Loader2, Star, MapPin, SlidersHorizontal, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateSpecialtyName, translateLanguageName } from '../i18n/catalogTranslations';
@@ -368,7 +369,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
               </div>
             )}
 
-            <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-soft mb-3 relative" style={{ height: 460 }}>
+            <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-soft mb-3 relative isolate" style={{ height: 460 }}>
               <MapContainer center={[patientPos.lat, patientPos.lng]} zoom={13} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -415,6 +416,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
                     </Tooltip>
                   </Marker>
                 ))}
+                <KeepSize />
               </MapContainer>
 
               <div

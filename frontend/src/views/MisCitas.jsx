@@ -23,8 +23,8 @@ const MisCitas = ({
   username,
   onLogout
 }) => {
-  const { t, language } = useLanguage();
-  const locale = language === 'es' ? 'es-ES' : 'en-US';
+  const { t, language, locale: uiLocale } = useLanguage();
+  const locale = uiLocale;
 
   const [tab, setTab] = useState('upcoming');
   const [appts, setAppts] = useState([]);

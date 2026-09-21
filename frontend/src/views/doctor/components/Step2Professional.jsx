@@ -51,13 +51,13 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
           {/* Header con Imagen IA */}
           <div className="flex flex-col items-center text-center">
             <div className="w-28 h-28 rounded-full overflow-hidden mb-4 shadow-sm">
-              <img src={iaHeaderImg} alt="IA Médica" className="w-full h-full object-cover" />
+              <img src={iaHeaderImg} alt={t('step1personal_ia_medica')} className="w-full h-full object-cover" />
             </div>
             <h3 className="text-lg font-extrabold text-blue-950 leading-snug">
-              La <span className="text-blue-600">inteligencia artificial</span> que acompaña tu práctica médica.
+             {t('step1personal_la')} <span className="text-blue-600">{t('artificial_intelligence')}</span> {t('step1personal_que_acompana_tu_practica_medica')}
             </h3>
             <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-              Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente.
+             {t('save_time_make_better_decisions')}
             </p>
           </div>
 
@@ -68,8 +68,8 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                 <BrainCircuit size={18} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-800">IA clínica avanzada</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Resúmenes inteligentes, evidencia médica y apoyo en decisiones.</p>
+                <h4 className="text-xs font-bold text-slate-800">{t('clinical_ai_adv')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{t('step2professional_resumenes_inteligentes_evidencia_med')}</p>
               </div>
             </div>
 
@@ -78,8 +78,8 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                 <Users size={18} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-800">Gestiona tus pacientes</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Historiales completos, consultas, pruebas y medicación en un solo lugar.</p>
+                <h4 className="text-xs font-bold text-slate-800">{t('manage_patients_feat')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{t('step2professional_historiales_completos_consultas_prue')}</p>
               </div>
             </div>
 
@@ -88,8 +88,8 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                 <ShieldCheck size={18} />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-800">Seguro y confidencial</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Cumplimos los más altos estándares de seguridad y privacidad.</p>
+                <h4 className="text-xs font-bold text-slate-800">{t('safe_confidential')}</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{t('safe_confidential_desc')}</p>
               </div>
             </div>
           </div>
@@ -99,8 +99,8 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
         <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center gap-3">
           <HelpCircle className="text-blue-600 shrink-0" size={22} />
           <div className="text-xs">
-            <p className="font-bold text-slate-700">¿Necesitas ayuda?</p>
-            <p className="text-slate-500">Escríbenos a <span className="text-blue-600 font-medium">soporte@mivor.ai</span></p>
+            <p className="font-bold text-slate-700">{t('patienttopnav_necesitas_ayuda')}</p>
+            <p className="text-slate-500">{t('step2professional_escribenos_a')} <span className="text-blue-600 font-medium">soporte@mivor.ai</span></p>
           </div>
         </div>
       </aside>
@@ -112,7 +112,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
           <div className="space-y-5">
             <div>
               <h2 className="text-base font-extrabold text-slate-900">{t('step_professional_info', 'Información profesional')}</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Cuéntanos más sobre tu práctica médica.</p>
+              <p className="text-xs text-slate-500 mt-0.5">{t('step2professional_cuentanos_mas_sobre_tu_practica')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -122,7 +122,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                   type="text"
                   name="specialty"
                   required
-                  placeholder="Escribe tu especialidad"
+                  placeholder={t('step2professional_escribe_tu_especialidad')}
                   value={formData.specialty || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -130,12 +130,12 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nº de colegiado</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_n_de_colegiado')}</label>
                 <input
                   type="text"
                   name="colegiatedNumber"
                   required
-                  placeholder="Ingresa tu número de colegiado"
+                  placeholder={t('step2professional_ingresa_tu_numero_de_colegiado')}
                   value={formData.colegiatedNumber || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -143,12 +143,12 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Colegio profesional</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_colegio_profesional')}</label>
                 <input
                   type="text"
                   name="professionalCollege"
                   required
-                  placeholder="Escribe tu colegio profesional"
+                  placeholder={t('step2professional_escribe_tu_colegio_profesional')}
                   value={formData.professionalCollege || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -158,7 +158,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">País del colegio</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_pais_del_colegio')}</label>
                 <div className="relative">
                   <select
                     name="collegeCountry"
@@ -178,12 +178,12 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Años de experiencia</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('profile_years_experience')}</label>
                 <input
                   type="text"
                   name="experienceYears"
                   required
-                  placeholder="Ej: 5 años"
+                  placeholder={t('step2professional_ej_5_anos')}
                   value={formData.experienceYears || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -191,11 +191,11 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Subespecialidad <span className="text-slate-400 font-normal">(opcional)</span></label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_subespecialidad')} <span className="text-slate-400 font-normal">{t('step2professional_opcional')}</span></label>
                 <input
                   type="text"
                   name="subspecialty"
-                  placeholder="Ingresa tu subespecialidad"
+                  placeholder={t('step2professional_ingresa_tu_subespecialidad')}
                   value={formData.subspecialty || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -206,13 +206,13 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
 
           {/* Sección 2: Sobre ti */}
           <div className="space-y-2">
-            <h3 className="text-xs font-bold text-slate-900">Sobre ti <span className="text-slate-400 font-normal">(opcional)</span></h3>
-            <label className="block text-xs font-semibold text-slate-600">Breve descripción profesional</label>
+            <h3 className="text-xs font-bold text-slate-900">{t('step2professional_sobre_ti')} <span className="text-slate-400 font-normal">{t('step2professional_opcional')}</span></h3>
+            <label className="block text-xs font-semibold text-slate-600">{t('step2professional_breve_descripcion_profesional')}</label>
             <div className="relative">
               <textarea
                 name="bio"
                 rows={3}
-                placeholder="Cuéntanos brevemente sobre tu trayectoria profesional, áreas de interés, enfoque de trabajo, etc."
+                placeholder={t('step2professional_cuentanos_brevemente_sobre_tu_trayec')}
                 value={bio}
                 onChange={handleChange}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none placeholder:text-slate-400"
@@ -226,19 +226,19 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
           {/* Sección 3: Dirección profesional */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Dirección profesional y Ubicación</h3>
+              <h3 className="text-sm font-bold text-slate-900">{t('step2professional_direccion_profesional_y_ubicacion')}</h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Ingresa los datos de tu consultorio. El mapa ubicará automáticamente el punto según la ciudad y dirección que escribas.
+               {t('step2professional_ingresa_los_datos_de_tu')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Nombre de la clínica / centro</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_nombre_de_la_clinica_centro')}</label>
                 <input
                   type="text"
                   name="clinicName"
-                  placeholder="Ej: Centro Médico San Rafael"
+                  placeholder={t('step2professional_ej_centro_medico_san_rafael')}
                   value={formData.clinicName || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -246,11 +246,11 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Dirección del consultorio</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_direccion_del_consultorio')}</label>
                 <input
                   type="text"
                   name="address"
-                  placeholder="Ej: Carrera 15 # 93-60, Consultorio 402"
+                  placeholder={t('step2professional_ej_carrera_15_93_60')}
                   value={formData.address || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -258,11 +258,11 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Ciudad</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_ciudad')}</label>
                 <input
                   type="text"
                   name="city"
-                  placeholder="Ej: Bogotá, Medellín, Cali, Madrid..."
+                  placeholder={t('step2professional_ej_bogota_medellin_cali_madrid')}
                   value={formData.city || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -273,8 +273,8 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
             {/* Mapa interactivo de ubicación exacta */}
             <div className="pt-1">
               <label className="block text-xs font-bold text-slate-800 mb-1.5 flex items-center justify-between">
-                <span>📍 Ubicación en el mapa (Confirmación de Latitud y Longitud)</span>
-                <span className="text-[11px] font-normal text-blue-600">Puedes mover el pin para ajustar la entrada exacta</span>
+                <span>{t('step2professional_ubicacion_en_el_mapa_confirmacion')}</span>
+                <span className="text-[11px] font-normal text-blue-600">{t('step2professional_puedes_mover_el_pin_para')}</span>
               </label>
               <DoctorLocationMap
                 latitude={formData.latitude}
@@ -285,17 +285,17 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                 onChange={handleLocationChange}
                 readOnly={false}
                 height="280px"
-                title="Punto de atención médica"
+                title={t('step2professional_punto_de_atencion_medica')}
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Código postal</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('zip_code_label')}</label>
                 <input
                   type="text"
                   name="zipCode"
-                  placeholder="Código postal"
+                  placeholder={t('zip_code_label')}
                   value={formData.zipCode || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"
@@ -304,7 +304,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
 
               {/* Teléfono de consulta dinámico */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Teléfono de consulta</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('step2professional_telefono_de_consulta')}</label>
                 <div className="flex gap-2">
                   <div className="relative shrink-0">
                     <select
@@ -334,11 +334,11 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Sitio web <span className="text-slate-400 font-normal">(opcional)</span></label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">{t('profile_website')} <span className="text-slate-400 font-normal">{t('step2professional_opcional')}</span></label>
                 <input
                   type="url"
                   name="website"
-                  placeholder="www.tusitio.com"
+                  placeholder={t('step2professional_www_tusitio_com')}
                   value={formData.website || ''}
                   onChange={handleChange}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400"

@@ -37,6 +37,29 @@ function Recenter({ lat, lng }) {
   return null;
 }
 
+// Leaflet calcula su tamaño al montarse; si el contenedor cambia después (móvil, rotación,
+// animaciones de entrada) quedan zonas sin cargar. Se recalcula al cambiar el tamaño.
+export function KeepSize() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    const refresh = () => map.invalidateSize();
+    const t = setTimeout(refresh, 250);
+    let ro;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(refresh);
+      ro.observe(container);
+    }
+    window.addEventListener('resize', refresh);
+    return () => {
+      clearTimeout(t);
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', refresh);
+    };
+  }, [map]);
+  return null;
+}
+
 // Map picker: geocodes `address` via Nominatim, lets the pin be adjusted by
 // click/drag/GPS, and reverse-geocodes pin moves back into `address`.
 // `readOnly` disables all interaction.
@@ -119,7 +142,7 @@ const DoctorLocationMap = ({ address, lat, lng, latitude, longitude, city, count
   return (
     <div>
       {title && <div className="text-xs font-bold text-gray-500 mb-2">{title}</div>}
-      <div className="rounded-xl overflow-hidden border border-gray-200 relative" style={{ height: typeof height === 'number' ? `${height}px` : height }}>
+      <div className="rounded-xl overflow-hidden border border-gray-200 relative isolate" style={{ height: typeof height === 'number' ? `${height}px` : height }}>
         <MapContainer
           center={center}
           zoom={hasPoint ? 15 : 5}
@@ -144,6 +167,7 @@ const DoctorLocationMap = ({ address, lat, lng, latitude, longitude, city, count
           )}
           <ClickHandler onPick={handlePick} readOnly={readOnly} />
           <Recenter lat={actualLat} lng={actualLng} />
+          <KeepSize />
         </MapContainer>
         {(geocoding || reverseGeocoding) && (
           <div className="absolute top-2 right-2 bg-white/90 rounded-lg px-2.5 py-1 text-[11px] font-semibold text-gray-500 flex items-center gap-1.5 shadow z-[1000]">

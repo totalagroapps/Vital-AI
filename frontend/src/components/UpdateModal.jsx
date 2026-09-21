@@ -3,8 +3,7 @@ import { Download, Sparkles, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle 
 import { App as CapApp } from '@capacitor/app';
 
 export const CURRENT_APP_VERSION = '1.0.2';
-// Servidor de Railway o respaldo en version.json
-export const VERSION_CHECK_URL = 'https://vitalai.up.railway.app/api/version';
+// La versión se consulta primero en la API configurada (VITE_API_URL) y, como respaldo, en version.json
 export const FALLBACK_APK_URL = 'https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk';
 
 export function UpdateModal({ t, apiUrl }) {
@@ -59,7 +58,6 @@ export function UpdateModal({ t, apiUrl }) {
 
       const candidates = [
         apiUrl ? `${apiUrl}/api/version` : null,
-        VERSION_CHECK_URL,
         '/api/version',
         '/version.json'
       ].filter(Boolean);
@@ -69,13 +67,13 @@ export function UpdateModal({ t, apiUrl }) {
           const response = await fetch(url, { cache: 'no-store' });
           if (!response.ok) continue;
           const data = await response.json();
-          if (data && data.version && isNewerVersion(data.version, installedVersion)) {
-            if (isMounted) {
-              setUpdateInfo(data);
-              setIsVisible(true);
-            }
-            return;
+          if (!data || !data.version) continue;
+          if (isNewerVersion(data.version, installedVersion) && isMounted) {
+            setUpdateInfo(data);
+            setIsVisible(true);
           }
+          // Primera fuente válida: no seguir consultando las demás
+          return;
         } catch (err) {
           // ignore and continue
         }
@@ -191,12 +189,12 @@ export function UpdateModal({ t, apiUrl }) {
         </div>
 
         <p className="text-sm text-slate-300 mb-4 leading-relaxed">
-          {updateInfo.notes || t('new_version_desc') || 'Hay una actualización de MIVOR.ai lista para instalar con nuevas mejoras.'}
+          {updateInfo.notes || t('new_version_desc') || t('new_version_desc')}
         </p>
 
         <div className="flex items-center gap-2 text-xs text-teal-400 mb-5 bg-teal-950/40 p-3 rounded-xl border border-teal-800/40">
           <ShieldCheck size={16} className="shrink-0" />
-          <span>Actualización oficial in-app de MIVOR.ai</span>
+          <span>{t('updatemodal_actualizacion_oficial_in_app_de')}</span>
         </div>
 
         {/* UI de Descarga In-App con Barra de Progreso */}
@@ -205,7 +203,7 @@ export function UpdateModal({ t, apiUrl }) {
             <div className="flex items-center justify-between text-xs font-medium text-slate-200 mb-2">
               <span className="flex items-center gap-1.5">
                 <Loader2 size={14} className="animate-spin text-teal-400" />
-                Descargando en la app...
+               {t('updatemodal_descargando_en_la_app')}
               </span>
               <span className="font-bold text-teal-300">{progressPercent}%</span>
             </div>
@@ -224,7 +222,7 @@ export function UpdateModal({ t, apiUrl }) {
                   ? `${(bytesInfo.current / (1024 * 1024)).toFixed(1)} MB / ${(bytesInfo.total / (1024 * 1024)).toFixed(1)} MB` 
                   : 'Preparando descarga...'}
               </span>
-              <span className="text-[10px] text-teal-300/80">Sin salir de la app</span>
+              <span className="text-[10px] text-teal-300/80">{t('updatemodal_sin_salir_de_la_app')}</span>
             </div>
           </div>
         )}
@@ -234,9 +232,9 @@ export function UpdateModal({ t, apiUrl }) {
           <div className="mb-4 bg-emerald-950/40 border border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3 text-emerald-300 text-xs">
             <CheckCircle2 size={20} className="shrink-0 text-emerald-400" />
             <div className="flex-1">
-              <p className="font-bold">¡Descarga completa!</p>
+              <p className="font-bold">{t('updatemodal_descarga_completa')}</p>
               <p className="text-[11px] text-emerald-200/80 mt-0.5">
-                Abriendo el instalador de Android... Confirma la instalación.
+               {t('updatemodal_abriendo_el_instalador_de_android')}
               </p>
             </div>
           </div>
@@ -247,7 +245,7 @@ export function UpdateModal({ t, apiUrl }) {
           <div className="mb-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl p-3 flex items-start gap-2.5 text-rose-300 text-xs">
             <AlertCircle size={18} className="shrink-0 text-rose-400 mt-0.5" />
             <div className="flex-1">
-              <p className="font-bold">No se pudo completar la descarga</p>
+              <p className="font-bold">{t('updatemodal_no_se_pudo_completar_la')}</p>
               <p className="text-[11px] text-rose-200/80 mt-0.5">{errorMessage}</p>
             </div>
           </div>

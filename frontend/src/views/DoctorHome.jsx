@@ -60,9 +60,9 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
     }
   };
 
-  const doctorName = doctorProfile?.full_name || 'Dr. Alejandro Ruiz';
-  const doctorSpecialty = doctorProfile?.specialty || 'Médico Especialista';
-  const doctorPhoto = doctorProfile?.photo_url || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80';
+  const doctorName = doctorProfile?.full_name || t('default_doctor_name');
+  const doctorSpecialty = doctorProfile?.specialty || t('doctor');
+  const doctorPhoto = doctorProfile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(doctorName)}&background=0D8ABC&color=fff&size=150`;
 
   return (
     <>
@@ -89,7 +89,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
             <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-1">
               MIVOR<span className="text-teal-600">.ai</span>
             </h1>
-            <span className="text-[9px] font-black text-teal-700 uppercase tracking-widest">Portal Médico</span>
+            <span className="text-[9px] font-black text-teal-700 uppercase tracking-widest">{t('doctor_login_title')}</span>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
@@ -136,7 +136,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
               {t("online") || "En Línea"}
             </div>
             <h3 className="font-extrabold text-gray-900 text-sm truncate">{doctorName}</h3>
-            <p className="text-[11px] text-gray-500 truncate">{doctorSpecialty} · {doctorProfile?.license_number || 'Verificado'}</p>
+            <p className="text-[11px] text-gray-500 truncate">{doctorSpecialty} · {doctorProfile?.license_number || ''}</p>
           </div>
         </div>
       </div>
@@ -219,25 +219,6 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
           </div>
         </button>
 
-        {/* Card 6: Verificador de Médicos y Auditoría */}
-        <button onClick={() => onNavigate('verifier')} className="w-full bg-gradient-to-r from-teal-50/80 to-emerald-50/80 rounded-3xl p-5 text-left shadow-soft border border-teal-100/80 flex items-center hover:shadow-md transition-shadow group gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <ShieldCheck size={24} />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-0.5">
-              <h3 className="font-bold text-gray-900 text-sm">{t("doctor_verification_title", "Verificación Médica")}</h3>
-              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 uppercase tracking-wide">Auditoría</span>
-            </div>
-            <p className="text-[10px] text-gray-600 leading-relaxed">
-              Validar credenciales profesionales, licencias médicas y colegiados oficiales.
-            </p>
-          </div>
-          <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-            <ArrowRight size={14} />
-          </div>
-        </button>
-
         {/* AI Search Banner */}
         <div className="bg-brand-dark rounded-3xl p-5 shadow-xl relative overflow-hidden mt-6">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brand-purple/30 rounded-full blur-3xl pointer-events-none"></div>
@@ -262,11 +243,11 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
               type="button"
               onClick={() => doctorHomeFileInputRef.current?.click()}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors ml-1 shrink-0"
-              title="Adjuntar cualquier archivo clínico (PDF o imágenes)"
+              title={t('doctorhome_adjuntar_cualquier_archivo_clinico_p')}
             >
               <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
             </button>
-            <button type="submit" className="pl-2 pr-2 text-gray-400 hover:text-white transition-colors" title="Buscar">
+            <button type="submit" className="pl-2 pr-2 text-gray-400 hover:text-white transition-colors" title={t('search_action')}>
               <Search size={18} />
             </button>
             <input 
@@ -280,7 +261,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
               type="button" 
               onClick={toggleListening} 
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-brand-purple text-white shadow-glow hover:scale-105'}`}
-              title={isListening ? "Detener grabación" : "Dictar búsqueda o consulta"}
+              title={isListening ? t('doctorhome_detener_grabacion') : t('doctorhome_dictar_busqueda_o_consulta')}
             >
               <Mic size={18} />
             </button>

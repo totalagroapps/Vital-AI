@@ -9,7 +9,7 @@ from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 import database
 import models
@@ -30,9 +30,25 @@ REGISTER_IP_WINDOW = 60
 REGISTER_IP_MAX = 10
 
 # Roles auto-asignables mediante el endpoint público de registro.
-# 'doctor' requiere el flujo de verificación de /api/auth/register-doctor
-# y 'admin' nunca debe poder ser elegido por el propio usuario.
-SELF_REGISTERABLE_ROLES = {'patient', 'verifier'}
+# 'doctor' requiere el flujo de verificación de /api/auth/register-doctor,
+# y 'admin' / 'verifier' nunca deben poder ser elegidos por el propio usuario
+# (los verificadores se crean con scripts/create_verifier.py).
+SELF_REGISTERABLE_ROLES = {'patient'}
+
+
+def normalize_username(username: str) -> str:
+    return (username or '').strip().lower()
+
+
+async def find_user_by_username(db: AsyncSession, username: str):
+    """Busca sin distinguir mayúsculas/espacios (cuentas antiguas conservan su valor original)."""
+    raw = (username or '').strip()
+    result = await db.execute(select(models.User).where(models.User.username == raw))
+    user = result.scalars().first()
+    if user:
+        return user
+    result = await db.execute(select(models.User).where(func.lower(models.User.username) == raw.lower()))
+    return result.scalars().first()
 
 
 def apply_login_rate_limit(client_ip: str):
@@ -73,8 +89,10 @@ async def register(request: RegisterRequest, req: Request, db: AsyncSession=Depe
     if request.role not in SELF_REGISTERABLE_ROLES:
         raise HTTPException(status_code=400, detail='Rol de registro no válido.')
 
-    result = (await db.execute(select(models.User).where((models.User.username == request.username))))
-    if result.scalars().first():
+    request.username = normalize_username(request.username)
+    if len(request.username) < 3:
+        raise HTTPException(status_code=400, detail='El usuario debe tener al menos 3 caracteres.')
+    if await find_user_by_username(db, request.username):
         # Mitigación de enumeración de usuarios (Punto 16 Auditoría R3)
         raise HTTPException(status_code=400, detail='No fue posible completar el registro. Verifique los datos ingresados o inicie sesión si ya dispone de una cuenta.')
     hashed_pwd = get_password_hash(request.password)
@@ -109,9 +127,8 @@ async def register_doctor(
     id_doc_file: UploadFile=File(None),
     db: AsyncSession=Depends(get_db)
 ):
-    clean_username = username.strip().lower()
-    result = (await db.execute(select(models.User).where((models.User.username == clean_username))))
-    if result.scalars().first():
+    clean_username = normalize_username(username)
+    if await find_user_by_username(db, clean_username):
         # Mitigación de enumeración de usuarios (Punto 16 Auditoría R3)
         raise HTTPException(status_code=400, detail='No fue posible completar el registro. Verifique los datos ingresados o inicie sesión si ya dispone de una cuenta.')
     
@@ -213,8 +230,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm=Depends()
     client_ip = request.client.host if request.client else "unknown"
     apply_login_rate_limit(client_ip)
 
-    result = (await db.execute(select(models.User).where((models.User.username == form_data.username))))
-    user = result.scalars().first()
+    user = await find_user_by_username(db, form_data.username)
     if ((not user) or (not verify_password(form_data.password, user.hashed_password))):
         raise HTTPException(status_code=400, detail='Usuario o contraseña incorrectos')
     access_token = create_access_token(data={'sub': user.id})

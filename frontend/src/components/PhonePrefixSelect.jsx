@@ -1,3 +1,4 @@
+import { useLanguage } from '../contexts/LanguageContext';
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 import * as CountryFlags from 'country-flag-icons/react/3x2';
@@ -6,6 +7,7 @@ import { CALLING_CODES } from '../data/callingCodes';
 // Phone dial code picker, searchable by country name or code. Only the
 // dial code (e.g. "+34") is stored in the form.
 const PhonePrefixSelect = ({ value, onChange }) => {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const wrapperRef = useRef(null);
@@ -57,7 +59,7 @@ const PhonePrefixSelect = ({ value, onChange }) => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="País o prefijo..."
+              placeholder={t('phoneprefixselect_pais_o_prefijo')}
               className="w-full bg-gray-50 border border-gray-200 rounded-lg py-1.5 pl-8 pr-2 text-xs text-brand-dark focus:outline-none focus:border-brand-blue"
             />
           </div>
@@ -80,7 +82,7 @@ const PhonePrefixSelect = ({ value, onChange }) => {
               );
             })}
             {filtered.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-3">Sin resultados.</p>
+              <p className="text-xs text-gray-400 text-center py-3">{t('profile_no_results')}</p>
             )}
           </div>
         </div>

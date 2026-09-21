@@ -1,4 +1,5 @@
 import DoctorDashboard from './DoctorDashboard';
+import { API_URL } from './utils/apiUrl';
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
@@ -68,19 +69,10 @@ import {
     Menu,
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || (
-  typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? (window.location.port === '8000' ? window.location.origin : 'http://127.0.0.1:8000')
-    : (typeof window !== 'undefined' && !window.location.origin.startsWith('capacitor://')
-        ? window.location.origin
-        : 'https://vitalai.up.railway.app')
-);
-
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, language } = useLanguage();
+  const { t, language, country } = useLanguage();
   const [token, setToken] = useState(localStorage.getItem('med_token') || null);
   const [username, setUsername] = useState(null);
   const [patientScreen, setPatientScreen] = useState(() => {
@@ -186,6 +178,8 @@ export default function App() {
   };
 
   const [sessions, setSessions] = useState([]);
+  // Eventos del historial de salud (distintos de las conversaciones del chat)
+  const [healthHistory, setHealthHistory] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
   const [triageSessionId, setTriageSessionId] = useState(() => localStorage.getItem('triageSessionId') || null);
   const [isTriageClosed, setIsTriageClosed] = useState(() => localStorage.getItem('isTriageClosed') === 'true');
@@ -238,7 +232,7 @@ export default function App() {
       return (
         <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
           <div className="flex items-center gap-1.5 font-bold text-slate-700 mb-1">
-            <Sparkles className="w-4 h-4 text-content-primary0" /> Resumen IA
+            <Sparkles className="w-4 h-4 text-content-primary0" /> {t('app_resumen_ia')}
           </div>
           <p className="whitespace-pre-wrap">{extracted_text}</p>
         </div>
@@ -256,7 +250,7 @@ export default function App() {
       <div className="mt-3 p-3 bg-semantic-info-bg/50 border border-brand/30 rounded-lg text-xs text-slate-600 space-y-2 w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-bold text-brand">
-            <Sparkles className="w-4 h-4 text-content-primary0" /> Resumen Clínico
+            <Sparkles className="w-4 h-4 text-content-primary0" /> {t('app_resumen_clinico')}
           </div>
           {data.severidad && (
             <span className={`px-2 py-0.5 rounded-full border text-[10px] uppercase font-bold tracking-wider ${badgeColor}`}>
@@ -269,7 +263,7 @@ export default function App() {
         
         {data.diagnosticos && data.diagnosticos.length > 0 && (
           <div>
-            <strong className="text-slate-700">Diagnósticos:</strong>
+            <strong className="text-slate-700">{t('app_diagnosticos')}</strong>
             <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-slate-600">
               {data.diagnosticos.map((d, i) => <li key={i}>{d}</li>)}
             </ul>
@@ -278,7 +272,7 @@ export default function App() {
         
         {data.anomalias && data.anomalias.length > 0 && (
           <div>
-            <strong className="text-amber-700">Anomalías / Alertas:</strong>
+            <strong className="text-amber-700">{t('app_anomalias_alertas')}</strong>
             <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-slate-600">
               {data.anomalias.map((a, i) => <li key={i}>{a}</li>)}
             </ul>
@@ -287,7 +281,7 @@ export default function App() {
         
         {data.preguntas_sugeridas && data.preguntas_sugeridas.length > 0 && (
           <div className="pt-2 border-t border-brand/30 mt-2">
-            <strong className="text-brand flex items-center gap-1">Preguntas sugeridas para tu médico:</strong>
+            <strong className="text-brand flex items-center gap-1">{t('app_preguntas_sugeridas_para_tu_medico')}</strong>
             <ul className="list-disc pl-4 mt-1 space-y-0.5 text-slate-600">
               {data.preguntas_sugeridas.map((p, i) => <li key={i}>{p}</li>)}
             </ul>
@@ -333,20 +327,20 @@ export default function App() {
       if (res.ok) {
         setDocFile(null);
         setDocNotes('');
-        alert('Documento subido correctamente');
+        alert(t('app_documento_subido_correctamente'));
         fetchDocuments();
       } else {
         const err = await res.json();
         alert('Error: ' + err.detail);
       }
     } catch (error) {
-      alert('Error subiendo documento');
+      alert(t('app_error_subiendo_documento'));
     }
     setUploadingDoc(false);
   };
 
   const deleteDocument = async (docId) => {
-    if (!confirm('¿Seguro que quieres borrar este documento?')) return;
+    if (!confirm(t('app_seguro_que_quieres_borrar_este'))) return;
     try {
       const res = await fetch(`${API_URL}/api/patients/me/documents/${docId}`, {
         method: 'DELETE',
@@ -477,9 +471,7 @@ export default function App() {
 
   const downloadReport = (text, patient, dateTitle) => {
     const element = document.createElement("a");
-    const file = new Blob([`Informe Médico - ${patient}
-
-${text}`], {type: 'text/plain'});
+    const file = new Blob([t('app_informe_medico', { patient, text })], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
     element.download = `informe_${patient.replace(/\s+/g, '_')}_${dateTitle.replace(/[^a-z0-9]/gi, '_')}.txt`;
     document.body.appendChild(element);
@@ -498,6 +490,7 @@ ${text}`], {type: 'text/plain'});
     localStorage.removeItem('isTriageClosed');
     localStorage.removeItem('chatMessages');
     setSessions([]);
+    setHealthHistory([]);
     setMessages([]);
     setCurrentSessionId(null);
     setTriageSessionId(null);
@@ -525,7 +518,7 @@ ${text}`], {type: 'text/plain'});
       utterance.lang = detectLanguage(text);
       window.speechSynthesis.speak(utterance);
     } else {
-      alert("Tu navegador no soporta lectura en voz alta.");
+      alert(t('app_tu_navegador_no_soporta_lectura'));
     }
   };
 
@@ -557,7 +550,7 @@ ${text}`], {type: 'text/plain'});
       });
       if (res.ok) {
         const data = await res.json();
-        setSessions(data);
+        setHealthHistory(data);
       }
     } catch (e) {
       console.error("Error fetching history:", e);
@@ -587,7 +580,7 @@ ${text}`], {type: 'text/plain'});
         body: JSON.stringify(patientProfile)
       });
       if (res.ok) {
-        alert('Historial médico guardado con éxito');
+        alert(t('app_historial_medico_guardado_con_exito'));
         fetchPatientProfile();
       fetchHistory(); // reload to get new QR
       }
@@ -702,11 +695,11 @@ ${text}`], {type: 'text/plain'});
         setIsTriageClosed(false);
         setMessages([{ id: Date.now(), type: 'ai', text: t('triage_welcome'), phiScrubbed: false }]);
       } else {
-        throw new Error("Fallo en el servidor");
+        throw new Error(t('app_fallo_en_el_servidor'));
       }
     } catch (err) {
       console.error("Error iniciando sesión de orientación:", err);
-      alert("Error al iniciar la sesión de orientación. Verifica tu conexión o intenta de nuevo.");
+      alert(t('app_error_al_iniciar_la_sesion'));
       navigate('/paciente');
     }
   };
@@ -757,13 +750,13 @@ ${text}`], {type: 'text/plain'});
     const attachedImages = attachments.filter(a => a.type === 'image');
     const attachedPdfs = attachments.filter(a => a.type === 'pdf');
 
-    let defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos:';
+    let defaultPrompt = t('app_por_favor_explicame_los_siguientes');
     if (attachedImages.length > 0 && attachedPdfs.length === 0) {
       defaultPrompt = attachedImages.length > 1 
-        ? 'Por favor, analiza y explícame estas radiografías/imágenes médicas en conjunto:' 
-        : 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+        ? t('app_por_favor_analiza_y_explicame') 
+        : t('app_por_favor_explicame_los_siguientes_2');
     } else if (attachedPdfs.length > 0) {
-      defaultPrompt = 'Por favor, explícame este documento clínico:';
+      defaultPrompt = t('app_por_favor_explicame_este_documento');
     }
 
     const finalUserText = textToSend.trim() || defaultPrompt;
@@ -794,7 +787,7 @@ ${text}`], {type: 'text/plain'});
         setMessages(prev => [...prev, { 
           id: Date.now() + 2, 
           type: 'ai', 
-          text: filesToSend.length > 1 ? `Analizando ${filesToSend.length} archivos adjuntos con OCR y Visión IA...` : t('analyzing_ocr'), 
+          text: filesToSend.length > 1 ? t('app_analizando_archivos_adjuntos_con_ocr', { length: filesToSend.length }) : t('analyzing_ocr'), 
           phiScrubbed: false 
         }]);
 
@@ -815,7 +808,7 @@ ${text}`], {type: 'text/plain'});
             const errData = await uploadRes.json();
             errText = errData.detail || errText;
           } catch (e) {}
-          throw new Error(`Fallo al analizar los archivos: ${errText}`);
+          throw new Error(t('app_fallo_al_analizar_los_archivos', { errText }));
         }
 
         const uploadData = await uploadRes.json();
@@ -842,6 +835,7 @@ ${text}`], {type: 'text/plain'});
         body: JSON.stringify({
           messages: chatPayload,
           language: language,
+          country: country || undefined,
           session_id: currentSessionId
         })
       });
@@ -851,7 +845,7 @@ ${text}`], {type: 'text/plain'});
         return;
       }
       if (response.status === 403) {
-        let detail = "No tienes permiso para acceder a esta sesión.";
+        let detail = t('app_no_tienes_permiso_para_acceder');
         try {
           const errData = await response.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -861,8 +855,8 @@ ${text}`], {type: 'text/plain'});
       if (response.status === 429) {
         const retryAfter = response.headers.get("Retry-After");
         let detail = retryAfter 
-          ? `Demasiadas solicitudes. Por favor, espera ${retryAfter} segundos.`
-          : "Demasiadas solicitudes, por favor espera un momento.";
+          ? t('app_demasiadas_solicitudes_por_favor_esp', { retryAfter })
+          : t('app_demasiadas_solicitudes_por_favor_esp_2');
         try {
           const errData = await response.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -918,17 +912,17 @@ ${text}`], {type: 'text/plain'});
     const attachedImages = attachments.filter(a => a.type === 'image');
     const attachedPdfs = attachments.filter(a => a.type === 'pdf');
 
-    let defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos:';
+    let defaultPrompt = t('app_por_favor_explicame_los_siguientes');
     if (attachedImages.length > 0 && attachedPdfs.length === 0) {
       defaultPrompt = attachedImages.length > 1 
-        ? 'Por favor, analiza y explícame estas radiografías/imágenes médicas en conjunto:' 
-        : 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+        ? t('app_por_favor_analiza_y_explicame') 
+        : t('app_por_favor_explicame_los_siguientes_2');
     } else if (attachedPdfs.length > 0) {
-      defaultPrompt = 'Por favor, explícame este documento clínico:';
+      defaultPrompt = t('app_por_favor_explicame_este_documento');
     } else if (selectedImage || selectedImageFile) {
-      defaultPrompt = 'Por favor, explícame los siguientes hallazgos médicos que fueron extraídos de mi radiografía:';
+      defaultPrompt = t('app_por_favor_explicame_los_siguientes_2');
     } else if (selectedPdf) {
-      defaultPrompt = 'Por favor, explícame el siguiente documento clínico:';
+      defaultPrompt = t('app_por_favor_explicame_el_siguiente');
     }
 
     const userText = inputMessage.trim() || defaultPrompt;
@@ -962,7 +956,7 @@ ${text}`], {type: 'text/plain'});
         setMessages((prev) => [...prev, { 
           id: Date.now() + 2, 
           type: 'ai', 
-          text: filesToSend.length > 1 ? `Analizando ${filesToSend.length} archivos adjuntos con OCR y Visión IA...` : t('analyzing_ocr'), 
+          text: filesToSend.length > 1 ? t('app_analizando_archivos_adjuntos_con_ocr', { length: filesToSend.length }) : t('analyzing_ocr'), 
           phiScrubbed: false 
         }]);
         
@@ -984,14 +978,14 @@ ${text}`], {type: 'text/plain'});
               const errData = await uploadRes.json();
               errText = errData.detail || errText;
             } catch (e) {}
-            throw new Error(`Fallo al analizar los archivos: ${errText}`);
+            throw new Error(t('app_fallo_al_analizar_los_archivos', { errText }));
           }
 
           const uploadData = await uploadRes.json();
           documentContext = `\n\n--- INICIO DEL REPORTE ---\n${uploadData.extracted_text}\n--- FIN DEL REPORTE ---`;
           await fetchPatientProfile();
         } catch (uploadErr) {
-          throw new Error(`Error de subida: ${uploadErr.message}`);
+          throw new Error(t('app_error_de_subida', { message: uploadErr.message }));
         }
       }
 
@@ -1035,7 +1029,7 @@ ${text}`], {type: 'text/plain'});
           ...authHeaders,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ messages: chatMessages, language: language })
+        body: JSON.stringify({ messages: chatMessages, language: language, country: country || undefined })
       });
 
       if (res.status === 401) {
@@ -1043,7 +1037,7 @@ ${text}`], {type: 'text/plain'});
         return;
       }
       if (res.status === 403) {
-        let detail = "No tienes permiso para acceder a esta sesión.";
+        let detail = t('app_no_tienes_permiso_para_acceder');
         try {
           const errData = await res.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -1053,8 +1047,8 @@ ${text}`], {type: 'text/plain'});
       if (res.status === 429) {
         const retryAfter = res.headers.get("Retry-After");
         let detail = retryAfter 
-          ? `Demasiadas solicitudes. Por favor, espera ${retryAfter} segundos antes de volver a consultar.`
-          : "Demasiadas solicitudes, por favor espera un momento.";
+          ? t('app_demasiadas_solicitudes_por_favor_esp_3', { retryAfter })
+          : t('app_demasiadas_solicitudes_por_favor_esp_2');
         try {
           const errData = await res.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -1106,7 +1100,7 @@ ${text}`], {type: 'text/plain'});
         {
           id: Date.now() + 1,
           type: 'ai',
-          text: `⚠️ **Error:** No se pudo completar la solicitud. \nDetalle: ${err.message}`,
+          text: t('app_error_no_se_pudo_completar', { message: err.message }),
           error: true
         }
       ]);
@@ -1136,8 +1130,9 @@ ${text}`], {type: 'text/plain'});
   }
 
   if (path === '/verificador' || path.startsWith('/verificacion')) {
+    if (!token) return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Panel de Verificación Médica" onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : '/login')}>
+      <ErrorBoundary title={t('app_panel_de_verificacion_medica')} onGoHome={() => navigate(viewMode === 'doctor' ? '/medico' : '/login')}>
         <DoctorVerificationDetail 
           apiUrl={API_URL} 
           authHeaders={authHeaders} 
@@ -1158,7 +1153,7 @@ ${text}`], {type: 'text/plain'});
   if (path === '/doctor/profile' || path === '/medico/perfil') {
     if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Perfil Profesional Médico" onGoHome={() => navigate('/medico')}>
+      <ErrorBoundary title={t('app_perfil_profesional_medico')} onGoHome={() => navigate('/medico')}>
         <DoctorProfile apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate(-1)} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </ErrorBoundary>
@@ -1168,7 +1163,7 @@ ${text}`], {type: 'text/plain'});
   if (path === '/medico/disponibilidad' || path === '/medico/horarios') {
     if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Disponibilidad y Horarios" onGoHome={() => navigate('/medico')}>
+      <ErrorBoundary title={t('app_disponibilidad_y_horarios')} onGoHome={() => navigate('/medico')}>
         <DoctorSchedule apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/medico')} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </ErrorBoundary>
@@ -1178,7 +1173,7 @@ ${text}`], {type: 'text/plain'});
   if (path === '/medico/perfil-publico') {
     if (!token || viewMode !== 'doctor') return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Perfil Público de Especialista" onGoHome={() => navigate('/medico')}>
+      <ErrorBoundary title={t('app_perfil_publico_de_especialista')} onGoHome={() => navigate('/medico')}>
         <DoctorProfileForm apiUrl={API_URL} authHeaders={authHeaders} onBack={() => navigate('/medico')} onSaved={() => navigate('/medico')} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </ErrorBoundary>
@@ -1225,7 +1220,7 @@ ${text}`], {type: 'text/plain'});
   if (path.startsWith('/medico')) {
     if (!token) return <Navigate to="/login" />;
     return (
-      <ErrorBoundary title="Portal Médico MIVOR.ai" onGoHome={() => navigate('/medico')}>
+      <ErrorBoundary title={t('app_portal_medico_mivor_ai')} onGoHome={() => navigate('/medico')}>
         <DoctorDashboard apiUrl={API_URL} authHeaders={authHeaders} onLogout={handleLogout} />
         <UpdateModal t={t} apiUrl={API_URL} />
       </ErrorBoundary>
@@ -1446,7 +1441,7 @@ ${text}`], {type: 'text/plain'});
           patientProfile={patientProfile}
           setPatientProfile={setPatientProfile}
           savePatientProfile={savePatientProfile}
-          sessions={sessions}
+          sessions={healthHistory}
           onBack={() => navigate('/paciente')}
           onLogout={handleLogout}
           onNavigate={handleNavigate}
@@ -1510,12 +1505,12 @@ ${text}`], {type: 'text/plain'});
               {
                 id: Date.now(),
                 type: 'user',
-                text: `Por favor, explícame este documento clínico (${filename || 'documento'}):`,
+                text: t('app_por_favor_explicame_este_documento_2', { value: filename || 'documento' }),
                 phiScrubbed: false
               }
             ]);
             // Store extracted text so handleSend can inject it as context
-            setInputMessage(`Tengo dudas sobre los resultados de mi documento: ${filename}`);
+            setInputMessage(t('app_tengo_dudas_sobre_los_resultados', { filename }));
             startTriageSession().then(() => navigate('/paciente/asistente'));
           }}
         />

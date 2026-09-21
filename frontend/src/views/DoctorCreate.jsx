@@ -27,7 +27,7 @@ const parseBirthDate = (str) => {
 
 export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSuccess }) {
   const navigate = useNavigate();
-  const { t, language } = useLanguage();
+  const { t, language, isRtl } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -130,6 +130,7 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
       if (response.ok) {
         const responseData = await response.json();
         const userId = responseData.user_id || responseData.id;
+        const registerToken = responseData.access_token;
 
         // Subir fotos o documentos opcionales si se seleccionaron
         const filesToUpload = [];
@@ -149,10 +150,12 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
             const fileData = new FormData();
             fileData.append('media_type', item.type);
             fileData.append('file', item.file);
-            await fetch(mediaUrl, {
+            const mediaRes = await fetch(mediaUrl, {
               method: 'POST',
+              headers: registerToken ? { Authorization: `Bearer ${registerToken}` } : {},
               body: fileData
             });
+            if (!mediaRes.ok) console.warn('El archivo no se pudo subir:', item.type, mediaRes.status);
           } catch (e) {
             console.warn('Error subiendo archivo opcional:', item.type, e);
           }
@@ -183,7 +186,7 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-800" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Top Header Fijo */}
       <header className="min-h-16 border-b border-slate-200/80 bg-white px-4 md:px-8 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 shrink-0 sticky top-0 z-30">
         <div className="flex items-center gap-3">
@@ -192,7 +195,7 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
           </div>
           <span className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-tight">
             MIVOR<span className="text-blue-600">.ai</span>
-            <span className="block text-[10px] text-blue-600 font-bold tracking-widest -mt-1 uppercase">PORTAL MÉDICO</span>
+            <span className="block text-[10px] text-blue-600 font-bold tracking-widest -mt-1 uppercase">{t('doctorcreate_portal_medico')}</span>
           </span>
         </div>
 

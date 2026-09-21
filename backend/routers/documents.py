@@ -22,6 +22,7 @@ from sqlalchemy import select, update
 import database
 import models
 import security
+from services.language_service import language_label
 from database import get_db
 from security import get_current_user, get_current_user_id
 from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extract_text_from_pdf, scrub_phi
@@ -122,8 +123,7 @@ async def upload_document(
         'files_count': len(file_payloads)
     }
 
-    lang_map = {'es': 'Español', 'en': 'English', 'fr': 'Français', 'ar': 'العربية'}
-    target_lang = (lang_map.get(language, 'Español') if language else 'Español')
+    target_lang = language_label(language)
     lang_directive = f'DIRECTIVA DE IDIOMA: Todo el contenido textual del JSON (resumen, hallazgos, diagnosticos, recomendacion) DEBE generarse obligatoriamente en {target_lang}.'
 
     summary_data_json = None
@@ -667,7 +667,7 @@ async def upload_patient_document(
     patient = result.scalar_one_or_none()
     if (not patient):
         raise HTTPException(status_code=404, detail='Patient not found.')
-    if patient.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(status_code=403, detail='No autorizado para subir documentos para este paciente.')
     extracted_insights = ''
     try:
@@ -743,7 +743,7 @@ async def list_documents(patient_id: str, db: AsyncSession=Depends(get_db), curr
     patient = result.scalar_one_or_none()
     if (not patient):
         raise HTTPException(status_code=404, detail='Patient not found.')
-    if patient.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(status_code=403, detail='No autorizado para ver documentos de este paciente.')
     doc_stmt = select(models.MedicalDocument).where((models.MedicalDocument.patient_id == patient.id), (models.MedicalDocument.is_deleted == False)).order_by(models.MedicalDocument.uploaded_at.desc())
     doc_result = (await db.execute(doc_stmt))
@@ -772,7 +772,7 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession=De
     patient = p_result.scalar_one_or_none()
     if ((not patient) or (doc.patient_id != patient.id)):
         raise HTTPException(status_code=404, detail='Document not found for this patient.')
-    if patient.user_id != current_user.id and current_user.role not in ("doctor", "admin"):
+    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
         raise HTTPException(status_code=403, detail='No autorizado para eliminar este documento.')
     doc.is_deleted = True
     (await db.commit())
@@ -790,7 +790,7 @@ async def get_document_summary(document_id: str, db: AsyncSession=Depends(get_db
     p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == doc.patient_id)
     p_res = await db.execute(p_stmt)
     patient = p_res.scalar_one_or_none()
-    if not patient or (patient.user_id != current_user.id and current_user.role not in ("doctor", "admin")):
+    if not patient or (patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user)):
         raise HTTPException(status_code=403, detail='No autorizado para ver el resumen de este documento.')
     import json
     payload_data = {}
@@ -893,7 +893,7 @@ async def download_document_pdf(
                 p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == doc_med.patient_id)
                 p_res = await db.execute(p_stmt)
                 patient = p_res.scalar_one_or_none()
-                if not patient or (patient.user_id != current_user.id and current_user.role not in ("doctor", "admin")):
+                if not patient or (patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user)):
                     raise HTTPException(status_code=403, detail="No autorizado para descargar este documento.")
                 payload = {}
                 if doc_med.extracted_text:
