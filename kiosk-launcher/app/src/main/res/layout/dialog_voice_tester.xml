@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/bg_card">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🎙️ Asistente de Voz MIVOR"
+        android:textColor="@color/text_white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tvVoiceDiagnostic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="En emuladores el micrófono requiere configuración en Extended Controls. Puedes probar diciendo las órdenes por micrófono o tocando una prueba rápida:"
+        android:textColor="@color/text_sub"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Mic Listen Button -->
+    <Button
+        android:id="@+id/btnTriggerSystemMic"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="🎤 Activar Micrófono de Android"
+        android:textColor="@color/text_white"
+        android:backgroundTint="#0D9488"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pruebas Rápidas de Comandos por Voz:"
+        android:textColor="@color/text_gold"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Grid / Chips of Voice Commands -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:alignmentMode="alignMargins"
+        android:useDefaultMargins="true">
+
+        <Button
+            android:id="@+id/btnSimWake"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="🗣️ &quot;Hola MIVOR&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#1E293B"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimSos"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="🚨 &quot;¡Ayuda SOS!&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#991B1B"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimSon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="📞 &quot;Llama a mi hijo&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#1E3A8A"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimDaughter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="📞 &quot;Llama a mi hija&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#831843"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimApp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="🩺 &quot;Abrir MIVOR&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#065F46"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimPhotos"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="🖼️ &quot;Ver fotos&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#92400E"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="⏰ &quot;¿Qué hora es?&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#334155"
+            android:textColor="@color/text_white" />
+
+        <Button
+            android:id="@+id/btnSimPills"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:text="💊 &quot;¿Qué pastillas?&quot;"
+            android:textSize="11sp"
+            android:backgroundTint="#475569"
+            android:textColor="@color/text_white" />
+    </GridLayout>
+
+    <!-- Custom phrase input -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
+
+        <EditText
+            android:id="@+id/etCustomVoice"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/card_background"
+            android:hint="O escribe cualquier orden..."
+            android:textColorHint="@color/text_muted"
+            android:textColor="@color/text_white"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/btnSendCustomVoice"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Ejecutar"
+            android:textColor="@color/text_white"
+            android:backgroundTint="#0D9488"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCloseVoiceTester"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Cerrar"
+        android:textColor="@color/text_white"
+        android:backgroundTint="@color/btn_settings"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>

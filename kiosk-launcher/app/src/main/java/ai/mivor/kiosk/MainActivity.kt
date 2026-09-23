@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var speechIntent: Intent? = null
     private var isListening = false
     private var isKioskActive = true
+    private var isSpeechAvailableOnDevice = false
 
     // Default configuration constants
     companion object {
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         private const val MIVOR_PACKAGE_NAME = "com.vitalai.app"
         private const val PERMISSION_REQUEST_ALL = 100
+        private const val REQUEST_CODE_SPEECH_INPUT = 1001
     }
 
     private val clockRunnable = object : Runnable {
@@ -131,10 +133,19 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         tvVoiceStatus = findViewById(R.id.tvVoiceStatus)
         pillVoice = findViewById(R.id.pillVoice)
 
-        // Pill Voice Click: Manual trigger or speech instructions
+        // Pill Voice Click: Trigger system microphone prompt or simulator
         pillVoice.setOnClickListener {
-            speak("Te escucho atentamente. ¿Qué necesitas?")
-            restartVoiceListeningWithDelay(600)
+            if (isSpeechAvailableOnDevice) {
+                triggerSystemSpeechPrompt()
+            } else {
+                showVoiceSimulatorDialog("En este emulador el servicio de voz continuo no está instalado. Usa este simulador o la ventana de voz:")
+            }
+        }
+
+        // Long click always opens the Voice Command Simulator (ideal for testing in emulator)
+        pillVoice.setOnLongClickListener {
+            showVoiceSimulatorDialog()
+            true
         }
 
         // 1. MIVOR Salud
@@ -233,7 +244,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     // =========================================================================
-    // TEXT TO SPEECH (VOICE SPREAKER)
+    // TEXT TO SPEECH (VOICE SPEAKER)
     // =========================================================================
     private fun initTextToSpeech() {
         tts = TextToSpeech(this, this)
@@ -266,8 +277,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // CONTINUOUS VOICE ENGINE & WAKE-WORD DETECTION
     // =========================================================================
     private fun startVoiceEngine() {
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            tvVoiceStatus.text = "Micrófono no soportado"
+        isSpeechAvailableOnDevice = SpeechRecognizer.isRecognitionAvailable(this)
+        
+        if (!isSpeechAvailableOnDevice) {
+            tvVoiceStatus.text = "🎙️ Toca para hablar o probar comandos"
             return
         }
 
@@ -296,8 +309,24 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
                 override fun onError(error: Int) {
                     isListening = false
-                    // Automatically restart listening to maintain continuous hands-free operation
-                    restartVoiceListeningWithDelay(1500)
+                    // Handle errors gracefully and retry listening
+                    when (error) {
+                        SpeechRecognizer.ERROR_NO_MATCH,
+                        SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> {
+                            restartVoiceListeningWithDelay(1000)
+                        }
+                        SpeechRecognizer.ERROR_AUDIO -> {
+                            tvVoiceStatus.text = "🎙️ Activa mic en controles del emulador"
+                            restartVoiceListeningWithDelay(3000)
+                        }
+                        SpeechRecognizer.ERROR_CLIENT,
+                        SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> {
+                            restartVoiceListeningWithDelay(2000)
+                        }
+                        else -> {
+                            restartVoiceListeningWithDelay(1500)
+                        }
+                    }
                 }
 
                 override fun onResults(results: Bundle?) {
@@ -314,7 +343,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     if (!partial.isNullOrEmpty()) {
                         val spoken = partial[0].lowercase(Locale.ROOT)
                         // Immediate fast-path trigger for urgent emergency words
-                        if (spoken.contains("ayuda") || spoken.contains("emergencia") || spoken.contains("socorro") || spoken.contains("me caí") || spoken.contains("me cai")) {
+                        if (spoken.contains("ayuda") || spoken.contains("emergencia") || spoken.contains("socorro") || 
+                            spoken.contains("me cai") || spoken.contains("me caí") || spoken.contains("auxilio")) {
                             speechRecognizer?.stopListening()
                             processVoiceCommand(spoken)
                         }
@@ -350,10 +380,107 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun restartVoiceListeningWithDelay(delayMs: Long) {
         voiceRestartHandler.removeCallbacksAndMessages(null)
         voiceRestartHandler.postDelayed({
-            if (isVoicePermissionGranted()) {
+            if (isVoicePermissionGranted() && isSpeechAvailableOnDevice) {
                 startListeningSafe()
             }
         }, delayMs)
+    }
+
+    // =========================================================================
+    // SYSTEM SPEECH PROMPT FALLBACK (FOR EMULATORS & TAP-TO-SPEAK)
+    // =========================================================================
+    private fun triggerSystemSpeechPrompt() {
+        try {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "Habla ahora... Di \"Hola MIVOR\" o \"Ayuda\"")
+            }
+            startActivityForResult(intent, REQUEST_CODE_SPEECH_INPUT)
+        } catch (e: Exception) {
+            showVoiceSimulatorDialog("No se pudo iniciar el servicio de voz del sistema. Usa este simulador para probar:")
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_SPEECH_INPUT && resultCode == RESULT_OK && data != null) {
+            val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!result.isNullOrEmpty()) {
+                processVoiceCommand(result[0])
+            }
+        }
+    }
+
+    // =========================================================================
+    // VOICE SIMULATOR & TESTER (PERFECT FOR TESTING IN EMULATORS)
+    // =========================================================================
+    private fun showVoiceSimulatorDialog(diagnosticMsg: String? = null) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_voice_tester, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val tvDiag = dialogView.findViewById<TextView>(R.id.tvVoiceDiagnostic)
+        if (diagnosticMsg != null) {
+            tvDiag.text = diagnosticMsg
+        }
+
+        // Button to trigger native system mic
+        dialogView.findViewById<Button>(R.id.btnTriggerSystemMic).setOnClickListener {
+            dialog.dismiss()
+            triggerSystemSpeechPrompt()
+        }
+
+        // Quick simulation chips
+        dialogView.findViewById<Button>(R.id.btnSimWake).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("hola mivor")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimSos).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("ayuda emergencia")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimSon).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("llama a mi hijo")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimDaughter).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("llama a mi hija")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimApp).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("abrir mivor")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimPhotos).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("ver fotos")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimTime).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("que hora es")
+        }
+        dialogView.findViewById<Button>(R.id.btnSimPills).setOnClickListener {
+            dialog.dismiss()
+            processVoiceCommand("que pastillas me tocan")
+        }
+
+        // Custom text simulation
+        val etCustom = dialogView.findViewById<EditText>(R.id.etCustomVoice)
+        dialogView.findViewById<Button>(R.id.btnSendCustomVoice).setOnClickListener {
+            val text = etCustom.text.toString().trim()
+            if (text.isNotEmpty()) {
+                dialog.dismiss()
+                processVoiceCommand(text)
+            }
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCloseVoiceTester).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     // =========================================================================
@@ -395,7 +522,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         // 5. OPEN MIVOR SALUD
-        if (cmd.contains("abrir mivor") || cmd.contains("mivor salud") || cmd.contains("mivor") && (cmd.contains("abrir") || cmd.contains("salud") || cmd.contains("medico") || cmd.contains("cita"))) {
+        if (cmd.contains("abrir mivor") || cmd.contains("mivor salud") || (cmd.contains("mivor") && (cmd.contains("abrir") || cmd.contains("salud") || cmd.contains("medico") || cmd.contains("cita")))) {
             speak("Abriendo MIVOR Salud.")
             launchMivorApp()
             return
@@ -437,6 +564,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             speak("¡Hola! Te escucho con atención. Puedes decirme: llamar a mi hijo, fotos, o ayuda.")
             return
         }
+
+        // Fallback unrecognized command
+        speak("Comando no reconocido. Puedes decir: llamar al hijo, fotos, o ayuda.")
     }
 
     // =========================================================================
