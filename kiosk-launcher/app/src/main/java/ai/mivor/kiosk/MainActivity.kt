@@ -14,10 +14,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,14 +35,25 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val clockHandler = Handler(Looper.getMainLooper())
+    private val voiceRestartHandler = Handler(Looper.getMainLooper())
 
     private lateinit var tvClock: TextView
     private lateinit var tvDate: TextView
+    private lateinit var tvVoiceStatus: TextView
+    private lateinit var pillVoice: LinearLayout
+
+    // Voice & TTS Engine
+    private var tts: TextToSpeech? = null
+    private var isTtsReady = false
+    private var speechRecognizer: SpeechRecognizer? = null
+    private var speechIntent: Intent? = null
+    private var isListening = false
+    private var isKioskActive = true
 
     // Default configuration constants
     companion object {
@@ -58,8 +74,7 @@ class MainActivity : AppCompatActivity() {
         private const val DEFAULT_WPP = "+34600111222"
 
         private const val MIVOR_PACKAGE_NAME = "com.vitalai.app"
-        private const val PERMISSION_REQUEST_CALL = 101
-        private const val PERMISSION_REQUEST_LOCATION = 102
+        private const val PERMISSION_REQUEST_ALL = 100
     }
 
     private val clockRunnable = object : Runnable {
@@ -77,6 +92,7 @@ class MainActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         initViews()
+        initTextToSpeech()
         requestInitialPermissions()
         startKioskLockMode()
     }
@@ -85,11 +101,22 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         clockHandler.post(clockRunnable)
         startKioskLockMode()
+        if (isVoicePermissionGranted()) {
+            startVoiceEngine()
+        }
     }
 
     override fun onPause() {
         super.onPause()
         clockHandler.removeCallbacks(clockRunnable)
+        stopVoiceEngine()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tts?.stop()
+        tts?.shutdown()
+        speechRecognizer?.destroy()
     }
 
     @Deprecated("Deprecated in Java")
@@ -101,6 +128,14 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         tvClock = findViewById(R.id.tvClock)
         tvDate = findViewById(R.id.tvDate)
+        tvVoiceStatus = findViewById(R.id.tvVoiceStatus)
+        pillVoice = findViewById(R.id.pillVoice)
+
+        // Pill Voice Click: Manual trigger or speech instructions
+        pillVoice.setOnClickListener {
+            speak("Te escucho atentamente. ¿Qué necesitas?")
+            restartVoiceListeningWithDelay(600)
+        }
 
         // 1. MIVOR Salud
         findViewById<CardView>(R.id.cardMivor).setOnClickListener {
@@ -144,6 +179,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startKioskLockMode() {
+        if (!isKioskActive) return
         try {
             val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -158,8 +194,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // =========================================================================
+    // PERMISSIONS MANAGEMENT
+    // =========================================================================
+    private fun isVoicePermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    }
+
     private fun requestInitialPermissions() {
         val permissions = mutableListOf<String>()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.RECORD_AUDIO)
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CALL_PHONE)
         }
@@ -171,7 +217,225 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (permissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 100)
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), PERMISSION_REQUEST_ALL)
+        } else {
+            startVoiceEngine()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == PERMISSION_REQUEST_ALL) {
+            if (isVoicePermissionGranted()) {
+                startVoiceEngine()
+            }
+        }
+    }
+
+    // =========================================================================
+    // TEXT TO SPEECH (VOICE SPREAKER)
+    // =========================================================================
+    private fun initTextToSpeech() {
+        tts = TextToSpeech(this, this)
+    }
+
+    override fun onInit(status: Int) {
+        if (status == TextToSpeech.SUCCESS) {
+            val result = tts?.setLanguage(Locale("es", "ES"))
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                tts?.setLanguage(Locale.getDefault())
+            }
+            tts?.setSpeechRate(0.92f) // Cadencia pausada y clara para adulto mayor
+            tts?.setPitch(1.0f)
+            isTtsReady = true
+        }
+    }
+
+    private fun speak(text: String) {
+        if (!isTtsReady) return
+        tvVoiceStatus.text = "🔊 $text"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "MIVOR_VOICE_UTTERANCE")
+        } else {
+            @Suppress("DEPRECATION")
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null)
+        }
+    }
+
+    // =========================================================================
+    // CONTINUOUS VOICE ENGINE & WAKE-WORD DETECTION
+    // =========================================================================
+    private fun startVoiceEngine() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            tvVoiceStatus.text = "Micrófono no soportado"
+            return
+        }
+
+        if (speechRecognizer == null) {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+            speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES")
+                putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            }
+
+            speechRecognizer?.setRecognitionListener(object : RecognitionListener {
+                override fun onReadyForSpeech(params: Bundle?) {
+                    isListening = true
+                    tvVoiceStatus.text = "🎙️ Escuchando... Di \"Hola MIVOR\" o \"Ayuda\""
+                }
+
+                override fun onBeginningOfSpeech() {}
+                override fun onRmsChanged(rmsdB: Float) {}
+                override fun onBufferReceived(buffer: ByteArray?) {}
+
+                override fun onEndOfSpeech() {
+                    isListening = false
+                }
+
+                override fun onError(error: Int) {
+                    isListening = false
+                    // Automatically restart listening to maintain continuous hands-free operation
+                    restartVoiceListeningWithDelay(1500)
+                }
+
+                override fun onResults(results: Bundle?) {
+                    isListening = false
+                    val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    if (!matches.isNullOrEmpty()) {
+                        processVoiceCommand(matches[0])
+                    }
+                    restartVoiceListeningWithDelay(1800)
+                }
+
+                override fun onPartialResults(partialResults: Bundle?) {
+                    val partial = partialResults?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    if (!partial.isNullOrEmpty()) {
+                        val spoken = partial[0].lowercase(Locale.ROOT)
+                        // Immediate fast-path trigger for urgent emergency words
+                        if (spoken.contains("ayuda") || spoken.contains("emergencia") || spoken.contains("socorro") || spoken.contains("me caí") || spoken.contains("me cai")) {
+                            speechRecognizer?.stopListening()
+                            processVoiceCommand(spoken)
+                        }
+                    }
+                }
+
+                override fun onEvent(eventType: Int, params: Bundle?) {}
+            })
+        }
+
+        startListeningSafe()
+    }
+
+    private fun startListeningSafe() {
+        try {
+            if (!isListening && speechRecognizer != null && speechIntent != null) {
+                speechRecognizer?.startListening(speechIntent)
+            }
+        } catch (e: Exception) {
+            restartVoiceListeningWithDelay(2000)
+        }
+    }
+
+    private fun stopVoiceEngine() {
+        voiceRestartHandler.removeCallbacksAndMessages(null)
+        try {
+            speechRecognizer?.stopListening()
+            speechRecognizer?.cancel()
+        } catch (e: Exception) {}
+        isListening = false
+    }
+
+    private fun restartVoiceListeningWithDelay(delayMs: Long) {
+        voiceRestartHandler.removeCallbacksAndMessages(null)
+        voiceRestartHandler.postDelayed({
+            if (isVoicePermissionGranted()) {
+                startListeningSafe()
+            }
+        }, delayMs)
+    }
+
+    // =========================================================================
+    // VOICE COMMAND PARSER (ZERO-TOUCH SENIOR ACCESSIBILITY)
+    // =========================================================================
+    private fun processVoiceCommand(rawText: String) {
+        val cmd = rawText.lowercase(Locale.ROOT).trim()
+
+        // 1. SOS EMERGENCY / FALL DETECTION (Highest Priority)
+        if (cmd.contains("ayuda") || cmd.contains("emergencia") || cmd.contains("socorro") ||
+            cmd.contains("me cai") || cmd.contains("me caí") || cmd.contains("auxilio") || cmd.contains("urgencia")) {
+            speak("Activando alerta de socorro y llamando a emergencias de inmediato.")
+            triggerSosEmergency()
+            return
+        }
+
+        // 2. CALL SON / CARLOS
+        if (cmd.contains("hijo") || cmd.contains("carlos") || cmd.contains("llamar a mi hijo") || cmd.contains("llama a mi hijo")) {
+            val phone1 = prefs.getString(KEY_PHONE_1, DEFAULT_PHONE_1) ?: DEFAULT_PHONE_1
+            speak("Llamando a tu hijo.")
+            makeDirectCall(phone1)
+            return
+        }
+
+        // 3. CALL DAUGHTER / MARIA
+        if (cmd.contains("hija") || cmd.contains("maría") || cmd.contains("maria") || cmd.contains("llamar a mi hija") || cmd.contains("llama a mi hija")) {
+            val phone2 = prefs.getString(KEY_PHONE_2, DEFAULT_PHONE_2) ?: DEFAULT_PHONE_2
+            speak("Llamando a tu hija.")
+            makeDirectCall(phone2)
+            return
+        }
+
+        // 4. CALL CAREGIVER / NURSE / DOCTOR
+        if (cmd.contains("cuidador") || cmd.contains("enfermero") || cmd.contains("enfermera") || cmd.contains("doctor")) {
+            val phone3 = prefs.getString(KEY_PHONE_3, DEFAULT_PHONE_3) ?: DEFAULT_PHONE_3
+            speak("Llamando a tu cuidador.")
+            makeDirectCall(phone3)
+            return
+        }
+
+        // 5. OPEN MIVOR SALUD
+        if (cmd.contains("abrir mivor") || cmd.contains("mivor salud") || cmd.contains("mivor") && (cmd.contains("abrir") || cmd.contains("salud") || cmd.contains("medico") || cmd.contains("cita"))) {
+            speak("Abriendo MIVOR Salud.")
+            launchMivorApp()
+            return
+        }
+
+        // 6. WHATSAPP
+        if (cmd.contains("whatsapp") || cmd.contains("mensajes") || cmd.contains("mensaje") || cmd.contains("grupo")) {
+            speak("Abriendo WhatsApp familiar.")
+            launchFamilyWhatsApp()
+            return
+        }
+
+        // 7. FAMILY PHOTOS ALBUM
+        if (cmd.contains("foto") || cmd.contains("fotos") || cmd.contains("album") || cmd.contains("álbum") || cmd.contains("recuerdo") || cmd.contains("recuerdos")) {
+            speak("Abriendo el álbum de fotos de la familia.")
+            showFamilyPhotosDialog()
+            return
+        }
+
+        // 8. CLOCK & DATE INQUIRY
+        if (cmd.contains("que hora es") || cmd.contains("qué hora es") || cmd.contains("hora") || cmd.contains("dia") || cmd.contains("día") || cmd.contains("fecha")) {
+            val calendar = Calendar.getInstance()
+            val timeFmt = SimpleDateFormat("h y m a", Locale("es", "ES"))
+            val dateFmt = SimpleDateFormat("EEEE d 'de' MMMM", Locale("es", "ES"))
+            val timeStr = timeFmt.format(calendar.time)
+            val dateStr = dateFmt.format(calendar.time)
+            speak("Son las $timeStr del $dateStr.")
+            return
+        }
+
+        // 9. MEDICATIONS / PILLS INQUIRY
+        if (cmd.contains("pastilla") || cmd.contains("pastillas") || cmd.contains("medicamento") || cmd.contains("remedio") || cmd.contains("medicina")) {
+            speak("Recuerda tomar tu Losartán de 50 miligramos con un vaso de agua.")
+            return
+        }
+
+        // 10. GENERAL WAKE-WORD: "Hola MIVOR" / "MIVOR"
+        if (cmd.contains("hola mivor") || cmd.contains("oye mivor") || cmd == "mivor") {
+            speak("¡Hola! Te escucho con atención. Puedes decirme: llamar a mi hijo, fotos, o ayuda.")
+            return
         }
     }
 
@@ -184,7 +448,6 @@ class MainActivity : AppCompatActivity() {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(launchIntent)
         } else {
-            // App is not installed yet on this phone
             AlertDialog.Builder(this)
                 .setTitle("MIVOR Salud")
                 .setMessage("La aplicación médica MIVOR (com.vitalai.app) no se encuentra instalada aún en este dispositivo.\n\n¿Deseas abrir la versión web en línea o instalar el APK?")
@@ -212,16 +475,19 @@ class MainActivity : AppCompatActivity() {
 
         dialogView.findViewById<CardView>(R.id.cardContact1).setOnClickListener {
             dialog.dismiss()
+            speak("Llamando a tu hijo.")
             makeDirectCall(phone1)
         }
 
         dialogView.findViewById<CardView>(R.id.cardContact2).setOnClickListener {
             dialog.dismiss()
+            speak("Llamando a tu hija.")
             makeDirectCall(phone2)
         }
 
         dialogView.findViewById<CardView>(R.id.cardContact3).setOnClickListener {
             dialog.dismiss()
+            speak("Llamando a tu cuidador.")
             makeDirectCall(phone3)
         }
 
@@ -234,12 +500,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeDirectCall(phoneNumber: String) {
         val cleanNumber = phoneNumber.replace(" ", "").trim()
-        val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$cleanNumber"))
+        val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$cleanNumber")).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
             startActivity(intent)
         } else {
-            // Fallback to dialer if direct call permission not yet granted
-            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$cleanNumber"))
+            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$cleanNumber")).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
             startActivity(dialIntent)
         }
     }
@@ -253,6 +522,7 @@ class MainActivity : AppCompatActivity() {
             .setMessage(R.string.sos_confirm_message)
             .setIcon(R.drawable.ic_sos_emergency)
             .setPositiveButton(R.string.sos_action_call) { _, _ ->
+                speak("Activando alerta de socorro y llamando a emergencias.")
                 triggerSosEmergency()
             }
             .setNegativeButton(R.string.cancel, null)
@@ -418,6 +688,7 @@ class MainActivity : AppCompatActivity() {
         // 3. Exit Kiosk Lock Task Mode (Unlocks Phone for Caregiver)
         dialogView.findViewById<Button>(R.id.btnSettingExitKiosk).setOnClickListener {
             try {
+                isKioskActive = false
                 stopLockTask()
                 Toast.makeText(this, "Modo Kiosko Desactivado. El teléfono está libre.", Toast.LENGTH_LONG).show()
                 dialog.dismiss()

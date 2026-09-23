@@ -49,6 +49,41 @@
             android:textSize="13sp"
             android:letterSpacing="0.05"
             android:layout_marginTop="2dp" />
+
+        <!-- Voice Assistant Status Pill -->
+        <LinearLayout
+            android:id="@+id/pillVoice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/pill_voice_bg"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:layout_marginTop="8dp"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/ivVoiceMic"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_mic_voice"
+                app:tint="#00D2A0" />
+
+            <TextView
+                android:id="@+id/tvVoiceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/voice_pill_hint"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Grid Container with 6 Big Senior Cards -->

@@ -24,5 +24,6 @@
     <string name="sos_confirm_title">¿Emitir Alerta SOS?</string>
     <string name="sos_confirm_message">Se llamará a emergencias y se enviará tu ubicación exacta por WhatsApp a la familia.</string>
     <string name="sos_action_call">Llamar Ahora</string>
+    <string name="voice_pill_hint">🎙️ Di: \"Hola MIVOR\" o \"Ayuda\"</string>
     <string name="cancel">Cancelar</string>
 </resources>
