@@ -4,7 +4,6 @@ import ClinicalCalculatorsModal from './ClinicalCalculatorsModal';
 import CognitiveGamesModal from './CognitiveGamesModal';
 import PreventiveCalendarModal from './PreventiveCalendarModal';
 import ConsensusMeterModal from './ConsensusMeterModal';
-import SeniorKioskView from './SeniorKioskView';
 import ScribeSoapModal from './ScribeSoapModal';
 import { 
   Brain, 
@@ -54,22 +53,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
   const [showConsensusModal, setShowConsensusModal] = useState(false);
   const [showScribeModal, setShowScribeModal] = useState(false);
-  const [isKioskModeActive, setIsKioskModeActive] = useState(() => {
-    try {
-      return localStorage.getItem('mivor_kiosk_mode') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  const setKioskMode = (active) => {
-    setIsKioskModeActive(active);
-    try {
-      localStorage.setItem('mivor_kiosk_mode', active ? 'true' : 'false');
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const homeFileInputRef = useRef(null);
 
@@ -131,21 +114,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
       };
     }
   }, [showDrawer, showAboutModal, showHowModal, showMissionModal, showContactModal, showSecurityModal]);
-
-  if (isKioskModeActive) {
-    return (
-      <SeniorKioskView
-        onExitKiosk={() => setKioskMode(false)}
-        onNavigate={onNavigate}
-        apiUrl={apiUrl}
-        authHeaders={authHeaders}
-        userProfile={userProfile}
-        username={username}
-        onOpenCalculators={() => setShowCalculatorsModal(true)}
-        onOpenGames={() => setShowGamesModal(true)}
-      />
-    );
-  }
 
   return (
     <>
@@ -318,34 +286,23 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             </div>
           </div>
 
-          {/* Accesos Rápidos a Módulos Clínicos y Kiosko (Móvil) */}
-          <div className="flex items-center gap-1.5 shrink-0 px-0.5 mobile-quick-pills">
+          {/* Accesos Rápidos a Módulos Clínicos y Cognitivos (Móvil) */}
+          <div className="flex items-center gap-2 shrink-0 px-0.5 mobile-quick-pills">
             <button
               type="button"
               onClick={() => setShowCalculatorsModal(true)}
-              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[10.5px] font-extrabold text-teal-800 flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer truncate"
-              title="Calculadoras Clínicas & Cardio"
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[11px] font-extrabold text-teal-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
             >
-              <Heart size={12} className="text-teal-600 stroke-[2.6] shrink-0" />
-              <span className="truncate">Cardio</span>
+              <Heart size={13} className="text-teal-600 stroke-[2.6]" />
+              <span>Calculadoras & Cardio</span>
             </button>
             <button
               type="button"
               onClick={() => setShowGamesModal(true)}
-              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[10.5px] font-extrabold text-violet-800 flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer truncate"
-              title="Mente Activa"
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[11px] font-extrabold text-violet-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
             >
-              <Brain size={12} className="text-violet-600 stroke-[2.6] shrink-0" />
-              <span className="truncate">Mente Activa</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setKioskMode(true)}
-              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-rose-500 to-red-600 border border-rose-400 rounded-xl text-[10.5px] font-black text-white flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer truncate"
-              title="Activar Modo Cuidador / Kiosko para Adultos Mayores"
-            >
-              <Users size={12} className="text-white stroke-[2.8] shrink-0" />
-              <span className="truncate">Modo Kiosko</span>
+              <Brain size={13} className="text-violet-600 stroke-[2.6]" />
+              <span>Mente Activa</span>
             </button>
           </div>
 
@@ -593,14 +550,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   >
                     <FileText size={18} className="text-indigo-600 stroke-[2.4]" />
                     <span>Preparador de Consulta (MedAlly)</span>
-                  </button>
-
-                  <button 
-                    onClick={() => { setShowDrawer(false); setKioskMode(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-black text-rose-700 bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/80 transition-colors text-left cursor-pointer my-1"
-                  >
-                    <Users size={18} className="text-rose-600 stroke-[2.6]" />
-                    <span>Activar Modo Cuidador / Kiosko</span>
                   </button>
 
                   <button 
@@ -921,7 +870,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           onOpenGames={() => setShowGamesModal(true)}
           onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
           onOpenConsensus={() => setShowConsensusModal(true)}
-          onActivateKiosk={() => setKioskMode(true)}
           onOpenScribe={() => setShowScribeModal(true)}
         />
 
