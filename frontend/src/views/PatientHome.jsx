@@ -154,23 +154,33 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         
         {/* 1. Barra Superior Móvil: Logo + Idioma + Campana + Perfil (Compacta y Exacta) */}
         <header className="w-full px-3.5 py-1.5 sm:py-2 flex items-center justify-between border-b border-slate-100 bg-white shrink-0 mobile-header">
-          {/* Logo Marca Español */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer select-none" 
-            onClick={() => onNavigate('home')}
-          >
-            <img 
-              src="/images/mivor_hero_circle_clean.png" 
-              alt="MIVOR.ai" 
-              className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0 drop-shadow-xs" 
-            />
-            <div className="flex flex-col justify-center">
-              <div className="text-[17px] sm:text-[18.5px] font-black leading-none tracking-tight text-[#0a1128] flex items-center">
-                MIVOR<span className="text-[#00ab84]">.ai</span>
+          {/* Logo Marca Español + Botón Menú Lateral */}
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={() => setShowDrawer(true)} 
+              className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 active:scale-95 transition-all cursor-pointer shadow-2xs"
+              title="Abrir Menú"
+            >
+              <Menu size={18} className="stroke-[2.4]" />
+            </button>
+            <div 
+              className="flex items-center gap-1.5 cursor-pointer select-none" 
+              onClick={() => onNavigate('home')}
+            >
+              <img 
+                src="/images/mivor_hero_circle_clean.png" 
+                alt="MIVOR.ai" 
+                className="h-7 w-7 sm:h-8 sm:w-8 object-contain shrink-0 drop-shadow-xs" 
+              />
+              <div className="flex flex-col justify-center">
+                <div className="text-[17px] sm:text-[18.5px] font-black leading-none tracking-tight text-[#0a1128] flex items-center">
+                  MIVOR<span className="text-[#00ab84]">.ai</span>
+                </div>
+                <span className="text-[6.8px] sm:text-[7.4px] font-black tracking-[0.22em] text-[#0055ff] uppercase mt-0.5 leading-none">
+                 {t('patienthome_tu_salud_mas_clara')}
+                </span>
               </div>
-              <span className="text-[6.8px] sm:text-[7.4px] font-black tracking-[0.22em] text-[#0055ff] uppercase mt-0.5 leading-none">
-               {t('patienthome_tu_salud_mas_clara')}
-              </span>
             </div>
           </div>
 
@@ -308,23 +318,34 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             </div>
           </div>
 
-          {/* Accesos Rápidos a Módulos Clínicos y Cognitivos (Móvil) */}
-          <div className="flex items-center gap-2 shrink-0 px-0.5 mobile-quick-pills">
+          {/* Accesos Rápidos a Módulos Clínicos y Kiosko (Móvil) */}
+          <div className="flex items-center gap-1.5 shrink-0 px-0.5 mobile-quick-pills">
             <button
               type="button"
               onClick={() => setShowCalculatorsModal(true)}
-              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[11px] font-extrabold text-teal-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[10.5px] font-extrabold text-teal-800 flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer truncate"
+              title="Calculadoras Clínicas & Cardio"
             >
-              <Heart size={13} className="text-teal-600 stroke-[2.6]" />
-              <span>Calculadoras & Cardio</span>
+              <Heart size={12} className="text-teal-600 stroke-[2.6] shrink-0" />
+              <span className="truncate">Cardio</span>
             </button>
             <button
               type="button"
               onClick={() => setShowGamesModal(true)}
-              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[11px] font-extrabold text-violet-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[10.5px] font-extrabold text-violet-800 flex items-center justify-center gap-1 shadow-2xs active:scale-95 cursor-pointer truncate"
+              title="Mente Activa"
             >
-              <Brain size={13} className="text-violet-600 stroke-[2.6]" />
-              <span>Mente Activa</span>
+              <Brain size={12} className="text-violet-600 stroke-[2.6] shrink-0" />
+              <span className="truncate">Mente Activa</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setKioskMode(true)}
+              className="flex-1 py-1.5 px-2 bg-gradient-to-r from-rose-500 to-red-600 border border-rose-400 rounded-xl text-[10.5px] font-black text-white flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer truncate"
+              title="Activar Modo Cuidador / Kiosko para Adultos Mayores"
+            >
+              <Users size={12} className="text-white stroke-[2.8] shrink-0" />
+              <span className="truncate">Modo Kiosko</span>
             </button>
           </div>
 
