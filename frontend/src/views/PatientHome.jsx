@@ -41,7 +41,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
 const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments, apiUrl, authHeaders }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showDrawer, setShowDrawer] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showHowModal, setShowHowModal] = useState(false);
@@ -192,13 +192,16 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Texto Hero Izquierda */}
             <div className="flex-1 min-w-0 pr-1">
               <h1 className="text-[17px] sm:text-[19px] font-black text-slate-900 leading-[1.12] tracking-tight">
-               {t('hero_title_p1')} <br />
-               {t('patienthome_con_el_apoyo_de_la')} <br />
-                <span className="text-[#0055ff]">{t('artificial_intelligence')} <br />{t('patienthome_mas_avanzada')}</span>
+                {t('hero_title_p1')}<br />
+                {t('patienthome_con_el_apoyo_de_la')}<br />
+                <span className="text-[#0055ff]">
+                  {t('patienthome_ia_line1') || t('artificial_intelligence')}<br />
+                  {t('patienthome_ia_line2') || t('patienthome_mas_avanzada')}
+                </span>
               </h1>
               <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 font-medium leading-tight mt-1.5">
-               {t('patienthome_mas_informacion_mas_claridad')}<br />
-               {t('patienthome_una_vida_mas_saludable')}
+                {t('patienthome_mas_informacion_mas_claridad')}<br />
+                {t('patienthome_una_vida_mas_saludable')}
               </p>
             </div>
 
@@ -294,7 +297,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[11px] font-extrabold text-teal-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
             >
               <Heart size={13} className="text-teal-600 stroke-[2.6]" />
-              <span>Calculadoras & Cardio</span>
+              <span>{t('patienthome_calculadoras_cardio')}</span>
             </button>
             <button
               type="button"
@@ -302,7 +305,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[11px] font-extrabold text-violet-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
             >
               <Brain size={13} className="text-violet-600 stroke-[2.6]" />
-              <span>Mente Activa</span>
+              <span>{t('patienthome_mente_activa')}</span>
             </button>
           </div>
 
@@ -421,14 +424,34 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
 
           {/* 6. Banner de Medicina Preventiva y Longevidad */}
           <div 
-            onClick={() => onNavigate('search')}
+            onClick={() => setShowPreventiveCalendarModal(true)}
             className="w-full rounded-2xl border border-sky-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner bg-white"
           >
-            <img 
-              src="/images/banner_preventive_mobile.png" 
-              alt={t('patienthome_medicina_preventiva_y_longevidad')} 
-              className="w-full aspect-[412/128] object-contain block" 
-            />
+            {language === 'es' ? (
+              <img 
+                src="/images/banner_preventive_mobile.png" 
+                alt={t('patienthome_medicina_preventiva_y_longevidad')} 
+                className="w-full aspect-[412/128] object-contain block" 
+              />
+            ) : (
+              <div className="w-full aspect-[412/128] bg-gradient-to-r from-sky-50 via-teal-50/70 to-emerald-50/50 p-2.5 sm:p-3.5 flex items-center justify-between gap-2.5 relative overflow-hidden select-none">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-teal-100/90 border border-teal-200 flex items-center justify-center text-teal-700 shrink-0 shadow-2xs">
+                  <Heart size={24} className="stroke-[2.4] text-teal-600" />
+                </div>
+                <div className="flex-1 min-w-0 pr-1">
+                  <h4 className="text-[12.5px] sm:text-[13.5px] font-black text-slate-900 leading-tight">
+                    {t('patienthome_medicina_preventiva_y_longevidad')}
+                  </h4>
+                  <p className="text-[9.5px] sm:text-[10.5px] text-slate-600 font-medium leading-tight mt-0.5 line-clamp-2">
+                    {t('patienthome_preventive_banner_sub')}
+                  </p>
+                  <div className="inline-flex items-center gap-1.5 mt-1.5 px-3 py-1 bg-[#0055ff] text-white rounded-full text-[10px] font-bold shadow-2xs">
+                    <span>{t('patienthome_descubre_como')}</span>
+                    <ArrowRight size={11} className="stroke-[2.8]" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
         </main>
@@ -872,8 +895,9 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           onOpenConsensus={() => setShowConsensusModal(true)}
           onOpenScribe={() => setShowScribeModal(true)}
         />
+      </div>
 
-      {/* Modales Clínicos y Cognitivos */}
+      {/* Modales Clínicos y Cognitivos (Activos tanto en Móvil como en Escritorio) */}
       <ClinicalCalculatorsModal
         isOpen={showCalculatorsModal}
         onClose={() => setShowCalculatorsModal(false)}
@@ -910,7 +934,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         initialMode="patient"
         patientData={userProfile}
       />
-      </div>
     </>
   );
 };

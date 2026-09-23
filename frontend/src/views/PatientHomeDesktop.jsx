@@ -116,8 +116,8 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUr
             {t('hero_title_p1')}<br />
             {t('patienthome_con_el_apoyo_de_la')}<br />
             <strong>
-              {t('artificial_intelligence')}<br />
-              {t('patienthome_mas_avanzada')}
+              {t('patienthome_ia_line1') || t('artificial_intelligence')}<br />
+              {t('patienthome_ia_line2') || t('patienthome_mas_avanzada')}
             </strong>
           </h1>
           <p className="hero-subtitle">

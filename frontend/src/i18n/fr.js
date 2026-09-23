@@ -702,7 +702,14 @@ export const fr = {
     patient_how_title: "Comment fonctionne MIVOR.ai",
     patient_how_desc: "MIVOR.ai allie intelligence artificielle médicale et rigueur scientifique pour vous accompagner au quotidien.",
     patient_for_patients_title: "Portail Patients",
-    patient_for_patients_desc: "Un espace sécurisé et confidentiel pour gérer votre santé et accéder à des conseils médicaux personnalisés."
+    patient_for_patients_desc: "Un espace sécurisé et confidentiel pour gérer votre santé et accéder à des conseils médicaux personnalisés.",
+    patienthome_con_el_apoyo_de_la: "avec le soutien de",
+    patienthome_ia_line1: "l'intelligence artificielle",
+    patienthome_ia_line2: "la plus avancée.",
+    patienthome_calculadoras_cardio: "Calculateurs & Cardio",
+    patienthome_mente_activa: "Esprit Actif",
+    patienthome_preventive_banner_sub: "Anticipez les problèmes de santé potentiels et prenez soin de vous.",
+    patienthome_descubre_como: "Découvrir comment"
 };
 
 
