@@ -8,6 +8,9 @@ import DoctorProfileForm from './views/DoctorProfileForm';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
 import MedicalSearchModal from './MedicalSearchModal';
 import ClinicalCalculatorsModal from './views/ClinicalCalculatorsModal';
+import PreventiveCalendarModal from './views/PreventiveCalendarModal';
+import ConsensusMeterModal from './views/ConsensusMeterModal';
+import ScribeSoapModal from './views/ScribeSoapModal';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -34,6 +37,9 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
   const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
+  const [showCaPtyVaModal, setShowCaPtyVaModal] = useState(false);
+  const [showConsensusModal, setShowConsensusModal] = useState(false);
+  const [showScribeModal, setShowScribeModal] = useState(false);
 
   // Copilot Chat States
   const [copilotMessages, setCopilotMessages] = useState([]);
@@ -646,11 +652,38 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                 <div className="flex items-center gap-2.5">
                   <button 
                     onClick={() => setShowCalculatorsModal(true)} 
-                    className="flex items-center gap-2 px-3.5 py-2 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl text-sm font-bold text-teal-800 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-2 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl text-xs sm:text-sm font-bold text-teal-800 shadow-xs transition-all active:scale-95 cursor-pointer"
                     title="Calculadoras Clínicas MDCalc + Lipidwise (SCORE2, LDL Gap, CKD-EPI, Fragilidad)"
                   >
                     <Stethoscope className="w-4 h-4 text-teal-600 stroke-[2.4]" />
-                    <span>Calculadoras Clínicas</span>
+                    <span>Calculadoras MDCalc</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setShowCaPtyVaModal(true)} 
+                    className="flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 hover:bg-sky-100 rounded-xl text-xs sm:text-sm font-bold text-sky-800 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    title="Vigilancia Oncológica Digestiva CaPtyVa y Calendario Preventivo"
+                  >
+                    <Calendar className="w-4 h-4 text-sky-600 stroke-[2.4]" />
+                    <span>CaPtyVa</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setShowConsensusModal(true)} 
+                    className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    title="Consensus: Medidor de Evidencia Científica en PubMed"
+                  >
+                    <Sparkles className="w-4 h-4 text-emerald-600 stroke-[2.4]" />
+                    <span>Consensus</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setShowScribeModal(true)} 
+                    className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs sm:text-sm font-bold text-indigo-800 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    title="MedAlly: Copiloto Scribe SOAP y Hoja Clara de Cuidados"
+                  >
+                    <FileText className="w-4 h-4 text-indigo-600 stroke-[2.4]" />
+                    <span>MedAlly Scribe</span>
                   </button>
 
                   <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
@@ -1197,6 +1230,28 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         apiUrl={apiUrl}
         authHeaders={authHeaders}
         patientId={selectedPatient?.user_id}
+      />
+
+      <PreventiveCalendarModal
+        isOpen={showCaPtyVaModal}
+        onClose={() => setShowCaPtyVaModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        patientId={selectedPatient?.user_id}
+      />
+
+      <ConsensusMeterModal
+        isOpen={showConsensusModal}
+        onClose={() => setShowConsensusModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+      />
+
+      <ScribeSoapModal
+        isOpen={showScribeModal}
+        onClose={() => setShowScribeModal(false)}
+        initialMode="doctor"
+        patientData={selectedPatient}
       />
     </div>
   );

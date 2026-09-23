@@ -479,3 +479,16 @@ app.include_router(clinical_calculators_router)
 from routers.cognitive_games import router as cognitive_games_router
 app.include_router(cognitive_games_router)
 
+from routers.surveillance import router as surveillance_router
+app.include_router(surveillance_router)
+
+from routers.consensus import router as consensus_router
+app.include_router(consensus_router)
+
+from routers.caregiver import router as caregiver_router
+app.include_router(caregiver_router)
+
+from routers.scribe import router as scribe_router
+app.include_router(scribe_router)
+
+

@@ -27,7 +27,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
 
-const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUrl, authHeaders, onOpenCalculators, onOpenGames }) => {
+const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUrl, authHeaders, onOpenCalculators, onOpenGames, onOpenPreventiveCalendar, onOpenConsensus, onActivateKiosk, onOpenScribe }) => {
   const { language, changeLanguage, t } = useLanguage();
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showHowModal, setShowHowModal] = useState(false);
@@ -167,6 +167,64 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUr
                 <h4 className="text-xs font-extrabold text-slate-800 leading-tight">Mente Activa</h4>
                 <p className="text-[10px] text-violet-700 font-semibold truncate">Memoria • Cálculo</p>
               </div>
+            </button>
+          </div>
+
+          {/* Segunda fila: CaPtyVa, Consensus, MedAlly y Modo Cuidador Kiosko */}
+          <div className="flex items-center gap-2 mt-2 w-full max-w-lg">
+            <button
+              type="button"
+              onClick={onOpenPreventiveCalendar}
+              className="flex-1 px-2.5 py-2 bg-white/90 hover:bg-sky-50 border border-sky-200/80 rounded-xl shadow-2xs transition text-left cursor-pointer flex items-center gap-1.5"
+              title="Calendario Preventivo y Vigilancia Digestiva CaPtyVa"
+            >
+              <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                <Calendar size={13} className="text-sky-700" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold text-slate-800 leading-none">CaPtyVa</div>
+                <div className="text-[9px] text-sky-700 font-semibold mt-0.5 truncate">Cribados</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenConsensus}
+              className="flex-1 px-2.5 py-2 bg-white/90 hover:bg-emerald-50 border border-emerald-200/80 rounded-xl shadow-2xs transition text-left cursor-pointer flex items-center gap-1.5"
+              title="Medidor de Consenso de Evidencia Científica en PubMed"
+            >
+              <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <Sparkles size={13} className="text-emerald-700" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold text-slate-800 leading-none">Consensus</div>
+                <div className="text-[9px] text-emerald-700 font-semibold mt-0.5 truncate">PubMed</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenScribe}
+              className="flex-1 px-2.5 py-2 bg-white/90 hover:bg-indigo-50 border border-indigo-200/80 rounded-xl shadow-2xs transition text-left cursor-pointer flex items-center gap-1.5"
+              title="MedAlly: Preparador de Consulta Médica (1 Página)"
+            >
+              <div className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                <FileText size={13} className="text-indigo-700" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[11px] font-bold text-slate-800 leading-none">MedAlly</div>
+                <div className="text-[9px] text-indigo-700 font-semibold mt-0.5 truncate">Preparar Cita</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={onActivateKiosk}
+              className="px-2.5 py-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-800 rounded-xl shadow-2xs transition cursor-pointer flex items-center gap-1.5 shrink-0"
+              title="Activar Modo Cuidador / Lanzador Kiosko para Adultos Mayores"
+            >
+              <Users size={14} className="text-rose-600" />
+              <span className="text-[11px] font-black">Kiosko</span>
             </button>
           </div>
         </div>

@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
 import ClinicalCalculatorsModal from './ClinicalCalculatorsModal';
 import CognitiveGamesModal from './CognitiveGamesModal';
+import PreventiveCalendarModal from './PreventiveCalendarModal';
+import ConsensusMeterModal from './ConsensusMeterModal';
+import SeniorKioskView from './SeniorKioskView';
+import ScribeSoapModal from './ScribeSoapModal';
 import { 
   Brain, 
   Folder, 
@@ -47,6 +51,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
   const [showGamesModal, setShowGamesModal] = useState(false);
+  const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
+  const [showConsensusModal, setShowConsensusModal] = useState(false);
+  const [showScribeModal, setShowScribeModal] = useState(false);
+  const [isKioskModeActive, setIsKioskModeActive] = useState(false);
 
   const homeFileInputRef = useRef(null);
 
@@ -108,6 +116,21 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
       };
     }
   }, [showDrawer, showAboutModal, showHowModal, showMissionModal, showContactModal, showSecurityModal]);
+
+  if (isKioskModeActive) {
+    return (
+      <SeniorKioskView
+        onExitKiosk={() => setIsKioskModeActive(false)}
+        onNavigate={onNavigate}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        userProfile={userProfile}
+        username={username}
+        onOpenCalculators={() => setShowCalculatorsModal(true)}
+        onOpenGames={() => setShowGamesModal(true)}
+      />
+    );
+  }
 
   return (
     <>
@@ -513,6 +536,38 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   </button>
 
                   <button 
+                    onClick={() => { setShowDrawer(false); setShowPreventiveCalendarModal(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-sky-800 hover:bg-sky-50 transition-colors text-left cursor-pointer"
+                  >
+                    <Calendar size={18} className="text-sky-600 stroke-[2.4]" />
+                    <span>Calendario & CaPtyVa</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); setShowConsensusModal(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-emerald-800 hover:bg-emerald-50 transition-colors text-left cursor-pointer"
+                  >
+                    <Sparkles size={18} className="text-emerald-600 stroke-[2.4]" />
+                    <span>Consensus (Evidencia PubMed)</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); setShowScribeModal(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-indigo-800 hover:bg-indigo-50 transition-colors text-left cursor-pointer"
+                  >
+                    <FileText size={18} className="text-indigo-600 stroke-[2.4]" />
+                    <span>Preparador de Consulta (MedAlly)</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); setIsKioskModeActive(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-black text-rose-700 bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/80 transition-colors text-left cursor-pointer my-1"
+                  >
+                    <Users size={18} className="text-rose-600 stroke-[2.6]" />
+                    <span>Activar Modo Cuidador / Kiosko</span>
+                  </button>
+
+                  <button 
                     onClick={() => { setShowDrawer(false); onNavigate('doctors'); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-black hover:bg-slate-50 hover:text-[#0055ff] transition-colors text-left cursor-pointer"
                   >
@@ -828,6 +883,10 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           authHeaders={authHeaders}
           onOpenCalculators={() => setShowCalculatorsModal(true)}
           onOpenGames={() => setShowGamesModal(true)}
+          onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
+          onOpenConsensus={() => setShowConsensusModal(true)}
+          onActivateKiosk={() => setIsKioskModeActive(true)}
+          onOpenScribe={() => setShowScribeModal(true)}
         />
 
       {/* Modales Clínicos y Cognitivos */}
@@ -844,6 +903,28 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         onClose={() => setShowGamesModal(false)}
         apiUrl={apiUrl}
         authHeaders={authHeaders}
+      />
+
+      <PreventiveCalendarModal
+        isOpen={showPreventiveCalendarModal}
+        onClose={() => setShowPreventiveCalendarModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        patientId={userProfile?.user_id}
+      />
+
+      <ConsensusMeterModal
+        isOpen={showConsensusModal}
+        onClose={() => setShowConsensusModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+      />
+
+      <ScribeSoapModal
+        isOpen={showScribeModal}
+        onClose={() => setShowScribeModal(false)}
+        initialMode="patient"
+        patientData={userProfile}
       />
       </div>
     </>
