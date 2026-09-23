@@ -54,7 +54,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
   const [showConsensusModal, setShowConsensusModal] = useState(false);
   const [showScribeModal, setShowScribeModal] = useState(false);
-  const [isKioskModeActive, setIsKioskModeActive] = useState(false);
+  const [isKioskModeActive, setIsKioskModeActive] = useState(() => {
+    try {
+      return localStorage.getItem('mivor_kiosk_mode') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const setKioskMode = (active) => {
+    setIsKioskModeActive(active);
+    try {
+      localStorage.setItem('mivor_kiosk_mode', active ? 'true' : 'false');
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const homeFileInputRef = useRef(null);
 
@@ -120,7 +135,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   if (isKioskModeActive) {
     return (
       <SeniorKioskView
-        onExitKiosk={() => setIsKioskModeActive(false)}
+        onExitKiosk={() => setKioskMode(false)}
         onNavigate={onNavigate}
         apiUrl={apiUrl}
         authHeaders={authHeaders}
@@ -560,7 +575,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   </button>
 
                   <button 
-                    onClick={() => { setShowDrawer(false); setIsKioskModeActive(true); }}
+                    onClick={() => { setShowDrawer(false); setKioskMode(true); }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-black text-rose-700 bg-rose-50/70 hover:bg-rose-100/70 border border-rose-200/80 transition-colors text-left cursor-pointer my-1"
                   >
                     <Users size={18} className="text-rose-600 stroke-[2.6]" />
@@ -885,7 +900,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           onOpenGames={() => setShowGamesModal(true)}
           onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
           onOpenConsensus={() => setShowConsensusModal(true)}
-          onActivateKiosk={() => setIsKioskModeActive(true)}
+          onActivateKiosk={() => setKioskMode(true)}
           onOpenScribe={() => setShowScribeModal(true)}
         />
 
