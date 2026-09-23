@@ -472,3 +472,10 @@ app.include_router(health_places_router)
 
 from routers.i18n import router as i18n_router
 app.include_router(i18n_router)
+
+from routers.clinical_calculators import router as clinical_calculators_router
+app.include_router(clinical_calculators_router)
+
+from routers.cognitive_games import router as cognitive_games_router
+app.include_router(cognitive_games_router)
+

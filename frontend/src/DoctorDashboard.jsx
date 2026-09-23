@@ -7,6 +7,7 @@ import DoctorSchedule from './views/DoctorSchedule';
 import DoctorProfileForm from './views/DoctorProfileForm';
 import { printHtmlContent, escapeHtml } from './utils/printPdf';
 import MedicalSearchModal from './MedicalSearchModal';
+import ClinicalCalculatorsModal from './views/ClinicalCalculatorsModal';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -32,6 +33,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
+  const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
 
   // Copilot Chat States
   const [copilotMessages, setCopilotMessages] = useState([]);
@@ -641,10 +643,21 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                     <span>{patientDetail?.profile?.gender || t('not_specified')}</span>
                   </p>
                 </div>
-                <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
-                  <Printer className="w-4 h-4 text-brand-teal" />
-                 {t('print_pdf')}
-                </button>
+                <div className="flex items-center gap-2.5">
+                  <button 
+                    onClick={() => setShowCalculatorsModal(true)} 
+                    className="flex items-center gap-2 px-3.5 py-2 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl text-sm font-bold text-teal-800 shadow-xs transition-all active:scale-95 cursor-pointer"
+                    title="Calculadoras Clínicas MDCalc + Lipidwise (SCORE2, LDL Gap, CKD-EPI, Fragilidad)"
+                  >
+                    <Stethoscope className="w-4 h-4 text-teal-600 stroke-[2.4]" />
+                    <span>Calculadoras Clínicas</span>
+                  </button>
+
+                  <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">
+                    <Printer className="w-4 h-4 text-brand-teal" />
+                   {t('print_pdf')}
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -1177,6 +1190,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         </div>
       </div>
 
+      {/* Modal de Calculadoras Clínicas MDCalc + Lipidwise */}
+      <ClinicalCalculatorsModal
+        isOpen={showCalculatorsModal}
+        onClose={() => setShowCalculatorsModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        patientId={selectedPatient?.user_id}
+      />
     </div>
   );
 }

@@ -27,7 +27,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
 
-const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => {
+const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUrl, authHeaders, onOpenCalculators, onOpenGames }) => {
   const { language, changeLanguage, t } = useLanguage();
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showHowModal, setShowHowModal] = useState(false);
@@ -135,6 +135,39 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username }) => 
               <h3>{t('patient_data_protected')}</h3>
               <p>{t('hero_security_desc')}</p>
             </div>
+          </div>
+
+          {/* Tarjetas de Acceso Directo: Calculadoras Clínicas y Mente Activa */}
+          <div className="flex items-center gap-3 mt-3 w-full max-w-md">
+            <button
+              type="button"
+              onClick={onOpenCalculators}
+              className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 hover:bg-teal-50/90 border border-teal-200/80 rounded-2xl shadow-xs transition-all active:scale-98 cursor-pointer group text-left"
+              title="Calculadoras de riesgo cardiovascular SCORE2, brecha de colesterol LDL y función renal"
+            >
+              <div className="w-8 h-8 rounded-xl bg-teal-100/90 text-teal-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <Heart size={16} className="text-teal-700 stroke-[2.4]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-extrabold text-slate-800 leading-tight">Calculadoras & Cardio</h4>
+                <p className="text-[10px] text-teal-700 font-semibold truncate">SCORE2 • LDL • Renal</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={onOpenGames}
+              className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 hover:bg-violet-50/90 border border-violet-200/80 rounded-2xl shadow-xs transition-all active:scale-98 cursor-pointer group text-left"
+              title="Juegos diarios de estimulación cognitiva, memoria y agilidad mental"
+            >
+              <div className="w-8 h-8 rounded-xl bg-violet-100/90 text-violet-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                <Brain size={16} className="text-violet-700 stroke-[2.4]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-extrabold text-slate-800 leading-tight">Mente Activa</h4>
+                <p className="text-[10px] text-violet-700 font-semibold truncate">Memoria • Cálculo</p>
+              </div>
+            </button>
           </div>
         </div>
 

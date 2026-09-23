@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
+import ClinicalCalculatorsModal from './ClinicalCalculatorsModal';
+import CognitiveGamesModal from './CognitiveGamesModal';
 import { 
   Brain, 
   Folder, 
@@ -35,7 +37,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments }) => {
+const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments, apiUrl, authHeaders }) => {
   const { t } = useLanguage();
   const [showDrawer, setShowDrawer] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
@@ -43,6 +45,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
+  const [showGamesModal, setShowGamesModal] = useState(false);
 
   const homeFileInputRef = useRef(null);
 
@@ -266,6 +270,26 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             </div>
           </div>
 
+          {/* Accesos Rápidos a Módulos Clínicos y Cognitivos (Móvil) */}
+          <div className="flex items-center gap-2 shrink-0 px-0.5 mobile-quick-pills">
+            <button
+              type="button"
+              onClick={() => setShowCalculatorsModal(true)}
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[11px] font-extrabold text-teal-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+            >
+              <Heart size={13} className="text-teal-600 stroke-[2.6]" />
+              <span>Calculadoras & Cardio</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowGamesModal(true)}
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200/90 rounded-xl text-[11px] font-extrabold text-violet-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
+            >
+              <Brain size={13} className="text-violet-600 stroke-[2.6]" />
+              <span>Mente Activa</span>
+            </button>
+          </div>
+
           {/* 5. Cuadrícula 2x2 de Servicios (Exacta al diseño) */}
           <div className="grid grid-cols-2 gap-2 sm:gap-2.5 flex-1 min-h-0 items-stretch mobile-grid">
             
@@ -470,6 +494,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   >
                     <Lightbulb size={18} className="text-[#ea580c] stroke-[2.4]" />
                     <span>{t('patient_card4_title')}</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); setShowCalculatorsModal(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-teal-800 hover:bg-teal-50 transition-colors text-left cursor-pointer"
+                  >
+                    <Heart size={18} className="text-teal-600 stroke-[2.4]" />
+                    <span>Calculadoras & Longevidad</span>
+                  </button>
+
+                  <button 
+                    onClick={() => { setShowDrawer(false); setShowGamesModal(true); }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-violet-800 hover:bg-violet-50 transition-colors text-left cursor-pointer"
+                  >
+                    <Brain size={18} className="text-violet-600 stroke-[2.4]" />
+                    <span>Mente Activa (Juegos)</span>
                   </button>
 
                   <button 
@@ -784,7 +824,27 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           onLogout={onLogout} 
           userProfile={userProfile}
           username={username}
+          apiUrl={apiUrl}
+          authHeaders={authHeaders}
+          onOpenCalculators={() => setShowCalculatorsModal(true)}
+          onOpenGames={() => setShowGamesModal(true)}
         />
+
+      {/* Modales Clínicos y Cognitivos */}
+      <ClinicalCalculatorsModal
+        isOpen={showCalculatorsModal}
+        onClose={() => setShowCalculatorsModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        patientId={userProfile?.user_id}
+      />
+
+      <CognitiveGamesModal
+        isOpen={showGamesModal}
+        onClose={() => setShowGamesModal(false)}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+      />
       </div>
     </>
   );

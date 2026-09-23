@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip } from 'lucide-react';
+import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip, Printer } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
+import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 
 export default function PatientTreatments({ 
   apiUrl, 
@@ -162,6 +163,77 @@ export default function PatientTreatments({
     }
   };
 
+
+  const handlePrintFridgeSheet = async () => {
+    if (!medications || medications.length === 0) {
+      alert("No tienes medicamentos registrados para imprimir.");
+      return;
+    }
+    const patientName = userProfile?.full_name || username || "Paciente";
+    const dateStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const medRows = medications.map(m => `
+      <tr>
+        <td style="padding: 10px 12px; font-weight: bold; font-size: 15px; border-bottom: 1px solid #e2e8f0;">
+          💊 ${escapeHtml(m.medication_name)}
+        </td>
+        <td style="padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #e2e8f0;">
+          ${escapeHtml(m.dosage || 'Según indicación médica')}
+        </td>
+        <td style="padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #e2e8f0;">
+          ${escapeHtml(m.time_of_day || m.frequency || 'Horario habitual')}
+        </td>
+        <td style="padding: 10px 12px; text-align: center; border-bottom: 1px solid #e2e8f0;">
+          <span style="display: inline-block; width: 22px; height: 22px; border: 2px solid #0f766e; border-radius: 6px;"></span>
+        </td>
+      </tr>
+    `).join('');
+
+    const htmlContent = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; max-width: 800px; margin: 0 auto;">
+        <div style="text-align: center; border-bottom: 3px solid #0f766e; padding-bottom: 14px; margin-bottom: 20px;">
+          <h1 style="color: #0b1a30; margin: 0; font-size: 26px; font-weight: 800;">
+            MIVOR<span style="color: #0f766e;">.ai</span> — Plan de Medicación Diario
+          </h1>
+          <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px; font-weight: 600;">
+            Hoja de control clara para la nevera • ${escapeHtml(patientName)}
+          </p>
+          <p style="color: #94a3b8; margin: 2px 0 0 0; font-size: 12px;">Fecha de emisión: ${escapeHtml(dateStr)}</p>
+        </div>
+
+        <div style="background-color: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; color: #0f766e;">
+          📌 <strong>Instrucciones para el paciente o cuidador:</strong> Mantén esta hoja en un lugar visible (como la nevera). Marca la casilla con un bolígrafo cada vez que tomes tu medicación para no olvidar ninguna toma.
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+          <thead>
+            <tr style="background-color: #0f766e; color: #ffffff;">
+              <th style="padding: 12px; text-align: left; font-size: 14px; border-radius: 8px 0 0 0;">Medicamento</th>
+              <th style="padding: 12px; text-align: left; font-size: 14px;">Dosis</th>
+              <th style="padding: 12px; text-align: left; font-size: 14px;">Horario / Momento</th>
+              <th style="padding: 12px; text-align: center; font-size: 14px; border-radius: 0 8px 0 0;">Tomado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${medRows}
+          </tbody>
+        </table>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 30px; font-size: 12px; color: #475569; border-top: 2px dashed #cbd5e1; padding-top: 16px;">
+          <div>
+            <strong>Teléfono de Emergencias:</strong> 112 / 911<br />
+            <strong>Centro de Salud / Hospital:</strong> Consulte su centro habitual
+          </div>
+          <div style="text-align: right;">
+            <strong>Aviso de seguridad:</strong> No suspender ni alterar dosis de tratamientos sin consultar a su médico colegiado.
+          </div>
+        </div>
+      </div>
+    `;
+
+    await printHtmlContent(`Plan_Medicacion_${patientName.replace(/\s+/g, '_')}`, htmlContent);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-base font-sans relative pb-28 overflow-x-hidden">
       {/* Top Navbar Unificado */}
@@ -247,6 +319,22 @@ export default function PatientTreatments({
             <span>{isExtracting ? (t("analyzing_with_ai") || "Analizando...") : (t("upload_prescription_pdf") || "Subir PDF / Imagen")}</span>
           </button>
         </div>
+
+        
+        {/* Botón Imprimir Plan Nevera */}
+        {medications.length > 0 && (
+          <div className="flex justify-end mb-4">
+            <button
+              type="button"
+              onClick={handlePrintFridgeSheet}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-teal-50 text-teal-800 border border-teal-200 rounded-2xl text-xs font-bold shadow-xs transition active:scale-95 cursor-pointer"
+              title="Genera una hoja clara en PDF con casillas de verificación para imprimir y pegar en la nevera"
+            >
+              <Printer size={16} className="text-teal-700" />
+              <span>Imprimir Plan para la Nevera</span>
+            </button>
+          </div>
+        )}
 
         {/* List */}
         <div className="space-y-4 mb-8">

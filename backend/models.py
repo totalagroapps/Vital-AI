@@ -146,6 +146,23 @@ class HealthEvent(Base):
 
     patient = relationship("PatientProfile", back_populates="health_events")
 
+class CognitiveGameSession(Base):
+    """
+    Registros de sesiones de juegos de estimulación cognitiva (Mente Activa).
+    Permite seguir la agilidad mental, memoria y velocidad de reacción en el tiempo.
+    """
+    __tablename__ = "cognitive_game_sessions"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    game_type = Column(String, index=True) # "memory_digits", "speed_math", "pattern_match"
+    score = Column(Integer, default=0)
+    accuracy_percentage = Column(Float, default=100.0)
+    duration_seconds = Column(Float, default=0.0)
+    difficulty_level = Column(String, default="normal") # "easy", "normal", "challenge"
+    details = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class SpecialistProfile(Base):
     """
     Perfil público y profesional del médico especialista.

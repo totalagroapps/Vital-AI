@@ -1461,6 +1461,8 @@ export default function App() {
           userProfile={patientProfile}
           username={username}
           onAddAttachments={addAttachments}
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
         />
         {GlobalBottomNav}
       </>
@@ -1477,6 +1479,8 @@ export default function App() {
           userProfile={patientProfile}
           username={username}
           onAddAttachments={addAttachments}
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
         />
         <MedicalSearchModal isOpen={true} onClose={() => navigate('/paciente')} token={token} apiUrl={API_URL} userProfile={patientProfile} />
         {GlobalBottomNav}
