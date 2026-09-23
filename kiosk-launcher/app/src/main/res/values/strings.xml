@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MIVOR Kiosk</string>
+    <string name="kiosk_header_subtitle">Modo Senior Protegido</string>
+    
+    <string name="btn_mivor_title">MIVOR SALUD</string>
+    <string name="btn_mivor_sub">Consultas, recetas y signos</string>
+    
+    <string name="btn_call_title">LLAMAR FAMILIA</string>
+    <string name="btn_call_sub">1 toque a tus seres queridos</string>
+    
+    <string name="btn_sos_title">SOS EMERGENCIA</string>
+    <string name="btn_sos_sub">Llamada 112 y alerta GPS</string>
+    
+    <string name="btn_whatsapp_title">WHATSAPP</string>
+    <string name="btn_whatsapp_sub">Mensajes del grupo familiar</string>
+    
+    <string name="btn_photos_title">ÁLBUM FAMILIAR</string>
+    <string name="btn_photos_sub">Fotos y recuerdos felices</string>
+    
+    <string name="btn_settings_title">AJUSTES CUIDADOR</string>
+    <string name="btn_settings_sub">Acceso con código PIN</string>
+    
+    <string name="sos_confirm_title">¿Emitir Alerta SOS?</string>
+    <string name="sos_confirm_message">Se llamará a emergencias y se enviará tu ubicación exacta por WhatsApp a la familia.</string>
+    <string name="sos_action_call">Llamar Ahora</string>
+    <string name="cancel">Cancelar</string>
+</resources>
