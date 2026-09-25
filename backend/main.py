@@ -103,7 +103,10 @@ def get_version():
         "version": os.getenv("APP_LATEST_VERSION", "1.0.2"),
         "apkUrl": os.getenv("APP_APK_URL", DEFAULT_APK_URL),
         "notes": os.getenv("APP_UPDATE_NOTES", "Nueva versión con diseño optimizado 100dvh para móvil (sin scroll) y adecuación regulatoria."),
-        "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1")
+        "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1"),
+        # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
+        # Solo tiene sentido con una URL fija por versión (no con el tag "latest", que cambia en cada build).
+        "sha256": os.getenv("APP_APK_SHA256") or None
     }
 
 
