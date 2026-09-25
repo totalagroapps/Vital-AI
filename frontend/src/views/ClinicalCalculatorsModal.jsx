@@ -47,7 +47,7 @@ export default function ClinicalCalculatorsModal({
   });
   const [isCalculatingCardio, setIsCalculatingCardio] = useState(false);
   const [score2Result, setScore2Result] = useState(null);
-  const [lipidwiseResult, setLípidos MIVORResult] = useState(null);
+  const [lipidwiseResult, setLipidwiseResult] = useState(null);
 
   // --- TAB 2: RENAL (Filtrado MIVOR 2021) ---
   const [renalForm, setRenalForm] = useState({
@@ -173,7 +173,7 @@ export default function ClinicalCalculatorsModal({
         });
         if (resLipid.ok) {
           const lData = await resLipid.json();
-          setLípidos MIVORResult(lData);
+          setLipidwiseResult(lData);
         }
       }
     } catch (err) {
