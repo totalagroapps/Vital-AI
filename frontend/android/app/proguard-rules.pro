@@ -1,21 +1,14 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Reglas de R8 para el build de release (minifyEnabled true).
+# Los plugins de Capacitor (incluido SecureTokenPlugin) ya los protegen las reglas
+# que trae @capacitor/android.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Métodos que el WebView llama desde JavaScript (puente de Capacitor y window.AndroidUpdater):
+# si R8 los renombra o quita la anotación, el WebView no los encuentra y la llamada falla sin error.
+-keepattributes JavascriptInterface,*Annotation*
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Números de línea en los informes de errores, sin exponer los nombres de archivo originales.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
