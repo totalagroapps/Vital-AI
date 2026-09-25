@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getToken } from '../utils/authStorage';
 import { 
   User, Briefcase, ShieldCheck, Lock, Edit3, CheckCircle2, 
   Mail, Phone, Clock, Stethoscope, Award, Building2, Globe, 
@@ -75,7 +76,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
   });
   const [showEduForm, setShowEduForm] = useState(false);
 
-  const token = localStorage.getItem('med_token');
+  const token = getToken();
   const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? window.location.origin : 'http://127.0.0.1:8000');
   const cleanApiUrl = effectiveApiUrl.replace(/\/$/, '');
   const baseApi = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;

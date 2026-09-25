@@ -1,5 +1,6 @@
 import DoctorDashboard from './DoctorDashboard';
 import { API_URL } from './utils/apiUrl';
+import { getToken, loadToken, saveToken, clearToken, tokenAvailableSync } from './utils/authStorage';
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
@@ -68,11 +69,22 @@ import {
     Menu,
 } from 'lucide-react';
 
+const CHAT_STORAGE_KEYS = ['currentSessionId', 'triageSessionId', 'isTriageClosed', 'chatMessages'];
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, language, country, locale } = useLanguage();
-  const [token, setToken] = useState(localStorage.getItem('med_token') || null);
+  // En Android el token se descifra del Keystore de forma asíncrona: hasta entonces no se decide la ruta
+  const [token, setToken] = useState(() => (tokenAvailableSync ? getToken() : null));
+  const [authReady, setAuthReady] = useState(tokenAvailableSync);
+  useEffect(() => {
+    if (tokenAvailableSync) return;
+    loadToken().then((stored) => {
+      setToken(stored);
+      setAuthReady(true);
+    });
+  }, []);
   const [username, setUsername] = useState(null);
   const [patientScreen, setPatientScreen] = useState(() => {
     const path = window.location.pathname.replace('/', '');
@@ -179,30 +191,42 @@ export default function App() {
   const [sessions, setSessions] = useState([]);
   // Eventos del historial de salud (distintos de las conversaciones del chat)
   const [healthHistory, setHealthHistory] = useState([]);
-  const [currentSessionId, setCurrentSessionId] = useState(() => localStorage.getItem('currentSessionId') || null);
-  const [triageSessionId, setTriageSessionId] = useState(() => localStorage.getItem('triageSessionId') || null);
-  const [isTriageClosed, setIsTriageClosed] = useState(() => localStorage.getItem('isTriageClosed') === 'true');
+  // La conversación en curso vive en sessionStorage: sobrevive a recargas, pero el historial médico
+  // no se queda guardado en el dispositivo al cerrar (los chats con sesión se recuperan del servidor).
+  const [currentSessionId, setCurrentSessionId] = useState(() => sessionStorage.getItem('currentSessionId') || null);
+  const [triageSessionId, setTriageSessionId] = useState(() => sessionStorage.getItem('triageSessionId') || null);
+  const [isTriageClosed, setIsTriageClosed] = useState(() => sessionStorage.getItem('isTriageClosed') === 'true');
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('chatMessages');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = sessionStorage.getItem('chatMessages');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
+  // Versiones anteriores guardaban el chat en localStorage: se borra una vez
   useEffect(() => {
-    if (currentSessionId) localStorage.setItem('currentSessionId', currentSessionId);
-    else localStorage.removeItem('currentSessionId');
+    CHAT_STORAGE_KEYS.forEach((key) => localStorage.removeItem(key));
+  }, []);
+
+  useEffect(() => {
+    if (currentSessionId) sessionStorage.setItem('currentSessionId', currentSessionId);
+    else sessionStorage.removeItem('currentSessionId');
   }, [currentSessionId]);
 
   useEffect(() => {
-    if (triageSessionId) localStorage.setItem('triageSessionId', triageSessionId);
-    else localStorage.removeItem('triageSessionId');
+    if (triageSessionId) sessionStorage.setItem('triageSessionId', triageSessionId);
+    else sessionStorage.removeItem('triageSessionId');
   }, [triageSessionId]);
 
   useEffect(() => {
-    localStorage.setItem('isTriageClosed', isTriageClosed);
+    sessionStorage.setItem('isTriageClosed', isTriageClosed);
   }, [isTriageClosed]);
 
   useEffect(() => {
-    localStorage.setItem('chatMessages', JSON.stringify(messages));
+    if (messages.length) sessionStorage.setItem('chatMessages', JSON.stringify(messages));
+    else sessionStorage.removeItem('chatMessages');
   }, [messages]);
   const [inputMessage, setInputMessage] = useState('');
   
@@ -481,12 +505,9 @@ export default function App() {
     setToken(null);
     setUsername(null);
     setViewMode('patient');
-    localStorage.removeItem('med_token');
+    clearToken();
     localStorage.removeItem('med_role');
-    localStorage.removeItem('currentSessionId');
-    localStorage.removeItem('triageSessionId');
-    localStorage.removeItem('isTriageClosed');
-    localStorage.removeItem('chatMessages');
+    CHAT_STORAGE_KEYS.forEach((key) => sessionStorage.removeItem(key));
     setSessions([]);
     setHealthHistory([]);
     setMessages([]);
@@ -1114,6 +1135,9 @@ export default function App() {
 
   const path = location.pathname;
 
+  // Android: esperando a que el Keystore devuelva la sesión (unos milisegundos)
+  if (!authReady) return null;
+
   if (path === '/' || path === '') {
     if (!token) return <Navigate to="/login" />;
     return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
@@ -1198,8 +1222,8 @@ export default function App() {
       <>
         <Auth 
           onLogin={(jwt, role) => { 
-            setToken(jwt); 
-            localStorage.setItem('med_token', jwt); 
+            setToken(jwt);
+            saveToken(jwt);
             if(role) { 
               setViewMode(role); 
               localStorage.setItem('med_role', role); 

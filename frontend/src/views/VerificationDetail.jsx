@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getToken } from '../utils/authStorage';
 import {
   ChevronRight,
   ExternalLink,
@@ -52,7 +53,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
   const baseApi = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;
 
   const getHeaders = () => {
-    const token = localStorage.getItem('med_token') || localStorage.getItem('token');
+    const token = getToken();
     return {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
