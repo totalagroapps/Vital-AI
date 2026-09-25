@@ -15,7 +15,10 @@ import database
 import models
 from database import get_db
 from security import verify_password, get_password_hash, create_access_token, get_current_user_id
-from main import RegisterRequest, s3_client, R2_BUCKET_NAME, logger
+from schemas.requests import RegisterRequest
+from storage import s3_client, R2_BUCKET_NAME
+
+logger = logging.getLogger('media_v2')
 
 router = APIRouter()
 

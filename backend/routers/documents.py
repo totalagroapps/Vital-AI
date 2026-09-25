@@ -25,7 +25,10 @@ import security
 from services.language_service import language_label
 from database import get_db
 from security import get_current_user, get_current_user_id
-from main import s3_client, R2_BUCKET_NAME, logger, resize_image_to_base64, extract_text_from_pdf, scrub_phi
+from storage import s3_client, R2_BUCKET_NAME
+from services.document_utils import resize_image_to_base64, extract_text_from_pdf, scrub_phi
+
+logger = logging.getLogger('media_v2')
 from services.clinical_pdf_service import generate_clinical_pdf
 
 router = APIRouter()

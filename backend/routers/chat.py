@@ -17,7 +17,9 @@ import security
 from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user_id
-from main import StandardChatRequest, TriageRequest, logger
+from schemas.requests import StandardChatRequest, TriageRequest
+
+logger = logging.getLogger('media_v2')
 
 router = APIRouter()
 

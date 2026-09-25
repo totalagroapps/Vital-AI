@@ -14,7 +14,11 @@ import security
 from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user, require_role
-from main import TriageRequest, logger, scrub_phi, TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
+from schemas.requests import TriageRequest
+from services.document_utils import scrub_phi
+from prompts import TRIAGE_SYSTEM_PROMPT, TRIAGE_SYSTEM_PROMPT_V2
+
+logger = logging.getLogger('media_v2')
 from openai import AsyncOpenAI
 
 router = APIRouter()

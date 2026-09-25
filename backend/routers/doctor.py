@@ -24,11 +24,10 @@ from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user, require_role, get_current_user_id
 
-from main import (
-    RegisterRequest, StandardChatMessage, StandardChatRequest, ChatMessage, 
-    TriageRequest, PatientProfileSchema, DoctorQueryRequest, MedicationReminderCreate,
-    s3_client, R2_BUCKET_NAME, logger
-)
+from schemas.requests import DoctorQueryRequest
+from storage import s3_client, R2_BUCKET_NAME
+
+logger = logging.getLogger('media_v2')
 from services import appointment_service, doctor_service
 from services.matching_service import match_specialty_from_clinical_data, get_recommended_specialists
 

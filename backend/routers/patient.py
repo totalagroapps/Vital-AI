@@ -18,7 +18,10 @@ import models
 import security
 from database import get_db
 from security import get_current_user, require_role, get_current_user_id
-from main import PatientProfileSchema, logger, s3_client, R2_BUCKET_NAME
+from schemas.requests import PatientProfileSchema
+from storage import s3_client, R2_BUCKET_NAME
+
+logger = logging.getLogger('media_v2')
 
 router = APIRouter()
 
