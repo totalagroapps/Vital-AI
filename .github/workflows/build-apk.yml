@@ -54,31 +54,96 @@ jobs:
         working-directory: frontend/android
         run: chmod +x gradlew
 
-      - name: Build Android APK (Debug)
+      # ------------------------------------------------------------------
+      # Firma de release con una clave FIJA (Secrets del repositorio):
+      #   MIVOR_KEYSTORE_BASE64   keystore .jks codificado en base64
+      #   MIVOR_KEYSTORE_PASSWORD contraseña del keystore
+      #   MIVOR_KEY_ALIAS         alias de la clave
+      #   MIVOR_KEY_PASSWORD      contraseña de la clave
+      # Variable (no secreta) opcional: MIVOR_CERT_SHA256 = huella SHA-256 esperada del certificado.
+      # Sin los secrets se compila en debug (clave aleatoria del runner) y NO se publica en Releases:
+      # la app instalada rechazaría esa actualización por venir firmada con otra clave.
+      # ------------------------------------------------------------------
+      - name: Prepare Release Signing
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MIVOR_KEYSTORE_BASE64 }}
+        run: |
+          echo "MIVOR_VERSION_CODE=$((GITHUB_RUN_NUMBER + 100))" >> "$GITHUB_ENV"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/mivor-release.jks"
+            echo "MIVOR_KEYSTORE_FILE=$RUNNER_TEMP/mivor-release.jks" >> "$GITHUB_ENV"
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Faltan los secrets de firma (MIVOR_KEYSTORE_BASE64...). Se compila en debug y no se publica en Releases."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Android APK (Release, firmado)
+        if: steps.signing.outputs.available == 'true'
         working-directory: frontend/android
-        run: ./gradlew clean assembleDebug --stacktrace --info --no-daemon
+        env:
+          MIVOR_KEYSTORE_PASSWORD: ${{ secrets.MIVOR_KEYSTORE_PASSWORD }}
+          MIVOR_KEY_ALIAS: ${{ secrets.MIVOR_KEY_ALIAS }}
+          MIVOR_KEY_PASSWORD: ${{ secrets.MIVOR_KEY_PASSWORD }}
+        run: |
+          ./gradlew clean assembleRelease --stacktrace --no-daemon
+          echo "APK_PATH=frontend/android/app/build/outputs/apk/release/app-release.apk" >> "$GITHUB_ENV"
+
+      - name: Build Android APK (Debug, sin publicar)
+        if: steps.signing.outputs.available != 'true'
+        working-directory: frontend/android
+        run: |
+          ./gradlew clean assembleDebug --stacktrace --no-daemon
+          echo "APK_PATH=frontend/android/app/build/outputs/apk/debug/app-debug.apk" >> "$GITHUB_ENV"
+
+      - name: Verify APK Signature
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.MIVOR_CERT_SHA256 }}
+        run: |
+          APKSIGNER="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          "$APKSIGNER" verify --print-certs "$APK_PATH" | tee signer.txt
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" signer.txt | awk '{print $NF}')
+          if [ -n "$EXPECTED_CERT_SHA256" ]; then
+            EXPECTED=$(echo "$EXPECTED_CERT_SHA256" | tr -d ': ' | tr 'A-F' 'a-f')
+            if [ "$ACTUAL" != "$EXPECTED" ]; then
+              echo "::error::El APK está firmado con $ACTUAL y se esperaba $EXPECTED. No se publica."
+              exit 1
+            fi
+          fi
 
       - name: Prepare MIVOR Latest APK
         run: |
           mkdir -p frontend/public/download
-          cp frontend/android/app/build/outputs/apk/debug/app-debug.apk frontend/public/download/mivor-latest.apk
+          cp "$APK_PATH" frontend/public/download/mivor-latest.apk
+          cd frontend/public/download
+          sha256sum mivor-latest.apk | awk '{print $1}' > mivor-latest.apk.sha256
+          echo "SHA-256: $(cat mivor-latest.apk.sha256)"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MIVOR-Android-APK
-          path: frontend/public/download/mivor-latest.apk
+          path: |
+            frontend/public/download/mivor-latest.apk
+            frontend/public/download/mivor-latest.apk.sha256
           retention-days: 30
 
       - name: Publish to GitHub Releases (latest)
         uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        if: steps.signing.outputs.available == 'true' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         with:
           tag_name: latest
           name: "MIVOR.ai Latest Build"
-          body: "Descarga directa de la última versión compilada automáticamente de MIVOR.ai para Android."
+          body: "Descarga directa de la última versión compilada automáticamente de MIVOR.ai para Android (firmada con la clave de release)."
           draft: false
           prerelease: false
-          files: frontend/public/download/mivor-latest.apk
+          files: |
+            frontend/public/download/mivor-latest.apk
+            frontend/public/download/mivor-latest.apk.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove Keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mivor-release.jks"

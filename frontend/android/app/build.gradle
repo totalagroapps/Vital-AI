@@ -1,5 +1,18 @@
 apply plugin: 'com.android.application'
 
+// Firma de release: variables de entorno (CI) o android/keystore.properties (local, no se sube a git).
+// Sin ninguna de las dos, el APK de release sale sin firmar y no se puede instalar.
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) {
+    keystorePropsFile.withInputStream { keystoreProps.load(it) }
+}
+def signingValue = { String envName, String propName ->
+    System.getenv(envName) ?: keystoreProps.getProperty(propName)
+}
+def releaseStoreFile = signingValue('MIVOR_KEYSTORE_FILE', 'storeFile')
+def hasReleaseSigning = releaseStoreFile && file(releaseStoreFile).exists()
+
 android {
     namespace = "com.vitalai.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,7 +20,8 @@ android {
         applicationId "com.vitalai.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
+        // CI lo sube en cada build (MIVOR_VERSION_CODE) para que Android acepte la actualización
+        versionCode((System.getenv('MIVOR_VERSION_CODE') ?: '3') as int)
         versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -16,8 +30,21 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword signingValue('MIVOR_KEYSTORE_PASSWORD', 'storePassword')
+                keyAlias signingValue('MIVOR_KEY_ALIAS', 'keyAlias')
+                keyPassword signingValue('MIVOR_KEY_PASSWORD', 'keyPassword')
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -110,6 +137,10 @@ tasks.register('copyApkToPublicDownload') {
 tasks.configureEach { task ->
     if (task.name.startsWith('merge') && task.name.endsWith('Assets')) {
         task.dependsOn 'cleanAndroidAssetsApk'
+        task.dependsOn 'syncWebAssets'
+    }
+    // El lint de release (lintVital) también lee src/main/assets: debe ir después de copiar la web
+    if (task.name.toLowerCase().contains('lintvital')) {
         task.dependsOn 'syncWebAssets'
     }
     if (task.name == 'assembleDebug' || task.name == 'packageDebug' || task.name == 'installDebug') {
