@@ -2,6 +2,8 @@
 *.jks
 *.keystore
 keystore.properties
+*keystore*base64*
+*.jks.b64
 
 # Frontend
 frontend/node_modules/
