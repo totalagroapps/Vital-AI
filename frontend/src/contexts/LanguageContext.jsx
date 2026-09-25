@@ -12,7 +12,7 @@ const LANG_KEY = 'media_hub_lang';
 const CACHE_PREFIX = 'media_hub_ui_';
 const CACHE_MAX_AGE_MS = 24 * 3600 * 1000;
 const POLL_MS = 4000;
-const POLL_MAX = 45;
+const POLL_MAX = 150; // ~10 min: la traducción llega por bloques y se va mostrando
 
 const readSaved = () => {
   try {

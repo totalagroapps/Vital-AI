@@ -36,6 +36,10 @@ CHUNK_SIZE = 70
 CONCURRENCY = 4
 TRANSLATION_MODEL = os.getenv("UI_TRANSLATION_MODEL", "gpt-4o-mini")
 
+# Si la fila de un idioma se actualizó hace menos de esto y aún faltan cadenas, se asume que
+# otro worker la está generando (cada bloque traducido se guarda y refresca updated_at).
+ACTIVE_WINDOW = timedelta(seconds=int(os.getenv("UI_TRANSLATION_ACTIVE_WINDOW", "120")))
+
 _tasks: Dict[str, asyncio.Task] = {}
 _last_attempt: Dict[str, float] = {}
 _PLACEHOLDER_RE = re.compile(r"\{[^{}]*\}")
@@ -84,33 +88,59 @@ async def _translate_chunk(client: AsyncOpenAI, lang: str, chunk: Dict[str, str]
     return {}
 
 
+async def _save(lang: str, new_strings: Dict[str, str]) -> None:
+    """Fusiona cadenas traducidas en la fila del idioma (la crea si no existe)."""
+    async with database.AsyncSessionLocal() as session:
+        row = await session.get(models.UITranslation, lang)
+        if row:
+            row.strings = {**(row.strings or {}), **new_strings}
+            row.updated_at = datetime.now(timezone.utc)
+        else:
+            session.add(models.UITranslation(lang=lang, strings=dict(new_strings)))
+        await session.commit()
+
+
 async def _generate(lang: str, keys: Dict[str, str]) -> None:
     client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     items = list(keys.items())
     chunks = [dict(items[i:i + CHUNK_SIZE]) for i in range(0, len(items), CHUNK_SIZE)]
     sem = asyncio.Semaphore(CONCURRENCY)
+    save_lock = asyncio.Lock()  # los bloques de un idioma escriben la misma fila
+    done = 0
 
     async def run(chunk):
+        # Cada bloque se guarda en cuanto llega: el usuario ve la traducción parcial
+        # enseguida y un reinicio del servidor no hace perder lo ya traducido.
+        nonlocal done
         async with sem:
-            return await _translate_chunk(client, lang, chunk)
+            translated = await _translate_chunk(client, lang, chunk)
+        if translated:
+            async with save_lock:
+                await _save(lang, translated)
+            done += len(translated)
 
-    results = await asyncio.gather(*(run(c) for c in chunks), return_exceptions=True)
-    merged: Dict[str, str] = {}
-    for r in results:
-        if isinstance(r, dict):
-            merged.update(r)
-    if not merged:
+    try:
+        # Reclamar el idioma para que los demás workers no lo generen en paralelo
+        await _save(lang, {})
+        results = await asyncio.gather(*(run(c) for c in chunks), return_exceptions=True)
+        for r in results:
+            if isinstance(r, Exception):
+                logger.error("Bloque de traducción de %s falló: %r", lang, r)
+    except Exception as exc:
+        logger.error("Traducción de %s interrumpida: %s", lang, exc)
+    if done:
+        logger.info("Interfaz traducida a %s: %d/%d cadenas", lang, done, len(items))
+    else:
         logger.error("Traducción de %s sin resultados", lang)
-        return
 
-    async with database.AsyncSessionLocal() as session:
-        row = await session.get(models.UITranslation, lang)
-        if row:
-            row.strings = {**(row.strings or {}), **merged}
-        else:
-            session.add(models.UITranslation(lang=lang, strings=merged))
-        await session.commit()
-    logger.info("Interfaz traducida a %s: %d/%d cadenas", lang, len(merged), len(items))
+
+def _recently_updated(row) -> bool:
+    ts = row.updated_at or row.created_at if row else None
+    if ts is None:
+        return False
+    if ts.tzinfo is None:  # SQLite devuelve fechas sin zona horaria (UTC)
+        ts = ts.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - ts < ACTIVE_WINDOW
 
 
 def _start(lang: str, keys: Dict[str, str]) -> None:
@@ -139,6 +169,8 @@ async def get_ui_translation(lang: str):
         missing = {k: v for k, v in source.items() if k not in strings}
 
         running = primary in _tasks and not _tasks[primary].done()
+        if missing and not running and _recently_updated(row):
+            running = True  # la está generando otro worker
 
         cooldown = 3600 if strings else 300  # no reintentar en bucle cadenas que la IA no traduce bien
         recently_tried = (time.time() - _last_attempt.get(primary, 0)) < cooldown
