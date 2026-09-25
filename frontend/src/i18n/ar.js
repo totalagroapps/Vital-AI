@@ -703,14 +703,10 @@ export const ar = {
     patient_how_desc: "نظام ذكي متطور يجمع بين الأدلة الطبية المعتمدة والذكاء الاصطناعي لخدمة صحتك.",
     patient_for_patients_title: "بوابة المرضى",
     patient_for_patients_desc: "أدوات متكاملة لإدارة ملفك الطبي والتواصل الصحي بأمان وسرية تامة.",
-    patienthome_con_el_apoyo_de_la: "بدعم من",
-    patienthome_ia_line1: "الذكاء الاصطناعي",
-    patienthome_ia_line2: "الأكثر تطوراً.",
     patienthome_calculadoras_cardio: "حاسبات القلب والسريرية",
     patienthome_mente_activa: "العقل النشط",
     patienthome_preventive_banner_sub: "استبق المخاطر الصحية واعتنِ بنفسك لتعيش بصحة أفضل.",
-    patienthome_descubre_como: "اكتشف كيف"
+    patienthome_descubre_como: "اكتشف كيف",
+  // Titular del Inicio como una sola frase; la parte destacada va entre dobles asteriscos
+  patienthome_hero_title: "صحتك،\nبدعم من\n**الذكاء الاصطناعي\nالأكثر تطوراً.**",
 };
-
-
-

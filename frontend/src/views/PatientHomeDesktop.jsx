@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import './MivorPacienteHome.css';
 import {
   ShieldCheck,
@@ -11,11 +11,36 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroTitle from '../components/HeroTitle';
 import PatientTopNav from '../components/PatientTopNav';
 
 const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpenGames, onOpenPreventiveCalendar }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [showSecurityModal, setShowSecurityModal] = useState(false);
+  const heroRef = useRef(null);
+  const heroCopyRef = useRef(null);
+
+  // El titular traducido puede ocupar más líneas (alemán, ruso…). Si el bloque de texto no cabe en la
+  // portada, se reduce el tamaño del titular hasta que quepa (como mínimo al 60 %).
+  useLayoutEffect(() => {
+    const fit = () => {
+      const hero = heroRef.current;
+      const copy = heroCopyRef.current;
+      if (!hero || !copy) return;
+      let scale = 1;
+      copy.style.setProperty('--hero-scale', '1');
+      const cs = getComputedStyle(hero);
+      const available = hero.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      while (copy.scrollHeight > available && scale > 0.6) {
+        scale = Math.round((scale - 0.05) * 100) / 100;
+        copy.style.setProperty('--hero-scale', String(scale));
+      }
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    if (document.fonts?.ready) document.fonts.ready.then(fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [language, t]);
 
   // Escape cierra el modal de seguridad y bloquea el scroll mientras está abierto
   useEffect(() => {
@@ -48,7 +73,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpe
       />
 
       {/* 2. HERO SECTION */}
-      <section className="mivor-hero">
+      <section className="mivor-hero" ref={heroRef}>
         {/* Portada Oficial MIVOR.ai (Hero Art con ondas celestiales y emblema central) */}
         <div className="hero-wave-bg pointer-events-none select-none overflow-hidden flex items-center justify-center">
           <img 
@@ -58,14 +83,9 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpe
           />
         </div>
 
-        <div className="hero-copy">
+        <div className="hero-copy" ref={heroCopyRef}>
           <h1>
-            {t('hero_title_p1')}<br />
-            {t('patienthome_con_el_apoyo_de_la')}<br />
-            <strong>
-              {t('patienthome_ia_line1') || t('artificial_intelligence')}<br />
-              {t('patienthome_ia_line2') || t('patienthome_mas_avanzada')}
-            </strong>
+            <HeroTitle text={t('patienthome_hero_title')} HighlightTag="strong" />
           </h1>
           <p className="hero-subtitle">
             {t('patienthomedesktop_mas_informacion_mas_claridad_una')}

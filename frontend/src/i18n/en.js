@@ -786,10 +786,6 @@ export const en = {
   patientchat_mivor_ai_ofrece_orientacion_clinica: "MIVOR.ai offers informative clinical guidance. In case of a real medical emergency, contact {number} or the nearest emergency center immediately.",
   patientchat_aviso_clinico: "Clinical notice:",
   patienthome_tu_salud_mas_clara: "YOUR HEALTH, CLEARER",
-  patienthome_con_el_apoyo_de_la: "with the support of",
-  patienthome_mas_avanzada: "the most advanced artificial intelligence.",
-  patienthome_ia_line1: "the most advanced",
-  patienthome_ia_line2: "artificial intelligence.",
   patienthome_calculadoras_cardio: "Calculators & Cardio",
   patienthome_mente_activa: "Active Mind",
   patienthome_preventive_banner_sub: "Anticipate potential health issues and take care of yourself to live longer and better.",
@@ -2356,4 +2352,6 @@ export const en = {
   docanalyzer_pdf_col_value: "Value",
   docanalyzer_pdf_col_reference: "Reference range",
   docanalyzer_pdf_col_status: "Status",
+  // Titular del Inicio como una sola frase; la parte destacada va entre dobles asteriscos
+  patienthome_hero_title: "Your health,\nwith the support of\n**the most advanced\nartificial intelligence.**",
 };

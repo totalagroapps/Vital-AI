@@ -37,6 +37,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import HeroTitle from '../components/HeroTitle';
 import LanguageSelector from '../components/LanguageSelector';
 
 const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments, apiUrl, authHeaders }) => {
@@ -174,12 +175,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Texto Hero Izquierda */}
             <div className="flex-1 min-w-0 pr-1">
               <h1 className="text-[17px] sm:text-[19px] font-black text-slate-900 leading-[1.12] tracking-tight">
-                {t('hero_title_p1')}<br />
-                {t('patienthome_con_el_apoyo_de_la')}<br />
-                <span className="text-[#0055ff]">
-                  {t('patienthome_ia_line1') || t('artificial_intelligence')}<br />
-                  {t('patienthome_ia_line2') || t('patienthome_mas_avanzada')}
-                </span>
+                <HeroTitle text={t('patienthome_hero_title')} highlightClassName="text-[#0055ff]" />
               </h1>
               <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 font-medium leading-tight mt-1.5">
                 {t('patienthome_mas_informacion_mas_claridad')}<br />

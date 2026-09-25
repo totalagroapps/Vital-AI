@@ -64,11 +64,14 @@
 }
 .hero-copy h1{
   margin:0 0 clamp(8px,1.5vh,18px);
-  font-size:clamp(30px,3.75vw,72px);
+  /* --hero-scale lo reduce PatientHomeDesktop si el titular traducido no cabe (idiomas de palabras largas) */
+  font-size:calc(clamp(30px,3.75vw,72px) * var(--hero-scale, 1));
   line-height:1.03;
   letter-spacing:-1.8px;
   font-weight:900;
   color:var(--navy);
+  overflow-wrap:break-word;
+  hyphens:auto;
 }
 .hero-copy h1 strong{color:var(--blue-h1);font-weight:900}
 .hero-subtitle{
@@ -320,7 +323,7 @@
 /* Portátil pequeño / tablet horizontal (951-1250px): pilares, tarjetas y titular sin recortes */
 @media(min-width:951px) and (max-width:1250px){
   .mivor-hero{grid-template-columns:35% 34% 31%}
-  .hero-copy h1{font-size:clamp(28px,3.2vw,40px);letter-spacing:-1.2px}
+  .hero-copy h1{font-size:calc(clamp(28px,3.2vw,40px) * var(--hero-scale, 1));letter-spacing:-1.2px}
   .hero-features{width:100%;max-width:100%;justify-self:stretch;margin-left:0;padding-left:8px;height:auto;max-height:100%;gap:clamp(6px,1.6vh,18px);justify-content:center}
   .feature{gap:12px}
   .feature-icon{width:clamp(48px,6vh,60px);height:clamp(48px,6vh,60px)}
