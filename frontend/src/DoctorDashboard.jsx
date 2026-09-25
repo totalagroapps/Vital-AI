@@ -671,19 +671,19 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   <button 
                     onClick={() => setShowConsensusModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="Consensus: Medidor de Evidencia Científica en PubMed"
+                    title="MIVOR Evidencia: Medidor de Evidencia Científica en PubMed"
                   >
                     <Sparkles className="w-4 h-4 text-emerald-600 stroke-[2.4]" />
-                    <span>Consensus</span>
+                    <span>MIVOR Evidencia</span>
                   </button>
 
                   <button 
                     onClick={() => setShowScribeModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs sm:text-sm font-bold text-indigo-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="MedAlly: Copiloto Scribe SOAP y Hoja Clara de Cuidados"
+                    title="MIVOR Scribe: Copiloto Scribe SOAP y Hoja Clara de Cuidados"
                   >
                     <FileText className="w-4 h-4 text-indigo-600 stroke-[2.4]" />
-                    <span>MedAlly Scribe</span>
+                    <span>MIVOR Scribe</span>
                   </button>
 
                   <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:border-gray-300 rounded-xl text-sm font-medium text-gray-700 shadow-sm transition-all hover:shadow">

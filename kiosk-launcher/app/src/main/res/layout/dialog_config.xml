@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Formulario del cuidador: país, emergencias, contactos, WhatsApp y medicamentos -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        style="@style/DialogRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            style="@style/DialogTitle"
+            android:text="Contactos y números" />
+
+        <TextView
+            style="@style/FormLabel"
+            android:text="País" />
+
+        <Spinner
+            android:id="@+id/spCountry"
+            style="@style/FormField"
+            android:paddingHorizontal="4dp" />
+
+        <TextView
+            style="@style/FormLabel"
+            android:text="Número de emergencias" />
+
+        <EditText
+            android:id="@+id/etEmergency"
+            style="@style/FormField"
+            android:importantForAutofill="no"
+            android:inputType="phone" />
+
+        <TextView
+            style="@style/DialogSub"
+            android:layout_marginBottom="0dp"
+            android:gravity="start"
+            android:text="Comprueba que sea el correcto para tu ciudad."
+            android:textSize="13sp" />
+
+            <TextView
+                style="@style/FormLabel"
+                android:text="Contacto 1" />
+
+            <EditText
+                android:id="@+id/etName1"
+                style="@style/FormField"
+                android:hint="Nombre (ej. Carlos, mi hija…)"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName|textCapWords" />
+
+            <EditText
+                android:id="@+id/etPhone1"
+                style="@style/FormField"
+                android:hint="Teléfono"
+                android:importantForAutofill="no"
+                android:inputType="phone" />
+
+            <TextView
+                style="@style/FormLabel"
+                android:text="Contacto 2" />
+
+            <EditText
+                android:id="@+id/etName2"
+                style="@style/FormField"
+                android:hint="Nombre (ej. Carlos, mi hija…)"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName|textCapWords" />
+
+            <EditText
+                android:id="@+id/etPhone2"
+                style="@style/FormField"
+                android:hint="Teléfono"
+                android:importantForAutofill="no"
+                android:inputType="phone" />
+
+            <TextView
+                style="@style/FormLabel"
+                android:text="Contacto 3" />
+
+            <EditText
+                android:id="@+id/etName3"
+                style="@style/FormField"
+                android:hint="Nombre (ej. Carlos, mi hija…)"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName|textCapWords" />
+
+            <EditText
+                android:id="@+id/etPhone3"
+                style="@style/FormField"
+                android:hint="Teléfono"
+                android:importantForAutofill="no"
+                android:inputType="phone" />
+
+        <TextView
+            style="@style/FormLabel"
+            android:text="Grupo de WhatsApp de la familia" />
+
+        <EditText
+            android:id="@+id/etGroup"
+            style="@style/FormField"
+            android:hint="Nombre exacto del grupo"
+            android:importantForAutofill="no"
+            android:inputType="text|textCapSentences" />
+
+        <TextView
+            style="@style/DialogSub"
+            android:layout_marginBottom="0dp"
+            android:gravity="start"
+            android:text="En una emergencia se envía a este grupo el aviso con la ubicación y se hace una llamada grupal. Escríbelo igual que en WhatsApp."
+            android:textSize="13sp" />
+
+        <TextView
+            style="@style/FormLabel"
+            android:text="WhatsApp de la familia" />
+
+        <EditText
+            android:id="@+id/etWhatsapp"
+            style="@style/FormField"
+            android:hint="Número (si lo dejas vacío, el contacto 1)"
+            android:importantForAutofill="no"
+            android:inputType="phone" />
+
+        <TextView
+            style="@style/DialogSub"
+            android:layout_marginBottom="0dp"
+            android:gravity="start"
+            android:text="Recibe las fotos, y el aviso de emergencia si no hay grupo. Con el prefijo del país (+57, +52…) si es de otro país."
+            android:textSize="13sp" />
+
+        <TextView
+            style="@style/FormLabel"
+            android:text="Recordatorio de medicamentos" />
+
+        <EditText
+            android:id="@+id/etMeds"
+            style="@style/FormField"
+            android:gravity="top|start"
+            android:hint="Ej.: Losartán 50 mg por la mañana con agua"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textCapSentences"
+            android:minLines="2"
+            android:paddingVertical="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCancelConfig"
+                style="@style/BigButton.Light"
+                android:layout_width="0dp"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:text="Cancelar" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveConfig"
+                style="@style/BigButton"
+                android:layout_width="0dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:text="Guardar"
+                app:backgroundTint="@color/c_blue" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo degradado azul + barridos azules y brillos blancos (como el diseño de referencia) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:startColor="@color/bg_top"
+                android:centerColor="#D6EAFD"
+                android:endColor="@color/bg_bottom" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/bg_home_waves" />
+</layer-list>

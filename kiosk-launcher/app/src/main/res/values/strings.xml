@@ -26,4 +26,6 @@
     <string name="sos_action_call">Llamar Ahora</string>
     <string name="voice_pill_hint">🎙️ Di: \"Hola MIVOR\" o \"Ayuda\"</string>
     <string name="cancel">Cancelar</string>
+
+    <string name="sos_accessibility_description">Solo durante una alerta SOS: abre el grupo de WhatsApp de la familia, envía el mensaje con tu ubicación y empieza la llamada grupal, sin que tengas que tocar nada. No lee ni guarda tus mensajes.</string>
 </resources>

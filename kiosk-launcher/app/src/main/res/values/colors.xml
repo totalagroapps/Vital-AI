@@ -1,23 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#0D9488</color>
-    <color name="primary_dark">#0F766E</color>
-    <color name="accent">#10B981</color>
+    <color name="primary">#0055ff</color>
+    <color name="primary_dark">#003ecb</color>
+    <color name="accent">#00ab84</color>
     
-    <color name="bg_main">#0B132B</color>
-    <color name="bg_card">#1C2541</color>
-    <color name="bg_card_pressed">#2A3A68</color>
+    <color name="bg_main">#E3F2FD</color>
+    <color name="bg_card">#FFFFFF</color>
     
+    <color name="text_main">#0A1128</color>
+    <!-- Pizarra muy oscuro: contraste AAA en todas las tarjetas, algo más claro que los títulos -->
+    <color name="text_sub">#2B3A4F</color>
     <color name="text_white">#FFFFFF</color>
-    <color name="text_gold">#FBBF24</color>
-    <color name="text_sub">#94A3B8</color>
-    <color name="text_muted">#64748B</color>
     
-    <!-- Action Colors -->
-    <color name="btn_mivor">#059669</color>
-    <color name="btn_call">#2563EB</color>
-    <color name="btn_sos">#DC2626</color>
-    <color name="btn_whatsapp">#16A34A</color>
-    <color name="btn_photos">#D97706</color>
-    <color name="btn_settings">#475569</color>
+    <!-- Vibrant Pastel Solid Backgrounds -->
+    <color name="bg_mivor">#64B5F6</color>
+    <color name="bg_sos">#EF5350</color>
+    <color name="bg_qr">#4DB6AC</color>
+    <color name="bg_call">#81C784</color>
+    <color name="bg_family">#FFB74D</color>
+    <color name="bg_settings">#BA68C8</color>
+    <color name="bg_voice_btn">#42A5F5</color>
+    
+    <!-- Required for dialogs -->
+    <color name="text_gold">#F59E0B</color>
+    <color name="text_muted">#94A3B8</color>
+    <color name="btn_settings">#E2E8F0</color>
+
+    <!-- Fondo -->
+    <color name="bg_top">#EAF4FF</color>
+    <color name="bg_bottom">#BFDDFB</color>
+
+    <!-- Texto -->
+    <color name="text_title">#0D2B5E</color>
+    <color name="salud_green">#2BB673</color>
+
+    <!-- Telefono -->
+    <color name="c_blue">#0A6CF1</color>
+    <color name="chip_blue">#D6E8FF</color>
+    <color name="tile_blue">#EAF4FD</color>
+
+    <!-- WhatsApp -->
+    <color name="c_green">#25D366</color>
+    <color name="chip_green">#CFF2DF</color>
+    <color name="tile_green">#E3F8EE</color>
+
+    <!-- Emergencia -->
+    <color name="c_red">#EE1D36</color>
+    <color name="chip_red">#FBD3DB</color>
+    <color name="tile_red">#FDE9EE</color>
+
+    <!-- Camara -->
+    <color name="c_purple">#B37AF0</color>
+    <color name="chip_purple">#E4DAF9</color>
+    <color name="tile_purple">#F1EDFB</color>
+
+    <!-- Galeria -->
+    <color name="c_orange">#FF9F0A</color>
+    <color name="chip_orange">#FFE7B8</color>
+    <color name="tile_orange">#FFF6E6</color>
+
+    <!-- Agregar funcion -->
+    <color name="c_gray">#4A5B70</color>
+    <color name="circle_gray">#DDE6EE</color>
+    <color name="tile_gray">#EFF5FA</color>
+
+    <!-- Ajustes -->
+    <color name="c_violet">#6A2FE0</color>
+    <color name="chip_violet">#DED6F8</color>
+    <color name="tile_violet">#EEEBFB</color>
+
+    <!-- Salir -->
+    <color name="c_lock">#E0294A</color>
+    <color name="circle_pink">#F7C9D2</color>
+    <color name="chip_pink">#F9D0D8</color>
+    <color name="tile_pink">#FCE8EC</color>
+
+    <!-- Micrófono -->
+    <color name="mic_start">#00C6FF</color>
+    <color name="mic_end">#0A5BE0</color>
+    <color name="halo_outer">#40B3D9FF</color>
+    <color name="halo_inner">#7399CCFF</color>
 </resources>

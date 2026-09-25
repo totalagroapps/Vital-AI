@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fotos de la cámara en Android 9 o anterior (en 10+ se guardan en la galería) -->
+<paths>
+    <external-files-path name="photos" path="Pictures/" />
+</paths>

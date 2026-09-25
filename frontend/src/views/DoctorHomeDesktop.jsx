@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, Calendar, Sparkles, BookOpen, Search, Mic, ArrowRight, 
-  Bell, ChevronDown, LogOut, ShieldCheck, Paperclip 
+  Bell, ChevronDown, LogOut, ShieldCheck, Paperclip, Heart, FileText 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
+const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculators, onOpenConsensus, onOpenScribe, onOpenPreventiveCalendar }) => {
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -324,7 +324,56 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile }) => {
               <ArrowRight size={18} />
             </div>
           </div>
+        </div>
 
+        {/* 3.5 HERRAMIENTAS MIVOR */}
+        <div className="mb-8">
+          <h3 className="font-bold text-gray-900 mb-4 px-1">{t('Herramientas Clínicas Avanzadas') || 'Herramientas Clínicas Avanzadas'}</h3>
+          <div className="grid grid-cols-4 gap-4">
+            <div 
+              onClick={onOpenCalculators}
+              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col items-start group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
+                <Heart size={24} className="stroke-[2.2]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">Calculadoras & Cardio</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">Riesgo CV, LDL y renal</p>
+            </div>
+
+            <div 
+              onClick={onOpenPreventiveCalendar}
+              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col items-start group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
+                <Calendar size={24} className="stroke-[2.2]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Prevención</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">Cribados y calendario</p>
+            </div>
+
+            <div 
+              onClick={onOpenConsensus}
+              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col items-start group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
+                <Sparkles size={24} className="stroke-[2.2]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Evidencia</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">Evidencia en PubMed</p>
+            </div>
+
+            <div 
+              onClick={onOpenScribe}
+              className="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col items-start group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
+                <FileText size={24} className="stroke-[2.2]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Scribe</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">Preparador de Consulta</p>
+            </div>
+          </div>
         </div>
 
 

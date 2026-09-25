@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Medidas de la pantalla de inicio para teléfonos de 400dp de ancho o más -->
+<resources>
+    <dimen name="home_pad_h">10dp</dimen>
+    <dimen name="home_card_margin">4dp</dimen>
+    <dimen name="home_card_radius">24dp</dimen>
+
+    <dimen name="mic_text">25sp</dimen>
+
+    <dimen name="tile_pad">6dp</dimen>
+    <dimen name="tile_icon">52dp</dimen>
+    <dimen name="tile_icon_pad">11dp</dimen>
+    <dimen name="tile_text_gap">10dp</dimen>
+    <dimen name="tile_title">18sp</dimen>
+    <dimen name="tile_sub">12sp</dimen>
+    <dimen name="chevron">28dp</dimen>
+
+    <dimen name="wide_pad">12dp</dimen>
+    <dimen name="wide_icon">60dp</dimen>
+    <dimen name="wide_icon_pad">15dp</dimen>
+    <dimen name="wide_text_gap">14dp</dimen>
+    <dimen name="wide_title">24sp</dimen>
+    <dimen name="wide_sub">14sp</dimen>
+    <dimen name="chevron_big">40dp</dimen>
+
+    <dimen name="mivor_logo">76dp</dimen>
+    <dimen name="mivor_title_1">24sp</dimen>
+    <dimen name="mivor_title_2">27sp</dimen>
+</resources>

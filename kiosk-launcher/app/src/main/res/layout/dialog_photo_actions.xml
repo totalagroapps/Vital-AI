@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Después de tomar o elegir una foto -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/DialogRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        style="@style/DialogTitle"
+        android:text="¿Qué hago con la foto?" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivPhotoPreview"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/circle_gray"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeRounded" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPhotoWhatsapp"
+        style="@style/BigButton"
+        android:text="Enviar a mi familia"
+        app:backgroundTint="@color/c_green"
+        app:icon="@drawable/ic_whatsapp"
+        app:iconGravity="textStart"
+        app:iconSize="28dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPhotoMivor"
+        style="@style/BigButton"
+        android:text="Enviar a MIVOR Salud"
+        app:backgroundTint="@color/c_blue" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnPhotoDone"
+        style="@style/BigButton.Light"
+        android:text="Listo, solo guardar" />
+</LinearLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/DialogRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        style="@style/DialogTitle"
+        android:text="Cambiar clave" />
+
+    <TextView
+        style="@style/DialogSub"
+        android:text="De 4 a 8 números" />
+
+    <TextView
+        style="@style/FormLabel"
+        android:text="Nueva clave" />
+
+    <EditText
+        android:id="@+id/etNewPin"
+        style="@style/FormField"
+        android:importantForAutofill="no"
+        android:inputType="numberPassword"
+        android:maxLength="8" />
+
+    <TextView
+        style="@style/FormLabel"
+        android:text="Repite la nueva clave" />
+
+    <EditText
+        android:id="@+id/etNewPin2"
+        style="@style/FormField"
+        android:importantForAutofill="no"
+        android:inputType="numberPassword"
+        android:maxLength="8" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancelNewPin"
+            style="@style/BigButton.Light"
+            android:layout_width="0dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="Cancelar" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveNewPin"
+            style="@style/BigButton"
+            android:layout_width="0dp"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="Guardar"
+            app:backgroundTint="@color/c_blue" />
+    </LinearLayout>
+</LinearLayout>

@@ -84,7 +84,7 @@ export default function ConsensusMeterModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Consensus MIVOR</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">MIVOR Evidencia</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
                   Evidencia PubMed / Cochrane
                 </span>
@@ -298,7 +298,7 @@ export default function ConsensusMeterModal({
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
           <div className="flex items-center gap-1.5">
             <Info size={13} className="text-slate-400" />
-            <span>MIVOR Consensus recopila literatura de PubMed (NLM/NIH). La evidencia debe ser contextualizada por su médico.</span>
+            <span>MIVOR Evidencia recopila literatura de PubMed (NLM/NIH). La evidencia debe ser contextualizada por su médico.</span>
           </div>
           <button
             onClick={onClose}

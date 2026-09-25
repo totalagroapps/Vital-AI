@@ -1,63 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Panel del cuidador (se abre tras escribir la clave) -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="20dp"
-    android:background="@color/bg_card">
+    android:layout_height="wrap_content">
 
-    <TextView
+    <LinearLayout
+        style="@style/DialogRoot"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="🛠️ Panel del Cuidador"
-        android:textColor="@color/text_white"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:gravity="center" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Administración y configuración del sistema"
-        android:textColor="@color/text_sub"
-        android:textSize="13sp"
-        android:gravity="center"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="18dp" />
+        <TextView
+            style="@style/DialogTitle"
+            android:text="Panel del cuidador" />
 
-    <Button
-        android:id="@+id/btnSettingWifi"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="📶 Configurar Wi-Fi y Conexión"
-        android:textColor="@color/text_white"
-        android:backgroundTint="#0369A1"
-        android:layout_marginBottom="10dp" />
+        <TextView
+            style="@style/DialogSub"
+            android:text="Configura el teléfono de la persona mayor" />
 
-    <Button
-        android:id="@+id/btnSettingVolume"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="🔊 Ajustes de Sonido y Brillo"
-        android:textColor="@color/text_white"
-        android:backgroundTint="#4338CA"
-        android:layout_marginBottom="10dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingContacts"
+            style="@style/BigButton"
+            android:text="Contactos, país y emergencias"
+            app:backgroundTint="@color/c_blue" />
 
-    <Button
-        android:id="@+id/btnSettingExitKiosk"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="🔓 Salir del Modo Kiosko (Android Libre)"
-        android:textColor="@color/text_white"
-        android:backgroundTint="#B91C1C"
-        android:layout_marginBottom="16dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingSosAuto"
+            style="@style/BigButton"
+            android:text="Aviso SOS automático"
+            app:backgroundTint="@color/c_green" />
 
-    <Button
-        android:id="@+id/btnCloseSettings"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Cerrar Ajustes"
-        android:textColor="@color/text_white"
-        android:backgroundTint="@color/btn_settings" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingPin"
+            style="@style/BigButton"
+            android:text="Cambiar clave"
+            app:backgroundTint="@color/c_violet" />
 
-</LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingWifi"
+            style="@style/BigButton"
+            android:text="Wi-Fi e internet"
+            app:backgroundTint="#0369A1" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingVolume"
+            style="@style/BigButton"
+            android:text="Sonido y volumen"
+            app:backgroundTint="#4338CA" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingExitKiosk"
+            style="@style/BigButton"
+            android:text="Salir del modo kiosko"
+            app:backgroundTint="@color/c_red" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCloseSettings"
+            style="@style/BigButton.Light"
+            android:layout_marginTop="12dp"
+            android:text="Cerrar" />
+    </LinearLayout>
+</ScrollView>

@@ -33,7 +33,7 @@ export default function ClinicalCalculatorsModal({
   const [isLoadingAutoFill, setIsLoadingAutoFill] = useState(false);
   const [autoFillSources, setAutoFillSources] = useState([]);
 
-  // --- TAB 1: CARDIO (SCORE2 + LIPIDWISE) ---
+  // --- TAB 1: CARDIO (Riesgo CV MIVOR + LIPIDWISE) ---
   const [cardioForm, setCardioForm] = useState({
     age: 55,
     gender: 'male',
@@ -47,9 +47,9 @@ export default function ClinicalCalculatorsModal({
   });
   const [isCalculatingCardio, setIsCalculatingCardio] = useState(false);
   const [score2Result, setScore2Result] = useState(null);
-  const [lipidwiseResult, setLipidwiseResult] = useState(null);
+  const [lipidwiseResult, setLípidos MIVORResult] = useState(null);
 
-  // --- TAB 2: RENAL (CKD-EPI 2021) ---
+  // --- TAB 2: RENAL (Filtrado MIVOR 2021) ---
   const [renalForm, setRenalForm] = useState({
     creatinine: 0.9,
     age: 55,
@@ -143,7 +143,7 @@ export default function ClinicalCalculatorsModal({
   const handleCalculateCardio = async () => {
     setIsCalculatingCardio(true);
     try {
-      // 1. SCORE2
+      // 1. Riesgo CV MIVOR
       const resScore = await fetch(`${apiUrl}/api/calculators/score2`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
@@ -161,7 +161,7 @@ export default function ClinicalCalculatorsModal({
         const s2Data = await resScore.json();
         setScore2Result(s2Data);
 
-        // 2. Lipidwise LDL Gap
+        // 2. Lípidos MIVOR LDL Gap
         const resLipid = await fetch(`${apiUrl}/api/calculators/ldl_gap`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
@@ -173,7 +173,7 @@ export default function ClinicalCalculatorsModal({
         });
         if (resLipid.ok) {
           const lData = await resLipid.json();
-          setLipidwiseResult(lData);
+          setLípidos MIVORResult(lData);
         }
       }
     } catch (err) {
@@ -201,7 +201,7 @@ export default function ClinicalCalculatorsModal({
         setCkdResult(data);
       }
     } catch (err) {
-      console.error("Error al calcular CKD-EPI:", err);
+      console.error("Error al calcular Filtrado MIVOR:", err);
     } finally {
       setIsCalculatingRenal(false);
     }
@@ -280,7 +280,7 @@ export default function ClinicalCalculatorsModal({
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-slate-800 tracking-tight">Calculadoras Clínicas & Longevidad</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
-                  MDCalc + Lipidwise
+                  MDCalc + Lípidos MIVOR
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
@@ -332,7 +332,7 @@ export default function ClinicalCalculatorsModal({
             }`}
           >
             <Heart size={16} className={activeTab === 'cardio' ? 'text-teal-600' : 'text-slate-400'} />
-            <span>Cardiovascular (SCORE2 + Brecha LDL)</span>
+            <span>Cardiovascular (Riesgo CV MIVOR + Brecha LDL)</span>
           </button>
 
           <button
@@ -344,7 +344,7 @@ export default function ClinicalCalculatorsModal({
             }`}
           >
             <Activity size={16} className={activeTab === 'renal' ? 'text-teal-600' : 'text-slate-400'} />
-            <span>Función Renal (CKD-EPI 2021)</span>
+            <span>Función Renal (Filtrado MIVOR 2021)</span>
           </button>
 
           <button
@@ -364,7 +364,7 @@ export default function ClinicalCalculatorsModal({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
           {/* ======================================================== */}
-          {/* TAB 1: CARDIOVASCULAR (SCORE2 + LIPIDWISE)               */}
+          {/* TAB 1: CARDIOVASCULAR (Riesgo CV MIVOR + LIPIDWISE)               */}
           {/* ======================================================== */}
           {activeTab === 'cardio' && (
             <div className="space-y-6">
@@ -382,7 +382,7 @@ export default function ClinicalCalculatorsModal({
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
                   <span className="text-[11px] text-slate-400">
-                    {cardioForm.age >= 70 ? 'Aplica SCORE2-OP (Sénior)' : 'Aplica SCORE2 estándar'}
+                    {cardioForm.age >= 70 ? 'Aplica Riesgo CV MIVOR-OP (Sénior)' : 'Aplica Riesgo CV MIVOR estándar'}
                   </span>
                 </div>
 
@@ -455,7 +455,7 @@ export default function ClinicalCalculatorsModal({
                     onChange={(e) => setCardioForm({ ...cardioForm, current_ldl: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
-                  <span className="text-[11px] text-slate-400">Para cálculo de Brecha Lipidwise</span>
+                  <span className="text-[11px] text-slate-400">Para cálculo de Brecha Lípidos MIVOR</span>
                 </div>
 
                 <div className="md:col-span-3 flex flex-wrap items-center gap-6 pt-2 border-t border-slate-200/70">
@@ -493,13 +493,13 @@ export default function ClinicalCalculatorsModal({
               {/* RESULTADOS DE CARDIO */}
               {score2Result && lipidwiseResult && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in">
-                  {/* TARJETA SCORE2 */}
+                  {/* TARJETA Riesgo CV MIVOR */}
                   <div className="bg-white rounded-2xl border-2 border-slate-100 p-5 shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Heart className="text-rose-500" size={20} />
                         <h3 className="font-bold text-slate-800 text-base">
-                          {score2Result.is_score2_op ? 'SCORE2-OP (Adulto Mayor)' : 'SCORE2 (Europeo ESC)'}
+                          {score2Result.is_score2_op ? 'Riesgo CV MIVOR-OP (Adulto Mayor)' : 'Riesgo CV MIVOR (Europeo ESC)'}
                         </h3>
                       </div>
                       <span className={`px-2.5 py-1 text-xs font-extrabold rounded-full ${
@@ -544,7 +544,7 @@ export default function ClinicalCalculatorsModal({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Activity className="text-teal-600" size={20} />
-                        <h3 className="font-bold text-slate-800 text-base">Lipidwise (Brecha c-LDL)</h3>
+                        <h3 className="font-bold text-slate-800 text-base">Lípidos MIVOR (Brecha c-LDL)</h3>
                       </div>
                       <span className={`px-2.5 py-1 text-xs font-extrabold rounded-full ${
                         lipidwiseResult.at_target ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
@@ -598,7 +598,7 @@ export default function ClinicalCalculatorsModal({
           )}
 
           {/* ======================================================== */}
-          {/* TAB 2: FUNCIÓN RENAL (CKD-EPI 2021)                      */}
+          {/* TAB 2: FUNCIÓN RENAL (Filtrado MIVOR 2021)                      */}
           {/* ======================================================== */}
           {activeTab === 'renal' && (
             <div className="space-y-6">
@@ -665,7 +665,7 @@ export default function ClinicalCalculatorsModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Ecuación Oficial NKF/ASN CKD-EPI 2021 (Race-Free)
+                        Ecuación Oficial NKF/ASN Filtrado MIVOR 2021 (Race-Free)
                       </span>
                       <h3 className="text-xl font-bold text-slate-800">Filtrado Glomerular Estimado (eGFR)</h3>
                     </div>

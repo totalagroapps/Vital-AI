@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_blue">#DDF3FF</color>
+    <color name="navy_text">#123B75</color>
+    <color name="secondary_text">#6C7D99</color>
+    
+    <color name="mivor_card">#FFFFFF</color>
+    <color name="family_card">#E4FFF5</color>
+    <color name="settings_card">#F0EAFF</color>
+    <color name="sos_card">#FFE9ED</color>
+    <color name="call_card">#E8F1FF</color>
+    <color name="whatsapp_card">#E4FFF5</color>
+    <color name="meds_card">#FFF4DC</color>
+    <color name="appts_card">#FFE8EE</color>
+
+    <color name="blue_icon">#1478F2</color>
+    <color name="green_icon">#18C99A</color>
+    <color name="red_icon">#FF3448</color>
+    <color name="purple_icon">#7A4CFF</color>
+    <color name="orange_icon">#FFAA00</color>
+    <color name="pink_icon">#FF6699</color>
+    
+    <color name="white">#FFFFFF</color>
+</resources>

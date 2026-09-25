@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="🎙️ Asistente de Voz MIVOR"
-        android:textColor="@color/text_white"
+        android:textColor="@color/text_main"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center" />
@@ -149,7 +149,7 @@
             android:background="@drawable/card_background"
             android:hint="O escribe cualquier orden..."
             android:textColorHint="@color/text_muted"
-            android:textColor="@color/text_white"
+            android:textColor="@color/text_main"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:textSize="13sp" />

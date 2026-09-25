@@ -153,7 +153,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
       setSoapViewSubtab("soap");
     } catch (err) {
       console.error(err);
-      alert("Ocurrió un error al procesar con MedAlly Scribe. Intenta de nuevo.");
+      alert("Ocurrió un error al procesar con MIVOR Scribe. Intenta de nuevo.");
     } finally {
       setLoadingSoap(false);
     }
@@ -203,7 +203,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
     const content = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
         <div style="border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="color: #0369a1; margin: 0; font-size: 22px;">MIVOR.ai MedAlly — Nota Clínica SOAP</h1>
+          <h1 style="color: #0369a1; margin: 0; font-size: 22px;">MIVOR.ai MIVOR Scribe — Nota Clínica SOAP</h1>
           <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Especialidad: ${template_name} | Fecha: ${new Date().toLocaleDateString('es-ES')}</p>
         </div>
         ${patientName ? `<p><strong>Paciente:</strong> ${patientName} ${patientAge ? `(${patientAge} años)` : ''}</p>` : ''}
@@ -232,7 +232,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         </div>
         
         <div style="margin-top: 30px; font-size: 10px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
-          Documento generado con soporte de MedAlly CDSS. Validación y firma requerida por facultativo médico colegiado.
+          Documento generado con soporte de MIVOR Scribe CDSS. Validación y firma requerida por facultativo médico colegiado.
         </div>
       </div>
     `;
@@ -358,7 +358,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">
-                  MedAlly Scribe & Copiloto
+                  MIVOR Scribe & Copiloto
                 </h2>
                 <span className="text-[11px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
                   SOAP + Hoja Clara
@@ -579,7 +579,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   {loadingSoap ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Estructurando Nota SOAP & Hoja de Cuidados con MedAlly...
+                      Estructurando Nota SOAP & Hoja de Cuidados con MIVOR Scribe...
                     </>
                   ) : (
                     <>
@@ -946,7 +946,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            MedAlly Scribe CDSS v2.0 • Validación facultativa requerida
+            MIVOR Scribe CDSS v2.0 • Validación facultativa requerida
           </span>
           <button
             type="button"

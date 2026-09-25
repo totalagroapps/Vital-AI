@@ -1,14 +1,24 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck, Paperclip } from 'lucide-react';
+import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck, Paperclip, Heart, FileText } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 import DoctorHomeDesktop from './DoctorHomeDesktop';
 
-const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
+import ClinicalCalculatorsModal from './ClinicalCalculatorsModal';
+import ConsensusMeterModal from './ConsensusMeterModal';
+import ScribeSoapModal from './ScribeSoapModal';
+import PreventiveCalendarModal from './PreventiveCalendarModal';
+
+const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }) => {
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
+  
+  const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
+  const [showConsensusModal, setShowConsensusModal] = useState(false);
+  const [showScribeModal, setShowScribeModal] = useState(false);
+  const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
   const recognitionRef = useRef(null);
   const doctorHomeFileInputRef = useRef(null);
 
@@ -291,6 +301,53 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
             <span className="text-[9px] text-gray-500 leading-tight">{t("pending_reports_with_ai")}</span>
           </div>
         </div>
+        
+        {/* Herramientas MIVOR */}
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <button onClick={() => setShowCalculatorsModal(true)} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
+            <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
+              <Heart size={22} />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">Calculadoras & Cardio</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Riesgo CV, LDL y renal</p>
+            <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
+              <ArrowRight size={14} />
+            </div>
+          </button>
+
+          <button onClick={() => setShowPreventiveCalendarModal(true)} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
+            <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
+              <Calendar size={22} />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Prevención</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Cribados y calendario</p>
+            <div className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
+              <ArrowRight size={14} />
+            </div>
+          </button>
+
+          <button onClick={() => setShowConsensusModal(true)} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+              <Sparkles size={22} />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Evidencia</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Evidencia en PubMed</p>
+            <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
+              <ArrowRight size={14} />
+            </div>
+          </button>
+
+          <button onClick={() => setShowScribeModal(true)} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+              <FileText size={22} />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Scribe</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Preparador de Consulta</p>
+            <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
+              <ArrowRight size={14} />
+            </div>
+          </button>
+        </div>
       </div>
 
       <BottomNav activeTab="home" onTabChange={(tab) => {
@@ -304,8 +361,48 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile }) => {
 
     {/* DESKTOP VIEW */}
     <div className="hidden lg:block">
-      <DoctorHomeDesktop onNavigate={onNavigate} onLogout={onLogout} doctorProfile={doctorProfile} />
+      <DoctorHomeDesktop 
+        onNavigate={onNavigate} 
+        onLogout={onLogout} 
+        doctorProfile={doctorProfile}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
+        onOpenCalculators={() => setShowCalculatorsModal(true)}
+        onOpenConsensus={() => setShowConsensusModal(true)}
+        onOpenScribe={() => setShowScribeModal(true)}
+        onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
+      />
     </div>
+
+    <ClinicalCalculatorsModal
+      isOpen={showCalculatorsModal}
+      onClose={() => setShowCalculatorsModal(false)}
+      apiUrl={apiUrl}
+      authHeaders={authHeaders}
+      patientId={doctorProfile?.user_id}
+    />
+
+    <ConsensusMeterModal
+      isOpen={showConsensusModal}
+      onClose={() => setShowConsensusModal(false)}
+      apiUrl={apiUrl}
+      authHeaders={authHeaders}
+    />
+
+    <ScribeSoapModal
+      isOpen={showScribeModal}
+      onClose={() => setShowScribeModal(false)}
+      initialMode="doctor"
+      patientData={doctorProfile}
+    />
+
+    <PreventiveCalendarModal
+      isOpen={showPreventiveCalendarModal}
+      onClose={() => setShowPreventiveCalendarModal(false)}
+      apiUrl={apiUrl}
+      authHeaders={authHeaders}
+      patientId={doctorProfile?.user_id}
+    />
     </>
   );
 };

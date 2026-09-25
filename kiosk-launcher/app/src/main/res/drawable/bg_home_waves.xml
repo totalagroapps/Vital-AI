@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Barridos azules con brillo blanco en las esquinas superiores y ola suave abajo.
+     Se estira al tamaño de la pantalla (lo usa bg_home.xml) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="360dp"
+    android:height="800dp"
+    android:viewportWidth="360"
+    android:viewportHeight="800">
+
+    <!-- Izquierda: banda azul -->
+    <path android:pathData="M0,20 C90,70 160,190 185,360 C140,250 70,180 0,160 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="40"
+                android:endX="185" android:endY="360"
+                android:startColor="#735AA9EE"
+                android:endColor="#005AA9EE" />
+        </aapt:attr>
+    </path>
+
+    <!-- Izquierda: brillo blanco -->
+    <path android:pathData="M0,95 C70,125 130,200 160,320 C115,230 60,175 0,150 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="110"
+                android:endX="160" android:endY="320"
+                android:startColor="#99FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </aapt:attr>
+    </path>
+
+    <!-- Derecha: banda azul -->
+    <path android:pathData="M360,20 C270,70 200,190 175,360 C220,250 290,180 360,160 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="360" android:startY="40"
+                android:endX="175" android:endY="360"
+                android:startColor="#735AA9EE"
+                android:endColor="#005AA9EE" />
+        </aapt:attr>
+    </path>
+
+    <!-- Derecha: brillo blanco -->
+    <path android:pathData="M360,95 C290,125 230,200 200,320 C245,230 300,175 360,150 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="360" android:startY="110"
+                android:endX="200" android:endY="320"
+                android:startColor="#99FFFFFF"
+                android:endColor="#00FFFFFF" />
+        </aapt:attr>
+    </path>
+
+    <!-- Abajo: ola azul suave -->
+    <path android:pathData="M0,560 C110,500 230,620 360,520 L360,800 L0,800 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="520"
+                android:endX="0" android:endY="800"
+                android:startColor="#005AA9EE"
+                android:endColor="#665AA9EE" />
+        </aapt:attr>
+    </path>
+</vector>

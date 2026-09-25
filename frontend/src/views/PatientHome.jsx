@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
-import ClinicalCalculatorsModal from './ClinicalCalculatorsModal';
 import CognitiveGamesModal from './CognitiveGamesModal';
 import PreventiveCalendarModal from './PreventiveCalendarModal';
-import ConsensusMeterModal from './ConsensusMeterModal';
-import ScribeSoapModal from './ScribeSoapModal';
 import { 
   Brain, 
   Folder, 
@@ -48,11 +45,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showMissionModal, setShowMissionModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
-  const [showCalculatorsModal, setShowCalculatorsModal] = useState(false);
   const [showGamesModal, setShowGamesModal] = useState(false);
   const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
-  const [showConsensusModal, setShowConsensusModal] = useState(false);
-  const [showScribeModal, setShowScribeModal] = useState(false);
 
   const homeFileInputRef = useRef(null);
 
@@ -291,14 +285,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
 
           {/* Accesos Rápidos a Módulos Clínicos y Cognitivos (Móvil) */}
           <div className="flex items-center gap-2 shrink-0 px-0.5 mobile-quick-pills">
-            <button
-              type="button"
-              onClick={() => setShowCalculatorsModal(true)}
-              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200/90 rounded-xl text-[11px] font-extrabold text-teal-800 flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer"
-            >
-              <Heart size={13} className="text-teal-600 stroke-[2.6]" />
-              <span>{t('patienthome_calculadoras_cardio')}</span>
-            </button>
+
             <button
               type="button"
               onClick={() => setShowGamesModal(true)}
@@ -535,13 +522,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     <span>{t('patient_card4_title')}</span>
                   </button>
 
-                  <button 
-                    onClick={() => { setShowDrawer(false); setShowCalculatorsModal(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-teal-800 hover:bg-teal-50 transition-colors text-left cursor-pointer"
-                  >
-                    <Heart size={18} className="text-teal-600 stroke-[2.4]" />
-                    <span>Calculadoras & Longevidad</span>
-                  </button>
 
                   <button 
                     onClick={() => { setShowDrawer(false); setShowGamesModal(true); }}
@@ -556,24 +536,9 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-sky-800 hover:bg-sky-50 transition-colors text-left cursor-pointer"
                   >
                     <Calendar size={18} className="text-sky-600 stroke-[2.4]" />
-                    <span>Calendario & CaPtyVa</span>
+                    <span>Calendario & MIVOR Prevención</span>
                   </button>
 
-                  <button 
-                    onClick={() => { setShowDrawer(false); setShowConsensusModal(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-emerald-800 hover:bg-emerald-50 transition-colors text-left cursor-pointer"
-                  >
-                    <Sparkles size={18} className="text-emerald-600 stroke-[2.4]" />
-                    <span>Consensus (Evidencia PubMed)</span>
-                  </button>
-
-                  <button 
-                    onClick={() => { setShowDrawer(false); setShowScribeModal(true); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-indigo-800 hover:bg-indigo-50 transition-colors text-left cursor-pointer"
-                  >
-                    <FileText size={18} className="text-indigo-600 stroke-[2.4]" />
-                    <span>Preparador de Consulta (MedAlly)</span>
-                  </button>
 
                   <button 
                     onClick={() => { setShowDrawer(false); onNavigate('doctors'); }}
@@ -889,23 +854,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           username={username}
           apiUrl={apiUrl}
           authHeaders={authHeaders}
-          onOpenCalculators={() => setShowCalculatorsModal(true)}
           onOpenGames={() => setShowGamesModal(true)}
           onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
-          onOpenConsensus={() => setShowConsensusModal(true)}
-          onOpenScribe={() => setShowScribeModal(true)}
         />
       </div>
 
       {/* Modales Clínicos y Cognitivos (Activos tanto en Móvil como en Escritorio) */}
-      <ClinicalCalculatorsModal
-        isOpen={showCalculatorsModal}
-        onClose={() => setShowCalculatorsModal(false)}
-        apiUrl={apiUrl}
-        authHeaders={authHeaders}
-        patientId={userProfile?.user_id}
-      />
-
       <CognitiveGamesModal
         isOpen={showGamesModal}
         onClose={() => setShowGamesModal(false)}
@@ -919,20 +873,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         apiUrl={apiUrl}
         authHeaders={authHeaders}
         patientId={userProfile?.user_id}
-      />
-
-      <ConsensusMeterModal
-        isOpen={showConsensusModal}
-        onClose={() => setShowConsensusModal(false)}
-        apiUrl={apiUrl}
-        authHeaders={authHeaders}
-      />
-
-      <ScribeSoapModal
-        isOpen={showScribeModal}
-        onClose={() => setShowScribeModal(false)}
-        initialMode="patient"
-        patientData={userProfile}
       />
     </>
   );

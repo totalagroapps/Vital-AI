@@ -111,7 +111,7 @@ export default function PreventiveCalendarModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Calendario Preventivo & CaPtyVa</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Calendario Preventivo & MIVOR Prevención</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
                   Cribados & Vigilancia
                 </span>
@@ -154,7 +154,7 @@ export default function PreventiveCalendarModal({
             }`}
           >
             <Stethoscope size={16} className={activeTab === 'captyva' ? 'text-sky-600' : 'text-slate-400'} />
-            <span>Vigilancia Digestiva CaPtyVa (Colonoscopia)</span>
+            <span>Vigilancia Digestiva MIVOR Prevención (Colonoscopia)</span>
           </button>
         </div>
 
@@ -353,7 +353,7 @@ export default function PreventiveCalendarModal({
                       className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2 text-sm disabled:opacity-50"
                     >
                       <Zap size={16} />
-                      <span>{isEvaluatingCaptyva ? 'Evaluando...' : 'Evaluar Intervalo de Vigilancia CaPtyVa'}</span>
+                      <span>{isEvaluatingCaptyva ? 'Evaluando...' : 'Evaluar Intervalo de Vigilancia MIVOR Prevención'}</span>
                     </button>
                   </div>
                 </div>
@@ -429,7 +429,7 @@ export default function PreventiveCalendarModal({
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
           <div className="flex items-center gap-1.5">
             <Info size={13} className="text-slate-400" />
-            <span>MIVOR CaPtyVa orienta sobre los intervalos de guías internacionales sin sustituir la prescripción de tu especialista.</span>
+            <span>MIVOR MIVOR Prevención orienta sobre los intervalos de guías internacionales sin sustituir la prescripción de tu especialista.</span>
           </div>
           <button
             onClick={onClose}
