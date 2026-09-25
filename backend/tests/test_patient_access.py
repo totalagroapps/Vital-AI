@@ -135,3 +135,16 @@ async def test_patient_endpoints_enforce_relationship(client, path):
 async def test_doctor_cannot_lookup_patient_by_name(client):
     res = await client.get("/api/doctor/patients/Paciente pat-4", headers=auth("doc-1"))
     assert res.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_access_to_third_party_data_is_audited(db, world, caplog):
+    caplog.set_level("INFO", logger="mivor.audit")
+    await security.can_access_patient_data(db, world["doc-1"], "pat-1")
+    await security.can_access_patient_data(db, world["doc-2"], "pat-1")
+    await security.can_access_patient_data(db, world["pat-1"], "pat-1")  # acceso propio: no se audita
+    lines = [r.getMessage() for r in caplog.records if r.name == "mivor.audit"]
+    assert lines == [
+        "patient_data_access granted=True actor=doc-1 role=doctor patient=pat-1",
+        "patient_data_access granted=False actor=doc-2 role=doctor patient=pat-1",
+    ]

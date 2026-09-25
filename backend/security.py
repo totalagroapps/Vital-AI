@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 import bcrypt
 import jwt
@@ -15,6 +15,7 @@ import models
 
 load_dotenv()
 logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger("mivor.audit")
 
 # Constants and Fail-Fast for JWT_SECRET_KEY in production
 ENVIRONMENT = os.environ.get("ENVIRONMENT", os.environ.get("RAILWAY_ENVIRONMENT", "development")).lower()
@@ -52,9 +53,9 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -197,12 +198,19 @@ async def can_access_patient_data(db: AsyncSession, user: models.User, patient_u
     if patient_user_id is not None and str(patient_user_id) == str(user.id):
         return True
     if user.role == "admin":
-        return True
-    if user.role != "doctor" or patient_user_id is None:
-        return False
-    if not await _doctor_is_verified(db, user.id):
-        return False
-    return str(patient_user_id) in await get_doctor_patient_ids(db, user)
+        granted = True
+    elif user.role != "doctor" or patient_user_id is None:
+        granted = False
+    elif not await _doctor_is_verified(db, user.id):
+        granted = False
+    else:
+        granted = str(patient_user_id) in await get_doctor_patient_ids(db, user)
+    # Registro de auditoría: todo acceso (o intento) a datos clínicos de un tercero
+    audit_logger.info(
+        "patient_data_access granted=%s actor=%s role=%s patient=%s",
+        granted, user.id, user.role, patient_user_id,
+    )
+    return granted
 
 
 async def assert_patient_access(db: AsyncSession, user: models.User, patient_user_id: Optional[str]) -> None:
