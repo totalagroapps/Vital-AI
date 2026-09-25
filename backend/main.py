@@ -195,11 +195,14 @@ def health_check():
     return {'status': 'healthy'}
 
 
+DEFAULT_APK_URL = "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk"
+
+
 @app.get('/api/version')
 def get_version():
     return {
         "version": os.getenv("APP_LATEST_VERSION", "1.0.2"),
-        "apkUrl": os.getenv("APP_APK_URL", "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk"),
+        "apkUrl": os.getenv("APP_APK_URL", DEFAULT_APK_URL),
         "notes": os.getenv("APP_UPDATE_NOTES", "Nueva versión con diseño optimizado 100dvh para móvil (sin scroll) y adecuación regulatoria."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1")
     }
@@ -225,8 +228,8 @@ async def download_apk_file(filename: str):
     if os.path.isfile(resolved_path):
         return FileResponse(resolved_path, filename=clean_filename, media_type="application/vnd.android.package-archive")
 
-    github_release_url = "https://github.com/totalagroapps/Vital-AI/releases/latest/download/app-release.apk"
-    return RedirectResponse(url=github_release_url, status_code=302)
+    # El workflow build-apk publica el APK en GitHub Releases como mivor-latest.apk
+    return RedirectResponse(url=os.getenv("APP_APK_URL", DEFAULT_APK_URL), status_code=302)
 
 
 # Lista explícita de orígenes permitidos para CORS (Punto 10)

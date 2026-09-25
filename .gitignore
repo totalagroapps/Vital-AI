@@ -24,3 +24,13 @@ node_modules/
 .idea/
 *.iml
 frontend/android/.idea/
+
+# APKs generados (se publican en GitHub Releases)
+*.apk
+
+# Builds de Android
+frontend/android/app/build/
+kiosk-launcher/build/
+kiosk-launcher/app/build/
+kiosk-launcher/.gradle/
+kiosk-launcher/local.properties

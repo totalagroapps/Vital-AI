@@ -12,7 +12,7 @@ from sqlalchemy import select, desc
 
 import models
 from database import get_db
-from security import get_current_user
+from security import get_current_user, resolve_target_patient_id
 
 logger = logging.getLogger("clinical_calculators")
 
@@ -568,7 +568,7 @@ async def auto_fill_from_records(
     colesterol, creatinina, etc.) desde su perfil y documentos analizados (OCR) para prellenar
     todas las calculadoras clínicas con un solo clic.
     """
-    target_user_id = patient_id if (patient_id and current_user.role in ["doctor", "admin", "verifier"]) else current_user.id
+    target_user_id = await resolve_target_patient_id(db, current_user, patient_id)
 
     data = {
         "age": None,

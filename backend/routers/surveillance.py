@@ -9,7 +9,7 @@ from sqlalchemy import select
 
 import models
 from database import get_db
-from security import get_current_user
+from security import get_current_user, resolve_target_patient_id
 
 logger = logging.getLogger("surveillance")
 
@@ -225,7 +225,7 @@ async def get_preventive_calendar(
     Genera el calendario preventivo consolidado del paciente según su edad, sexo y antecedentes,
     incluyendo cribados oncológicos universales y vacunas recomendadas para adultos mayores.
     """
-    target_id = patient_id if (patient_id and current_user.role in ["doctor", "admin"]) else current_user.id
+    target_id = await resolve_target_patient_id(db, current_user, patient_id)
 
     age = 55
     gender = "male"

@@ -11,7 +11,7 @@ from sqlalchemy import select, desc
 
 import models
 from database import get_db
-from security import get_current_user
+from security import get_current_user, resolve_target_patient_id
 
 logger = logging.getLogger("caregiver")
 
@@ -149,12 +149,13 @@ def _get_user_photos(user_id: str) -> List[Dict[str, Any]]:
 @router.get("/config", response_model=CaregiverConfig)
 async def get_caregiver_config(
     patient_id: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     """
     Obtiene la configuración de contactos rápidos, grupo familiar de WhatsApp y modo kiosko.
     """
-    target_id = patient_id if (patient_id and current_user.role in ["doctor", "admin"]) else current_user.id
+    target_id = await resolve_target_patient_id(db, current_user, patient_id)
     data = _get_user_caregiver_data(target_id)
     return CaregiverConfig(
         whatsapp_group_url=data.get("whatsapp_group_url"),
@@ -252,12 +253,13 @@ async def trigger_sos_alert(
 @router.get("/photos", response_model=List[FamilyPhotoItem])
 async def get_family_photos(
     patient_id: Optional[str] = Query(None),
+    db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
     """
     Obtiene las fotos familiares para mostrar en el Modo Kiosko sénior.
     """
-    target_id = patient_id if (patient_id and current_user.role in ["doctor", "admin"]) else current_user.id
+    target_id = await resolve_target_patient_id(db, current_user, patient_id)
     photos = _get_user_photos(target_id)
     return [FamilyPhotoItem(**p) for p in photos]
 

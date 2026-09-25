@@ -199,13 +199,12 @@ async def get_patient_detail(
 
     profile_res = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == patient_id))))
     profile = profile_res.scalars().first()
-    if not profile:
-        profile_res = (await db.execute(select(models.PatientProfile).where(
-            (models.PatientProfile.id == int(patient_id)) if patient_id.isdigit() else (models.PatientProfile.full_name == patient_id)
-        )))
+    if not profile and patient_id.isdigit():
+        profile_res = (await db.execute(select(models.PatientProfile).where(models.PatientProfile.id == int(patient_id))))
         profile = profile_res.scalars().first()
 
     effective_user_id = profile.user_id if profile else patient_id
+    await security.assert_patient_access(db, current_user, effective_user_id)
 
     if not profile:
         profile_dict = {
@@ -392,7 +391,7 @@ async def get_patient_history(
     # Control de Autorización estricto (Prevención de IDOR / BOLA):
     # Un paciente solo puede ver su propio historial clínico.
     # Los médicos y administradores pueden acceder al historial de pacientes.
-    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, patient.user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso denegado: No tienes autorización para consultar el historial médico de otro paciente."

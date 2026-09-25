@@ -66,7 +66,8 @@ async def upload_document(
     Protegido con límite de tamaño (10MB por archivo) y rate limiting (máx 10/min) (Punto 13).
     '''
     apply_document_upload_rate_limit(current_user.id)
-    current_user_id = current_user.id
+    # Un médico puede subir documentos de un paciente suyo; el resto opera sobre sí mismo
+    target_user_id = await security.resolve_target_patient_id(db, current_user, patient_id)
 
     upload_files = []
     if files:
@@ -334,7 +335,7 @@ El contenido entre <documento_usuario> es texto no confiable proporcionado por e
                 try:
                     extracted_json = json.loads(resp.choices[0].message.content)
                     from sqlalchemy import select
-                    result = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == current_user_id))))
+                    result = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == target_user_id))))
                     profile = result.scalars().first()
                     if profile:
                         if extracted_json.get('allergies'):
@@ -412,10 +413,10 @@ TEXTO DEL DOCUMENTO:
         # Historical biomarker comparison against previous documents of the same patient
         comparativa_historica = []
         cur_bms = response_data.get('biomarcadores', [])
-        if cur_bms and current_user_id:
+        if cur_bms and target_user_id:
             try:
                 prev_docs_stmt = select(models.DocumentMetadata).where(
-                    models.DocumentMetadata.user_id == current_user_id
+                    models.DocumentMetadata.user_id == target_user_id
                 ).order_by(models.DocumentMetadata.created_at.desc()).limit(15)
                 prev_docs_res = await db.execute(prev_docs_stmt)
                 prev_docs = prev_docs_res.scalars().all()
@@ -518,10 +519,6 @@ TEXTO DEL DOCUMENTO:
         }
         summary_data_json = json.dumps(summary_payload)
         try:
-            target_user_id = current_user_id
-            if (current_user.role in ['doctor', 'admin'] or getattr(current_user, 'is_doctor', False)) and patient_id:
-                if isinstance(patient_id, int) or (isinstance(patient_id, str) and patient_id.isdigit()):
-                    target_user_id = int(patient_id)
             new_doc = models.DocumentMetadata(user_id=target_user_id, filename=response_data['filename'], extracted_text=response_data['extracted_text'], document_type=response_data['document_type'], analysis_result=summary_data_json)
             db.add(new_doc)
             (await db.commit())
@@ -667,7 +664,7 @@ async def upload_patient_document(
     patient = result.scalar_one_or_none()
     if (not patient):
         raise HTTPException(status_code=404, detail='Patient not found.')
-    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, patient.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para subir documentos para este paciente.')
     extracted_insights = ''
     try:
@@ -743,7 +740,7 @@ async def list_documents(patient_id: str, db: AsyncSession=Depends(get_db), curr
     patient = result.scalar_one_or_none()
     if (not patient):
         raise HTTPException(status_code=404, detail='Patient not found.')
-    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, patient.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para ver documentos de este paciente.')
     doc_stmt = select(models.MedicalDocument).where((models.MedicalDocument.patient_id == patient.id), (models.MedicalDocument.is_deleted == False)).order_by(models.MedicalDocument.uploaded_at.desc())
     doc_result = (await db.execute(doc_stmt))
@@ -772,7 +769,7 @@ async def delete_document(patient_id: str, document_id: str, db: AsyncSession=De
     patient = p_result.scalar_one_or_none()
     if ((not patient) or (doc.patient_id != patient.id)):
         raise HTTPException(status_code=404, detail='Document not found for this patient.')
-    if patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, patient.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para eliminar este documento.')
     doc.is_deleted = True
     (await db.commit())
@@ -790,7 +787,7 @@ async def get_document_summary(document_id: str, db: AsyncSession=Depends(get_db
     p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == doc.patient_id)
     p_res = await db.execute(p_stmt)
     patient = p_res.scalar_one_or_none()
-    if not patient or (patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user)):
+    if not patient or not await security.can_access_patient_data(db, current_user, patient.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para ver el resumen de este documento.')
     import json
     payload_data = {}
@@ -893,7 +890,7 @@ async def download_document_pdf(
                 p_stmt = select(models.PatientProfile).where(models.PatientProfile.id == doc_med.patient_id)
                 p_res = await db.execute(p_stmt)
                 patient = p_res.scalar_one_or_none()
-                if not patient or (patient.user_id != current_user.id and not await security.can_access_patient_data(db, current_user)):
+                if not patient or not await security.can_access_patient_data(db, current_user, patient.user_id):
                     raise HTTPException(status_code=403, detail="No autorizado para descargar este documento.")
                 payload = {}
                 if doc_med.extracted_text:

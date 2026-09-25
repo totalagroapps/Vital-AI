@@ -150,11 +150,78 @@ async def _doctor_is_verified(db: AsyncSession, user_id: str) -> bool:
     return bool(doc and doc.verification_status == "verified")
 
 
-async def can_access_patient_data(db: AsyncSession, user: models.User) -> bool:
-    """True si el usuario es admin o médico con credenciales verificadas."""
+# Identificadores heredados del médico demo (ver scripts/seed_demo_doctor.py)
+_DEMO_DOCTOR_USERNAMES = ("doctor@mivor.ai", "dr.mivor")
+_DEMO_DOCTOR_IDS = ("doc-alejandro-ruiz", "doc-alejandro-alias")
+_DEMO_DOCTOR_ALIASES = ("doc-alejandro-ruiz", "doc-alejandro-alias", "doctor@mivor.ai", "all")
+
+
+def doctor_identifiers(user: models.User) -> List[str]:
+    """Valores con los que un médico puede figurar en Appointment.doctor_id (id o username)."""
+    ids = [user.id, user.username]
+    if user.username in _DEMO_DOCTOR_USERNAMES or user.id in _DEMO_DOCTOR_IDS:
+        ids.extend(_DEMO_DOCTOR_ALIASES)
+    return ids
+
+
+async def get_doctor_patient_ids(db: AsyncSession, user: models.User) -> set:
+    """
+    user_ids de los pacientes con los que el médico tiene relación asistencial,
+    es decir, al menos una cita (agenda del médico o reserva hecha por el paciente).
+    """
+    refs = set((await db.execute(
+        select(models.Appointment.patient_id).where(models.Appointment.doctor_id.in_(doctor_identifiers(user)))
+    )).scalars().all())
+    refs.discard(None)
+
+    # Appointment.patient_id puede guardar el username del paciente en lugar de su id
+    if refs:
+        refs.update((await db.execute(
+            select(models.User.id).where(models.User.username.in_(refs))
+        )).scalars().all())
+
+    doctor_profile_ids = select(models.DoctorProfile.id).where(models.DoctorProfile.user_id == str(user.id))
+    refs.update((await db.execute(
+        select(models.ScheduledAppointment.patient_id).where(
+            models.ScheduledAppointment.doctor_id.in_(doctor_profile_ids)
+        )
+    )).scalars().all())
+    return refs
+
+
+async def can_access_patient_data(db: AsyncSession, user: models.User, patient_user_id: Optional[str]) -> bool:
+    """
+    True si el usuario puede ver los datos clínicos del paciente indicado:
+    el propio paciente, un admin, o un médico verificado con una cita con ese paciente.
+    """
+    if patient_user_id is not None and str(patient_user_id) == str(user.id):
+        return True
     if user.role == "admin":
         return True
-    return user.role == "doctor" and await _doctor_is_verified(db, user.id)
+    if user.role != "doctor" or patient_user_id is None:
+        return False
+    if not await _doctor_is_verified(db, user.id):
+        return False
+    return str(patient_user_id) in await get_doctor_patient_ids(db, user)
+
+
+async def assert_patient_access(db: AsyncSession, user: models.User, patient_user_id: Optional[str]) -> None:
+    if not await can_access_patient_data(db, user, patient_user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acceso denegado: no tienes una relación asistencial con este paciente.",
+        )
+
+
+async def resolve_target_patient_id(db: AsyncSession, user: models.User, patient_id: Optional[str]) -> str:
+    """
+    Para endpoints con ?patient_id= opcional: un médico/admin solo puede consultar a un
+    paciente al que tenga acceso; cualquier otro usuario siempre opera sobre sí mismo.
+    """
+    if not patient_id or user.role not in ("doctor", "admin"):
+        return user.id
+    await assert_patient_access(db, user, patient_id)
+    return patient_id
 
 
 async def require_verified_doctor(

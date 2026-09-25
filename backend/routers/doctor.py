@@ -94,10 +94,13 @@ async def get_all_patients(
     current_user: models.User = Depends(security.require_verified_doctor)
 ):
     """
-    Lista todos los pacientes y su triaje más reciente para el portal médico.
-    Restringido a rol doctor o admin. Solución a N+1 mediante consulta agrupada.
+    Lista los pacientes del médico (con al menos una cita con él) y su triaje más reciente.
+    Los administradores ven todos. Solución a N+1 mediante consulta agrupada.
     """
-    result = await db.execute(select(models.PatientProfile))
+    stmt = select(models.PatientProfile)
+    if current_user.role != "admin":
+        stmt = stmt.where(models.PatientProfile.user_id.in_(await security.get_doctor_patient_ids(db, current_user)))
+    result = await db.execute(stmt)
     patients = result.scalars().all()
     if not patients:
         return []
@@ -243,10 +246,7 @@ async def get_doctor_appointments(
     """
     stmt = select(models.Appointment)
     if current_user.role != "admin":
-        allowed_doc_ids = [current_user.id, current_user.username]
-        # Compatibilidad con doctor demo oficial
-        if current_user.username in ("doctor@mivor.ai", "dr.mivor") or current_user.id in ("doc-alejandro-ruiz", "doc-alejandro-alias"):
-            allowed_doc_ids.extend(["doc-alejandro-ruiz", "doc-alejandro-alias", "doctor@mivor.ai", "all"])
+        allowed_doc_ids = security.doctor_identifiers(current_user)
         stmt = stmt.where(models.Appointment.doctor_id.in_(allowed_doc_ids))
 
     if date:
@@ -359,9 +359,7 @@ async def update_appointment_status(
 
     # Verificación estricta de propiedad/ownership de la cita
     if current_user.role != "admin":
-        allowed_doc_ids = [current_user.id, current_user.username]
-        if current_user.username in ("doctor@mivor.ai", "dr.mivor") or current_user.id in ("doc-alejandro-ruiz", "doc-alejandro-alias"):
-            allowed_doc_ids.extend(["doc-alejandro-ruiz", "doc-alejandro-alias", "doctor@mivor.ai", "all"])
+        allowed_doc_ids = security.doctor_identifiers(current_user)
         if appt.doctor_id not in allowed_doc_ids:
             raise HTTPException(status_code=403, detail="No tienes autorización para modificar el estado de una cita ajena.")
 
@@ -422,14 +420,13 @@ async def ask_doctor_copilot(
     effective_user_id = request.patient_id
     profile_res = (await db.execute(select(models.PatientProfile).where((models.PatientProfile.user_id == request.patient_id))))
     profile = profile_res.scalars().first()
-    if not profile:
-        profile_res = (await db.execute(select(models.PatientProfile).where(
-            (models.PatientProfile.id == int(request.patient_id)) if request.patient_id.isdigit() else (models.PatientProfile.full_name == request.patient_id)
-        )))
+    if not profile and request.patient_id.isdigit():
+        profile_res = (await db.execute(select(models.PatientProfile).where(models.PatientProfile.id == int(request.patient_id))))
         profile = profile_res.scalars().first()
 
     if profile:
         effective_user_id = profile.user_id
+    await security.assert_patient_access(db, current_user, effective_user_id)
 
     # 1. Triajes
     triage_res = (await db.execute(

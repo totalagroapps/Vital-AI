@@ -64,7 +64,7 @@ async def get_triage_session(session_id: int, db: AsyncSession=Depends(get_db), 
     session = result.scalars().first()
     if (not session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
-    if session.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, session.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para ver esta sesión de orientación')
     return {'session_id': session.id, 'status': session.status, 'questions_asked': session.questions_asked, 'final_report': session.final_report}
 
@@ -80,7 +80,7 @@ async def send_triage_message(session_id: int, request: TriageRequest, db: Async
     t_session = result.scalars().first()
     if (not t_session):
         raise HTTPException(status_code=404, detail='Sesión no encontrada')
-    if t_session.user_id != current_user.id and not await security.can_access_patient_data(db, current_user):
+    if not await security.can_access_patient_data(db, current_user, t_session.user_id):
         raise HTTPException(status_code=403, detail='No autorizado para interactuar en esta sesión de orientación')
     if (t_session.status != 'in_progress'):
         raise HTTPException(status_code=400, detail='Esta sesión de orientación ya está cerrada.')
