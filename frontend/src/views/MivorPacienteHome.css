@@ -1,5 +1,7 @@
-*{box-sizing:border-box}
+/* Inicio del paciente (escritorio y móvil). Estilos acotados a sus propias clases: nada global.
+   La barra superior es el componente compartido PatientTopNav. */
 :root{
+  /* Tokens de la pantalla de referencia (también en tailwind.config.js -> mivor.*) */
   --navy:#050838;
   --body-text:#1e2952;
   --blue:#0062ff;
@@ -9,8 +11,6 @@
   --violet:#6400ff;
   --orange:#ff6c20;
 }
-body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:#fff;color:var(--navy)}
-button{font:inherit}
 .mivor-page{
   width:100%;
   height:100vh;
@@ -20,118 +20,9 @@ button{font:inherit}
   justify-content:space-between;
   overflow:hidden;
   background:#ffffff;
+  color:var(--navy);
 }
-.mivor-header{
-  height:clamp(58px,7.2vh,78px);
-  padding:0 3.2vw;
-  display:flex;
-  align-items:center;
-  gap:28px;
-  background:rgba(255,255,255,.96);
-  border-bottom:1px solid #eef2fb;
-  flex-shrink:0;
-  position:relative;
-  z-index:30;
-}
-.mivor-logo-button{border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center}
-.mivor-logo{display:block;width:clamp(210px,18vw,315px);height:auto}
-.mivor-nav{margin-left:auto;display:flex;align-items:center;gap:clamp(16px,2vw,34px)}
-.mivor-nav button,.language,.notification{border:0;background:transparent;color:var(--navy);cursor:pointer}
-.mivor-nav button{
-  position:relative;
-  padding:clamp(16px,2vh,24px) 0;
-  font-size:clamp(13px,0.95vw,16px);
-  white-space:nowrap;
-  font-weight:600;
-  transition:color .2s ease;
-}
-.mivor-nav button:hover{color:var(--blue)}
-.mivor-nav button.active{color:var(--blue);font-weight:700}
-.mivor-nav button.active:after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:clamp(6px,0.8vh,10px);
-  height:3px;
-  border-radius:4px;
-  background:var(--blue);
-}
-.mivor-account{display:flex;align-items:center;gap:clamp(8px,0.8vw,13px);margin-left:12px}
-.language{
-  border:1px solid #dce8fb;
-  border-radius:24px;
-  padding:clamp(6px,0.8vh,10px) clamp(10px,1vw,16px);
-  background:#fff;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  font-size:clamp(12px,0.85vw,14px);
-  font-weight:600;
-  transition:all .2s ease;
-}
-.language:hover{background:#f6faff;border-color:#b9d5fb}
-.notification{
-  width:clamp(36px,4.5vh,44px);
-  height:clamp(36px,4.5vh,44px);
-  border:1px solid #dce8fb;
-  border-radius:50%;
-  position:relative;
-  font-size:20px;
-  display:grid;
-  place-items:center;
-  background:#fff;
-  transition:all .2s ease;
-}
-.notification:hover{background:#f6faff;border-color:#b9d5fb}
-.notification span{
-  position:absolute;
-  top:6px;
-  right:6px;
-  width:7px;
-  height:7px;
-  background:#f01936;
-  border-radius:50%;
-  box-shadow:0 0 0 2px #fff;
-}
-.avatar{
-  width:clamp(36px,4.5vh,44px);
-  height:clamp(36px,4.5vh,44px);
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  color:#fff;
-  background:linear-gradient(135deg,#c89169,#20263d);
-  font-weight:700;
-  overflow:hidden;
-  border:2px solid #fff;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-  cursor:pointer;
-  transition:transform .2s ease;
-}
-.avatar:hover{transform:scale(1.05)}
-.account-button{
-  border:0;
-  border-radius:27px;
-  padding:clamp(8px,1vh,12px) clamp(14px,1.2vw,22px);
-  min-width:auto;
-  color:#fff;
-  background:linear-gradient(90deg,#1664ee,#0b9fe8);
-  cursor:pointer;
-  font-weight:700;
-  font-size:clamp(12px,0.85vw,14.5px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  box-shadow:0 4px 14px rgba(18,104,239,.25);
-  transition:all .2s ease;
-}
-.account-button:hover{
-  box-shadow:0 6px 18px rgba(18,104,239,.38);
-  transform:translateY(-1px);
-}
-.account-button b{font-size:18px;line-height:1}
+.mivor-page button{font:inherit}
 
 /* HERO */
 .mivor-hero{
@@ -247,14 +138,6 @@ button{font:inherit}
   place-items:center;
   width:100%;
   z-index:1;
-}
-.hero-glow{
-  position:absolute;
-  width:clamp(340px,37vw,650px);
-  height:clamp(340px,37vw,650px);
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(0,194,255,.55) 0%,rgba(56,189,248,.4) 40%,rgba(125,211,252,.2) 65%,transparent 80%);
-  pointer-events:none;
 }
 .hero-emblem{
   position:relative;
@@ -432,9 +315,6 @@ button{font:inherit}
 .service-card.orange .service-arrow{background:var(--orange)}
 
 @media(max-width:1250px){
-  .mivor-logo{width:clamp(170px,15vw,220px)}
-  .mivor-nav{gap:14px}
-  .mivor-nav button{font-size:13px}
   .mivor-hero{grid-template-columns:40% 38% 22%}
 }
 /* Portátil pequeño / tablet horizontal (951-1250px): pilares, tarjetas y titular sin recortes */
@@ -452,18 +332,12 @@ button{font:inherit}
 }
 @media(max-width:950px){
   .mivor-page{height:auto;overflow-y:auto}
-  .mivor-nav{display:none}
-  .mivor-header{justify-content:space-between}
   .mivor-hero{grid-template-columns:1fr;min-height:auto}
   .hero-art{position:absolute;right:3%;top:25px;width:43%;opacity:.9}
   .hero-features{display:none}
   .service-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:650px){
-  .mivor-account .avatar,.mivor-account .notification{display:none}
-  .mivor-logo{width:170px}
-  .account-button{min-width:auto;padding:8px 12px}
-  .language{display:none}
   .hero-art{display:none}
   .service-grid{grid-template-columns:1fr}
 }

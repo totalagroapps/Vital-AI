@@ -28,7 +28,9 @@ export default function ClinicalCalculatorsModal({
   patientId = null,
   initialPatientData = null 
 }) {
-  const { t, language } = useLanguage();
+  const { t, language, locale } = useLanguage();
+  // Idioma en que el backend redacta interpretaciones y recomendaciones
+  const langParam = `lang=${encodeURIComponent(locale || language || 'es')}`;
   const [activeTab, setActiveTab] = useState('cardio'); // 'cardio' | 'renal' | 'fragility'
   const [isLoadingAutoFill, setIsLoadingAutoFill] = useState(false);
   const [autoFillSources, setAutoFillSources] = useState([]);
@@ -124,7 +126,7 @@ export default function ClinicalCalculatorsModal({
   const handleAutoFill = async () => {
     setIsLoadingAutoFill(true);
     try {
-      const queryParam = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
+      const queryParam = `?${langParam}${patientId ? `&patient_id=${encodeURIComponent(patientId)}` : ''}`;
       const res = await fetch(`${apiUrl}/api/calculators/auto_fill${queryParam}`, {
         headers: authHeaders || {}
       });
@@ -144,7 +146,7 @@ export default function ClinicalCalculatorsModal({
     setIsCalculatingCardio(true);
     try {
       // 1. Riesgo CV MIVOR
-      const resScore = await fetch(`${apiUrl}/api/calculators/score2`, {
+      const resScore = await fetch(`${apiUrl}/api/calculators/score2?${langParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
         body: JSON.stringify({
@@ -162,7 +164,7 @@ export default function ClinicalCalculatorsModal({
         setScore2Result(s2Data);
 
         // 2. Lípidos MIVOR LDL Gap
-        const resLipid = await fetch(`${apiUrl}/api/calculators/ldl_gap`, {
+        const resLipid = await fetch(`${apiUrl}/api/calculators/ldl_gap?${langParam}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
           body: JSON.stringify({
@@ -187,7 +189,7 @@ export default function ClinicalCalculatorsModal({
   const handleCalculateRenal = async () => {
     setIsCalculatingRenal(true);
     try {
-      const res = await fetch(`${apiUrl}/api/calculators/ckd_epi`, {
+      const res = await fetch(`${apiUrl}/api/calculators/ckd_epi?${langParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
         body: JSON.stringify({
@@ -239,7 +241,7 @@ export default function ClinicalCalculatorsModal({
     setIsCalculatingFragility(true);
     try {
       const currentBarthel = Object.values(barthelForm).reduce((acc, curr) => acc + Number(curr), 0);
-      const res = await fetch(`${apiUrl}/api/calculators/fragility_tug`, {
+      const res = await fetch(`${apiUrl}/api/calculators/fragility_tug?${langParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
         body: JSON.stringify({
@@ -278,13 +280,13 @@ export default function ClinicalCalculatorsModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Calculadoras Clínicas & Longevidad</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('clinicalcalculator_calculadoras_clinicas_longevidad')}</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
-                  MDCalc + Lípidos MIVOR
+                  {t('clinicalcalculator_mdcalc_lipidos_mivor')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Soporte a decisiones clínicas basado en guías europeas e internacionales
+                {t('clinicalcalculator_soporte_a_decisiones_clinicas_basado_en')}
               </p>
             </div>
           </div>
@@ -294,16 +296,16 @@ export default function ClinicalCalculatorsModal({
               onClick={handleAutoFill}
               disabled={isLoadingAutoFill}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-xl transition border border-teal-200/60 disabled:opacity-50"
-              title="Autocompletar variables con la analítica más reciente"
+              title={t('clinicalcalculator_autocompletar_variables_con_la_analitica')}
             >
               <RefreshCw size={13} className={isLoadingAutoFill ? 'animate-spin' : ''} />
-              <span>{isLoadingAutoFill ? 'Cargando...' : 'Cargar de mis análisis'}</span>
+              <span>{isLoadingAutoFill ? t('loading') : t('clinicalcalculator_cargar_de_mis_analisis')}</span>
             </button>
 
             <button 
               onClick={onClose}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-              aria-label="Cerrar modal"
+              aria-label={t('medicalsearchmodal_cerrar_modal')}
             >
               <X size={20} />
             </button>
@@ -315,9 +317,9 @@ export default function ClinicalCalculatorsModal({
           <div className="bg-emerald-50/70 border-b border-emerald-100 px-6 py-1.5 text-xs text-emerald-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles size={13} className="text-emerald-600 shrink-0" />
-              <span>Valores prellenados desde: <strong>{autoFillSources.join(', ')}</strong></span>
+              <span>{t('clinicalcalculator_valores_prellenados_desde')} <strong>{autoFillSources.join(', ')}</strong></span>
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium">Puedes editarlos libremente</span>
+            <span className="text-[11px] text-emerald-600 font-medium">{t('clinicalcalculator_puedes_editarlos_libremente')}</span>
           </div>
         )}
 
@@ -332,7 +334,7 @@ export default function ClinicalCalculatorsModal({
             }`}
           >
             <Heart size={16} className={activeTab === 'cardio' ? 'text-teal-600' : 'text-slate-400'} />
-            <span>Cardiovascular (Riesgo CV MIVOR + Brecha LDL)</span>
+            <span>{t('clinicalcalculator_cardiovascular_riesgo_cv_mivor_brecha_ld')}</span>
           </button>
 
           <button
@@ -344,7 +346,7 @@ export default function ClinicalCalculatorsModal({
             }`}
           >
             <Activity size={16} className={activeTab === 'renal' ? 'text-teal-600' : 'text-slate-400'} />
-            <span>Función Renal (Filtrado MIVOR 2021)</span>
+            <span>{t('clinicalcalculator_funcion_renal_filtrado_mivor_2021')}</span>
           </button>
 
           <button
@@ -356,7 +358,7 @@ export default function ClinicalCalculatorsModal({
             }`}
           >
             <Clock size={16} className={activeTab === 'fragility' ? 'text-teal-600' : 'text-slate-400'} />
-            <span>Fragilidad & Caídas (TUG + Barthel)</span>
+            <span>{t('clinicalcalculator_fragilidad_caidas_tug_barthel')}</span>
           </button>
         </div>
 
@@ -371,7 +373,7 @@ export default function ClinicalCalculatorsModal({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Edad (40-89 años)
+                    {t('clinicalcalculator_edad_40_89_anos')}
                   </label>
                   <input
                     type="number"
@@ -382,27 +384,27 @@ export default function ClinicalCalculatorsModal({
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
                   <span className="text-[11px] text-slate-400">
-                    {cardioForm.age >= 70 ? 'Aplica Riesgo CV MIVOR-OP (Sénior)' : 'Aplica Riesgo CV MIVOR estándar'}
+                    {cardioForm.age >= 70 ? t('clinicalcalculator_aplica_riesgo_cv_mivor_op_senior') : t('clinicalcalculator_aplica_riesgo_cv_mivor_estandar')}
                   </span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Sexo Biológico
+                    {t('clinicalcalculator_sexo_biologico')}
                   </label>
                   <select
                     value={cardioForm.gender}
                     onChange={(e) => setCardioForm({ ...cardioForm, gender: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   >
-                    <option value="male">Hombre</option>
-                    <option value="female">Mujer</option>
+                    <option value="male">{t('clinicalcalculator_hombre')}</option>
+                    <option value="female">{t('clinicalcalculator_mujer')}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Presión Sistólica (mmHg)
+                    {t('clinicalcalculator_presion_sistolica_mmhg')}
                   </label>
                   <input
                     type="number"
@@ -412,12 +414,12 @@ export default function ClinicalCalculatorsModal({
                     onChange={(e) => setCardioForm({ ...cardioForm, systolic_bp: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
-                  <span className="text-[11px] text-slate-400">Ejemplo: 120, 135, 150</span>
+                  <span className="text-[11px] text-slate-400">{t('clinicalcalculator_ejemplo_120_135_150')}</span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Colesterol Total (mg/dL)
+                    {t('clinicalcalculator_colesterol_total_mg_dl')}
                   </label>
                   <input
                     type="number"
@@ -431,7 +433,7 @@ export default function ClinicalCalculatorsModal({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Colesterol HDL (mg/dL)
+                    {t('clinicalcalculator_colesterol_hdl_mg_dl')}
                   </label>
                   <input
                     type="number"
@@ -445,7 +447,7 @@ export default function ClinicalCalculatorsModal({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    c-LDL Actual (mg/dL)
+                    {t('clinicalcalculator_c_ldl_actual_mg_dl')}
                   </label>
                   <input
                     type="number"
@@ -455,7 +457,7 @@ export default function ClinicalCalculatorsModal({
                     onChange={(e) => setCardioForm({ ...cardioForm, current_ldl: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
-                  <span className="text-[11px] text-slate-400">Para cálculo de Brecha Lípidos MIVOR</span>
+                  <span className="text-[11px] text-slate-400">{t('clinicalcalculator_para_calculo_de_brecha_lipidos_mivor')}</span>
                 </div>
 
                 <div className="md:col-span-3 flex flex-wrap items-center gap-6 pt-2 border-t border-slate-200/70">
@@ -466,7 +468,7 @@ export default function ClinicalCalculatorsModal({
                       onChange={(e) => setCardioForm({ ...cardioForm, is_smoker: e.target.checked })}
                       className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                     />
-                    <span className="text-sm font-medium text-slate-700">Fumador activo</span>
+                    <span className="text-sm font-medium text-slate-700">{t('clinicalcalculator_fumador_activo')}</span>
                   </label>
 
                   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -476,7 +478,7 @@ export default function ClinicalCalculatorsModal({
                       onChange={(e) => setCardioForm({ ...cardioForm, has_prior_ascvd: e.target.checked })}
                       className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                     />
-                    <span className="text-sm font-medium text-slate-700">Enfermedad cardiovascular previa conocida (infarto, ictus, stent)</span>
+                    <span className="text-sm font-medium text-slate-700">{t('clinicalcalculator_enfermedad_cardiovascular_previa_conocid')}</span>
                   </label>
 
                   <button
@@ -485,7 +487,7 @@ export default function ClinicalCalculatorsModal({
                     className="ml-auto px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-2 text-sm disabled:opacity-50"
                   >
                     <Zap size={16} />
-                    <span>{isCalculatingCardio ? 'Calculando...' : 'Calcular Riesgo & Brecha LDL'}</span>
+                    <span>{isCalculatingCardio ? t('clinicalcalculator_calculando') : t('clinicalcalculator_calcular_riesgo_brecha_ldl')}</span>
                   </button>
                 </div>
               </div>
@@ -499,7 +501,7 @@ export default function ClinicalCalculatorsModal({
                       <div className="flex items-center gap-2">
                         <Heart className="text-rose-500" size={20} />
                         <h3 className="font-bold text-slate-800 text-base">
-                          {score2Result.is_score2_op ? 'Riesgo CV MIVOR-OP (Adulto Mayor)' : 'Riesgo CV MIVOR (Europeo ESC)'}
+                          {score2Result.is_score2_op ? t('clinicalcalculator_riesgo_cv_mivor_op_adulto_mayor') : t('clinicalcalculator_riesgo_cv_mivor_europeo_esc')}
                         </h3>
                       </div>
                       <span className={`px-2.5 py-1 text-xs font-extrabold rounded-full ${
@@ -507,7 +509,7 @@ export default function ClinicalCalculatorsModal({
                         score2Result.risk_badge === 'yellow' ? 'bg-amber-100 text-amber-800' :
                         'bg-rose-100 text-rose-800'
                       }`}>
-                        Riesgo {score2Result.risk_category}
+                        {t('clinicalcalculator_riesgo')} {score2Result.risk_category_label || score2Result.risk_category}
                       </span>
                     </div>
 
@@ -516,7 +518,7 @@ export default function ClinicalCalculatorsModal({
                         {score2Result.risk_percentage}%
                       </span>
                       <span className="text-xs text-slate-500 font-medium">
-                        riesgo estimado de evento fatal o no fatal en 10 años
+                        {t('clinicalcalculator_riesgo_estimado_de_evento_fatal_o')}
                       </span>
                     </div>
 
@@ -526,7 +528,7 @@ export default function ClinicalCalculatorsModal({
 
                     <div>
                       <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                        Recomendaciones preventivas ESC:
+                        {t('clinicalcalculator_recomendaciones_preventivas_esc')}
                       </h4>
                       <ul className="space-y-1.5">
                         {score2Result.clinical_guidance.map((g, idx) => (
@@ -544,31 +546,31 @@ export default function ClinicalCalculatorsModal({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Activity className="text-teal-600" size={20} />
-                        <h3 className="font-bold text-slate-800 text-base">Lípidos MIVOR (Brecha c-LDL)</h3>
+                        <h3 className="font-bold text-slate-800 text-base">{t('clinicalcalculator_lipidos_mivor_brecha_c_ldl')}</h3>
                       </div>
                       <span className={`px-2.5 py-1 text-xs font-extrabold rounded-full ${
                         lipidwiseResult.at_target ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                       }`}>
-                        {lipidwiseResult.at_target ? 'En Objetivo' : 'Fuera de Meta'}
+                        {lipidwiseResult.at_target ? t('clinicalcalculator_en_objetivo') : t('clinicalcalculator_fuera_de_meta')}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl text-center">
                       <div>
-                        <span className="text-[11px] font-bold text-slate-500 uppercase">LDL Actual</span>
-                        <div className="text-2xl font-black text-slate-800">{lipidwiseResult.current_ldl} <span className="text-xs font-normal">mg/dL</span></div>
+                        <span className="text-[11px] font-bold text-slate-500 uppercase">{t('clinicalcalculator_ldl_actual')}</span>
+                        <div className="text-2xl font-black text-slate-800">{lipidwiseResult.current_ldl} <span className="text-xs font-normal">{t('clinicalcalculator_mg_dl')}</span></div>
                       </div>
                       <div>
-                        <span className="text-[11px] font-bold text-teal-700 uppercase">Meta ESC ({score2Result.risk_category})</span>
-                        <div className="text-2xl font-black text-teal-700">&lt; {lipidwiseResult.target_ldl} <span className="text-xs font-normal">mg/dL</span></div>
+                        <span className="text-[11px] font-bold text-teal-700 uppercase">{t('calc_esc_target', { category: score2Result.risk_category_label || score2Result.risk_category })}</span>
+                        <div className="text-2xl font-black text-teal-700">&lt; {lipidwiseResult.target_ldl} <span className="text-xs font-normal">{t('clinicalcalculator_mg_dl')}</span></div>
                       </div>
                     </div>
 
                     {!lipidwiseResult.at_target ? (
                       <div className="space-y-2">
                         <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
-                          <span>Brecha a reducir: <strong className="text-rose-600">+{lipidwiseResult.ldl_gap} mg/dL</strong></span>
-                          <span>Reducción necesaria: <strong className="text-rose-600">{lipidwiseResult.reduction_pct_needed}%</strong></span>
+                          <span>{t('clinicalcalculator_brecha_a_reducir')} <strong className="text-rose-600">+{lipidwiseResult.ldl_gap} {t('clinicalcalculator_mg_dl')}</strong></span>
+                          <span>{t('clinicalcalculator_reduccion_necesaria')} <strong className="text-rose-600">{lipidwiseResult.reduction_pct_needed}%</strong></span>
                         </div>
                         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                           <div 
@@ -577,14 +579,14 @@ export default function ClinicalCalculatorsModal({
                           />
                         </div>
                         <div className="text-xs text-slate-600 bg-sky-50/70 p-3 rounded-xl border border-sky-100">
-                          <strong className="text-sky-900 block mb-1">Estrategia sugerida: {lipidwiseResult.suggested_intensity}</strong>
+                          <strong className="text-sky-900 block mb-1">{t('clinicalcalculator_estrategia_sugerida')} {lipidwiseResult.suggested_intensity}</strong>
                           {lipidwiseResult.clinical_strategy}
                         </div>
                       </div>
                     ) : (
                       <div className="text-xs text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-center gap-2">
                         <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
-                        <span>Excelente. Tu c-LDL se encuentra dentro de la diana recomendada para tu perfil de riesgo.</span>
+                        <span>{t('clinicalcalculator_excelente_tu_c_ldl_se_encuentra')}</span>
                       </div>
                     )}
 
@@ -605,7 +607,7 @@ export default function ClinicalCalculatorsModal({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Creatinina Sérica (mg/dL)
+                    {t('clinicalcalculator_creatinina_serica_mg_dl')}
                   </label>
                   <input
                     type="number"
@@ -616,12 +618,12 @@ export default function ClinicalCalculatorsModal({
                     onChange={(e) => setRenalForm({ ...renalForm, creatinine: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   />
-                  <span className="text-[11px] text-slate-400">Normal aprox: 0.6 - 1.2 mg/dL</span>
+                  <span className="text-[11px] text-slate-400">{t('clinicalcalculator_normal_aprox_0_6_1_2')}</span>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Edad (años)
+                    {t('clinicalcalculator_edad_anos')}
                   </label>
                   <input
                     type="number"
@@ -635,15 +637,15 @@ export default function ClinicalCalculatorsModal({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                    Sexo Biológico
+                    {t('clinicalcalculator_sexo_biologico')}
                   </label>
                   <select
                     value={renalForm.gender}
                     onChange={(e) => setRenalForm({ ...renalForm, gender: e.target.value })}
                     className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 font-semibold"
                   >
-                    <option value="male">Hombre</option>
-                    <option value="female">Mujer</option>
+                    <option value="male">{t('clinicalcalculator_hombre')}</option>
+                    <option value="female">{t('clinicalcalculator_mujer')}</option>
                   </select>
                 </div>
 
@@ -654,7 +656,7 @@ export default function ClinicalCalculatorsModal({
                     className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md shadow-teal-600/20 transition flex items-center gap-2 text-sm disabled:opacity-50"
                   >
                     <Activity size={16} />
-                    <span>{isCalculatingRenal ? 'Calculando...' : 'Calcular Filtrado Glomerular'}</span>
+                    <span>{isCalculatingRenal ? t('clinicalcalculator_calculando') : t('clinicalcalculator_calcular_filtrado_glomerular')}</span>
                   </button>
                 </div>
               </div>
@@ -665,9 +667,9 @@ export default function ClinicalCalculatorsModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Ecuación Oficial NKF/ASN Filtrado MIVOR 2021 (Race-Free)
+                        {t('clinicalcalculator_ecuacion_oficial_nkf_asn_filtrado_mivor')}
                       </span>
-                      <h3 className="text-xl font-bold text-slate-800">Filtrado Glomerular Estimado (eGFR)</h3>
+                      <h3 className="text-xl font-bold text-slate-800">{t('clinicalcalculator_filtrado_glomerular_estimado_egfr')}</h3>
                     </div>
                     <span className={`px-3 py-1 text-sm font-black rounded-full ${
                       ckdResult.badge_color === 'green' ? 'bg-emerald-100 text-emerald-800' :
@@ -675,19 +677,19 @@ export default function ClinicalCalculatorsModal({
                       ckdResult.badge_color === 'orange' ? 'bg-orange-100 text-orange-800' :
                       'bg-rose-100 text-rose-800'
                     }`}>
-                      Estadio {ckdResult.stage}
+                      {t('clinicalcalculator_estadio')} {ckdResult.stage}
                     </span>
                   </div>
 
                   <div className="flex items-baseline gap-3">
                     <span className="text-5xl font-black text-slate-900">{ckdResult.egfr}</span>
-                    <span className="text-sm font-semibold text-slate-500">mL/min/1.73 m²</span>
+                    <span className="text-sm font-semibold text-slate-500">{t('clinicalcalculator_ml_min_1_73_m')}</span>
                     <span className="text-sm font-bold text-slate-700 ml-2">({ckdResult.stage_label})</span>
                   </div>
 
                   <div className="p-4 bg-slate-50 rounded-2xl space-y-2 border border-slate-100 text-xs text-slate-700 leading-relaxed">
-                    <p><strong>Interpretación Clínica:</strong> {ckdResult.clinical_interpretation}</p>
-                    <p><strong>Pauta de Seguimiento:</strong> {ckdResult.follow_up_recommendation}</p>
+                    <p><strong>{t('clinicalcalculator_interpretacion_clinica')}</strong> {ckdResult.clinical_interpretation}</p>
+                    <p><strong>{t('clinicalcalculator_pauta_de_seguimiento')}</strong> {ckdResult.follow_up_recommendation}</p>
                   </div>
                 </div>
               )}
@@ -704,18 +706,18 @@ export default function ClinicalCalculatorsModal({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="text-teal-600" size={20} />
-                    <h3 className="font-bold text-slate-800 text-base">Prueba Timed Up and Go (TUG)</h3>
+                    <h3 className="font-bold text-slate-800 text-base">{t('clinicalcalculator_prueba_timed_up_and_go_tug')}</h3>
                   </div>
-                  <span className="text-xs text-slate-500">Cronómetro interactivo</span>
+                  <span className="text-xs text-slate-500">{t('clinicalcalculator_cronometro_interactivo')}</span>
                 </div>
 
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  <strong>Instrucciones:</strong> El paciente se sienta en una silla apoyando la espalda. Al pulsar "Iniciar", se levanta, camina 3 metros a paso cómodo, se da la vuelta, regresa a la silla y se sienta de nuevo. Al sentarse, pulsa "Detener".
+                  <strong>{t('clinicalcalculator_instrucciones')}</strong> {t('clinicalcalculator_el_paciente_se_sienta_en_una')}
                 </p>
 
                 <div className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
                   <div className="text-5xl font-black text-slate-900 font-mono tracking-wider mb-4">
-                    {timerDisplay.toFixed(1)} <span className="text-lg font-normal text-slate-400">segundos</span>
+                    {timerDisplay.toFixed(1)} <span className="text-lg font-normal text-slate-400">{t('calc_seconds')}</span>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -725,7 +727,7 @@ export default function ClinicalCalculatorsModal({
                         className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2 text-sm"
                       >
                         <Play size={16} />
-                        <span>Iniciar Cronómetro</span>
+                        <span>{t('clinicalcalculator_iniciar_cronometro')}</span>
                       </button>
                     ) : (
                       <button
@@ -733,7 +735,7 @@ export default function ClinicalCalculatorsModal({
                         className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2 text-sm animate-pulse"
                       >
                         <Square size={16} />
-                        <span>Detener (Llegada)</span>
+                        <span>{t('clinicalcalculator_detener_llegada')}</span>
                       </button>
                     )}
 
@@ -742,79 +744,79 @@ export default function ClinicalCalculatorsModal({
                       className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition flex items-center gap-1.5 text-sm"
                     >
                       <RotateCcw size={15} />
-                      <span>Reiniciar</span>
+                      <span>{t('clinicalcalculator_reiniciar')}</span>
                     </button>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-slate-500 pt-2 border-t border-slate-200/60">
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> &lt; 10s: Normal</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> 10 - 20s: Fragilidad leve</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> &gt; 20s: Alto riesgo de caídas</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> {t('calc_tug_normal')}</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> {t('clinicalcalculator_10_20s_fragilidad_leve')}</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" /> {t('calc_tug_high_risk')}</span>
                 </div>
               </div>
 
               {/* SELECCIÓN RÁPIDA ÍNDICE DE BARTHEL */}
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-slate-800 text-base">Escala de Autonomía Funcional (Barthel)</h3>
+                  <h3 className="font-bold text-slate-800 text-base">{t('clinicalcalculator_escala_de_autonomia_funcional_barthel')}</h3>
                   <span className="text-xs font-bold text-teal-700">
-                    Puntos: {Object.values(barthelForm).reduce((acc, curr) => acc + Number(curr), 0)} / 100
+                    {t('clinicalcalculator_puntos')} {Object.values(barthelForm).reduce((acc, curr) => acc + Number(curr), 0)} / 100
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="font-semibold text-slate-600 block mb-1">Deambulación / Marcha</label>
+                    <label className="font-semibold text-slate-600 block mb-1">{t('clinicalcalculator_deambulacion_marcha')}</label>
                     <select
                       value={barthelForm.mobility}
                       onChange={(e) => setBarthelForm({ ...barthelForm, mobility: Number(e.target.value) })}
                       className="w-full p-2 bg-white border border-slate-200 rounded-xl"
                     >
-                      <option value="15">Independiente (camina &gt;50m solo)</option>
-                      <option value="10">Necesita ayuda o bastón</option>
-                      <option value="5">En silla de ruedas independiente</option>
-                      <option value="0">Inmóvil / encamado</option>
+                      <option value="15">{t('calc_barthel_walk_independent')}</option>
+                      <option value="10">{t('clinicalcalculator_necesita_ayuda_o_baston')}</option>
+                      <option value="5">{t('clinicalcalculator_en_silla_de_ruedas_independiente')}</option>
+                      <option value="0">{t('clinicalcalculator_inmovil_encamado')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="font-semibold text-slate-600 block mb-1">Subir y Bajar Escaleras</label>
+                    <label className="font-semibold text-slate-600 block mb-1">{t('clinicalcalculator_subir_y_bajar_escaleras')}</label>
                     <select
                       value={barthelForm.stairs}
                       onChange={(e) => setBarthelForm({ ...barthelForm, stairs: Number(e.target.value) })}
                       className="w-full p-2 bg-white border border-slate-200 rounded-xl"
                     >
-                      <option value="10">Independiente sin supervisión</option>
-                      <option value="5">Necesita ayuda física o barandilla</option>
-                      <option value="0">Incapaz de subir escaleras</option>
+                      <option value="10">{t('clinicalcalculator_independiente_sin_supervision')}</option>
+                      <option value="5">{t('clinicalcalculator_necesita_ayuda_fisica_o_barandilla')}</option>
+                      <option value="0">{t('clinicalcalculator_incapaz_de_subir_escaleras')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="font-semibold text-slate-600 block mb-1">Traslado Sillón - Cama</label>
+                    <label className="font-semibold text-slate-600 block mb-1">{t('clinicalcalculator_traslado_sillon_cama')}</label>
                     <select
                       value={barthelForm.transfers}
                       onChange={(e) => setBarthelForm({ ...barthelForm, transfers: Number(e.target.value) })}
                       className="w-full p-2 bg-white border border-slate-200 rounded-xl"
                     >
-                      <option value="15">Independiente</option>
-                      <option value="10">Mínima ayuda física o supervisión</option>
-                      <option value="5">Gran ayuda (1-2 personas)</option>
-                      <option value="0">Incapaz / dependiente</option>
+                      <option value="15">{t('clinicalcalculator_independiente')}</option>
+                      <option value="10">{t('clinicalcalculator_minima_ayuda_fisica_o_supervision')}</option>
+                      <option value="5">{t('clinicalcalculator_gran_ayuda_1_2_personas')}</option>
+                      <option value="0">{t('clinicalcalculator_incapaz_dependiente')}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="font-semibold text-slate-600 block mb-1">Vestido y Aseo Personal</label>
+                    <label className="font-semibold text-slate-600 block mb-1">{t('clinicalcalculator_vestido_y_aseo_personal')}</label>
                     <select
                       value={barthelForm.dressing}
                       onChange={(e) => setBarthelForm({ ...barthelForm, dressing: Number(e.target.value) })}
                       className="w-full p-2 bg-white border border-slate-200 rounded-xl"
                     >
-                      <option value="10">Independiente (se viste y calza solo)</option>
-                      <option value="5">Necesita ayuda para botones o cordones</option>
-                      <option value="0">Completamente dependiente</option>
+                      <option value="10">{t('clinicalcalculator_independiente_se_viste_y_calza_solo')}</option>
+                      <option value="5">{t('clinicalcalculator_necesita_ayuda_para_botones_o_cordones')}</option>
+                      <option value="0">{t('clinicalcalculator_completamente_dependiente')}</option>
                     </select>
                   </div>
                 </div>
@@ -827,7 +829,7 @@ export default function ClinicalCalculatorsModal({
                       onChange={(e) => setHistoryOfFalls(e.target.checked)}
                       className="w-4 h-4 text-teal-600 rounded focus:ring-teal-500"
                     />
-                    <span className="text-xs font-semibold text-slate-700">Ha sufrido alguna caída en los últimos 6 meses</span>
+                    <span className="text-xs font-semibold text-slate-700">{t('clinicalcalculator_ha_sufrido_alguna_caida_en_los')}</span>
                   </label>
 
                   <button
@@ -836,7 +838,7 @@ export default function ClinicalCalculatorsModal({
                     className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2 text-sm disabled:opacity-50"
                   >
                     <CheckCircle2 size={16} />
-                    <span>{isCalculatingFragility ? 'Evaluando...' : 'Evaluar Riesgo Global de Caídas'}</span>
+                    <span>{isCalculatingFragility ? t('clinicalcalculator_evaluando') : t('clinicalcalculator_evaluar_riesgo_global_de_caidas')}</span>
                   </button>
                 </div>
               </div>
@@ -847,10 +849,10 @@ export default function ClinicalCalculatorsModal({
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Evaluación Multidimensional de Movilidad
+                        {t('clinicalcalculator_evaluacion_multidimensional_de_movilidad')}
                       </span>
                       <h3 className="text-lg font-bold text-slate-800">
-                        Riesgo Global de Caídas: <span className={
+                        {t('clinicalcalculator_riesgo_global_de_caidas')} <span className={
                           fragilityResult.risk_badge === 'green' ? 'text-emerald-600' :
                           fragilityResult.risk_badge === 'yellow' ? 'text-amber-600' : 'text-rose-600'
                         }>{fragilityResult.overall_fall_risk}</span>
@@ -861,19 +863,19 @@ export default function ClinicalCalculatorsModal({
                       fragilityResult.risk_badge === 'yellow' ? 'bg-amber-100 text-amber-800' :
                       'bg-rose-100 text-rose-800'
                     }`}>
-                      {fragilityResult.barthel_dependency || 'Evaluado'}
+                      {fragilityResult.barthel_dependency || t('clinicalcalculator_evaluado')}
                     </span>
                   </div>
 
                   {fragilityResult.tug_interpretation && (
                     <div className="p-3 bg-slate-50 rounded-xl text-xs text-slate-700 border border-slate-100">
-                      <strong>Prueba de marcha (TUG):</strong> {fragilityResult.tug_interpretation}
+                      <strong>{t('clinicalcalculator_prueba_de_marcha_tug')}</strong> {fragilityResult.tug_interpretation}
                     </div>
                   )}
 
                   <div>
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Acciones recomendadas para la familia y cuidadores:
+                      {t('clinicalcalculator_acciones_recomendadas_para_la_familia_y')}
                     </h4>
                     <ul className="space-y-1.5">
                       {fragilityResult.suggested_actions.map((act, i) => (
@@ -895,13 +897,13 @@ export default function ClinicalCalculatorsModal({
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
           <div className="flex items-center gap-1.5">
             <Info size={13} className="text-slate-400" />
-            <span>MIVOR.ai actúa como soporte informativo para facilitar el diálogo clínico médico-paciente.</span>
+            <span>{t('clinicalcalculator_mivor_ai_actua_como_soporte_informativo')}</span>
           </div>
           <button
             onClick={onClose}
             className="px-4 py-1.5 font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl text-xs"
           >
-            Cerrar
+            {t('patient_close')}
           </button>
         </div>
       </div>

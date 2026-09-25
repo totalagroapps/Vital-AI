@@ -4,21 +4,32 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  // La app es de tema claro: las variantes dark: solo se activan con la clase .dark (nunca por el SO)
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        base: '#F4F7FB',
+        base: '#F7F9FC',
         surface: '#FFFFFF',
+        // Paleta de la pantalla de referencia (Inicio del paciente): azul MIVOR + azul marino
+        mivor: {
+          blue: '#0055FF',
+          blueHover: '#0047D6',
+          blueSoft: '#E8F1FF',
+          navy: '#050838',
+          ink: '#1E2952',
+          border: '#DCE8FB',
+        },
         brand: {
-          DEFAULT: '#1A6B72',
-          hover: '#134E53',
-          purple: '#6B46C1', 
+          DEFAULT: '#0055FF',
+          hover: '#0047D6',
+          purple: '#6B46C1',
           purpleLight: '#8B5CF6',
           purpleDark: '#4C1D95',
-          green: '#10B981', 
-          blue: '#3B82F6',  
-          orange: '#F97316', 
-          dark: '#0B1120',  
+          green: '#10B981',
+          blue: '#0055FF',
+          orange: '#F97316',
+          dark: '#050838',
           teal: '#14B8A6',
         },
         content: {
@@ -36,10 +47,10 @@ export default {
         }
       },
       backgroundColor: {
-        base: '#F4F7FB',
+        base: '#F7F9FC',
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',

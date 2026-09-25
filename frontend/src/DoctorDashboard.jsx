@@ -11,6 +11,7 @@ import ClinicalCalculatorsModal from './views/ClinicalCalculatorsModal';
 import PreventiveCalendarModal from './views/PreventiveCalendarModal';
 import ConsensusMeterModal from './views/ConsensusMeterModal';
 import ScribeSoapModal from './views/ScribeSoapModal';
+import { translateSpecialtyName } from './i18n/catalogTranslations';
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
-  const { t, language, country } = useLanguage();
+  const { t, language, country, locale } = useLanguage();
   const [doctorScreen, setDoctorScreen] = useState('home');
   const [patients, setPatients] = useState([]);
   const [patientSearch, setPatientSearch] = useState('');
@@ -127,7 +128,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       await fetchPatientDetail(selectedPatient.user_id);
     } catch (err) {
       console.error(err);
-      alert('Error al subir los estudios: ' + (err.message || 'Error desconocido'));
+      alert(t('doctordashboard_upload_error', { message: err.message || t('doctordashboard_error_desconocido') }));
     } finally {
       setIsUploadingStudies(false);
       e.target.value = '';
@@ -146,8 +147,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       return;
     }
     const recognition = new SpeechRecognition();
-    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
-    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.lang = locale || language;
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -227,10 +227,10 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
     let triagesHtml = (patientDetail.triages || []).map(triageItem => `
       <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
-        <stron${t('doctordashboard_fecha')}a:</strong> ${triageItem.created_at ? escapeHtml(new Date(triageItem.created_at).toLocaleString()) : '--'}<br/>
-        <strong${t('doctordashboard_categoria')}:</strong> ${escapeHtml(triageItem.category || 'N/A')} | <strong>${t('doctordashboard_estado')}</strong> ${escapeHtml(triageItem.status || '--')}<br/>
-        ${triageItem.recommended_specialty ? `<strong>Especialidad sugerida:</strong> ${escapeHtml(triageItem.recommended_specialty)}<br/>` : ''}
-        <strong${t('doctordashboard_informe_clinico')}:</strong><br/>
+        <strong>${escapeHtml(t('doctordashboard_fecha'))}</strong> ${triageItem.created_at ? escapeHtml(new Date(triageItem.created_at).toLocaleString(locale)) : '--'}<br/>
+        <strong>${escapeHtml(t('doctordashboard_categoria'))}</strong> ${escapeHtml(triageItem.category || 'N/A')} | <strong>${escapeHtml(t('doctordashboard_estado'))}</strong> ${escapeHtml(triageItem.status || '--')}<br/>
+        ${triageItem.recommended_specialty ? `<strong>${escapeHtml(t('doctordashboard_especialidad_sugerida_2'))}</strong> ${escapeHtml(translateSpecialtyName(triageItem.recommended_specialty, language, t))}<br/>` : ''}
+        <strong>${escapeHtml(t('doctordashboard_informe_clinico'))}</strong><br/>
         <div style="white-space: pre-wrap; font-size: 0.9em; color: #334155; margin-top: 4px;">${escapeHtml(triageItem.final_report || t('no_complete_report'))}</div>
       </div>
     `).join('');
@@ -248,55 +248,55 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
     if (patientDetail.smart_referral?.matched) {
       referralHtml = `
         <div class="referral-box">
-          <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;${t('doctordashboard_derivacion_inteligente_recomendada')}da</h3>
-          <p style="margin: 0 0 5px 0;"><stro${t('doctordashboard_especialidad_sugerida_2')}da:</strong> ${escapeHtml(patientDetail.smart_referral.recommended_specialty)} (${escapeHtml(patientDetail.smart_referral.urgency?.toUpperCase() || '')})</p>
-          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong${t('doctordashboard_motivo_clinico')}:</strong> ${escapeHtml(patientDetail.smart_referral.reason)}</p>
+          <h3 style="margin: 0 0 8px 0; color: #047857; font-size: 15px;">${escapeHtml(t('doctordashboard_derivacion_inteligente_recomendada'))}</h3>
+          <p style="margin: 0 0 5px 0;"><strong>${escapeHtml(t('doctordashboard_especialidad_sugerida_2'))}</strong> ${escapeHtml(translateSpecialtyName(patientDetail.smart_referral.recommended_specialty, language, t))} (${escapeHtml(patientDetail.smart_referral.urgency?.toUpperCase() || '')})</p>
+          <p style="margin: 0; font-size: 0.9em; color: #475569;"><strong>${escapeHtml(t('doctordashboard_motivo_clinico'))}</strong> ${escapeHtml(patientDetail.smart_referral.reason)}</p>
         </div>
       `;
     }
 
-    const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
+    const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || t('default_patient_name');
     const title = t('doctordashboard_expediente_clinico', { patientName });
     const bodyHtml = `
       <div class="header">
-        <h1><span class="brand">MIVOR.ai</span${t('doctordashboard_expediente_clinico_oficial')}al</h1>
-        ${t('doctordashboard_historial_medico_integral_del_pacien')}e · ${escapeHtml(t('app_slogan'))}</p>
+        <h1><span class="brand">MIVOR.ai</span> ${escapeHtml(t('doctordashboard_expediente_clinico_oficial'))}</h1>
+        <p>${escapeHtml(t('doctordashboard_historial_medico_integral_del_pacien'))} ${escapeHtml(t('app_slogan'))}</p>
       </div>
-      
-      <${t('patient_record')}nte</h2>
+
+      <h2>${escapeHtml(t('patient_record'))}</h2>
       <div class="grid">
         <div><div class="label">${escapeHtml(t('name'))}</div><div class="value">${escapeHtml(patientName)}</div></div>
         <div><div class="label">${escapeHtml(t('date_of_birth'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.date_of_birth || '--')}</div></div>
         <div><div class="label">${escapeHtml(t('gender'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.gender || '--')}</div></div>
         <div><div class="label">${escapeHtml(t('blood_type_label'))}</div><div class="value" style="color: #e11d48;">${escapeHtml(patientDetail?.profile?.blood_type || 'N/A')}</div></div>
-        <div><div class="label">${escapeHtml(t('allergies'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.allergies || 'Ninguna alergia registrada')}</div></div>
+        <div><div class="label">${escapeHtml(t('allergies'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.allergies || t('doctordashboard_ninguna_alergia_registrada'))}</div></div>
         <div><div class="label">${escapeHtml(t('chronic_conditions_label'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.chronic_conditions || t('doctordashboard_sin_condiciones_cronicas_registradas'))}</div></div>
-        <div><div class="label"${t('doctordashboard_altura_peso')}o</div><div class="value">${escapeHtml(patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--')} / ${escapeHtml(patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--')}</div></div>
-        <div><div class="label"${t('emergency_contact')}a</div><div class="value">${escapeHtml(patientDetail?.profile?.emergency_contact || '--')}</div></div>
+        <div><div class="label">${escapeHtml(t('doctordashboard_altura_peso'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.height ? `${patientDetail.profile.height} cm` : '--')} / ${escapeHtml(patientDetail?.profile?.weight ? `${patientDetail.profile.weight} kg` : '--')}</div></div>
+        <div><div class="label">${escapeHtml(t('emergency_contact'))}</div><div class="value">${escapeHtml(patientDetail?.profile?.emergency_contact || '--')}</div></div>
       </div>
 
       ${referralHtml}
 
-      <h${t('doctordashboard_tratamiento_farmacologico_activo')}vo</h2>
+      <h2>${escapeHtml(t('doctordashboard_tratamiento_farmacologico_activo'))}</h2>
       ${medicationsHtml ? `
         <table>
           <thead>
             <tr>
-              ${t('doctordashboard_farmaco')}maco</th>
-             ${t('dosage')}Dosis</th>
-            ${t('frequency')}uencia</th>
-           ${t('schedule')}Horario</th>
+              <th>${escapeHtml(t('doctordashboard_farmaco'))}</th>
+              <th>${escapeHtml(t('dosage'))}</th>
+              <th>${escapeHtml(t('frequency'))}</th>
+              <th>${escapeHtml(t('schedule'))}</th>
             </tr>
           </thead>
           <tbody>${medicationsHtml}</tbody>
         </table>
-      ` : '<p style="color: #64748b; font-size: 0.9em;">No hay medicamentos activos pautados.</p>'}
-      
-      <h${t('clinical_history')}ud</h2>
-      ${triagesHtml || '<p style="color: #64748b; font-size: 0.9em;">No hay orientaciones de salud registradas.</p>'}
-      
+      ` : `<p style="color: #64748b; font-size: 0.9em;">${escapeHtml(t('doctordashboard_no_active_medications'))}</p>`}
+
+      <h2>${escapeHtml(t('clinical_history'))}</h2>
+      ${triagesHtml || `<p style="color: #64748b; font-size: 0.9em;">${escapeHtml(t('doctordashboard_no_health_guidance'))}</p>`}
+
       <div class="footer">
-     ${t('doctordashboard_documento_emitido_por_mivor_ai')}ón: ${escapeHtml(new Date().toLocaleString())}
+        ${escapeHtml(t('doctordashboard_documento_emitido_por_mivor_ai'))} ${escapeHtml(new Date().toLocaleString(locale))}
       </div>
     `;
 
@@ -304,7 +304,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   };
 
   const handleReferPatient = (specialist, referral) => {
-    const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente';
+    const patientName = patientDetail?.profile?.full_name || selectedPatient?.full_name || t('default_patient_name');
     const reason = referral?.reason || t('doctordashboard_valoracion_especializada');
     const text = t('doctordashboard_hola_dr_a_le_comparto', { full_name: specialist.full_name, patientName, reason, specialty: specialist.specialty });
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
@@ -406,15 +406,15 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
         if (uploadRes.ok) {
           const docData = await uploadRes.json();
-          let ocrContext = `\n\n[DOCUMENTO(S) ADJUNTO(S) ANALIZADO(S) POR IA: ${docData.filename || 'Estudio clínico'}]`;
-          if (docData.summary) ocrContext += `\nResumen Clínico: ${docData.summary}`;
-          if (docData.hallazgos && docData.hallazgos.length > 0) ocrContext += `\nHallazgos: ${docData.hallazgos.join('; ')}`;
-          if (docData.diagnosticos && docData.diagnosticos.length > 0) ocrContext += `\nDiagnósticos Sugeridos: ${docData.diagnosticos.join('; ')}`;
+          let ocrContext = `\n\n[${t('doctordashboard_ctx_attached_docs')}: ${docData.filename || t('doctordashboard_estudio_clinico')}]`;
+          if (docData.summary) ocrContext += `\n${t('doctordashboard_ctx_summary')}: ${docData.summary}`;
+          if (docData.hallazgos && docData.hallazgos.length > 0) ocrContext += `\n${t('doctordashboard_ctx_findings')}: ${docData.hallazgos.join('; ')}`;
+          if (docData.diagnosticos && docData.diagnosticos.length > 0) ocrContext += `\n${t('doctordashboard_ctx_diagnoses')}: ${docData.diagnosticos.join('; ')}`;
           if (docData.biomarcadores && docData.biomarcadores.length > 0) {
-            ocrContext += `\nBiomarcadores: ${docData.biomarcadores.map(b => `${b.parametro}: ${b.valor} ${b.unidad || ''} (${b.estado || ''})`).join(', ')}`;
+            ocrContext += `\n${t('doctordashboard_ctx_biomarkers')}: ${docData.biomarcadores.map(b => `${b.parametro}: ${b.valor} ${b.unidad || ''} (${b.estado || ''})`).join(', ')}`;
           }
           if (docData.extracted_text) {
-            ocrContext += `\nTexto OCR:\n${docData.extracted_text.slice(0, 1500)}`;
+            ocrContext += `\n${t('doctordashboard_ctx_ocr_text')}:\n${docData.extracted_text.slice(0, 1500)}`;
           }
           enrichedQuery += ocrContext;
 
@@ -536,7 +536,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
       {/* Fondo decorativo opcional */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
         <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand-teal/20 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-brand-purple/20 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] bg-brand/20 rounded-full blur-[120px]"></div>
       </div>
 
       {/* HEADER / SIDEBAR NAV (Leftmost) */}
@@ -610,7 +610,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   {String(p.full_name || 'P').charAt(0).toUpperCase()}
                 </div>
                 <div className="overflow-hidden flex-1">
-                  <div className="font-semibold text-sm truncate">{p.full_name || 'Paciente'}</div>
+                  <div className="font-semibold text-sm truncate">{p.full_name || t('default_patient_name')}</div>
                   <div className={`text-[11px] truncate ` + (selectedPatient?.user_id === p.user_id ? 'text-teal-100' : 'text-gray-400')}>
                     {p.triage_category && p.triage_category !== 'Ninguno' ? p.triage_category : (p.gender || '')}
                   </div>
@@ -642,7 +642,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
 
               <div className="flex flex-wrap justify-between items-start gap-3 mb-8">
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight break-words">{patientDetail?.profile?.full_name || selectedPatient?.full_name || 'Paciente'}</h1>
+                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight break-words">{patientDetail?.profile?.full_name || selectedPatient?.full_name || t('default_patient_name')}</h1>
                   <p className="text-gray-500 text-sm mt-1 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4"/> {patientDetail?.profile?.date_of_birth || t('no_birth_date')}</span>
                     &bull;
@@ -653,34 +653,34 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   <button 
                     onClick={() => setShowCalculatorsModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-teal-50 border border-teal-200 hover:bg-teal-100 rounded-xl text-xs sm:text-sm font-bold text-teal-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="Calculadoras Clínicas MDCalc + Lipidwise (SCORE2, LDL Gap, CKD-EPI, Fragilidad)"
+                    title={t('doctordashboard_calculadoras_clinicas_mdcalc_lipidwise_s')}
                   >
                     <Stethoscope className="w-4 h-4 text-teal-600 stroke-[2.4]" />
-                    <span>Calculadoras MDCalc</span>
+                    <span>{t('doctordashboard_calculadoras_mdcalc')}</span>
                   </button>
 
                   <button 
                     onClick={() => setShowCaPtyVaModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 hover:bg-sky-100 rounded-xl text-xs sm:text-sm font-bold text-sky-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="Vigilancia Oncológica Digestiva CaPtyVa y Calendario Preventivo"
+                    title={t('doctordashboard_vigilancia_oncologica_digestiva_captyva_')}
                   >
                     <Calendar className="w-4 h-4 text-sky-600 stroke-[2.4]" />
-                    <span>CaPtyVa</span>
+                    <span>{t('doctordashboard_captyva')}</span>
                   </button>
 
                   <button 
                     onClick={() => setShowConsensusModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="MIVOR Evidencia: Medidor de Evidencia Científica en PubMed"
+                    title={t('doctordashboard_mivor_evidencia_medidor_de_evidencia_cie')}
                   >
                     <Sparkles className="w-4 h-4 text-emerald-600 stroke-[2.4]" />
-                    <span>MIVOR Evidencia</span>
+                    <span>{t('brand_mivor_evidence')}</span>
                   </button>
 
                   <button 
                     onClick={() => setShowScribeModal(true)} 
                     className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs sm:text-sm font-bold text-indigo-800 shadow-xs transition-all active:scale-95 cursor-pointer"
-                    title="MIVOR Scribe: Copiloto Scribe SOAP y Hoja Clara de Cuidados"
+                    title={t('doctordashboard_mivor_scribe_copiloto_scribe_soap_y')}
                   >
                     <FileText className="w-4 h-4 text-indigo-600 stroke-[2.4]" />
                     <span>MIVOR Scribe</span>
@@ -776,7 +776,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                         ? 'bg-amber-100 text-amber-800 border-amber-200'
                         : 'bg-teal-100 text-teal-700 border-teal-200'
                     }`}>
-                     {t('doctordashboard_prioridad')} {patientDetail.smart_referral?.urgency || 'Normal'}
+                     {t('doctordashboard_prioridad')} {patientDetail.smart_referral?.urgency || t('normal')}
                     </span>
                   </div>
 
@@ -786,7 +786,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                      {t('doctordashboard_especialidad_sugerida')}
                     </div>
                     <div className="text-lg font-extrabold text-brand-dark mb-2">
-                      {patientDetail.smart_referral?.recommended_specialty || 'Especialidad'}
+                      {patientDetail.smart_referral?.recommended_specialty || t('doctordashboard_especialidad')}
                     </div>
                     <p className="text-xs text-gray-700 leading-relaxed">
                       {patientDetail.smart_referral?.reason || ''}
@@ -817,14 +817,14 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
                                 <img 
-                                  src={spec.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(spec.full_name || 'Especialista')}&background=0D8ABC&color=fff`} 
-                                  alt={spec.full_name || 'Especialista'}
+                                  src={spec.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(spec.full_name || t('doctordashboard_especialista'))}&background=0D8ABC&color=fff`} 
+                                  alt={spec.full_name || t('doctordashboard_especialista')}
                                   className="w-full h-full object-cover" 
                                 />
                               </div>
                               <div className="overflow-hidden">
-                                <h5 className="text-xs font-bold text-gray-900 truncate">{spec.full_name || 'Especialista'}</h5>
-                                <p className="text-[11px] text-brand-teal font-medium truncate">{spec.specialty || 'Especialidad'}</p>
+                                <h5 className="text-xs font-bold text-gray-900 truncate">{spec.full_name || t('doctordashboard_especialista')}</h5>
+                                <p className="text-[11px] text-brand-teal font-medium truncate">{spec.specialty || t('doctordashboard_especialidad')}</p>
                                 {spec.city && <p className="text-[10px] text-gray-400 truncate">{spec.city}</p>}
                               </div>
                             </div>
@@ -871,12 +871,12 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                               <Pill className="w-4 h-4" />
                             </div>
                             <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                              {med.is_active ? 'Activo' : 'Pausado'}
+                              {med.is_active ? t('emergencypassportm_activo') : t('doctordashboard_pausado')}
                             </span>
                           </div>
-                          <h4 className="font-bold text-gray-900 text-sm mb-1">{med.medication_name || 'Medicamento'}</h4>
+                          <h4 className="font-bold text-gray-900 text-sm mb-1">{med.medication_name || t('doctordashboard_medicamento')}</h4>
                           <p className="text-xs text-gray-600">
-                            <strong>{t('doctordashboard_dosis')}</strong> {med.dosage || 'No especificada'}
+                            <strong>{t('doctordashboard_dosis')}</strong> {med.dosage || t('doctordashboard_no_especificada')}
                           </p>
                           <p className="text-xs text-gray-600 mt-0.5">
                             <strong>{t('doctordashboard_frecuencia')}</strong> {med.frequency || t('doctordashboard_segun_prescripcion')}

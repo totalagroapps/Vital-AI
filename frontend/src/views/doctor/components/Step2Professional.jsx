@@ -163,7 +163,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                   <select
                     name="collegeCountry"
                     required
-                    value={formData.collegeCountry || formData.country || 'Colombia'}
+                    value={formData.collegeCountry || formData.country || t('doctoronboarding_colombia')}
                     onChange={handleChange}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white appearance-none transition-all cursor-pointer"
                   >
@@ -281,7 +281,7 @@ export default function Step2Professional({ formData, updateFormData, onNext, on
                 longitude={formData.longitude}
                 address={formData.address}
                 city={formData.city}
-                country={formData.country || 'Colombia'}
+                country={formData.country || t('doctoronboarding_colombia')}
                 onChange={handleLocationChange}
                 readOnly={false}
                 height="280px"

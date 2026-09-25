@@ -91,7 +91,7 @@ export default function CognitiveGamesModal({
               <button 
                 onClick={() => setSelectedGame(null)}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition mr-1"
-                aria-label="Volver a lista de juegos"
+                aria-label={t('cognitivegamesmoda_volver_a_lista_de_juegos')}
               >
                 <ArrowLeft size={20} />
               </button>
@@ -102,13 +102,13 @@ export default function CognitiveGamesModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Mente Activa</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('patienthome_mente_activa')}</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">
-                  Gimnasio Cognitivo
+                  {t('cognitivegamesmoda_gimnasio_cognitivo')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Ejercicios diarios breves de memoria, cálculo y concentración para mantener tu mente ágil
+                {t('cognitivegamesmoda_ejercicios_diarios_breves_de_memoria_cal')}
               </p>
             </div>
           </div>
@@ -117,13 +117,13 @@ export default function CognitiveGamesModal({
             {stats && (
               <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-full text-amber-700 text-xs font-bold shadow-xs">
                 <Flame size={15} className="text-amber-500 fill-amber-500" />
-                <span>{stats.streak_days} {stats.streak_days === 1 ? 'día' : 'días'} de racha</span>
+                <span>{t(stats.streak_days === 1 ? 'games_streak_one' : 'games_streak_many', { count: stats.streak_days })}</span>
               </div>
             )}
             <button 
               onClick={onClose}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-              aria-label="Cerrar modal"
+              aria-label={t('medicalsearchmodal_cerrar_modal')}
             >
               <X size={20} />
             </button>
@@ -136,11 +136,13 @@ export default function CognitiveGamesModal({
             /* HUB DE SELECCIÓN DE JUEGO */
             <div className="space-y-6">
               {/* MENSAJE DE BIENESTAR COGNITIVO */}
-              {stats?.cognitive_wellness_message && (
+              {(stats?.cognitive_wellness_code || stats?.cognitive_wellness_message) && (
                 <div className="bg-gradient-to-r from-violet-500 to-indigo-600 rounded-2xl p-4 text-white shadow-sm flex items-center gap-3">
                   <Sparkles size={24} className="shrink-0 text-violet-200" />
                   <p className="text-xs md:text-sm font-medium leading-relaxed">
-                    {stats.cognitive_wellness_message}
+                    {stats.cognitive_wellness_code
+                      ? t(`games_wellness_${stats.cognitive_wellness_code}`, { count: stats.streak_days })
+                      : stats.cognitive_wellness_message}
                   </p>
                 </div>
               )}
@@ -156,17 +158,17 @@ export default function CognitiveGamesModal({
                     <div className="w-12 h-12 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center font-black text-xl mb-3 group-hover:scale-105 transition">
                       1 2 3
                     </div>
-                    <h3 className="font-bold text-slate-800 text-base mb-1">Memoria de Dígitos</h3>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">{t('cognitivegamesmoda_memoria_de_digitos')}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                      Memoriza la secuencia numérica que aparece en pantalla y repítela en orden.
+                      {t('cognitivegamesmoda_memoriza_la_secuencia_numerica_que_apare')}
                     </p>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 text-xs font-semibold text-violet-700">
                     <span>
-                      Récord: {stats?.games_breakdown?.memory_digits?.best_score || 0} pts
+                      {t('cognitivegamesmoda_record')} {t('games_points_short', { count: stats?.games_breakdown?.memory_digits?.best_score || 0 })}
                     </span>
                     <span className="flex items-center gap-1 group-hover:translate-x-1 transition">
-                      Jugar <ChevronRight size={14} />
+                      {t('cognitivegamesmoda_jugar')} <ChevronRight size={14} />
                     </span>
                   </div>
                 </div>
@@ -180,17 +182,17 @@ export default function CognitiveGamesModal({
                     <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xl mb-3 group-hover:scale-105 transition">
                       + − ×
                     </div>
-                    <h3 className="font-bold text-slate-800 text-base mb-1">Cálculo Rápido</h3>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">{t('cognitivegamesmoda_calculo_rapido')}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                      Resuelve operaciones matemáticas sencillas antes de que acabe el tiempo (30s).
+                      {t('cognitivegamesmoda_resuelve_operaciones_matematicas_sencill')}
                     </p>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 text-xs font-semibold text-emerald-700">
                     <span>
-                      Récord: {stats?.games_breakdown?.speed_math?.best_score || 0} pts
+                      {t('cognitivegamesmoda_record')} {t('games_points_short', { count: stats?.games_breakdown?.speed_math?.best_score || 0 })}
                     </span>
                     <span className="flex items-center gap-1 group-hover:translate-x-1 transition">
-                      Jugar <ChevronRight size={14} />
+                      {t('cognitivegamesmoda_jugar')} <ChevronRight size={14} />
                     </span>
                   </div>
                 </div>
@@ -204,17 +206,17 @@ export default function CognitiveGamesModal({
                     <div className="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-black text-xl mb-3 group-hover:scale-105 transition">
                       🧩 🍎
                     </div>
-                    <h3 className="font-bold text-slate-800 text-base mb-1">Emparejamiento</h3>
+                    <h3 className="font-bold text-slate-800 text-base mb-1">{t('cognitivegamesmoda_emparejamiento')}</h3>
                     <p className="text-xs text-slate-500 leading-relaxed mb-3">
-                      Encuentra todas las parejas de iconos con el menor número de intentos y tiempo.
+                      {t('cognitivegamesmoda_encuentra_todas_las_parejas_de_iconos')}
                     </p>
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 text-xs font-semibold text-sky-700">
                     <span>
-                      Récord: {stats?.games_breakdown?.pattern_match?.best_score || 0} pts
+                      {t('cognitivegamesmoda_record')} {t('games_points_short', { count: stats?.games_breakdown?.pattern_match?.best_score || 0 })}
                     </span>
                     <span className="flex items-center gap-1 group-hover:translate-x-1 transition">
-                      Jugar <ChevronRight size={14} />
+                      {t('cognitivegamesmoda_jugar')} <ChevronRight size={14} />
                     </span>
                   </div>
                 </div>
@@ -224,7 +226,7 @@ export default function CognitiveGamesModal({
               {stats?.recent_sessions && stats.recent_sessions.length > 0 && (
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                   <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-                    Tus últimas sesiones de entrenamiento
+                    {t('cognitivegamesmoda_tus_ultimas_sesiones_de_entrenamiento')}
                   </h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
                     {stats.recent_sessions.slice(0, 5).map((s) => (
@@ -232,13 +234,13 @@ export default function CognitiveGamesModal({
                         <div className="flex items-center gap-2">
                           <Trophy size={14} className="text-amber-500" />
                           <span className="font-bold text-slate-700">
-                            {s.game_type === 'memory_digits' ? 'Memoria de Dígitos' :
-                             s.game_type === 'speed_math' ? 'Cálculo Rápido' : 'Emparejamiento Visual'}
+                            {s.game_type === 'memory_digits' ? t('cognitivegamesmoda_memoria_de_digitos') :
+                             s.game_type === 'speed_math' ? t('cognitivegamesmoda_calculo_rapido') : t('cognitivegamesmoda_emparejamiento_visual')}
                           </span>
                         </div>
                         <div className="flex items-center gap-4 text-slate-500">
-                          <span className="font-semibold text-slate-900">{s.score} pts</span>
-                          <span>{s.accuracy_percentage}% acierto</span>
+                          <span className="font-semibold text-slate-900">{t('games_points_short', { count: s.score })}</span>
+                          <span>{s.accuracy_percentage}{t('cognitivegamesmoda_acierto')}</span>
                           <span className="text-[11px] text-slate-400">{s.created_at}</span>
                         </div>
                       </div>
@@ -271,6 +273,7 @@ export default function CognitiveGamesModal({
 // SUB-JUEGO 1: MEMORIA DE DÍGITOS
 // ============================================================================
 function MemoryDigitsGame({ onFinish, onBack }) {
+  const { t } = useLanguage();
   const [level, setLevel] = useState(1);
   const [sequence, setSequence] = useState([]);
   const [displayDigit, setDisplayDigit] = useState(null);
@@ -343,8 +346,8 @@ function MemoryDigitsGame({ onFinish, onBack }) {
   return (
     <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto space-y-6">
       <div className="flex items-center justify-between w-full text-xs font-bold text-slate-500 uppercase tracking-wider">
-        <span>Nivel: {level} / 6</span>
-        <span>Puntuación: {score} pts</span>
+        <span>{t('cognitivegamesmoda_nivel')} {level} / 6</span>
+        <span>{t('cognitivegamesmoda_puntuacion')} {t('games_points_short', { count: score })}</span>
       </div>
 
       {gameState === 'ready' && (
@@ -352,22 +355,22 @@ function MemoryDigitsGame({ onFinish, onBack }) {
           <div className="w-16 h-16 bg-violet-100 text-violet-700 rounded-3xl mx-auto flex items-center justify-center font-black text-2xl">
             123
           </div>
-          <h3 className="text-lg font-bold text-slate-800">¿Listo para memorizar?</h3>
+          <h3 className="text-lg font-bold text-slate-800">{t('cognitivegamesmoda_listo_para_memorizar')}</h3>
           <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-            Aparecerán números de uno en uno en la pantalla. Memorízalos en el orden exacto e ingrésalos al terminar.
+            {t('cognitivegamesmoda_apareceran_numeros_de_uno_en_uno')}
           </p>
           <button
             onClick={handleStartGame}
             className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md transition text-sm"
           >
-            Comenzar Partida
+            {t('cognitivegamesmoda_comenzar_partida')}
           </button>
         </div>
       )}
 
       {gameState === 'showing' && (
         <div className="h-44 flex flex-col items-center justify-center">
-          <span className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2 animate-pulse">Memoriza...</span>
+          <span className="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2 animate-pulse">{t('cognitivegamesmoda_memoriza')}</span>
           <div className="text-7xl font-black text-violet-700 animate-scale-in">
             {displayDigit}
           </div>
@@ -377,7 +380,7 @@ function MemoryDigitsGame({ onFinish, onBack }) {
       {gameState === 'input' && (
         <div className="space-y-4 w-full">
           <div className="text-center">
-            <span className="text-xs font-semibold text-slate-500">Introduce la secuencia ({sequence.length} dígitos):</span>
+            <span className="text-xs font-semibold text-slate-500">{t('games_enter_sequence', { count: sequence.length })}</span>
             <div className="h-12 flex items-center justify-center gap-2 mt-2">
               {Array.from({ length: sequence.length }).map((_, i) => (
                 <div 
@@ -414,7 +417,7 @@ function MemoryDigitsGame({ onFinish, onBack }) {
               onClick={() => setUserInput(prev => prev.slice(0, -1))}
               className="h-12 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition"
             >
-              Borrar
+              {t('cognitivegamesmoda_borrar')}
             </button>
           </div>
         </div>
@@ -428,23 +431,23 @@ function MemoryDigitsGame({ onFinish, onBack }) {
             {gameState === 'won' ? <Award size={32} /> : <Brain size={32} />}
           </div>
           <h3 className="text-xl font-black text-slate-800">
-            {gameState === 'won' ? '¡Magnífica Memoria!' : '¡Buen Entrenamiento!'}
+            {gameState === 'won' ? t('cognitivegamesmoda_magnifica_memoria') : t('cognitivegamesmoda_buen_entrenamiento')}
           </h3>
           <p className="text-xs text-slate-500">
-            Puntuación final: <strong className="text-slate-900">{score} puntos</strong> (Llegaste al nivel {level})
+            {t('cognitivegamesmoda_puntuacion_final')} <strong className="text-slate-900">{t('games_points', { count: score })}</strong> {t('games_reached_level', { level })}
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <button
               onClick={handleStartGame}
               className="px-5 py-2.5 bg-violet-600 text-white font-bold rounded-xl text-xs shadow-md"
             >
-              Jugar de Nuevo
+              {t('cognitivegamesmoda_jugar_de_nuevo')}
             </button>
             <button
               onClick={onBack}
               className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-200"
             >
-              Volver al Menú
+              {t('cognitivegamesmoda_volver_al_menu')}
             </button>
           </div>
         </div>
@@ -457,6 +460,7 @@ function MemoryDigitsGame({ onFinish, onBack }) {
 // SUB-JUEGO 2: CÁLCULO RÁPIDO (SPEED MATH)
 // ============================================================================
 function SpeedMathGame({ onFinish, onBack }) {
+  const { t } = useLanguage();
   const [timeLeft, setTimeLeft] = useState(30);
   const [score, setScore] = useState(0);
   const [currentProblem, setCurrentProblem] = useState(null);
@@ -559,15 +563,15 @@ function SpeedMathGame({ onFinish, onBack }) {
           <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-3xl mx-auto flex items-center justify-center font-black text-2xl">
             +−×
           </div>
-          <h3 className="text-lg font-bold text-slate-800">Cálculo Rápido (30 Segundos)</h3>
+          <h3 className="text-lg font-bold text-slate-800">{t('cognitivegamesmoda_calculo_rapido_30_segundos')}</h3>
           <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
-            Resuelve el mayor número de operaciones matemáticas antes de que el reloj llegue a cero.
+            {t('cognitivegamesmoda_resuelve_el_mayor_numero_de_operaciones')}
           </p>
           <button
             onClick={startGame}
             className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition text-sm"
           >
-            Comenzar Reto
+            {t('cognitivegamesmoda_comenzar_reto')}
           </button>
         </div>
       )}
@@ -576,9 +580,9 @@ function SpeedMathGame({ onFinish, onBack }) {
         <div className="w-full space-y-6">
           <div className="flex items-center justify-between text-xs font-bold text-slate-500">
             <span className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
-              <Timer size={14} /> {timeLeft}s restantes
+              <Timer size={14} /> {t('games_seconds_left', { count: timeLeft })}
             </span>
-            <span className="text-slate-800 font-extrabold">{score} pts</span>
+            <span className="text-slate-800 font-extrabold">{t('games_points_short', { count: score })}</span>
           </div>
 
           <div className="h-28 bg-slate-50 rounded-2xl border-2 border-slate-100 flex items-center justify-center">
@@ -606,22 +610,22 @@ function SpeedMathGame({ onFinish, onBack }) {
           <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-3xl mx-auto flex items-center justify-center font-black text-2xl">
             <Trophy size={32} />
           </div>
-          <h3 className="text-xl font-black text-slate-800">¡Tiempo Cumplido!</h3>
+          <h3 className="text-xl font-black text-slate-800">{t('cognitivegamesmoda_tiempo_cumplido')}</h3>
           <p className="text-xs text-slate-500">
-            Lograste <strong className="text-slate-900">{score} puntos</strong> ({correctAnswers} de {totalQuestions} correctas)
+            {t('cognitivegamesmoda_lograste')} <strong className="text-slate-900">{t('games_points', { count: score })}</strong> {t('games_correct_of', { correct: correctAnswers, total: totalQuestions })}
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <button
               onClick={startGame}
               className="px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-md"
             >
-              Intentar de Nuevo
+              {t('cognitivegamesmoda_intentar_de_nuevo')}
             </button>
             <button
               onClick={onBack}
               className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-200"
             >
-              Volver al Menú
+              {t('cognitivegamesmoda_volver_al_menu')}
             </button>
           </div>
         </div>
@@ -636,6 +640,7 @@ function SpeedMathGame({ onFinish, onBack }) {
 const ICONS = ['🍎', '💧', '🏃', '🧠', '☀️', '🌿'];
 
 function PatternMatchGame({ onFinish, onBack }) {
+  const { t } = useLanguage();
   const [cards, setCards] = useState([]);
   const [flipped, setFlipped] = useState([]);
   const [matched, setMatched] = useState([]);
@@ -689,8 +694,8 @@ function PatternMatchGame({ onFinish, onBack }) {
   return (
     <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto space-y-5">
       <div className="flex items-center justify-between w-full text-xs font-bold text-slate-500">
-        <span>Movimientos: {moves}</span>
-        <span>Parejas: {matched.length / 2} / {ICONS.length}</span>
+        <span>{t('cognitivegamesmoda_movimientos')} {moves}</span>
+        <span>{t('cognitivegamesmoda_parejas')} {matched.length / 2} / {ICONS.length}</span>
       </div>
 
       {!isWon ? (
@@ -717,22 +722,22 @@ function PatternMatchGame({ onFinish, onBack }) {
           <div className="w-16 h-16 bg-sky-100 text-sky-700 rounded-3xl mx-auto flex items-center justify-center font-black text-2xl">
             <Trophy size={32} />
           </div>
-          <h3 className="text-xl font-black text-slate-800">¡Todas las Parejas Encontradas!</h3>
+          <h3 className="text-xl font-black text-slate-800">{t('cognitivegamesmoda_todas_las_parejas_encontradas')}</h3>
           <p className="text-xs text-slate-500">
-            Completado en <strong className="text-slate-900">{moves} movimientos</strong>
+            {t('cognitivegamesmoda_completado_en')} <strong className="text-slate-900">{t('games_moves', { count: moves })}</strong>
           </p>
           <div className="flex gap-3 justify-center pt-2">
             <button
               onClick={initGame}
               className="px-5 py-2.5 bg-sky-600 text-white font-bold rounded-xl text-xs shadow-md"
             >
-              Jugar Otra Vez
+              {t('cognitivegamesmoda_jugar_otra_vez')}
             </button>
             <button
               onClick={onBack}
               className="px-4 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs hover:bg-slate-200"
             >
-              Volver al Menú
+              {t('cognitivegamesmoda_volver_al_menu')}
             </button>
           </div>
         </div>

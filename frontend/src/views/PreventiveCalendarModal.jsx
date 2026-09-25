@@ -23,7 +23,8 @@ export default function PreventiveCalendarModal({
   authHeaders, 
   patientId = null 
 }) {
-  const { t } = useLanguage();
+  const { t, language, locale } = useLanguage();
+  const langParam = `lang=${encodeURIComponent(locale || language || 'es')}`;
   const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' | 'captyva'
   const [calendarData, setCalendarData] = useState(null);
   const [isLoadingCalendar, setIsLoadingCalendar] = useState(false);
@@ -50,7 +51,7 @@ export default function PreventiveCalendarModal({
   const fetchCalendar = async () => {
     setIsLoadingCalendar(true);
     try {
-      const q = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
+      const q = `?${langParam}${patientId ? `&patient_id=${encodeURIComponent(patientId)}` : ''}`;
       const res = await fetch(`${apiUrl}/api/surveillance/calendar${q}`, {
         headers: authHeaders || {}
       });
@@ -68,7 +69,7 @@ export default function PreventiveCalendarModal({
   const handleEvaluateCaptyva = async () => {
     setIsEvaluatingCaptyva(true);
     try {
-      const res = await fetch(`${apiUrl}/api/surveillance/digestive/evaluate`, {
+      const res = await fetch(`${apiUrl}/api/surveillance/digestive/evaluate?${langParam}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
         body: JSON.stringify({
@@ -111,13 +112,13 @@ export default function PreventiveCalendarModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">Calendario Preventivo & MIVOR Prevención</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('preventivecalendar_calendario_preventivo_mivor_prevencion')}</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
-                  Cribados & Vigilancia
+                  {t('preventivecalendar_cribados_vigilancia')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Vigilancia oncológica digestiva ESGE y controles de salud recomendados por edad y sexo
+                {t('preventivecalendar_vigilancia_oncologica_digestiva_esge_y_c')}
               </p>
             </div>
           </div>
@@ -125,7 +126,7 @@ export default function PreventiveCalendarModal({
           <button 
             onClick={onClose}
             className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-            aria-label="Cerrar modal"
+            aria-label={t('medicalsearchmodal_cerrar_modal')}
           >
             <X size={20} />
           </button>
@@ -142,7 +143,7 @@ export default function PreventiveCalendarModal({
             }`}
           >
             <Activity size={16} className={activeTab === 'calendar' ? 'text-sky-600' : 'text-slate-400'} />
-            <span>Calendario Preventivo Integral</span>
+            <span>{t('preventivecalendar_calendario_preventivo_integral')}</span>
           </button>
 
           <button
@@ -154,7 +155,7 @@ export default function PreventiveCalendarModal({
             }`}
           >
             <Stethoscope size={16} className={activeTab === 'captyva' ? 'text-sky-600' : 'text-slate-400'} />
-            <span>Vigilancia Digestiva MIVOR Prevención (Colonoscopia)</span>
+            <span>{t('preventivecalendar_vigilancia_digestiva_mivor_prevencion_co')}</span>
           </button>
         </div>
 
@@ -171,10 +172,10 @@ export default function PreventiveCalendarModal({
                   <div className="flex items-center gap-2">
                     <Sparkles size={16} className="text-sky-600 shrink-0" />
                     <span>
-                      Perfil evaluado: <strong>{calendarData.patient_gender}</strong>, <strong>{calendarData.patient_age} años</strong>
+                      {t('preventivecalendar_perfil_evaluado')} <strong>{calendarData.patient_gender}</strong>, <strong>{calendarData.patient_age} {t('years')}</strong>
                     </span>
                   </div>
-                  <span className="font-semibold text-sky-700">Pautas actualizadas de Medicina Preventiva</span>
+                  <span className="font-semibold text-sky-700">{t('preventivecalendar_pautas_actualizadas_de_medicina_preventi')}</span>
                 </div>
               )}
 
@@ -182,7 +183,7 @@ export default function PreventiveCalendarModal({
               <div>
                 <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
                   <ShieldCheck size={18} className="text-sky-600" />
-                  <span>Revisiones y Cribados Recomendados</span>
+                  <span>{t('preventivecalendar_revisiones_y_cribados_recomendados')}</span>
                 </h3>
 
                 <div className="space-y-3">
@@ -195,14 +196,14 @@ export default function PreventiveCalendarModal({
                             item.status_badge === 'green' ? 'bg-emerald-100 text-emerald-800' :
                             item.status_badge === 'amber' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'
                           }`}>
-                            {item.status === 'al_dia' ? 'Al día' : item.status === 'pendiente' ? 'Pendiente' : 'Recomendado'}
+                            {item.status === 'al_dia' ? t('preventivecalendar_al_dia') : item.status === 'pendiente' ? t('status_pending') : t('preventivecalendar_recomendado')}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 leading-relaxed">{item.description}</p>
                         <div className="flex items-center gap-3 text-[11px] text-slate-400 pt-1">
-                          <span>Frecuencia: <strong className="text-slate-600">{item.recommended_frequency}</strong></span>
+                          <span>{t('doctordashboard_frecuencia')} <strong className="text-slate-600">{item.recommended_frequency}</strong></span>
                           <span>•</span>
-                          <span>Edad: <strong className="text-slate-600">{item.target_age_group}</strong></span>
+                          <span>{t('preventivecalendar_edad')} <strong className="text-slate-600">{item.target_age_group}</strong></span>
                         </div>
                       </div>
                     </div>
@@ -215,7 +216,7 @@ export default function PreventiveCalendarModal({
                 <div>
                   <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
                     <Syringe size={18} className="text-teal-600" />
-                    <span>Inmunización y Vacunación Sénior</span>
+                    <span>{t('preventivecalendar_inmunizacion_y_vacunacion_senior')}</span>
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -226,11 +227,11 @@ export default function PreventiveCalendarModal({
                           <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
                             v.status_badge === 'green' ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'
                           }`}>
-                            {v.status === 'al_dia' ? 'Al día' : 'Campaña recomendada'}
+                            {v.status === 'al_dia' ? t('preventivecalendar_al_dia') : t('preventivecalendar_campana_recomendada')}
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-500 leading-snug">{v.description}</p>
-                        <p className="text-[11px] text-teal-700 font-semibold pt-1">Pauta: {v.recommended_frequency}</p>
+                        <p className="text-[11px] text-teal-700 font-semibold pt-1">{t('preventivecalendar_pauta')} {v.recommended_frequency}</p>
                       </div>
                     ))}
                   </div>
@@ -241,7 +242,7 @@ export default function PreventiveCalendarModal({
               {calendarData?.general_recommendations && (
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    Notas importantes para tu salud preventiva:
+                    {t('preventivecalendar_notas_importantes_para_tu_salud_preventi')}
                   </h4>
                   <ul className="space-y-1.5">
                     {calendarData.general_recommendations.map((r, i) => (
@@ -264,17 +265,17 @@ export default function PreventiveCalendarModal({
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-slate-800 text-base">
-                    Parámetros de la Colonoscopia / Informe de Anatomía Patológica
+                    {t('preventivecalendar_parametros_de_la_colonoscopia_informe_de')}
                   </h3>
                   <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-200/60">
-                    Guías Oficiales ESGE 2020
+                    {t('preventivecalendar_guias_oficiales_esge_2020')}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                      Número total de pólipos
+                      {t('preventivecalendar_numero_total_de_polipos')}
                     </label>
                     <input
                       type="number"
@@ -284,12 +285,12 @@ export default function PreventiveCalendarModal({
                       onChange={(e) => setCaptyvaForm({ ...captyvaForm, num_adenomas: e.target.value })}
                       className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl font-semibold"
                     />
-                    <span className="text-[11px] text-slate-400">0 si fue normal/limpia</span>
+                    <span className="text-[11px] text-slate-400">{t('preventive_polyps_zero_hint')}</span>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                      Tamaño del pólipo mayor (mm)
+                      {t('preventivecalendar_tamano_del_polipo_mayor_mm')}
                     </label>
                     <input
                       type="number"
@@ -299,12 +300,12 @@ export default function PreventiveCalendarModal({
                       onChange={(e) => setCaptyvaForm({ ...captyvaForm, max_size_mm: e.target.value })}
                       className="w-full px-3 py-2 text-sm bg-white border border-slate-200 rounded-xl font-semibold"
                     />
-                    <span className="text-[11px] text-slate-400">≥ 10 mm se clasifica de alto riesgo</span>
+                    <span className="text-[11px] text-slate-400">{t('preventivecalendar_10_mm_se_clasifica_de_alto')}</span>
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
-                      Fecha de la exploración
+                      {t('preventivecalendar_fecha_de_la_exploracion')}
                     </label>
                     <input
                       type="date"
@@ -322,7 +323,7 @@ export default function PreventiveCalendarModal({
                         onChange={(e) => setCaptyvaForm({ ...captyvaForm, has_high_grade_dysplasia: e.target.checked })}
                         className="w-4 h-4 text-sky-600 rounded"
                       />
-                      <span className="text-xs font-semibold text-slate-700">Displasia de alto grado confirmada en el informe de biopsia</span>
+                      <span className="text-xs font-semibold text-slate-700">{t('preventivecalendar_displasia_de_alto_grado_confirmada_en')}</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -332,7 +333,7 @@ export default function PreventiveCalendarModal({
                         onChange={(e) => setCaptyvaForm({ ...captyvaForm, has_serrated_ge_10mm: e.target.checked })}
                         className="w-4 h-4 text-sky-600 rounded"
                       />
-                      <span className="text-xs font-semibold text-slate-700">Pólipo serrado sésil ≥ 10 mm o con displasia</span>
+                      <span className="text-xs font-semibold text-slate-700">{t('preventivecalendar_polipo_serrado_sesil_10_mm_o')}</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -342,7 +343,7 @@ export default function PreventiveCalendarModal({
                         onChange={(e) => setCaptyvaForm({ ...captyvaForm, piecemeal_resection_ge_20mm: e.target.checked })}
                         className="w-4 h-4 text-sky-600 rounded"
                       />
-                      <span className="text-xs font-semibold text-slate-700">Resección en fragmentos (piecemeal) de adenoma grande ≥ 20 mm</span>
+                      <span className="text-xs font-semibold text-slate-700">{t('preventivecalendar_reseccion_en_fragmentos_piecemeal_de_ade')}</span>
                     </label>
                   </div>
 
@@ -353,7 +354,7 @@ export default function PreventiveCalendarModal({
                       className="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2 text-sm disabled:opacity-50"
                     >
                       <Zap size={16} />
-                      <span>{isEvaluatingCaptyva ? 'Evaluando...' : 'Evaluar Intervalo de Vigilancia MIVOR Prevención'}</span>
+                      <span>{isEvaluatingCaptyva ? t('clinicalcalculator_evaluando') : t('preventivecalendar_evaluar_intervalo_de_vigilancia_mivor_pr')}</span>
                     </button>
                   </div>
                 </div>
@@ -368,7 +369,7 @@ export default function PreventiveCalendarModal({
                         {captyvaResult.guideline_source}
                       </span>
                       <h3 className="text-xl font-bold text-slate-800">
-                        Nivel de Riesgo: <span className={
+                        {t('preventivecalendar_nivel_de_riesgo')} <span className={
                           captyvaResult.risk_badge === 'green' ? 'text-emerald-600' :
                           captyvaResult.risk_badge === 'orange' ? 'text-orange-600' : 'text-rose-600'
                         }>{captyvaResult.risk_tier}</span>
@@ -376,7 +377,7 @@ export default function PreventiveCalendarModal({
                     </div>
 
                     <div className="text-right">
-                      <span className="text-xs text-slate-400 font-bold block uppercase">Intervalo Recomendado</span>
+                      <span className="text-xs text-slate-400 font-bold block uppercase">{t('preventivecalendar_intervalo_recomendado')}</span>
                       <span className="text-2xl font-black text-sky-700">{captyvaResult.interval_text}</span>
                     </div>
                   </div>
@@ -384,18 +385,18 @@ export default function PreventiveCalendarModal({
                   {captyvaResult.next_recommended_date && (
                     <div className="p-3 bg-sky-50 rounded-xl text-xs text-sky-900 border border-sky-100 flex items-center gap-2">
                       <Clock size={16} className="text-sky-600 shrink-0" />
-                      <span>Fecha estimada de próxima colonoscopia: <strong>{captyvaResult.next_recommended_date}</strong></span>
+                      <span>{t('preventivecalendar_fecha_estimada_de_proxima_colonoscopia')} <strong>{captyvaResult.next_recommended_date}</strong></span>
                     </div>
                   )}
 
                   <div className="p-4 bg-slate-50 rounded-2xl text-xs text-slate-700 leading-relaxed border border-slate-100">
-                    <strong className="block mb-1 text-slate-900">Justificación de la Guía Clínica:</strong>
+                    <strong className="block mb-1 text-slate-900">{t('preventivecalendar_justificacion_de_la_guia_clinica')}</strong>
                     {captyvaResult.clinical_justification}
                   </div>
 
                   <div>
                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Plan de acción recomendado:
+                      {t('preventivecalendar_plan_de_accion_recomendado')}
                     </h4>
                     <ul className="space-y-1.5">
                       {captyvaResult.action_plan.map((act, i) => (
@@ -411,7 +412,7 @@ export default function PreventiveCalendarModal({
                     <div className="pt-2 border-t border-slate-100">
                       <h4 className="text-xs font-bold text-rose-700 uppercase tracking-wider mb-1 flex items-center gap-1.5">
                         <AlertTriangle size={13} />
-                        <span>Signos de alarma que requieren consulta anticipada:</span>
+                        <span>{t('preventivecalendar_signos_de_alarma_que_requieren_consulta')}</span>
                       </h4>
                       <p className="text-[11px] text-slate-500 leading-relaxed">
                         {captyvaResult.warning_signs.join(' • ')}
@@ -429,13 +430,13 @@ export default function PreventiveCalendarModal({
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
           <div className="flex items-center gap-1.5">
             <Info size={13} className="text-slate-400" />
-            <span>MIVOR MIVOR Prevención orienta sobre los intervalos de guías internacionales sin sustituir la prescripción de tu especialista.</span>
+            <span>{t('preventivecalendar_mivor_mivor_prevencion_orienta_sobre_los')}</span>
           </div>
           <button
             onClick={onClose}
             className="px-4 py-1.5 font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl text-xs"
           >
-            Cerrar
+            {t('patient_close')}
           </button>
         </div>
       </div>

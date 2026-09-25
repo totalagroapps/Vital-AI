@@ -22,13 +22,13 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
   const handleShareWhatsApp = () => {
     const url = window.location.href;
     const text = t('emergencypassportm_ficha_medica_de_emergencia_mivor') +
-      t('emergencypassportm_paciente', { value: profile?.full_name || 'Paciente' }) +
+      t('emergencypassportm_paciente', { value: profile?.full_name || t('default_patient_name') }) +
       t('emergencypassportm_grupo_sanguineo', { value: profile?.blood_type || 'N/D' }) +
-      t('emergencypassportm_donante_2', { value: profile?.organ_donor || 'No especificado' }) +
-      t('emergencypassportm_alergias_2', { value: profile?.allergies || 'Sin alergias conocidas' }) +
+      t('emergencypassportm_donante_2', { value: profile?.organ_donor || t('not_specified') }) +
+      t('emergencypassportm_alergias_2', { value: profile?.allergies || t('emergencypassportm_sin_alergias_conocidas') }) +
       (profile?.medical_notes ? t('emergencypassportm_alerta_medica_2', { medical_notes: profile.medical_notes }) : '') +
       (profile?.insurance_provider ? t('emergencypassportv_seguro', { insurance_provider: profile.insurance_provider }) : '') +
-      t('emergencypassportm_contacto_urgencias_2', { value: profile?.emergency_contact || 'No especificado' }) +
+      t('emergencypassportm_contacto_urgencias_2', { value: profile?.emergency_contact || t('not_specified') }) +
       t('emergencypassportv_ver_ficha_tactica_en_vivo', { url });
     
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
@@ -55,7 +55,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
         setProfile(data);
       } catch (err) {
         console.error("Error loading emergency profile:", err);
-        setError(err.message || "Error al cargar la información de emergencia.");
+        setError(err.message || t('emergencypassportv_error_al_cargar_la_informacion_de'));
       } finally {
         setLoading(false);
       }
@@ -82,7 +82,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: t('emergencypassportv_ficha_medica_de_emergencia', { value: profile?.full_name || 'Paciente' }),
+          title: t('emergencypassportv_ficha_medica_de_emergencia', { value: profile?.full_name || t('default_patient_name') }),
           text: t('emergencypassportv_datos_de_emergencia_y_grupo', { value: profile?.blood_type || 'N/D', value2: profile?.full_name || 'paciente' }),
           url: url,
         });
@@ -144,7 +144,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
             title={t('documentanalyzer_compartir_por_whatsapp')}
           >
             <Share2 size={13} />
-            <span>WhatsApp</span>
+            <span>{t('doctordirectorymod_whatsapp')}</span>
           </button>
 
           <button 
@@ -250,7 +250,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   </span>
                   <span className="bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
                     <User size={13} className="text-slate-400" />
-                    {profile.gender || 'No especificado'}
+                    {profile.gender || t('not_specified')}
                   </span>
                   {profile.weight && (
                     <span className="bg-slate-800/90 border border-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1.5">
@@ -391,7 +391,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-tight">
-                        {profile.emergency_contact || 'No especificado'}
+                        {profile.emergency_contact || t('not_specified')}
                       </p>
                       <p className="text-[11px] text-slate-400">{t('emergencypassportv_familiar_tutor_designado')}</p>
                     </div>
@@ -415,7 +415,7 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   <ShieldCheck size={14} className="text-emerald-500" />
                   <span>{t('emergencypassportv_historial_verificado_por_mivor_ai')}</span>
                 </div>
-                <span>{t('emergencypassportv_actualizado')} {profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : 'Reciente'}</span>
+                <span>{t('emergencypassportv_actualizado')} {profile.updated_at ? new Date(profile.updated_at).toLocaleDateString() : t('emergencypassportv_reciente')}</span>
               </div>
             </div>
 

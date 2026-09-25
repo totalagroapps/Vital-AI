@@ -21,17 +21,20 @@ import {
   Calendar,
   Share2
 } from "lucide-react";
-import { printHtmlContent } from "../utils/printPdf";
+import { printHtmlContent, escapeHtml } from "../utils/printPdf";
+import { useLanguage } from "../contexts/LanguageContext";
 
+// Plantillas clínicas: textos como claves i18n
 const TEMPLATES = [
-  { id: "general", name: "Medicina General", specialty: "Atención Primaria", icon: Stethoscope },
-  { id: "cardiology", name: "Cardiología", specialty: "Riesgo Cardiovascular", icon: Heart },
-  { id: "pediatrics", name: "Pediatría", specialty: "Infantil / Puericultura", icon: Baby },
-  { id: "geriatrics", name: "Geriatría", specialty: "VGI & Cuidador", icon: Activity },
-  { id: "digestive", name: "Digestivo", specialty: "Gastroenterología", icon: Compass },
+  { id: "general", nameKey: "scribe_tpl_general", specialtyKey: "scribe_tpl_general_desc", icon: Stethoscope },
+  { id: "cardiology", nameKey: "scribe_tpl_cardiology", specialtyKey: "scribe_tpl_cardiology_desc", icon: Heart },
+  { id: "pediatrics", nameKey: "scribe_tpl_pediatrics", specialtyKey: "scribe_tpl_pediatrics_desc", icon: Baby },
+  { id: "geriatrics", nameKey: "scribe_tpl_geriatrics", specialtyKey: "scribe_tpl_geriatrics_desc", icon: Activity },
+  { id: "digestive", nameKey: "scribe_tpl_digestive", specialtyKey: "scribe_tpl_digestive_desc", icon: Compass },
 ];
 
 export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = "doctor", patientData = null }) {
+  const { t, language, locale } = useLanguage();
   const [activeTab, setActiveTab] = useState(initialMode === "patient" ? "patient_prep" : "soap_scribe");
   const [selectedTemplate, setSelectedTemplate] = useState("general");
   
@@ -76,7 +79,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = "es-ES";
+      recognition.lang = locale || language;
 
       recognition.onresult = (event) => {
         let transcript = "";
@@ -97,11 +100,11 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
 
       recognitionRef.current = recognition;
     }
-  }, []);
+  }, [locale, language]);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
-      alert("El reconocimiento de voz no está soportado en este navegador. Puedes escribir o pegar tus notas.");
+      alert(t('scribesoapmodal_el_reconocimiento_de_voz_no_esta'));
       return;
     }
     if (isRecording) {
@@ -119,7 +122,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
 
   const handleGenerateSoap = async () => {
     if (!consultationText.trim()) {
-      alert("Por favor introduce las notas o dictado de la consulta.");
+      alert(t('scribesoapmodal_por_favor_introduce_las_notas_o'));
       return;
     }
     setLoadingSoap(true);
@@ -130,6 +133,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         patient_name: patientName || undefined,
         patient_age: patientAge ? parseInt(patientAge, 10) : undefined,
         patient_gender: patientGender || undefined,
+        language: locale || language,
         vital_signs: {
           bp: vitalBp || undefined,
           hr: vitalHr || undefined,
@@ -147,13 +151,13 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Error al generar la nota clínica.");
+      if (!res.ok) throw new Error(t('scribesoapmodal_error_al_generar_la_nota_clinica'));
       const data = await res.json();
       setSoapResult(data);
       setSoapViewSubtab("soap");
     } catch (err) {
       console.error(err);
-      alert("Ocurrió un error al procesar con MIVOR Scribe. Intenta de nuevo.");
+      alert(t('scribesoapmodal_ocurrio_un_error_al_procesar_con'));
     } finally {
       setLoadingSoap(false);
     }
@@ -161,7 +165,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
 
   const handlePrepareConsultation = async () => {
     if (!mainConcerns.trim()) {
-      alert("Por favor describe qué síntomas o motivo principal te lleva a consultar.");
+      alert(t('scribesoapmodal_por_favor_describe_que_sintomas_o'));
       return;
     }
     setLoadingPrep(true);
@@ -177,15 +181,16 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
           duration_evolution: durationEvolution,
           questions_for_doctor: questionsForDoctor,
           current_meds: currentMeds,
+          language: locale || language,
         }),
       });
 
-      if (!res.ok) throw new Error("Error preparando la consulta.");
+      if (!res.ok) throw new Error(t('scribesoapmodal_error_preparando_la_consulta'));
       const data = await res.json();
       setPrepResult(data);
     } catch (err) {
       console.error(err);
-      alert("No se pudo preparar la consulta. Por favor intenta de nuevo.");
+      alert(t('scribesoapmodal_no_se_pudo_preparar_la_consulta'));
     } finally {
       setLoadingPrep(false);
     }
@@ -197,81 +202,90 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
     setTimeout(() => setCopiedKey(null), 2500);
   };
 
+  // El contenido generado por la IA se escapa antes de insertarlo en la plantilla de impresión
+  const esc = escapeHtml;
+  const templateLabel = (id, fallback) => {
+    const tmpl = TEMPLATES.find((x) => x.id === id);
+    return tmpl ? t(tmpl.nameKey) : fallback;
+  };
+
   const handlePrintSoap = () => {
     if (!soapResult) return;
     const { soap_note, suggested_icd10, template_name } = soapResult;
+    const specialty = templateLabel(selectedTemplate, template_name);
     const content = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
         <div style="border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="color: #0369a1; margin: 0; font-size: 22px;">MIVOR.ai MIVOR Scribe — Nota Clínica SOAP</h1>
-          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Especialidad: ${template_name} | Fecha: ${new Date().toLocaleDateString('es-ES')}</p>
+          <h1 style="color: #0369a1; margin: 0; font-size: 22px;">${esc(t('scribe_print_soap_title'))}</h1>
+          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">${esc(t('scribe_print_soap_meta', { specialty, date: new Date().toLocaleDateString(locale) }))}</p>
         </div>
-        ${patientName ? `<p><strong>Paciente:</strong> ${patientName} ${patientAge ? `(${patientAge} años)` : ''}</p>` : ''}
-        
+        ${patientName ? `<p><strong>${esc(t('scribe_print_patient'))}</strong> ${esc(patientName)} ${patientAge ? esc(t('scribe_print_age', { age: patientAge })) : ''}</p>` : ''}
+
         <div style="margin-bottom: 16px;">
-          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">S — SUBJETIVO</h3>
-          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${soap_note.subjective}</p>
+          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">${esc(t('scribe_print_s'))}</h3>
+          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${esc(soap_note.subjective)}</p>
         </div>
 
         <div style="margin-bottom: 16px;">
-          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">O — OBJETIVO</h3>
-          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${soap_note.objective}</p>
+          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">${esc(t('scribe_print_o'))}</h3>
+          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${esc(soap_note.objective)}</p>
         </div>
 
         <div style="margin-bottom: 16px;">
-          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">A — APRECIACIÓN / EVALUACIÓN</h3>
-          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${soap_note.assessment}</p>
+          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">${esc(t('scribe_print_a'))}</h3>
+          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${esc(soap_note.assessment)}</p>
           ${suggested_icd10 && suggested_icd10.length > 0 ? `
-            <p style="font-size: 12px; color: #475569; margin-top: 6px;"><strong>CIE-10 Sugeridos:</strong> ${suggested_icd10.map(i => `${i.code} (${i.description})`).join(', ')}</p>
+            <p style="font-size: 12px; color: #475569; margin-top: 6px;"><strong>${esc(t('scribe_print_icd10'))}</strong> ${suggested_icd10.map(i => `${esc(i.code)} (${esc(i.description)})`).join(', ')}</p>
           ` : ''}
         </div>
 
         <div style="margin-bottom: 16px;">
-          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">P — PLAN TERAPÉUTICO</h3>
-          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${soap_note.plan}</p>
+          <h3 style="color: #0f172a; margin-bottom: 6px; font-size: 15px; border-left: 4px solid #0284c7; padding-left: 8px;">${esc(t('scribe_print_p'))}</h3>
+          <p style="white-space: pre-wrap; font-size: 13px; line-height: 1.5;">${esc(soap_note.plan)}</p>
         </div>
-        
+
         <div style="margin-top: 30px; font-size: 10px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
-          Documento generado con soporte de MIVOR Scribe CDSS. Validación y firma requerida por facultativo médico colegiado.
+          ${esc(t('scribe_print_soap_footer'))}
         </div>
       </div>
     `;
-    printHtmlContent(content, "Nota_Clinica_SOAP.pdf");
+    printHtmlContent(t('scribe_print_soap_title'), content);
   };
 
   const handlePrintPatientSheet = () => {
     if (!soapResult?.patient_clear_sheet) return;
     const { patient_clear_sheet, template_name } = soapResult;
+    const specialty = templateLabel(selectedTemplate, template_name);
     const content = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
         <div style="border-bottom: 3px solid #10b981; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="color: #047857; margin: 0; font-size: 24px;">📋 Mi Hoja Clara de Cuidados</h1>
-          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Resumen para el paciente y la familia • Consulta de ${template_name}</p>
+          <h1 style="color: #047857; margin: 0; font-size: 24px;">📋 ${esc(t('scribe_print_sheet_title'))}</h1>
+          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">${esc(t('scribe_print_sheet_subtitle', { specialty }))}</p>
         </div>
 
         <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-          <h3 style="color: #166534; margin: 0 0 6px 0; font-size: 16px;">¿Qué me pasa?</h3>
-          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #1e293b;">${patient_clear_sheet.simple_diagnosis}</p>
+          <h3 style="color: #166534; margin: 0 0 6px 0; font-size: 16px;">${esc(t('scribe_print_whats_wrong'))}</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #1e293b;">${esc(patient_clear_sheet.simple_diagnosis)}</p>
         </div>
 
         <div style="margin-bottom: 20px;">
-          <h3 style="color: #0f172a; font-size: 16px; margin-bottom: 8px;">💊 ¿Qué medicamentos debo tomar?</h3>
+          <h3 style="color: #0f172a; font-size: 16px; margin-bottom: 8px;">💊 ${esc(t('scribe_print_which_meds'))}</h3>
           <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
             <thead>
               <tr style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1; text-align: left;">
-                <th style="padding: 8px;">Medicamento</th>
-                <th style="padding: 8px;">Dosis</th>
-                <th style="padding: 8px;">Cuándo tomarlo</th>
-                <th style="padding: 8px;">¿Para qué sirve?</th>
+                <th style="padding: 8px;">${esc(t('scribe_print_col_medication'))}</th>
+                <th style="padding: 8px;">${esc(t('scribe_print_col_dose'))}</th>
+                <th style="padding: 8px;">${esc(t('scribe_print_col_when'))}</th>
+                <th style="padding: 8px;">${esc(t('scribe_print_col_purpose'))}</th>
               </tr>
             </thead>
             <tbody>
               ${patient_clear_sheet.medication_schedule.map(m => `
                 <tr style="border-bottom: 1px solid #e2e8f0;">
-                  <td style="padding: 8px; font-weight: bold; color: #0284c7;">${m.medication}</td>
-                  <td style="padding: 8px;">${m.dose}</td>
-                  <td style="padding: 8px; color: #059669; font-weight: 500;">${m.timing}</td>
-                  <td style="padding: 8px; color: #475569;">${m.purpose}</td>
+                  <td style="padding: 8px; font-weight: bold; color: #0284c7;">${esc(m.medication)}</td>
+                  <td style="padding: 8px;">${esc(m.dose)}</td>
+                  <td style="padding: 8px; color: #059669; font-weight: 500;">${esc(m.timing)}</td>
+                  <td style="padding: 8px; color: #475569;">${esc(m.purpose)}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -279,30 +293,30 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         </div>
 
         <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; margin-bottom: 20px;">
-          <h3 style="color: #991b1b; margin: 0 0 8px 0; font-size: 15px;">🚨 Signos de Alarma — Acuda a Urgencias si nota:</h3>
+          <h3 style="color: #991b1b; margin: 0 0 8px 0; font-size: 15px;">🚨 ${esc(t('scribe_print_red_flags'))}</h3>
           <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #7f1d1d;">
-            ${patient_clear_sheet.red_flags.map(r => `<li>${r}</li>`).join('')}
+            ${patient_clear_sheet.red_flags.map(r => `<li>${esc(r)}</li>`).join('')}
           </ul>
         </div>
 
         <div style="margin-bottom: 20px;">
-          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">🌿 Consejos para el Día a Día:</h3>
+          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">🌿 ${esc(t('scribe_print_daily_tips'))}</h3>
           <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #334155;">
-            ${patient_clear_sheet.lifestyle_recommendations.map(l => `<li>${l}</li>`).join('')}
+            ${patient_clear_sheet.lifestyle_recommendations.map(l => `<li>${esc(l)}</li>`).join('')}
           </ul>
         </div>
 
         <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
-          <h4 style="color: #1e40af; margin: 0 0 4px 0; font-size: 14px;">📅 Próximo Control:</h4>
-          <p style="margin: 0; font-size: 13px; color: #1e3a8a;">${patient_clear_sheet.next_followup}</p>
+          <h4 style="color: #1e40af; margin: 0 0 4px 0; font-size: 14px;">📅 ${esc(t('scribe_print_next_followup'))}</h4>
+          <p style="margin: 0; font-size: 13px; color: #1e3a8a;">${esc(patient_clear_sheet.next_followup)}</p>
         </div>
 
         <div style="font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-          MIVOR.ai Cuidados • Documento informativo complementario para el paciente y cuidadores.
+          ${esc(t('scribe_print_sheet_footer'))}
         </div>
       </div>
     `;
-    printHtmlContent(content, "Mi_Hoja_Clara_Cuidados.pdf");
+    printHtmlContent(t('scribe_print_sheet_title'), content);
   };
 
   const handlePrintPrepSheet = () => {
@@ -310,38 +324,38 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
     const content = `
       <div style="font-family: Arial, sans-serif; padding: 24px; color: #1e293b;">
         <div style="border-bottom: 3px solid #6366f1; padding-bottom: 12px; margin-bottom: 20px;">
-          <h1 style="color: #4338ca; margin: 0; font-size: 24px;">📝 Mi Preparador de Consulta Médica</h1>
-          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Guía de 1 página para aprovechar al máximo mi cita con el doctor</p>
+          <h1 style="color: #4338ca; margin: 0; font-size: 24px;">📝 ${esc(t('scribe_print_prep_title'))}</h1>
+          <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">${esc(t('scribe_print_prep_subtitle'))}</p>
         </div>
 
         <div style="background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 14px; margin-bottom: 18px;">
-          <h3 style="color: #3730a3; margin: 0 0 6px 0; font-size: 15px;">⏱️ Mi Resumen de 2 Minutos para el Doctor:</h3>
-          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #1e1b4b; font-style: italic;">"${prepResult.elevator_pitch}"</p>
+          <h3 style="color: #3730a3; margin: 0 0 6px 0; font-size: 15px;">⏱️ ${esc(t('scribe_print_prep_pitch'))}</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #1e1b4b; font-style: italic;">"${esc(prepResult.elevator_pitch)}"</p>
         </div>
 
         <div style="margin-bottom: 18px;">
-          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">❓ Preguntas Clave que Deseo Hacer:</h3>
+          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">❓ ${esc(t('scribe_print_prep_questions'))}</h3>
           <ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #334155;">
-            ${prepResult.priority_questions.map(q => `<li><strong>${q}</strong></li>`).join('')}
+            ${prepResult.priority_questions.map(q => `<li><strong>${esc(q)}</strong></li>`).join('')}
           </ol>
         </div>
 
         <div style="margin-bottom: 18px;">
-          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">💊 Tratamientos y Medicinas a Revisar:</h3>
+          <h3 style="color: #0f172a; font-size: 15px; margin-bottom: 8px;">💊 ${esc(t('scribe_print_prep_meds'))}</h3>
           <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.6; color: #334155;">
-            ${prepResult.meds_checklist.map(m => `<li>${m}</li>`).join('')}
+            ${prepResult.meds_checklist.map(m => `<li>${esc(m)}</li>`).join('')}
           </ul>
         </div>
 
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-          <h4 style="color: #334155; margin: 0 0 6px 0; font-size: 13px;">💡 Consejos para la Visita:</h4>
+          <h4 style="color: #334155; margin: 0 0 6px 0; font-size: 13px;">💡 ${esc(t('scribe_print_prep_tips'))}</h4>
           <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #64748b; line-height: 1.5;">
-            ${prepResult.tips_for_visit.map(t => `<li>${t}</li>`).join('')}
+            ${prepResult.tips_for_visit.map(tip => `<li>${esc(tip)}</li>`).join('')}
           </ul>
         </div>
       </div>
     `;
-    printHtmlContent(content, "Preparador_Consulta_Medica.pdf");
+    printHtmlContent(t('scribe_print_prep_title'), content);
   };
 
   if (!isOpen) return null;
@@ -358,14 +372,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-slate-800 dark:text-white">
-                  MIVOR Scribe & Copiloto
+                  {t('scribesoapmodal_mivor_scribe_copiloto')}
                 </h2>
                 <span className="text-[11px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300">
-                  SOAP + Hoja Clara
+                  {t('scribesoapmodal_soap_hoja_clara')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Documentación médica automatizada por voz y preparador de consultas
+                {t('scribesoapmodal_documentacion_medica_automatizada_por_vo')}
               </p>
             </div>
           </div>
@@ -382,7 +396,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
-                🩺 Médico (SOAP)
+                {t('scribesoapmodal_medico_soap')}
               </button>
               <button
                 type="button"
@@ -393,14 +407,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
-                📝 Paciente (Preparador)
+                {t('scribesoapmodal_paciente_preparador')}
               </button>
             </div>
 
             <button
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-              title="Cerrar"
+              title={t('patient_close')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -415,7 +429,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
               {/* Template Selector Chips */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  1. Seleccionar Plantilla Clínica Especializada
+                  {t('scribesoapmodal_1_seleccionar_plantilla_clinica_especial')}
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                   {TEMPLATES.map((tmpl) => {
@@ -441,8 +455,8 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                         >
                           <Icon className="w-4 h-4" />
                         </div>
-                        <span className="text-xs font-bold leading-tight">{tmpl.name}</span>
-                        <span className="text-[10px] text-slate-400 leading-tight mt-0.5">{tmpl.specialty}</span>
+                        <span className="text-xs font-bold leading-tight">{t(tmpl.nameKey)}</span>
+                        <span className="text-[10px] text-slate-400 leading-tight mt-0.5">{t(tmpl.specialtyKey)}</span>
                       </button>
                     );
                   })}
@@ -452,23 +466,23 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
               {/* Patient Context (Optional quick inputs) */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-2xl border border-slate-200 dark:border-slate-700/60 text-xs">
                 <div>
-                  <label className="text-slate-500 dark:text-slate-400 block mb-1">Paciente</label>
+                  <label className="text-slate-500 dark:text-slate-400 block mb-1">{t('default_patient_name')}</label>
                   <input
                     type="text"
                     value={patientName}
                     onChange={(e) => setPatientName(e.target.value)}
-                    placeholder="Nombre o ID"
+                    placeholder={t('scribesoapmodal_nombre_o_id')}
                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="text-slate-500 dark:text-slate-400 block mb-1">Edad / Género</label>
+                  <label className="text-slate-500 dark:text-slate-400 block mb-1">{t('scribesoapmodal_edad_genero')}</label>
                   <div className="flex gap-1.5">
                     <input
                       type="number"
                       value={patientAge}
                       onChange={(e) => setPatientAge(e.target.value)}
-                      placeholder="Años"
+                      placeholder={t('scribesoapmodal_anos')}
                       className="w-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white"
                     />
                     <select
@@ -476,14 +490,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       onChange={(e) => setPatientGender(e.target.value)}
                       className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-1.5 py-1.5 text-xs text-slate-800 dark:text-white"
                     >
-                      <option value="">Género</option>
+                      <option value="">{t('gender')}</option>
                       <option value="Hombre">M</option>
                       <option value="Mujer">F</option>
                     </select>
                   </div>
                 </div>
                 <div>
-                  <label className="text-slate-500 dark:text-slate-400 block mb-1">Presión / Pulso</label>
+                  <label className="text-slate-500 dark:text-slate-400 block mb-1">{t('scribesoapmodal_presion_pulso')}</label>
                   <div className="flex gap-1.5">
                     <input
                       type="text"
@@ -496,13 +510,13 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       type="text"
                       value={vitalHr}
                       onChange={(e) => setVitalHr(e.target.value)}
-                      placeholder="72 lpm"
+                      placeholder={t('scribe_placeholder_hr')}
                       className="w-1/2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 text-xs text-slate-800 dark:text-white"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-slate-500 dark:text-slate-400 block mb-1">Temp / SatO2</label>
+                  <label className="text-slate-500 dark:text-slate-400 block mb-1">{t('scribesoapmodal_temp_sato2')}</label>
                   <div className="flex gap-1.5">
                     <input
                       type="text"
@@ -526,10 +540,10 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    2. Dictado de Voz o Notas en Borrador
+                    {t('scribesoapmodal_2_dictado_de_voz_o_notas')}
                     {isRecording && (
                       <span className="flex items-center gap-1 text-red-500 font-bold animate-pulse text-[11px] lowercase">
-                        <span className="w-2 h-2 rounded-full bg-red-500" /> grabando...
+                        <span className="w-2 h-2 rounded-full bg-red-500" /> {t('scribe_recording')}
                       </span>
                     )}
                   </label>
@@ -538,12 +552,12 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       type="button"
                       onClick={() =>
                         setConsultationText(
-                          "Varón de 62 años que acude a control de hipertensión y dislipemia. Refiere cefalea ocasional matutina y dolor lumbar leve tras esfuerzos. No dolor torácico ni disnea. Exploración: PA 145/88, FC 74 lpm, SatO2 97%. Auscultación limpia. En analítica previa: Colesterol LDL 148 mg/dL, creatinina 1.1 mg/dL. Se pauta ajuste de dosis de estatinas y medidas de estilo de vida."
+                          t('scribesoapmodal_varon_de_62_anos_que_acude')
                         )
                       }
                       className="text-[11px] text-sky-600 dark:text-sky-400 hover:underline"
                     >
-                      Ejemplo clínico
+                      {t('scribesoapmodal_ejemplo_clinico')}
                     </button>
                     <button
                       type="button"
@@ -555,7 +569,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       }`}
                     >
                       {isRecording ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                      {isRecording ? "Detener" : "Dictar"}
+                      {isRecording ? t('scribesoapmodal_detener') : t('scribesoapmodal_dictar')}
                     </button>
                   </div>
                 </div>
@@ -565,7 +579,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                     rows={4}
                     value={consultationText}
                     onChange={(e) => setConsultationText(e.target.value)}
-                    placeholder="Dicta con el micrófono o escribe aquí las notas desestructuradas de la consulta (síntomas del paciente, hallazgos, medicación acordada...)"
+                    placeholder={t('scribesoapmodal_dicta_con_el_microfono_o_escribe')}
                     className="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-3.5 text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
                   />
                 </div>
@@ -579,12 +593,12 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   {loadingSoap ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Estructurando Nota SOAP & Hoja de Cuidados con MIVOR Scribe...
+                      {t('scribesoapmodal_estructurando_nota_soap_hoja_de_cuidados')}
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-sky-200" />
-                      Estructurar Nota SOAP y Hoja Clara
+                      {t('scribesoapmodal_estructurar_nota_soap_y_hoja_clara')}
                     </>
                   )}
                 </button>
@@ -606,7 +620,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                         }`}
                       >
                         <FileText className="w-3.5 h-3.5" />
-                        Nota SOAP Formal
+                        {t('scribesoapmodal_nota_soap_formal')}
                       </button>
                       <button
                         type="button"
@@ -618,7 +632,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                         }`}
                       >
                         <Heart className="w-3.5 h-3.5" />
-                        Hoja Clara para el Paciente
+                        {t('scribesoapmodal_hoja_clara_para_el_paciente')}
                       </button>
                     </div>
 
@@ -629,11 +643,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                           const textToCopy =
                             soapViewSubtab === "soap"
                               ? `S: ${soapResult.soap_note.subjective}\nO: ${soapResult.soap_note.objective}\nA: ${soapResult.soap_note.assessment}\nP: ${soapResult.soap_note.plan}`
-                              : `¿Qué me pasa?: ${soapResult.patient_clear_sheet.simple_diagnosis}\nMedicamentos: ${soapResult.patient_clear_sheet.medication_schedule.map((m) => `${m.medication} (${m.timing})`).join(", ")}`;
+                              : t('scribe_copy_sheet', {
+                                  diagnosis: soapResult.patient_clear_sheet.simple_diagnosis,
+                                  meds: soapResult.patient_clear_sheet.medication_schedule.map((m) => `${m.medication} (${m.timing})`).join(", "),
+                                });
                           copyToClipboard(textToCopy, "soap_text");
                         }}
                         className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 text-xs font-medium flex items-center gap-1"
-                        title="Copiar texto"
+                        title={t('scribesoapmodal_copiar_texto')}
                       >
                         {copiedKey === "soap_text" ? (
                           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -647,7 +664,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                         className="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 text-xs font-bold flex items-center gap-1.5 shadow-sm"
                       >
                         <Printer className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
-                        Imprimir / PDF
+                        {t('print_pdf')}
                       </button>
                     </div>
                   </div>
@@ -657,21 +674,21 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                     <div className="space-y-3.5 text-xs text-slate-700 dark:text-slate-200">
                       <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <span className="font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-wide block mb-1">
-                          S — Subjetivo (Anamnesis & Motivo)
+                          {t('scribesoapmodal_s_subjetivo_anamnesis_motivo')}
                         </span>
                         <p className="whitespace-pre-wrap leading-relaxed">{soapResult.soap_note.subjective}</p>
                       </div>
 
                       <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <span className="font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-wide block mb-1">
-                          O — Objetivo (Exploración & Constantes)
+                          {t('scribesoapmodal_o_objetivo_exploracion_constantes')}
                         </span>
                         <p className="whitespace-pre-wrap leading-relaxed">{soapResult.soap_note.objective}</p>
                       </div>
 
                       <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <span className="font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-wide block mb-1">
-                          A — Apreciación / Juicio Diagnóstico
+                          {t('scribesoapmodal_a_apreciacion_juicio_diagnostico')}
                         </span>
                         <p className="whitespace-pre-wrap leading-relaxed">{soapResult.soap_note.assessment}</p>
                         {soapResult.suggested_icd10?.length > 0 && (
@@ -690,7 +707,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
 
                       <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <span className="font-extrabold text-sky-600 dark:text-sky-400 uppercase tracking-wide block mb-1">
-                          P — Plan Terapéutico & Recomendaciones
+                          {t('scribesoapmodal_p_plan_terapeutico_recomendaciones')}
                         </span>
                         <p className="whitespace-pre-wrap leading-relaxed">{soapResult.soap_note.plan}</p>
                       </div>
@@ -702,7 +719,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       <div className="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-200 dark:border-emerald-800">
                         <h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm mb-1 flex items-center gap-1.5">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          ¿Qué me ocurre? (En palabras sencillas)
+                          {t('scribesoapmodal_que_me_ocurre_en_palabras_sencillas')}
                         </h4>
                         <p className="text-slate-700 dark:text-slate-200 leading-relaxed">
                           {soapResult.patient_clear_sheet.simple_diagnosis}
@@ -713,16 +730,16 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                         <h4 className="font-bold text-slate-800 dark:text-white text-sm mb-2.5 flex items-center gap-1.5">
                           <Pill className="w-4 h-4 text-sky-600" />
-                          ¿Cómo tomar mis medicamentos?
+                          {t('scribesoapmodal_como_tomar_mis_medicamentos')}
                         </h4>
                         <div className="overflow-x-auto">
                           <table className="w-full text-left border-collapse">
                             <thead>
                               <tr className="border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 uppercase">
-                                <th className="pb-1.5">Fármaco</th>
-                                <th className="pb-1.5">Dosis</th>
-                                <th className="pb-1.5">Momento</th>
-                                <th className="pb-1.5">¿Para qué sirve?</th>
+                                <th className="pb-1.5">{t('doctordashboard_farmaco')}</th>
+                                <th className="pb-1.5">{t('dosage')}</th>
+                                <th className="pb-1.5">{t('scribesoapmodal_momento')}</th>
+                                <th className="pb-1.5">{t('scribesoapmodal_para_que_sirve')}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
@@ -745,7 +762,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       <div className="bg-rose-50 dark:bg-rose-950/40 p-4 rounded-2xl border border-rose-200 dark:border-rose-800">
                         <h4 className="font-bold text-rose-800 dark:text-rose-300 text-sm mb-2 flex items-center gap-1.5">
                           <AlertTriangle className="w-4 h-4 text-rose-600" />
-                          Signos de Alarma — Cuándo acudir a Urgencias:
+                          {t('scribesoapmodal_signos_de_alarma_cuando_acudir_a')}
                         </h4>
                         <ul className="space-y-1 list-disc list-inside text-rose-900 dark:text-rose-200 leading-relaxed">
                           {soapResult.patient_clear_sheet.red_flags.map((flag, idx) => (
@@ -757,7 +774,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       {/* Lifestyle & Next Followup */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
-                          <h5 className="font-bold text-slate-800 dark:text-white mb-1.5">🌿 Hábitos de Salud</h5>
+                          <h5 className="font-bold text-slate-800 dark:text-white mb-1.5">{t('scribesoapmodal_habitos_de_salud')}</h5>
                           <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
                             {soapResult.patient_clear_sheet.lifestyle_recommendations.map((rec, idx) => (
                               <li key={idx}>{rec}</li>
@@ -767,7 +784,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                         <div className="bg-sky-50 dark:bg-sky-950/40 p-3.5 rounded-2xl border border-sky-200 dark:border-sky-800">
                           <h5 className="font-bold text-sky-800 dark:text-sky-300 mb-1.5 flex items-center gap-1">
                             <Calendar className="w-3.5 h-3.5" />
-                            Próxima Cita / Control
+                            {t('scribesoapmodal_proxima_cita_control')}
                           </h5>
                           <p className="text-sky-900 dark:text-sky-200">
                             {soapResult.patient_clear_sheet.next_followup}
@@ -788,11 +805,10 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-indigo-900 dark:text-indigo-300">
-                    Aprovecha al máximo tu cita médica
+                    {t('scribesoapmodal_aprovecha_al_maximo_tu_cita_medica')}
                   </h3>
                   <p className="text-xs text-indigo-800/80 dark:text-indigo-200/80 mt-0.5 leading-relaxed">
-                    Los médicos disponen en promedio de 7 a 10 minutos por consulta. Este preparador te genera un
-                    resumen claro para explicar lo que sientes en 2 minutos y las preguntas clave que no debes olvidar.
+                    {t('scribesoapmodal_los_medicos_disponen_en_promedio_de')}
                   </p>
                 </div>
               </div>
@@ -800,13 +816,13 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    1. ¿Qué molestias o síntomas tienes principalmente hoy? <span className="text-red-500">*</span>
+                    {t('scribesoapmodal_1_que_molestias_o_sintomas_tienes')} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     rows={2}
                     value={mainConcerns}
                     onChange={(e) => setMainConcerns(e.target.value)}
-                    placeholder="Ej: Tengo dolor de cabeza en las mañanas, sensación de mareo leve y fatiga al subir escaleras..."
+                    placeholder={t('scribesoapmodal_ej_tengo_dolor_de_cabeza_en')}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   />
                 </div>
@@ -814,25 +830,25 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      2. ¿Desde cuándo te ocurre y cómo ha cambiado?
+                      {t('scribesoapmodal_2_desde_cuando_te_ocurre_y')}
                     </label>
                     <input
                       type="text"
                       value={durationEvolution}
                       onChange={(e) => setDurationEvolution(e.target.value)}
-                      placeholder="Ej: Hace unas 3 semanas, ha ido a más..."
+                      placeholder={t('scribesoapmodal_ej_hace_unas_3_semanas_ha')}
                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      3. ¿Qué medicinas tomas actualmente?
+                      {t('scribesoapmodal_3_que_medicinas_tomas_actualmente')}
                     </label>
                     <input
                       type="text"
                       value={currentMeds}
                       onChange={(e) => setCurrentMeds(e.target.value)}
-                      placeholder="Ej: Enalapril 20mg, Atorvastatina 20mg..."
+                      placeholder={t('scribesoapmodal_ej_enalapril_20mg_atorvastatina_20mg')}
                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white"
                     />
                   </div>
@@ -840,13 +856,13 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    4. ¿Hay alguna pregunta o temor específico que no quieras olvidar?
+                    {t('scribesoapmodal_4_hay_alguna_pregunta_o_temor')}
                   </label>
                   <input
                     type="text"
                     value={questionsForDoctor}
                     onChange={(e) => setQuestionsForDoctor(e.target.value)}
-                    placeholder="Ej: ¿Puede ser por la nueva pastilla del colesterol? ¿Necesito hacerme un electrocardiograma?"
+                    placeholder={t('scribesoapmodal_ej_puede_ser_por_la_nueva')}
                     className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-white"
                   />
                 </div>
@@ -860,12 +876,12 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   {loadingPrep ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Organizando tu guía de consulta...
+                      {t('scribesoapmodal_organizando_tu_guia_de_consulta')}
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4 text-indigo-200" />
-                      Generar mi Guía de Consulta (1 Página)
+                      {t('scribesoapmodal_generar_mi_guia_de_consulta_1')}
                     </>
                   )}
                 </button>
@@ -877,7 +893,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
                     <h4 className="font-bold text-indigo-900 dark:text-indigo-300 text-sm flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                      Tu Resumen de Consulta Listo
+                      {t('scribesoapmodal_tu_resumen_de_consulta_listo')}
                     </h4>
                     <button
                       type="button"
@@ -885,14 +901,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                       className="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 hover:bg-slate-100 text-xs font-bold flex items-center gap-1.5 shadow-sm"
                     >
                       <Printer className="w-3.5 h-3.5" />
-                      Imprimir / Guardar Guía
+                      {t('scribesoapmodal_imprimir_guardar_guia')}
                     </button>
                   </div>
 
                   {/* 2-minute elevator pitch */}
                   <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-indigo-100 dark:border-indigo-950">
                     <span className="text-[11px] font-extrabold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 block mb-1">
-                      ⏱️ Tu Discurso Inicial de 2 Minutos:
+                      {t('scribesoapmodal_tu_discurso_inicial_de_2_minutos')}
                     </span>
                     <p className="text-xs text-slate-800 dark:text-slate-200 italic leading-relaxed">
                       "{prepResult.elevator_pitch}"
@@ -902,7 +918,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   {/* Priority questions */}
                   <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-extrabold uppercase tracking-wide text-sky-600 dark:text-sky-400 block mb-2">
-                      ❓ Preguntas Clave para el Doctor:
+                      {t('scribesoapmodal_preguntas_clave_para_el_doctor')}
                     </span>
                     <ul className="space-y-1.5 text-xs text-slate-700 dark:text-slate-300 list-decimal list-inside">
                       {prepResult.priority_questions.map((q, idx) => (
@@ -917,7 +933,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
                       <span className="font-bold text-slate-800 dark:text-white block mb-1.5">
-                        💊 Checklist de Tratamiento:
+                        {t('scribesoapmodal_checklist_de_tratamiento')}
                       </span>
                       <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
                         {prepResult.meds_checklist.map((item, idx) => (
@@ -927,7 +943,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
                     </div>
                     <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
                       <span className="font-bold text-slate-800 dark:text-white block mb-1.5">
-                        💡 Consejos Clave:
+                        {t('scribesoapmodal_consejos_clave')}
                       </span>
                       <ul className="space-y-1 text-slate-600 dark:text-slate-400 list-disc list-inside">
                         {prepResult.tips_for_visit.map((tip, idx) => (
@@ -946,14 +962,14 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         <div className="px-5 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            MIVOR Scribe CDSS v2.0 • Validación facultativa requerida
+            {t('scribesoapmodal_mivor_scribe_cdss_v2_0_validacion')}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium"
           >
-            Cerrar
+            {t('patient_close')}
           </button>
         </div>
       </div>

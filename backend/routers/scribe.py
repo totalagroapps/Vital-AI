@@ -11,6 +11,8 @@ from openai import AsyncOpenAI
 import models
 from database import get_db
 from security import get_current_user
+from services.language_service import language_directive
+from services.localize_service import localize_fields
 
 logger = logging.getLogger("scribe")
 
@@ -37,6 +39,7 @@ class GenerateSoapRequest(BaseModel):
     patient_age: Optional[int] = None
     patient_gender: Optional[str] = None
     vital_signs: Optional[Dict[str, Any]] = None  # bp, hr, temp, spo2, weight, height
+    language: Optional[str] = Field(default=None, description="Idioma de la interfaz (BCP-47) en que se redacta la nota")
 
 
 class MedicationScheduleItem(BaseModel):
@@ -80,6 +83,7 @@ class PrepareConsultationRequest(BaseModel):
     duration_evolution: Optional[str] = Field(default="", description="¿Desde cuándo le ocurre y cómo ha evolucionado?")
     questions_for_doctor: Optional[str] = Field(default="", description="Preguntas o dudas que no quiere olvidar preguntar")
     current_meds: Optional[str] = Field(default="", description="Medicamentos que toma actualmente")
+    language: Optional[str] = Field(default=None, description="Idioma de la interfaz (BCP-47) en que se devuelve la guía")
 
 
 class PrepareConsultationResponse(BaseModel):
@@ -263,19 +267,40 @@ def fallback_soap_generation(
     )
 
 
+SOAP_TEXT_FIELDS = [
+    "template_name",
+    "soap_note.subjective", "soap_note.objective", "soap_note.assessment", "soap_note.plan",
+    "suggested_icd10.[].description",
+    "patient_clear_sheet.simple_diagnosis",
+    "patient_clear_sheet.medication_schedule.[].medication",
+    "patient_clear_sheet.medication_schedule.[].dose",
+    "patient_clear_sheet.medication_schedule.[].timing",
+    "patient_clear_sheet.medication_schedule.[].purpose",
+    "patient_clear_sheet.red_flags",
+    "patient_clear_sheet.lifestyle_recommendations",
+    "patient_clear_sheet.next_followup",
+]
+
+
+async def localized_fallback_soap(req: GenerateSoapRequest) -> GenerateSoapResponse:
+    note = fallback_soap_generation(
+        consultation_text=req.consultation_text,
+        template_id=req.template_id,
+        patient_name=req.patient_name,
+        patient_age=req.patient_age,
+        patient_gender=req.patient_gender,
+        vital_signs=req.vital_signs
+    )
+    data = await localize_fields(note.model_dump(), req.language or "es", SOAP_TEXT_FIELDS)
+    return GenerateSoapResponse(**data)
+
+
 async def generate_soap_with_llm(
     req: GenerateSoapRequest
 ) -> GenerateSoapResponse:
     openai_key = os.getenv("OPENAI_API_KEY")
     if not openai_key:
-        return fallback_soap_generation(
-            consultation_text=req.consultation_text,
-            template_id=req.template_id,
-            patient_name=req.patient_name,
-            patient_age=req.patient_age,
-            patient_gender=req.patient_gender,
-            vital_signs=req.vital_signs
-        )
+        return await localized_fallback_soap(req)
 
     template_meta = next((t for t in AVAILABLE_TEMPLATES if t.id == req.template_id), AVAILABLE_TEMPLATES[0])
 
@@ -322,7 +347,8 @@ Pautas obligatorias:
 - La nota SOAP debe ser rigurosa, profesional y clínica.
 - La Hoja Clara debe estar a nivel de lectura fácil, empática y práctica.
 - Sugiere 1 a 3 códigos CIE-10 pertinentes con su código exacto y descripción.
-"""
+- Las claves del JSON se mantienen en inglés; todos los valores de texto van en el idioma indicado abajo.
+""" + language_directive(req.language, None, 'clinician')
 
     context_str = f"Especialidad: {template_meta.name}\n"
     if req.patient_name: context_str += f"Paciente: {req.patient_name}\n"
@@ -373,14 +399,7 @@ Pautas obligatorias:
         )
     except Exception as e:
         logger.error("Error invoking OpenAI for SOAP generation: %r", e)
-        return fallback_soap_generation(
-            consultation_text=req.consultation_text,
-            template_id=req.template_id,
-            patient_name=req.patient_name,
-            patient_age=req.patient_age,
-            patient_gender=req.patient_gender,
-            vital_signs=req.vital_signs
-        )
+        return await localized_fallback_soap(req)
 
 
 # ============================================================================
@@ -451,10 +470,12 @@ async def prepare_consultation(req: PrepareConsultationRequest):
         "Apunta las respuestas antes de salir de la consulta."
     ]
 
-    return PrepareConsultationResponse(
-        elevator_pitch=elevator_pitch,
-        symptoms_timeline=symptoms_timeline,
-        priority_questions=priority_questions,
-        meds_checklist=meds_checklist,
-        tips_for_visit=tips
-    )
+    guide = {
+        "elevator_pitch": elevator_pitch,
+        "symptoms_timeline": symptoms_timeline,
+        "priority_questions": priority_questions,
+        "meds_checklist": meds_checklist,
+        "tips_for_visit": tips,
+    }
+    guide = await localize_fields(guide, req.language or "es", list(guide.keys()))
+    return PrepareConsultationResponse(**guide)

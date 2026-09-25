@@ -450,7 +450,7 @@ export default function DoctorCalendarView({
                         {renderTriageBadge(appt.triage_category)}
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${isTelemed ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700'}`}>
                           {isTelemed ? <Video size={10} /> : <MapPin size={10} />}
-                          {isTelemed ? 'Teleconsulta' : 'Presencial'}
+                          {isTelemed ? t('doctorcalendarview_teleconsulta') : t('book_modality_in_person')}
                         </span>
                       </div>
 

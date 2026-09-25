@@ -22,12 +22,15 @@ export const escapeHtml = (str) => {
  * En Web de escritorio abre una ventana de impresión limpia sin alterar la sesión del usuario.
  */
 export const printHtmlContent = async (title, htmlBody) => {
+  // Idioma y dirección de la interfaz (LanguageContext los fija en <html>)
+  const docLang = (typeof document !== 'undefined' && document.documentElement.lang) || 'es';
+  const docDir = (typeof document !== 'undefined' && document.documentElement.dir) || 'ltr';
   const fullHtml = `<!DOCTYPE html>
-<html lang="es">
+<html lang="${escapeHtml(docLang)}" dir="${escapeHtml(docDir)}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeHtml(title) || 'MIVOR.ai - Documento Clínico'}</title>
+    <title>${escapeHtml(title) || 'MIVOR.ai'}</title>
     <style>
       @page { size: auto; margin: 15mm; }
       body { 
@@ -38,9 +41,9 @@ export const printHtmlContent = async (title, htmlBody) => {
         margin: 0;
         background: #ffffff;
       }
-      .header { text-align: center; border-bottom: 2px solid #00a896; padding-bottom: 16px; margin-bottom: 24px; }
-      .header h1 { color: #0b1a30; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
-      .header .brand { color: #00a896; }
+      .header { text-align: center; border-bottom: 2px solid #0055ff; padding-bottom: 16px; margin-bottom: 24px; }
+      .header h1 { color: #050838; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+      .header .brand { color: #0055ff; }
       .header p { color: #64748b; margin: 4px 0 0 0; font-size: 13px; font-weight: 500; }
       h2 { color: #0f172a; margin-top: 24px; font-size: 16px; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
       .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
@@ -51,7 +54,7 @@ export const printHtmlContent = async (title, htmlBody) => {
       .med-badge { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
       .referral-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 14px; margin: 16px 0; }
       table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-      th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: left; }
+      th, td { border: 1px solid #e2e8f0; padding: 8px 12px; text-align: start; }
       th { background: #f8fafc; font-weight: 700; color: #334155; }
       .footer { margin-top: 40px; text-align: center; font-size: 0.75em; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
     </style>
@@ -65,7 +68,7 @@ export const printHtmlContent = async (title, htmlBody) => {
   if (Capacitor.isNativePlatform()) {
     try {
       await Printer.printHtml({
-        name: title || 'MIVOR Document',
+        name: title || 'MIVOR.ai',
         html: fullHtml,
       });
       return;

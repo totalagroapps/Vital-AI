@@ -13,6 +13,7 @@ from sqlalchemy import select, desc
 import models
 from database import get_db
 from security import get_current_user, resolve_target_patient_id
+from services.localize_service import localize_fields, translate_texts, ui_language
 
 logger = logging.getLogger("clinical_calculators")
 
@@ -35,7 +36,8 @@ class Score2Request(BaseModel):
 
 class Score2Response(BaseModel):
     risk_percentage: float
-    risk_category: str
+    risk_category: str  # código en español que /ldl_gap vuelve a recibir: no se traduce
+    risk_category_label: Optional[str] = None  # misma categoría en el idioma del usuario
     risk_badge: str  # "green", "yellow", "orange", "red"
     is_score2_op: bool
     non_hdl_cholesterol: float
@@ -481,7 +483,7 @@ def calculate_fragility_internal(
 # ============================================================================
 
 @router.post("/score2", response_model=Score2Response)
-async def calculate_score2(payload: Score2Request):
+async def calculate_score2(payload: Score2Request, lang: str = Depends(ui_language)):
     """
     Calcula el riesgo cardiovascular a 10 años mediante SCORE2 / SCORE2-OP (Guías ESC 2021).
     """
@@ -496,6 +498,8 @@ async def calculate_score2(payload: Score2Request):
             hdl_mg=payload.hdl_cholesterol,
             region=payload.region or "moderate"
         )
+        result = {**result, "risk_category_label": result.get("risk_category")}
+        result = await localize_fields(result, lang, ["risk_category_label", "interpretation", "clinical_guidance"])
         return Score2Response(**result)
     except Exception as e:
         logger.error(f"Error calculando SCORE2: {e}")
@@ -503,7 +507,7 @@ async def calculate_score2(payload: Score2Request):
 
 
 @router.post("/ldl_gap", response_model=LdlGapResponse)
-async def calculate_ldl_gap(payload: LdlGapRequest):
+async def calculate_ldl_gap(payload: LdlGapRequest, lang: str = Depends(ui_language)):
     """
     Calcula la brecha de c-LDL (Lipidwise) según guías ESC/EAS 2019/2021.
     """
@@ -516,6 +520,7 @@ async def calculate_ldl_gap(payload: LdlGapRequest):
             has_ckd=payload.has_ckd or False,
             on_statin=payload.on_statin or False
         )
+        result = await localize_fields(result, lang, ["suggested_intensity", "clinical_strategy", "educational_note"])
         return LdlGapResponse(**result)
     except Exception as e:
         logger.error(f"Error calculando Lipidwise LDL gap: {e}")
@@ -523,7 +528,7 @@ async def calculate_ldl_gap(payload: LdlGapRequest):
 
 
 @router.post("/ckd_epi", response_model=CkdEpiResponse)
-async def calculate_ckd_epi(payload: CkdEpiRequest):
+async def calculate_ckd_epi(payload: CkdEpiRequest, lang: str = Depends(ui_language)):
     """
     Calcula el filtrado glomerular estimado (eGFR) mediante ecuación CKD-EPI 2021 sin raza.
     """
@@ -534,6 +539,7 @@ async def calculate_ckd_epi(payload: CkdEpiRequest):
             age=payload.age,
             is_female=is_fem
         )
+        result = await localize_fields(result, lang, ["stage_label", "clinical_interpretation", "follow_up_recommendation"])
         return CkdEpiResponse(**result)
     except Exception as e:
         logger.error(f"Error calculando CKD-EPI: {e}")
@@ -541,7 +547,7 @@ async def calculate_ckd_epi(payload: CkdEpiRequest):
 
 
 @router.post("/fragility_tug", response_model=FragilityTugResponse)
-async def calculate_fragility(payload: FragilityTugRequest):
+async def calculate_fragility(payload: FragilityTugRequest, lang: str = Depends(ui_language)):
     """
     Evalúa fragilidad y riesgo de caídas combinando Timed Up and Go (TUG) e Índice de Barthel.
     """
@@ -551,6 +557,7 @@ async def calculate_fragility(payload: FragilityTugRequest):
             barthel_score=payload.barthel_score,
             history_of_falls=payload.history_of_falls or False
         )
+        result = await localize_fields(result, lang, ["overall_fall_risk", "tug_interpretation", "barthel_dependency", "suggested_actions"])
         return FragilityTugResponse(**result)
     except Exception as e:
         logger.error(f"Error evaluando fragilidad: {e}")
@@ -561,7 +568,8 @@ async def calculate_fragility(payload: FragilityTugRequest):
 async def auto_fill_from_records(
     patient_id: Optional[str] = Query(None, description="ID del paciente si lo consulta un médico"),
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
+    lang: str = Depends(ui_language),
 ):
     """
     Extrae automáticamente los parámetros biomédicos del paciente (edad, sexo, presión arterial,
@@ -616,7 +624,9 @@ async def auto_fill_from_records(
             elif "no fumador" in notes_str or "exfumador" in notes_str:
                 data["is_smoker"] = False
 
-            data["data_sources"].append("Perfil Clínico Digital")
+            profile_label = "Perfil Clínico Digital"
+            profile_label = (await translate_texts([profile_label], lang)).get(profile_label, profile_label)
+            data["data_sources"].append(profile_label)
 
         # 2. Obtener analíticas y documentos analizados
         stmt_docs = (
@@ -628,15 +638,8 @@ async def auto_fill_from_records(
         res_docs = await db.execute(stmt_docs)
         docs = res_docs.scalars().all()
 
-        # Si no hay docs con user_id directo, pero es el usuario actual, buscar los más recientes
-        if not docs and target_user_id == current_user.id:
-            stmt_recent = (
-                select(models.DocumentMetadata)
-                .order_by(desc(models.DocumentMetadata.created_at))
-                .limit(5)
-            )
-            res_recent = await db.execute(stmt_recent)
-            docs = res_recent.scalars().all()
+        # Solo documentos del propio paciente: antes, si no tenía ninguno, se tomaban los más
+        # recientes de cualquier usuario y se prellenaban analíticas ajenas.
 
         for doc in docs:
             doc_name = doc.filename or f"Documento #{doc.id}"

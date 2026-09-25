@@ -46,7 +46,7 @@ const EspecialistasLanding = ({
             </button>
 
             <h1 className="text-lg sm:text-2xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-             {t('especialistaslandi_conectate_con')} <span className="text-[#0d9488]">{t('especialistaslandi_medicos_especialistas')}</span>
+             {t('especialistaslandi_conectate_con')} <span className="text-[#0055ff]">{t('especialistaslandi_medicos_especialistas')}</span>
             </h1>
             <p className="text-[11.5px] sm:text-xs lg:text-sm text-slate-500 font-medium mt-0.5 sm:mt-1 max-w-xl leading-relaxed">
              {t('especialistaslandi_elige_la_opcion_que_mejor')}
@@ -56,11 +56,11 @@ const EspecialistasLanding = ({
           {/* Right Hero Banner matching official image (Desktop only) */}
           <div className="hidden sm:flex items-center bg-white rounded-3xl p-3 pr-4 border border-slate-200/80 shadow-xs gap-4 shrink-0 max-w-md">
             <div className="pl-3">
-              <div className="w-6 h-1 bg-teal-500 rounded-full mb-1.5" />
+              <div className="w-6 h-1 bg-blue-500 rounded-full mb-1.5" />
               <h4 className="text-sm font-black text-slate-900 leading-tight">{t('hero_title_p1')} <br /> {t('especialistaslandi_en_buenas_manos')}</h4>
               <p className="text-[10px] text-slate-400 font-semibold mt-1">{t('especialistaslandi_especialistas_verificados')}<br />{t('especialistaslandi_atencion_cercana_y_segura')}</p>
             </div>
-            <div className="w-32 h-20 rounded-2xl overflow-hidden shrink-0 bg-teal-50">
+            <div className="w-32 h-20 rounded-2xl overflow-hidden shrink-0 bg-blue-50">
               <img 
                 src="/images/especialistas_doctor_avatar.png" 
                 alt={t('especialistaslandi_medicos_especialistas_verificados')} 
@@ -86,7 +86,7 @@ const EspecialistasLanding = ({
                 <div className="w-6 h-6 rounded-full bg-[#10b981] text-white font-black text-xs flex items-center justify-center shadow-2xs">
                   1
                 </div>
-                <div className="w-6 h-6 rounded-full bg-emerald-100 text-[#0d9488] flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 text-[#0055ff] flex items-center justify-center">
                   <MapPin size={13} className="stroke-[2.4]" />
                 </div>
               </div>
@@ -99,7 +99,7 @@ const EspecialistasLanding = ({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => { e.target.src = "/images/in-person.png"; }}
                 />
-                <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#0d9488] px-1.5 py-0.5 rounded-md shadow-2xs">
+                <span className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-xs text-[9px] font-extrabold text-[#0055ff] px-1.5 py-0.5 rounded-md shadow-2xs">
                  {t('especialistaslandi_cerca_de_ti')}
                 </span>
               </div>
@@ -117,7 +117,7 @@ const EspecialistasLanding = ({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onSelectPresencial({}); }}
-              className="w-full mt-2.5 py-2.5 px-2 bg-[#0d9488] active:bg-[#0f766e] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
+              className="w-full mt-2.5 py-2.5 px-2 bg-[#0055ff] active:bg-[#0047d6] text-white font-black text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer"
             >
               <span>{t('especialistaslandi_buscar_presencial')}</span>
               <ArrowRight size={13} />
@@ -187,7 +187,7 @@ const EspecialistasLanding = ({
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
-                 {t('especialistaslandi_quiero_un_medico_cercano')} <br /> {t('especialistaslandi_para_una')} <span className="text-[#0d9488]">{t('especialistaslandi_cita_presencial')}</span>
+                 {t('especialistaslandi_quiero_un_medico_cercano')} <br /> {t('especialistaslandi_para_una')} <span className="text-[#0055ff]">{t('especialistaslandi_cita_presencial')}</span>
                 </h3>
                 
                 <p className="text-xs sm:text-sm text-slate-600 font-medium mt-2 mb-5 leading-relaxed">
@@ -196,22 +196,22 @@ const EspecialistasLanding = ({
 
                 <ul className="space-y-2.5 mb-6">
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
-                    <MapPin size={16} className="text-[#0d9488] shrink-0" />
+                    <MapPin size={16} className="text-[#0055ff] shrink-0" />
                     <span>{t('land_option_presencial_bullet1')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
-                    <Calendar size={16} className="text-[#0d9488] shrink-0" />
+                    <Calendar size={16} className="text-[#0055ff] shrink-0" />
                     <span>{t('especialistaslandi_elige_el_dia_y_hora')}</span>
                   </li>
                   <li className="flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
-                    <ShieldCheck size={16} className="text-[#0d9488] shrink-0" />
+                    <ShieldCheck size={16} className="text-[#0055ff] shrink-0" />
                     <span>{t('land_option_presencial_bullet3')}</span>
                   </li>
                 </ul>
 
                 <button
                   onClick={() => onSelectPresencial({})}
-                  className="px-6 py-3 bg-[#0d9488] hover:bg-[#0f766e] active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
+                  className="px-6 py-3 bg-[#0055ff] hover:bg-[#0047d6] active:scale-95 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-xs flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <span>{t('land_option_presencial_cta')}</span>
                   <ArrowRight size={16} />
@@ -293,7 +293,7 @@ const EspecialistasLanding = ({
 
         {/* ================= BOTTOM SECURITY BANNER ================= */}
         <div className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3.5 border border-slate-200/80 shadow-2xs flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-50 text-brand flex items-center justify-center shrink-0">
             <ShieldCheck size={15} className="sm:w-[18px] sm:h-[18px]" />
           </div>
           <p className="text-[10px] sm:text-xs text-slate-600 leading-snug">

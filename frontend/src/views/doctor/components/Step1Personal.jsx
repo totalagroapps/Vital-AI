@@ -204,7 +204,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
                     type="email"
                     name="email"
                     required
-                    placeholder="tu@email.com"
+                    placeholder={t('email_placeholder')}
                     value={formData.email || ''}
                     onChange={handleChange}
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-slate-50/50 hover:bg-white transition-all"
@@ -251,7 +251,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
                 <div className="relative">
                   <select
                     name="language"
-                    value={formData.language || 'Español'}
+                    value={formData.language || t('step1personal_espanol')}
                     onChange={handleChange}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-slate-50/50 hover:bg-white appearance-none transition-all cursor-pointer"
                   >
@@ -336,7 +336,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
                   
                   <label className="inline-flex items-center gap-1.5 mt-3 px-3.5 py-1.5 bg-white border border-blue-200 text-blue-600 text-xs font-semibold rounded-lg hover:bg-blue-50 cursor-pointer shadow-sm transition-all">
                     <Upload size={14} />
-                    <span>{formData.identityDoc ? formData.identityDoc.name : 'Subir archivo'}</span>
+                    <span>{formData.identityDoc ? formData.identityDoc.name : t('step1personal_subir_archivo')}</span>
                     <input 
                       type="file" 
                       className="hidden" 
@@ -358,7 +358,7 @@ export default function Step1Personal({ formData, updateFormData, onNext }) {
                   
                   <label className="inline-flex items-center gap-1.5 mt-3 px-3.5 py-1.5 bg-white border border-blue-200 text-blue-600 text-xs font-semibold rounded-lg hover:bg-blue-50 cursor-pointer shadow-sm transition-all">
                     <Upload size={14} />
-                    <span>{formData.colegiationCert ? formData.colegiationCert.name : 'Subir archivo'}</span>
+                    <span>{formData.colegiationCert ? formData.colegiationCert.name : t('step1personal_subir_archivo')}</span>
                     <input 
                       type="file" 
                       className="hidden" 

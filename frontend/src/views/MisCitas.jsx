@@ -8,7 +8,7 @@ const STATUS_STYLES = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
   confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   completed: 'bg-blue-50 text-blue-700 border-blue-200',
-  cancelled: 'bg-gray-100 text-gray-500 border-gray-200',
+  cancelled: 'bg-slate-100 text-slate-500 border-slate-200',
   no_show: 'bg-red-50 text-red-700 border-red-200',
 };
 const CANCELABLE = new Set(['pending', 'confirmed']);
@@ -74,10 +74,10 @@ const MisCitas = ({
         />
       )}
       <div className="max-w-screen-md mx-auto px-5 pt-6 lg:px-6 lg:pt-8">
-        <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark cursor-pointer transition-colors">
+        <button onClick={onBack} className="mb-4 flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-brand-dark cursor-pointer transition-colors">
           <ArrowLeft className="w-4 h-4" /> {t('detail_back')}
         </button>
-        <h1 className="text-xl font-extrabold text-brand-dark mb-4">{t(isDoctor ? 'appts_title_doctor' : 'appts_title')}</h1>
+        <h1 className="text-2xl lg:text-3xl font-black text-mivor-navy tracking-tight mb-4">{t(isDoctor ? 'appts_title_doctor' : 'appts_title')}</h1>
 
         <div className="flex gap-2 mb-5">
           {['upcoming', 'past'].map((tb) => (
@@ -85,7 +85,7 @@ const MisCitas = ({
               key={tb}
               onClick={() => setTab(tb)}
               className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${
-                tab === tb ? 'bg-brand-blue text-white' : 'bg-white border border-gray-200 text-gray-600'
+                tab === tb ? 'bg-brand-blue text-white' : 'bg-white border border-slate-200 text-slate-600'
               }`}
             >
               {t(tb === 'upcoming' ? 'appts_tab_upcoming' : 'appts_tab_past')}
@@ -98,7 +98,7 @@ const MisCitas = ({
         ) : error ? (
           <p className="text-sm text-red-600 py-8 text-center">{error}</p>
         ) : appts.length === 0 ? (
-          <p className="text-sm text-gray-400 py-12 text-center">
+          <p className="text-sm text-slate-400 py-12 text-center">
             {t(isDoctor
               ? (tab === 'upcoming' ? 'appts_empty_upcoming_doctor' : 'appts_empty_past_doctor')
               : (tab === 'upcoming' ? 'appts_empty_upcoming' : 'appts_empty_past'))}
@@ -106,7 +106,7 @@ const MisCitas = ({
         ) : (
           <div className="space-y-3">
             {appts.map((a) => (
-              <div key={a.id} className="bg-white rounded-2xl p-4 border border-gray-100 flex items-start gap-3">
+              <div key={a.id} className="bg-white rounded-2xl p-4 border border-slate-100 flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                   {a.modality === 'in_person' ? <MapPin className="w-5 h-5" /> : <Video className="w-5 h-5" />}
                 </div>
@@ -114,7 +114,7 @@ const MisCitas = ({
                   <p className="font-bold text-brand-dark truncate">
                     {isDoctor ? (a.patient?.full_name || a.patient?.username || '—') : (a.doctor?.full_name || '—')}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1 capitalize">
+                  <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1 capitalize">
                     <Calendar className="w-3.5 h-3.5" /> {fmt(a.scheduled_at)}
                   </p>
                   <span className={`inline-block mt-2 text-[10px] font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status] || ''}`}>

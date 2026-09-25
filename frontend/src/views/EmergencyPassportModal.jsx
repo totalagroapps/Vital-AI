@@ -46,12 +46,12 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
   const handleShareWhatsApp = () => {
     if (!emergencyUrl) return;
     const text = t('emergencypassportm_ficha_medica_de_emergencia_mivor') +
-      t('emergencypassportm_paciente', { value: patientProfile?.full_name || 'Paciente' }) +
+      t('emergencypassportm_paciente', { value: patientProfile?.full_name || t('default_patient_name') }) +
       t('emergencypassportm_grupo_sanguineo', { value: patientProfile?.blood_type || 'N/D' }) +
-      t('emergencypassportm_donante_2', { value: patientProfile?.organ_donor || 'No especificado' }) +
-      t('emergencypassportm_alergias_2', { value: patientProfile?.allergies || 'Sin alergias conocidas' }) +
+      t('emergencypassportm_donante_2', { value: patientProfile?.organ_donor || t('not_specified') }) +
+      t('emergencypassportm_alergias_2', { value: patientProfile?.allergies || t('emergencypassportm_sin_alergias_conocidas') }) +
       (patientProfile?.medical_notes ? t('emergencypassportm_alerta_medica_2', { medical_notes: patientProfile.medical_notes }) : '') +
-      t('emergencypassportm_contacto_urgencias_2', { value: patientProfile?.emergency_contact || 'No especificado' }) +
+      t('emergencypassportm_contacto_urgencias_2', { value: patientProfile?.emergency_contact || t('not_specified') }) +
       t('emergencypassportm_ficha_tactica_en_vivo_sin', { emergencyUrl });
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -104,7 +104,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
 
       // Blood Type Badge (Left) & Organ Donor Badge (Right)
       const blood = patientProfile?.blood_type || 'N/D';
-      const donor = (patientProfile?.organ_donor || 'No especificado').toUpperCase();
+      const donor = (patientProfile?.organ_donor || t('not_specified')).toUpperCase();
       
       // Blood Box (Left)
       ctx.fillStyle = '#450a0a';
@@ -168,7 +168,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
       } else {
         ctx.fillStyle = '#000000';
         ctx.font = 'bold 32px system-ui, -apple-system, sans-serif';
-        ctx.fillText('ESCANEAR QR', width / 2, qrBoxY + qrBoxSize / 2);
+        ctx.fillText(t('passport_canvas_scan_qr'), width / 2, qrBoxY + qrBoxSize / 2);
       }
 
       // 5. Dynamic Alert / Notes Box (if present)
@@ -197,7 +197,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
       }
 
       // 6. Critical Allergies Box
-      const allergies = patientProfile?.allergies || 'Ninguna conocida';
+      const allergies = patientProfile?.allergies || t('emergencypassportm_ninguna_conocida');
       ctx.fillStyle = '#450a0a';
       ctx.strokeStyle = '#dc2626';
       ctx.lineWidth = 4;
@@ -208,7 +208,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
 
       ctx.fillStyle = '#f87171';
       ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
-      ctx.fillText('⚠️  ALERGIAS SEVERAS / CONTRAINDICACIONES', width / 2, currentY + 42);
+      ctx.fillText(`⚠️  ${t('passport_canvas_allergies')}`, width / 2, currentY + 42);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 32px system-ui, -apple-system, sans-serif';
@@ -227,17 +227,17 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
 
       ctx.fillStyle = '#34d399';
       ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
-      ctx.fillText('📞  CONTACTO DE EMERGENCIA', width / 2, currentY + 42);
+      ctx.fillText(`📞  ${t('passport_canvas_contact')}`, width / 2, currentY + 42);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 34px system-ui, -apple-system, sans-serif';
-      const contactText = patientProfile?.emergency_contact || 'No especificado';
+      const contactText = patientProfile?.emergency_contact || t('not_specified');
       ctx.fillText(contactText, width / 2, currentY + 98);
 
       // 8. Footer Instructions
       ctx.fillStyle = '#64748b';
       ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-      ctx.fillText('MIVOR.AI MEDICAL PASSPORT  •  HISTORIAL DIGITAL PROTEGIDO', width / 2, 1780);
+      ctx.fillText(t('passport_canvas_footer'), width / 2, 1780);
       ctx.font = 'normal 22px system-ui, -apple-system, sans-serif';
       ctx.fillText(t('emergencypassportm_los_datos_medicos_de_este'), width / 2, 1820);
 
@@ -351,7 +351,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
                 className="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer active:scale-95"
               >
                 {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-                <span>{copied ? "Copiado" : "Copiar"}</span>
+                <span>{copied ? t('emergencypassportm_copiado') : t('copy')}</span>
               </button>
               {emergencyUrl ? (
                 <a
@@ -392,7 +392,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
               <Download size={18} />
               <span>
                 {generatingWallpaper 
-                  ? "Generando Fondo de Pantalla..." 
+                  ? t('emergencypassportm_generando_fondo_de_pantalla') 
                   : t('emergencypassportm_descargar_tarjeta_para_pantalla_de')}
               </span>
             </button>
@@ -428,7 +428,7 @@ const EmergencyPassportModal = ({ isOpen, onClose, patientProfile, onExportPDF }
                   </div>
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200">
                     <span className="text-[10px] font-bold text-slate-400 uppercase block">{t('emergencypassportm_donante')}</span>
-                    <span className="text-xs font-black text-slate-800">{patientProfile?.organ_donor || 'No especificado'}</span>
+                    <span className="text-xs font-black text-slate-800">{patientProfile?.organ_donor || t('not_specified')}</span>
                   </div>
                 </div>
 

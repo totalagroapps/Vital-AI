@@ -8,9 +8,10 @@ import {
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { translateSpecialtyName } from '../i18n/catalogTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { emergencyNumber } from '../utils/locale';
-import LanguageSelector from '../components/LanguageSelector';
+import PatientTopNav from '../components/PatientTopNav';
 
 const PatientChat = ({
   messages = [],
@@ -42,7 +43,6 @@ const PatientChat = ({
   username
 }) => {
   const [isListening, setIsListening] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +51,7 @@ const PatientChat = ({
   const [feedbacks, setFeedbacks] = useState({});
   const [localMessages, setLocalMessages] = useState([]);
 
-  const { t, language, country } = useLanguage();
+  const { t, language, country, locale } = useLanguage();
   const fileInputRef = useRef(null);
   const internalImageRef = useRef(null);
   const internalPdfRef = useRef(null);
@@ -120,12 +120,12 @@ const PatientChat = ({
     if (msg.created_at) {
       try {
         const d = new Date(msg.created_at);
-        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
       } catch (e) {
-        return '10:24';
+        return '';
       }
     }
-    return '10:24';
+    return '';
   };
 
   const toggleListening = () => {
@@ -140,8 +140,7 @@ const PatientChat = ({
       return;
     }
     const recognition = new SpeechRecognition();
-    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
-    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.lang = locale || language;
     recognition.continuous = false;
     recognition.interimResults = false;
     
@@ -162,24 +161,30 @@ const PatientChat = ({
     try { recognition.start(); } catch (e) { setIsListening(false); }
   };
 
+  // Especialidad sugerida en la respuesta de la IA. Devuelve el nombre en español (el que usa el
+  // directorio para filtrar); para mostrarlo se pasa por translateSpecialtyName.
+  const SPECIALTY_KEYWORDS = [
+    ['Cardiología', /\b(cardiolog\w*)/i], ['Traumatología', /\b(traumatolog\w*|orthop(a)?edic\w*)/i],
+    ['Dermatología', /\b(dermatolog\w*)/i], ['Neurología', /\b(neurolog\w*)/i],
+    ['Pediatría', /\b(pediatr\w*|paediatr\w*|pédiatr\w*)/i], ['Ginecología', /\b(ginecolog\w*|gyn(a)?ecolog\w*|gynécolog\w*)/i],
+    ['Oftalmología', /\b(oftalmolog\w*|ophthalmolog\w*|ophtalmolog\w*)/i], ['Psiquiatría', /\b(psiquiatr\w*|psychiatr\w*)/i],
+  ];
   const extractSpecialty = (raw) => {
     if (!raw) return 'Medicina General';
     const text = String(raw);
-    const match = text.match(/(?:Especialidad|Especialista|Derivaci[óo]n)(?:\s+a\s+la\s+que\s+deber[íi]a\s+acudir)?(?:\s+sugerida|\s+recomendada)?\s*[:*]\s*([A-Za-zÁÉÍÓÚáéíóúñÑ\s]+?)(?:\.|\n|\*|$)/i);
+    const match = text.match(/(?:Especialidad|Especialista|Derivaci[óo]n|Specialty|Specialist|Referral|Spécialité|Spécialiste)(?:\s+a\s+la\s+que\s+deber[íi]a\s+acudir)?(?:\s+sugerida|\s+recomendada|\s+suggested|\s+recommended)?\s*[:*]\s*([^.\n*]+?)(?:\.|\n|\*|$)/i);
     if (match && match[1]) {
       const candidate = match[1].trim().replace(/^\*+|\*+$/g, '');
       if (candidate.length > 2 && candidate.length < 35) {
         return candidate;
       }
     }
-    const keywords = ['Cardiología', 'Traumatología', 'Dermatología', 'Neurología', 'Pediatría', 'Ginecología', 'Oftalmología', 'Psiquiatría', 'Medicina General'];
-    for (const kw of keywords) {
-      if (new RegExp(`\\b${kw}\\b`, 'i').test(text)) {
-        return kw;
-      }
+    for (const [name, re] of SPECIALTY_KEYWORDS) {
+      if (re.test(text)) return name;
     }
     return 'Medicina General';
   };
+  const suggestedSpecialtyLabel = (raw) => translateSpecialtyName(extractSpecialty(raw), language, t);
 
   const formatSessionTime = (isoString) => {
     if (!isoString) return '';
@@ -190,7 +195,7 @@ const PatientChat = ({
       if (isToday) {
         return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
-      return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+      return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
     } catch {
       return '';
     }
@@ -253,181 +258,55 @@ const PatientChat = ({
   return (
     <div className="h-screen w-full bg-white text-slate-900 flex flex-col font-sans select-none overflow-hidden">
       
-      {/* 1. TOP NAVBAR */}
-      <header className="w-full shrink-0 border-b border-slate-100/90 bg-white/95 backdrop-blur-xs z-40">
-        <div className="w-full px-2 min-[360px]:px-3 sm:px-5 lg:px-7 py-2 flex items-center justify-between">
-          
-          {/* Brand Logo */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            {/* Mobile menu hamburger toggle */}
-            <button 
+      {/* 1. BARRA SUPERIOR COMÚN DEL PACIENTE */}
+      <PatientTopNav
+        activeTab="chat"
+        onNavigate={onNavigate}
+        userProfile={patientProfile}
+        username={username}
+        onLogout={onLogout}
+        className="shrink-0"
+      />
+
+      {/* Subbarra del chat: conversaciones (móvil), nueva consulta y ayuda del asistente */}
+      <div className="shrink-0 border-b border-slate-100 bg-white">
+        <div className="w-full px-3 sm:px-5 lg:px-7 py-2 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
               type="button"
               onClick={() => setMobileSidebarOpen(prev => !prev)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+              className="lg:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors"
               title={t('patientchat_abrir_conversaciones')}
             >
-              <Menu size={18} />
+              <Menu size={16} />
+              <span>{t('chat_toolbar_conversations')}</span>
             </button>
-
-            <div 
-              className="flex items-center cursor-pointer group shrink-0" 
-              onClick={() => onBack ? onBack() : onNavigate?.('home')}
-            >
-              <img 
-                src="/images/mivor_nav_logo.png" 
-                alt="MIVOR.ai - Better Health. Brighter Lives." 
-                className="h-6 sm:h-7 lg:h-7.5 w-auto object-contain transition-transform" 
-                onError={(e) => { e.target.src = '/logo.png'; }}
-              />
-            </div>
+            <h1 className="hidden lg:flex items-center gap-2 text-sm font-extrabold text-mivor-navy truncate">
+              <MessageSquare size={16} className="text-brand" />
+              {t('chat_toolbar_title')}
+            </h1>
           </div>
-
-          {/* Center Navigation Tabs (EXCLUDING VIDEOCONFERENCIA PER USER REQUEST) */}
-          <nav className="hidden lg:flex items-center gap-3 xl:gap-6 2xl:gap-8">
-            {/* Tab 1: Nueva consulta (Activo) */}
-            <button 
+          <div className="flex items-center gap-2 shrink-0">
+            <button
               type="button"
               onClick={handleStartNew}
-              className="relative flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-semibold text-[#005dff] transition-colors cursor-pointer group whitespace-nowrap shrink-0"
+              className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand hover:bg-brand-hover text-white text-xs font-bold transition-colors"
             >
-              <MessageSquare size={15} className="stroke-[2.2]" />
+              <Plus size={14} className="stroke-[2.5]" />
               <span>{t('patientchat_nueva_consulta')}</span>
-              <span className="absolute -bottom-2.5 left-0 right-0 h-[2px] bg-[#005dff] rounded-full" />
             </button>
-
-            {/* Tab 2: Subir análisis */}
-            <button 
-              type="button"
-              onClick={() => onNavigate ? onNavigate('documents') : actualPdfRef.current?.click()}
-              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <FileText size={15} className="stroke-[2]" />
-              <span>{t('patientchat_subir_analisis')}</span>
-            </button>
-
-            {/* Tab 3: Encontrar médico */}
-            <button 
-              type="button"
-              onClick={() => onOpenDoctorDirectory ? onOpenDoctorDirectory() : onNavigate?.('doctors')}
-              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <User size={15} className="stroke-[2]" />
-              <span>{t('patientchat_encontrar_medico')}</span>
-            </button>
-
-            {/* Tab 4: Mi historial */}
-            <button 
-              type="button"
-              onClick={() => onNavigate ? onNavigate('history') : onNavigate?.('patients')}
-              className="flex items-center gap-1.5 py-1 text-xs xl:text-[13px] font-medium text-slate-700 hover:text-[#005dff] transition-colors cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <Clock size={15} className="stroke-[2]" />
-              <span>{t('patientchat_mi_historial')}</span>
-            </button>
-          </nav>
-
-          {/* Right Controls: Idioma, Help, Bell, User profile */}
-          <div className="flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-2.5 shrink-0">
-            <LanguageSelector variant="pill" />
-
-            {/* Help Button */}
-            <button 
+            <button
               type="button"
               onClick={() => setShowHelpModal(true)}
-              className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-brand hover:bg-slate-50 transition-colors"
               title={t('patientchat_ayuda_y_soporte')}
             >
-              <HelpCircle size={14} className="text-slate-700" />
+              <HelpCircle size={15} />
+              <span className="hidden sm:inline">{t('chat_toolbar_how_it_works')}</span>
             </button>
-
-            {/* Notifications Bell */}
-            <div className="relative">
-              <button 
-                type="button"
-                onClick={() => onNavigate ? onNavigate('search') : null} 
-                className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/90 flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
-                title={t('patientchat_notificaciones')}
-              >
-                <Bell size={14} className="text-slate-700" />
-              </button>
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
-            </div>
-
-            {/* User Profile Capsule Badge */}
-            <div className="relative">
-              <div 
-                onClick={() => setShowUserMenu(prev => !prev)}
-                className="flex items-center gap-1.5 sm:gap-2 pl-0 sm:pl-1 pr-0 sm:pr-2 py-0.5 rounded-full hover:bg-slate-50 border border-transparent hover:border-slate-200 cursor-pointer transition-all select-none"
-              >
-                <div className="w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full overflow-hidden border border-slate-200 shadow-2xs shrink-0">
-                  <img 
-                    src={patientProfile?.photo_url || "/images/mivor_avatar_default.png"} 
-                    alt={t('doctor_section_profile')} 
-                    className="w-full h-full object-cover" 
-                    onError={(e) => { e.target.src = '/logo.png'; }}
-                  />
-                </div>
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-900 leading-tight truncate max-w-[95px] xl:max-w-[130px]">
-                    {displayName}
-                  </span>
-                  <span className="text-[9.5px] text-emerald-600 font-semibold flex items-center gap-1 leading-none mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                   {t('patientchat_identidad_verificada')}
-                  </span>
-                </div>
-                <ChevronDown size={13} className="hidden sm:block text-slate-400" />
-              </div>
-
-              {/* User Dropdown Menu */}
-              {showUserMenu && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40 cursor-default" 
-                    onClick={() => setShowUserMenu(false)} 
-                  />
-
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="p-3 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 rounded-xl border border-blue-100/60 mb-1.5">
-                      <p className="text-xs font-bold text-slate-900 truncate">{displayName}</p>
-                      <p className="text-[11px] text-slate-500 truncate">{patientProfile?.email || t('patientchat_paciente_verificado')}</p>
-                    </div>
-
-                    <button 
-                      type="button"
-                      onClick={() => { setShowUserMenu(false); onNavigate ? onNavigate('history') : null; }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
-                    >
-                      <User size={15} className="text-[#005dff]" />
-                      <span>{t('patient_menu_history_title') || 'Mi historial de salud'}</span>
-                    </button>
-
-                    <button 
-                      type="button"
-                      onClick={() => { setShowUserMenu(false); onNavigate ? onNavigate('documents') : null; }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-[#005dff] transition-colors text-left cursor-pointer"
-                    >
-                      <FileText size={15} className="text-teal-600" />
-                      <span>{t('patient_menu_docs_title') || 'Mis analíticas e informes'}</span>
-                    </button>
-
-                    <div className="pt-1.5 mt-1 border-t border-slate-100">
-                      <button 
-                        type="button"
-                        onClick={() => { setShowUserMenu(false); if (onLogout) onLogout(); }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors text-left cursor-pointer"
-                      >
-                        <LogOut size={15} className="text-rose-600" />
-                        <span>{t('patient_menu_logout_title') || 'Cerrar sesión'}</span>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* 2. BODY CONTAINER: SIDEBAR + MAIN CHAT CANVAS */}
       <div className="flex-1 flex overflow-hidden relative">
@@ -435,14 +314,14 @@ const PatientChat = ({
         {/* Backdrop for mobile sidebar */}
         {mobileSidebarOpen && (
           <div 
-            className="fixed inset-0 bg-slate-900/40 z-30 lg:hidden backdrop-blur-xs" 
+            className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-xs" 
             onClick={() => setMobileSidebarOpen(false)}
           />
         )}
 
         {/* LEFT SIDEBAR ("Últimas conversaciones") */}
         <aside className={`
-          fixed lg:static top-[52px] bottom-0 left-0 z-30
+          fixed lg:static top-0 bottom-0 left-0 z-50 lg:z-auto
           w-64 lg:w-72 xl:w-80 bg-white border-r border-slate-200/80 flex flex-col shrink-0
           transition-transform duration-200 ease-in-out
           ${mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
@@ -845,7 +724,7 @@ const PatientChat = ({
                                      {t('patientchat_orientacion_de_salud_finalizada')}
                                     </span>
                                     <span className="text-[10.5px] font-semibold text-[#005dff]">
-                                     {t('patientchat_especialidad_sugerida_para_tu_consul')} {extractSpecialty(msg.text || msg.content)}
+                                     {t('patientchat_especialidad_sugerida_para_tu_consul')} {suggestedSpecialtyLabel(msg.text || msg.content)}
                                     </span>
                                   </div>
                                 </div>
@@ -859,12 +738,12 @@ const PatientChat = ({
                                     className="px-3.5 py-2 rounded-xl bg-[#005dff] hover:bg-[#0052e0] text-white font-bold text-xs flex items-center gap-1.5 shadow-xs active:scale-95 transition-all cursor-pointer"
                                   >
                                     <Stethoscope size={14} />
-                                    <span>{t('patientchat_ver_especialistas')}{extractSpecialty(msg.text || msg.content)})</span>
+                                    <span>{t('patientchat_ver_especialistas')}{suggestedSpecialtyLabel(msg.text || msg.content)})</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const spec = extractSpecialty(msg.text || msg.content);
+                                      const spec = suggestedSpecialtyLabel(msg.text || msg.content);
                                       const whatsappText = encodeURIComponent(t('patientchat_hola_acabo_de_recibir_una', { spec }));
                                       window.open(`https://wa.me/?text=${whatsappText}`, '_blank');
                                     }}
@@ -969,7 +848,7 @@ const PatientChat = ({
                 <div className="flex items-center gap-2 truncate">
                   {selectedImagePreview && <ImageIcon size={15} className="text-[#005dff]" />}
                   {selectedPdfName && <FileText size={15} className="text-[#005dff]" />}
-                  <span className="truncate font-semibold">{selectedPdfName || 'Imagen adjunta'}</span>
+                  <span className="truncate font-semibold">{selectedPdfName || t('patientchat_imagen_adjunta')}</span>
                 </div>
                 <button 
                   type="button" 

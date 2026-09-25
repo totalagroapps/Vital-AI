@@ -21,7 +21,7 @@ const MedicalHistory = ({
   onNavigate,
   username
 }) => {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +77,7 @@ const MedicalHistory = ({
       t('medicalhistory_paciente', { displayName }) +
       t('emergencypassportm_grupo_sanguineo', { value: patientProfile?.blood_type || 'N/D' }) +
       t('medicalhistory_donante_de_organos_2', { value: ns(patientProfile?.organ_donor) }) +
-      t('emergencypassportm_alergias_2', { value: patientProfile?.allergies || 'No registradas' }) +
+      t('emergencypassportm_alergias_2', { value: patientProfile?.allergies || t('medicalhistory_no_registradas') }) +
       (patientProfile?.medical_notes ? t('emergencypassportm_alerta_medica_2', { medical_notes: patientProfile.medical_notes }) : '') +
       (patientProfile?.insurance_provider ? t('emergencypassportv_seguro', { insurance_provider: patientProfile.insurance_provider }) : '') +
       t('medicalhistory_contacto_de_urgencias', { value: ns(patientProfile?.emergency_contact) }) +
@@ -95,7 +95,7 @@ const MedicalHistory = ({
       t('medicalhistory_paciente_2', { displayName }) +
       t('medicalhistory_grupo_sanguineo', { value: patientProfile?.blood_type || 'N/D' }) +
       t('medicalhistory_donante_de_organos_3', { value: ns(patientProfile?.organ_donor) }) +
-      t('medicalhistory_alergias', { value: patientProfile?.allergies || 'No registradas' }) +
+      t('medicalhistory_alergias', { value: patientProfile?.allergies || t('medicalhistory_no_registradas') }) +
       (patientProfile?.medical_notes ? t('medicalhistory_alerta_medica', { medical_notes: patientProfile.medical_notes }) : '') +
       (patientProfile?.insurance_provider ? t('medicalhistory_seguro', { insurance_provider: patientProfile.insurance_provider }) : '') +
       t('medicalhistory_contacto_de_urgencias_2', { value: ns(patientProfile?.emergency_contact) }) +
@@ -107,7 +107,7 @@ const MedicalHistory = ({
   const handleExportPDF = () => {
     const safeName = escapeHtml(displayName);
     const safeContact = escapeHtml(ns(patientProfile?.emergency_contact));
-    const safeDob = escapeHtml(patientProfile?.date_of_birth || 'No especificada');
+    const safeDob = escapeHtml(patientProfile?.date_of_birth || t('doctordashboard_no_especificada'));
     const safeGender = escapeHtml(ns(patientProfile?.gender));
     const safeBlood = escapeHtml(patientProfile?.blood_type || 'N/D');
     const safeDonor = escapeHtml(ns(patientProfile?.organ_donor));
@@ -116,47 +116,47 @@ const MedicalHistory = ({
 
     const title = t('medicalhistory_pasaporte_medico', { safeName });
     const bodyHtml = `
-      <div class="header" style="text-align: center; border-bottom: 2px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
-        <h1 style="color: #0f172a; margin: 0;"><span style="color: #0d9488;">MIVOR.ai</span${t('medicalhistory_ficha_medica_de_emergencia')}ia</h1>
-        <p style="color: #64748b; margin: 5px 0 0 0${t('medicalhistory_historial_clinico_centralizado_y_seg')}uro</p>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-        <div><${t('medicalhistory_paciente_3')}ciente:</strong> ${safeName}</div>
-        <div><strong${t('medicalhistory_contacto_emergencia')}:</strong> ${safeContact}</div>
+      <div class="header" style="text-align: center; border-bottom: 2px solid #0055ff; padding-bottom: 15px; margin-bottom: 20px;">
+        <h1 style="color: #0f172a; margin: 0;"><span style="color: #0055ff;">MIVOR.ai</span> ${escapeHtml(t('medicalhistory_ficha_medica_de_emergencia'))}</h1>
+        <p style="color: #64748b; margin: 5px 0 0 0;">${escapeHtml(t('medicalhistory_historial_clinico_centralizado_y_seg'))}</p>
       </div>
 
-      <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px${t('medicalhistory_datos_biometricos_y_vitales')}les</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div><strong>${escapeHtml(t('medicalhistory_paciente_3'))}</strong> ${safeName}</div>
+        <div><strong>${escapeHtml(t('medicalhistory_contacto_emergencia'))}</strong> ${safeContact}</div>
+      </div>
+
+      <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${escapeHtml(t('medicalhistory_datos_biometricos_y_vitales'))}</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
-        <div><st${t('medicalhistory_fecha_nacimiento')}ento:</strong> ${safeDob} (${age ?? '--'} ${t('emergencypassportv_anos')}</div>
-        <div><strong${t('medicalhistory_genero')}:</strong> ${safeGender}</div>
-        <div><strong${t('medicalhistory_grupo_sanguineo_2')}:</strong> <span style="color: #dc2626; font-size: 16px; font-weight: bold;">${safeBlood}</span></div>
-        <div><strong${t('medicalhistory_donante_de_organos_4')}:</strong> ${safeDonor}</div>
-        <div><strong${t('medicalhistory_imc')}:</strong> ${bmiInfo?.value} (${bmiInfo?.status})</div>
-        <div><strong${t('medicalhistory_seguro_medico')}:</strong> ${safeInsurance}</div>
+        <div><strong>${escapeHtml(t('medicalhistory_fecha_nacimiento'))}</strong> ${safeDob} ${escapeHtml(t('medicalhistory_print_age', { age: age ?? '--' }))}</div>
+        <div><strong>${escapeHtml(t('medicalhistory_genero'))}</strong> ${safeGender}</div>
+        <div><strong>${escapeHtml(t('medicalhistory_grupo_sanguineo_2'))}</strong> <span style="color: #dc2626; font-size: 16px; font-weight: bold;">${safeBlood}</span></div>
+        <div><strong>${escapeHtml(t('medicalhistory_donante_de_organos_4'))}</strong> ${safeDonor}</div>
+        <div><strong>${escapeHtml(t('medicalhistory_imc'))}</strong> ${escapeHtml(bmiInfo?.value)} (${escapeHtml(bmiInfo?.status)})</div>
+        <div><strong>${escapeHtml(t('medicalhistory_seguro_medico'))}</strong> ${safeInsurance}</div>
       </div>
 
       ${safeNotes ? `
-      <h3 style="color: #dc2626;"${t('medicalhistory_alerta_medica_2')}a</h3>
+      <h3 style="color: #dc2626;">${escapeHtml(t('medicalhistory_alerta_medica_2'))}</h3>
       <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; color: #991b1b; font-weight: bold; margin-bottom: 20px;">
         ${safeNotes}
       </div>
       ` : ''}
       
-      <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;${t('medicalhistory_condiciones_clinicas')}as</h3>
+      <h3 style="color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">${escapeHtml(t('medicalhistory_condiciones_clinicas'))}</h3>
       <div style="margin-bottom: 15px;">
-        <str${t('medicalhistory_alergias_conocidas')}das:</strong> ${escapeHtml(patientProfile?.allergies || 'No registradas')}
+        <strong>${escapeHtml(t('medicalhistory_alergias_conocidas'))}</strong> ${escapeHtml(patientProfile?.allergies || t('medicalhistory_no_registradas'))}
       </div>
       <div style="margin-bottom: 15px;">
-        <stro${t('medicalhistory_enfermedades_cronicas')}as:</strong> ${escapeHtml(patientProfile?.chronic_conditions || 'Ninguna')}
+        <strong>${escapeHtml(t('medicalhistory_enfermedades_cronicas'))}</strong> ${escapeHtml(patientProfile?.chronic_conditions || t('none_female'))}
       </div>
       <div style="margin-bottom: 20px;">
-        <stro${t('medicalhistory_medicacion_activa')}va:</strong> ${escapeHtml(patientProfile?.current_medications || 'Ninguna')}
+        <strong>${escapeHtml(t('medicalhistory_medicacion_activa'))}</strong> ${escapeHtml(patientProfile?.current_medications || t('none_female'))}
       </div>
-      
+
       <div style="text-align: center; color: #94a3b8; font-size: 11px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-    ${t('medicalhistory_generado_automaticamente_por_mivor_a')}i el ${new Date().toLocaleString()}<br/>
-       ${t('medicalhistory_documento_medico_informativo_y_tacti')}.
+        ${escapeHtml(t('medicalhistory_generado_automaticamente_por_mivor_a'))} ${escapeHtml(new Date().toLocaleString(locale))}<br/>
+        ${escapeHtml(t('medicalhistory_documento_medico_informativo_y_tacti'))}
       </div>
     `;
     
@@ -180,13 +180,13 @@ const MedicalHistory = ({
         display_date: new Date(t_item.created_at).toLocaleString(),
         status_label: t_item.status === 'closed_red' ? t('medicalhistory_prioridad_alta') : (t_item.status === 'closed_yellow' ? t('medicalhistory_consulta_prioritaria') : t('medicalhistory_orientacion_general')),
         severity_badge: t_item.status === 'closed_red' ? 'bg-red-50 text-red-700 border border-red-200' : (t_item.status === 'closed_yellow' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
-        text: t_item.final_report || "Consulta completada satisfactoriamente."
+        text: t_item.final_report || t('medicalhistory_consulta_completada_satisfactoriamente')
       }));
     }
     const triageSessions = sessions?.filter(s => s.type === "triage") || [];
     if (triageSessions.length > 0) {
       return triageSessions.map(s => {
-        const sev = (s.payload?.severity || s.severity || "NORMAL").toUpperCase();
+        const sev = (s.payload?.severity || s.severity || 'normal').toUpperCase();
         return {
           id: s.id,
           display_date: new Date(s.created_at).toLocaleString(),
@@ -229,7 +229,7 @@ const MedicalHistory = ({
           <div>
             <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
              {t('your_info')} <br />
-              <span className="text-[#0d9488]">{t('centralized_clinical')}</span>
+              <span className="text-[#0055ff]">{t('centralized_clinical')}</span>
             </h1>
             <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
              {t('medicalhistory_manten_tu_informacion_biologica_actu')}
@@ -245,7 +245,7 @@ const MedicalHistory = ({
 
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2.5 bg-[#0d9488] hover:bg-[#0f766e] active:scale-95 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer"
+              className="px-4 py-2.5 bg-[#0055ff] hover:bg-[#0047d6] active:scale-95 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-xs transition-all shrink-0 cursor-pointer"
             >
               {isEditing ? <X size={15} /> : <Edit3 size={15} />}
               <span>{isEditing ? t('cancel') : t('edit_information')}</span>
@@ -348,7 +348,7 @@ const MedicalHistory = ({
 
               {/* Altura */}
               <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-xs flex flex-col items-center text-center">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-2">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
                   <Ruler size={22} />
                 </div>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t('medicalhistory_altura')}</span>
@@ -387,7 +387,7 @@ const MedicalHistory = ({
               </div>
 
               <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-brand flex items-center justify-center shrink-0">
                   <Shield size={20} />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -571,7 +571,7 @@ const MedicalHistory = ({
           /* ================= EDIT MODE ================= */
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 animate-fadeIn">
             <h3 className="font-black text-slate-900 mb-6 flex items-center gap-2 text-base">
-              <Edit3 size={18} className="text-teal-600" />
+              <Edit3 size={18} className="text-blue-600" />
               <span>{t('medicalhistory_editar_informacion_de_perfil_medico')}</span>
             </h3>
             
@@ -584,7 +584,7 @@ const MedicalHistory = ({
                     required 
                     value={patientProfile?.full_name || ""} 
                     onChange={e => setPatientProfile({...patientProfile, full_name: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   />
                 </div>
               </div>
@@ -596,7 +596,7 @@ const MedicalHistory = ({
                     type="date" 
                     value={patientProfile?.date_of_birth || ""} 
                     onChange={e => setPatientProfile({...patientProfile, date_of_birth: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   />
                 </div>
                 <div>
@@ -604,7 +604,7 @@ const MedicalHistory = ({
                   <select 
                     value={patientProfile?.gender || ""} 
                     onChange={e => setPatientProfile({...patientProfile, gender: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     <option value="">{t('medicalhistory_seleccionar')}</option>
                     <option value="Masculino">{t('male')}</option>
@@ -620,7 +620,7 @@ const MedicalHistory = ({
                   <select 
                     value={patientProfile?.blood_type || ""} 
                     onChange={e => setPatientProfile({...patientProfile, blood_type: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-bold text-red-600"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 font-bold text-red-600"
                   >
                     <option value="">{t('medicalhistory_sin_especificar')}</option>
                     <option value="A+">A+</option>
@@ -639,7 +639,7 @@ const MedicalHistory = ({
                     type="number" 
                     value={patientProfile?.height || ""} 
                     onChange={e => setPatientProfile({...patientProfile, height: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                     placeholder={t('medicalhistory_ej_170')} 
                   />
                 </div>
@@ -649,7 +649,7 @@ const MedicalHistory = ({
                     type="number" 
                     value={patientProfile?.weight || ""} 
                     onChange={e => setPatientProfile({...patientProfile, weight: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                     placeholder={t('medicalhistory_ej_65')} 
                   />
                 </div>
@@ -659,9 +659,9 @@ const MedicalHistory = ({
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 mb-1">{t('organ_donor')}</label>
                   <select 
-                    value={patientProfile?.organ_donor || "No especificado"} 
+                    value={patientProfile?.organ_donor || t('not_specified')} 
                     onChange={e => setPatientProfile({...patientProfile, organ_donor: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                   >
                     <option value="No especificado">{t('not_specified')}</option>
                     <option value="Sí">{t('donor_yes')}</option>
@@ -674,7 +674,7 @@ const MedicalHistory = ({
                     type="text" 
                     value={patientProfile?.insurance_provider || ""} 
                     onChange={e => setPatientProfile({...patientProfile, insurance_provider: e.target.value})} 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                     placeholder={t('medicalhistory_ej_sanitas_sura_eps')} 
                   />
                 </div>
@@ -686,7 +686,7 @@ const MedicalHistory = ({
                   type="text" 
                   value={patientProfile?.emergency_contact || ""} 
                   onChange={e => setPatientProfile({...patientProfile, emergency_contact: e.target.value})} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   placeholder={t('medicalhistory_nombre_telefono')} 
                 />
               </div>
@@ -696,7 +696,7 @@ const MedicalHistory = ({
                 <textarea 
                   value={patientProfile?.allergies || ""} 
                   onChange={e => setPatientProfile({...patientProfile, allergies: e.target.value})} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   rows={2} 
                   placeholder={t('medicalhistory_rinitis_penicilina')}
                 />
@@ -707,7 +707,7 @@ const MedicalHistory = ({
                 <textarea 
                   value={patientProfile?.chronic_conditions || ""} 
                   onChange={e => setPatientProfile({...patientProfile, chronic_conditions: e.target.value})} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   rows={2} 
                   placeholder={t('medicalhistory_hipertension_asma')}
                 />
@@ -718,7 +718,7 @@ const MedicalHistory = ({
                 <textarea 
                   value={patientProfile?.current_medications || ""} 
                   onChange={e => setPatientProfile({...patientProfile, current_medications: e.target.value})} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   rows={2} 
                   placeholder={t('medicalhistory_losartan_50mg')}
                 />
@@ -729,7 +729,7 @@ const MedicalHistory = ({
                 <textarea 
                   value={patientProfile?.medical_notes || ""} 
                   onChange={e => setPatientProfile({...patientProfile, medical_notes: e.target.value})} 
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50" 
                   rows={2} 
                   placeholder={t('medicalhistory_marcapasos_protesis')}
                 />
@@ -745,7 +745,7 @@ const MedicalHistory = ({
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#0d9488] hover:bg-[#0f766e] text-white font-bold py-3 rounded-xl shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 bg-[#0055ff] hover:bg-[#0047d6] text-white font-bold py-3 rounded-xl shadow-xs active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Save size={18} /> {t('medicalhistory_guardar_cambios')}
                 </button>

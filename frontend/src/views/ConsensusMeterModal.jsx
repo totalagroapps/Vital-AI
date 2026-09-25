@@ -22,17 +22,17 @@ export default function ConsensusMeterModal({
   apiUrl, 
   authHeaders 
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [consensusData, setConsensusData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const suggestedQueries = [
-    "¿El ayuno intermitente reduce la resistencia a la insulina?",
-    "¿Añadir ezetimiba a estatinas reduce eventos cardiovasculares?",
-    "¿Aspirina en prevención primaria en personas mayores de 70 años?",
-    "¿La dieta mediterránea previene el deterioro cognitivo?"
+    t('consensus_example_fasting'),
+    t('consensus_example_ezetimibe'),
+    t('consensus_example_aspirin'),
+    t('consensus_example_mediterranean'),
   ];
 
   const handleSearch = async (searchQuery) => {
@@ -47,7 +47,7 @@ export default function ConsensusMeterModal({
       const res = await fetch(`${apiUrl}/api/consensus/evaluate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...(authHeaders || {}) },
-        body: JSON.stringify({ query: q, max_articles: 6, language: 'es' })
+        body: JSON.stringify({ query: q, max_articles: 6, language: language || 'es' })
       });
 
       if (res.ok) {
@@ -55,11 +55,11 @@ export default function ConsensusMeterModal({
         setConsensusData(data);
       } else {
         const err = await res.json().catch(() => ({}));
-        setErrorMsg(err.detail || "No se pudo obtener el consenso sobre esta pregunta científica.");
+        setErrorMsg(err.detail || t('consensusmetermoda_no_se_pudo_obtener_el_consenso'));
       }
     } catch (e) {
       console.error(e);
-      setErrorMsg("Error de conexión al consultar PubMed.");
+      setErrorMsg(t('consensusmetermoda_error_de_conexion_al_consultar_pubmed'));
     } finally {
       setIsLoading(false);
     }
@@ -84,13 +84,13 @@ export default function ConsensusMeterModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-slate-800 tracking-tight">MIVOR Evidencia</h2>
+                <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('brand_mivor_evidence')}</h2>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-800">
-                  Evidencia PubMed / Cochrane
+                  {t('consensusmetermoda_evidencia_pubmed_cochrane')}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Medidor de consenso científico en la literatura biomédica indexada
+                {t('consensusmetermoda_medidor_de_consenso_cientifico_en_la')}
               </p>
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function ConsensusMeterModal({
           <button 
             onClick={onClose}
             className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-            aria-label="Cerrar modal"
+            aria-label={t('medicalsearchmodal_cerrar_modal')}
           >
             <X size={20} />
           </button>
@@ -118,7 +118,7 @@ export default function ConsensusMeterModal({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Plantea una duda clínica (ej. ¿El ayuno intermitente reduce la resistencia a la insulina?)"
+                placeholder={t('consensusmetermoda_plantea_una_duda_clinica_ej_el')}
                 className="flex-1 bg-transparent border-none outline-none text-sm text-slate-800 placeholder-slate-400 font-medium px-2"
               />
               <button
@@ -127,7 +127,7 @@ export default function ConsensusMeterModal({
                 className="px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs disabled:opacity-50 shrink-0"
               >
                 {isLoading ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-                <span>{isLoading ? 'Analizando...' : 'Medir Consenso'}</span>
+                <span>{isLoading ? t('consensusmetermoda_analizando') : t('consensusmetermoda_medir_consenso')}</span>
               </button>
             </form>
 
@@ -135,7 +135,7 @@ export default function ConsensusMeterModal({
             {!consensusData && !isLoading && (
               <div className="pt-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">
-                  O prueba con una de estas preguntas clínicas frecuentes:
+                  {t('consensusmetermoda_o_prueba_con_una_de_estas')}
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {suggestedQueries.map((sq, i) => (
@@ -165,8 +165,8 @@ export default function ConsensusMeterModal({
           {isLoading && (
             <div className="py-16 flex flex-col items-center justify-center space-y-3">
               <Loader2 size={36} className="text-teal-600 animate-spin" />
-              <p className="text-sm font-bold text-slate-700">Consultando bases de datos de PubMed & NCBI...</p>
-              <p className="text-xs text-slate-400">Analizando ensayos clínicos y calculando grado de acuerdo de la literatura</p>
+              <p className="text-sm font-bold text-slate-700">{t('consensusmetermoda_consultando_bases_de_datos_de_pubmed')}</p>
+              <p className="text-xs text-slate-400">{t('consensusmetermoda_analizando_ensayos_clinicos_y_calculando')}</p>
             </div>
           )}
 
@@ -178,7 +178,7 @@ export default function ConsensusMeterModal({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Resultado del Análisis de Evidencia
+                      {t('consensusmetermoda_resultado_del_analisis_de_evidencia')}
                     </span>
                     <h3 className="text-2xl font-black text-slate-900 mt-0.5">
                       {consensusData.consensus_classification}
@@ -189,7 +189,7 @@ export default function ConsensusMeterModal({
                     <span className={`px-3 py-1 rounded-full text-xs font-black ${
                       consensusData.evidence_strength_badge === 'green' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                     }`}>
-                      Rigor: {consensusData.evidence_strength}
+                      {t('consensusmetermoda_rigor')} {consensusData.evidence_strength}
                     </span>
                   </div>
                 </div>
@@ -199,15 +199,15 @@ export default function ConsensusMeterModal({
                   <div className="flex justify-between items-center text-xs font-bold text-slate-600">
                     <span className="text-emerald-700 flex items-center gap-1">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
-                      A Favor ({consensusData.consensus_percentage_agree}%)
+                      {t('consensus_in_favor_pct', { pct: consensusData.consensus_percentage_agree })}
                     </span>
                     <span className="text-amber-700 flex items-center gap-1">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" />
-                      Neutro / Mixto ({consensusData.consensus_percentage_neutral}%)
+                      {t('consensus_neutral_pct', { pct: consensusData.consensus_percentage_neutral })}
                     </span>
                     <span className="text-rose-700 flex items-center gap-1">
                       <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
-                      En Contra ({consensusData.consensus_percentage_disagree}%)
+                      {t('consensus_against_pct', { pct: consensusData.consensus_percentage_disagree })}
                     </span>
                   </div>
 
@@ -236,7 +236,7 @@ export default function ConsensusMeterModal({
                     {consensusData.synthesis_summary}
                   </p>
                   <p className="text-slate-500 pt-1 border-t border-slate-100">
-                    <strong className="text-slate-700">Implicación clínica:</strong> {consensusData.clinical_implication}
+                    <strong className="text-slate-700">{t('consensusmetermoda_implicacion_clinica')}</strong> {consensusData.clinical_implication}
                   </p>
                 </div>
               </div>
@@ -244,8 +244,8 @@ export default function ConsensusMeterModal({
               {/* LISTA DE ARTÍCULOS EVALUADOS */}
               <div>
                 <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center justify-between">
-                  <span>Estudios Biomédicos Analizados ({consensusData.total_articles_analyzed} publicaciones en PubMed)</span>
-                  <span className="text-teal-700 text-[11px] font-semibold">Revisados por pares</span>
+                  <span>{t('consensus_studies_analyzed', { count: consensusData.total_articles_analyzed })}</span>
+                  <span className="text-teal-700 text-[11px] font-semibold">{t('consensusmetermoda_revisados_por_pares')}</span>
                 </h4>
 
                 <div className="space-y-3">
@@ -256,8 +256,8 @@ export default function ConsensusMeterModal({
                           art.stance === 'agree' ? 'bg-emerald-100 text-emerald-800' :
                           art.stance === 'disagree' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
                         }`}>
-                          {art.stance === 'agree' ? 'Favorable / A favor' :
-                           art.stance === 'disagree' ? 'Desfavorable' : 'Neutro / Inconcluso'}
+                          {art.stance === 'agree' ? t('consensusmetermoda_favorable_a_favor') :
+                           art.stance === 'disagree' ? t('consensusmetermoda_desfavorable') : t('consensusmetermoda_neutro_inconcluso')}
                         </span>
 
                         <span className="text-[11px] font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-lg">
@@ -270,7 +270,7 @@ export default function ConsensusMeterModal({
                       </h5>
 
                       <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <strong>Hallazgo:</strong> {art.summary_finding}
+                        <strong>{t('consensusmetermoda_hallazgo')}</strong> {art.summary_finding}
                       </p>
 
                       <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-1">
@@ -281,7 +281,7 @@ export default function ConsensusMeterModal({
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-teal-700 hover:text-teal-900 font-bold ml-auto"
                         >
-                          <span>Ver en PubMed (PMID: {art.source_id})</span>
+                          <span>{t('consensus_view_pubmed', { id: art.source_id })}</span>
                           <ExternalLink size={12} />
                         </a>
                       </div>
@@ -298,13 +298,13 @@ export default function ConsensusMeterModal({
         <div className="px-6 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
           <div className="flex items-center gap-1.5">
             <Info size={13} className="text-slate-400" />
-            <span>MIVOR Evidencia recopila literatura de PubMed (NLM/NIH). La evidencia debe ser contextualizada por su médico.</span>
+            <span>{t('consensusmetermoda_mivor_evidencia_recopila_literatura_de_p')}</span>
           </div>
           <button
             onClick={onClose}
             className="px-4 py-1.5 font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl text-xs"
           >
-            Cerrar
+            {t('patient_close')}
           </button>
         </div>
       </div>

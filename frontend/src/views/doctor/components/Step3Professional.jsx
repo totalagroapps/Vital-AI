@@ -97,7 +97,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 <span className="w-48 text-slate-500 flex items-center gap-2">
                   <Mail size={14} /> {t('step1personal_correo_electronico')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.email || 'juan.perez@email.com'}</span>
+                <span className="font-semibold text-slate-800">{formData.email || t('step3professional_juan_perez_email_com')}</span>
               </div>
 
               <div className="flex items-center">
@@ -111,7 +111,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                 <span className="w-48 text-slate-500 flex items-center gap-2">
                   <Languages size={14} /> {t('step1personal_idioma_preferido')}
                 </span>
-                <span className="font-semibold text-slate-800">{formData.language || 'Español'}</span>
+                <span className="font-semibold text-slate-800">{formData.language || t('step1personal_espanol')}</span>
               </div>
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                     longitude={formData.longitude}
                     address={formData.address}
                     city={formData.city}
-                    country={formData.country || 'Colombia'}
+                    country={formData.country || t('doctoronboarding_colombia')}
                     readOnly={true}
                     height="200px"
                     title={t('step3professional_ubicacion_geografica_confirmada')}
@@ -248,7 +248,7 @@ export default function Step3Professional({ formData, onNext, onPrev, goToStep }
                   <CheckCircle2 size={16} className="text-emerald-500" /> {t('step1personal_certificado_de_colegiacion')}
                 </span>
                 <span className="font-medium text-slate-700">
-                  {formData.colegiationCert ? formData.colegiationCert.name : 'Certificado vigente – COM Madrid'}
+                  {formData.colegiationCert ? formData.colegiationCert.name : t('not_specified')}
                 </span>
               </div>
             </div>

@@ -7,7 +7,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
 const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculators, onOpenConsensus, onOpenScribe, onOpenPreventiveCalendar }) => {
-  const { t, language } = useLanguage();
+  const { t, language, locale } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -43,8 +43,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
       return;
     }
     const recognition = new SpeechRecognition();
-    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
-    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.lang = locale || language;
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -77,7 +76,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
   const doctorPhoto = doctorProfile?.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(doctorName)}&background=0D8ABC&color=fff&size=150`;
 
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col selection:bg-brand-purple/20">
+    <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col selection:bg-brand/20">
       
       {/* 1. TOP NAVBAR */}
       <header className="w-full bg-white border-b border-gray-100 px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">
@@ -103,37 +102,37 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
         <nav className="flex items-center gap-8 text-sm font-medium">
           <button 
             onClick={() => onNavigate('home')} 
-            className="text-brand-purple font-semibold border-b-2 border-brand-purple pb-1 transition-colors"
+            className="text-brand font-semibold border-b-2 border-brand pb-1 transition-colors"
           >
            {t('home')}
           </button>
           <button 
             onClick={() => onNavigate('patients')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
+            className="text-gray-600 hover:text-brand transition-colors pb-1"
           >
            {t('patients')}
           </button>
           <button 
             onClick={() => onNavigate('agenda')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
+            className="text-gray-600 hover:text-brand transition-colors pb-1"
           >
            {t('agenda')}
           </button>
           <button 
             onClick={() => onNavigate('copilot')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
+            className="text-gray-600 hover:text-brand transition-colors pb-1"
           >
            {t('doctorhomedesktop_analisis')}
           </button>
           <button 
             onClick={() => onNavigate('search')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1"
+            className="text-gray-600 hover:text-brand transition-colors pb-1"
           >
            {t('doctorhomedesktop_ultimos_avances')}
           </button>
           <button 
             onClick={() => onNavigate('more')} 
-            className="text-gray-600 hover:text-brand-purple transition-colors pb-1 flex items-center gap-1"
+            className="text-gray-600 hover:text-brand transition-colors pb-1 flex items-center gap-1"
           >
            {t('more')} <ChevronDown size={14} />
           </button>
@@ -144,10 +143,10 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
           <LanguageSelector />
           
           <div className="relative">
-            <button className="w-10 h-10 rounded-full bg-slate-50 border border-gray-200/70 flex items-center justify-center text-gray-600 hover:text-brand-purple hover:bg-slate-100 transition-all">
+            <button className="w-10 h-10 rounded-full bg-slate-50 border border-gray-200/70 flex items-center justify-center text-gray-600 hover:text-brand hover:bg-slate-100 transition-all">
               <Bell size={18} />
             </button>
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-brand-purple text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs">
               1
             </span>
           </div>
@@ -184,7 +183,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <p className="text-xs font-bold text-gray-900 truncate">{doctorName}</p>
-                    <p className="text-[11px] text-gray-500 truncate">{doctorProfile?.license_number || 'Colegiado'}</p>
+                    <p className="text-[11px] text-gray-500 truncate">{doctorProfile?.license_number || t('doctorhomedesktop_colegiado')}</p>
                   </div>
                   <button 
                     onClick={() => { setShowProfileMenu(false); onNavigate('profile'); }}
@@ -219,7 +218,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
             <h1 className="text-[42px] lg:text-[46px] font-black text-brand-dark tracking-tight leading-[1.12] mb-3">
              {t('doctorhomedesktop_tu_practica_medica')}<br />
              {t('enhanced_by_ai')}<br />
-              <span className="text-brand-purple">{t('doctorhomedesktop_inteligencia_artificial')}</span>
+              <span className="text-brand">{t('doctorhomedesktop_inteligencia_artificial')}</span>
             </h1>
             <p className="text-sm lg:text-[15px] text-gray-500 leading-relaxed max-w-lg">
              {t('save_time_make_better_decisions')}
@@ -230,7 +229,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
           <div className="relative w-72 h-72 lg:w-84 lg:h-84 flex items-center justify-center pointer-events-none shrink-0">
             <img 
               src="/images/doctor_ai_head.jpg" 
-              alt="MIVOR.ai Medical Intelligence" 
+              alt={t('doctorhome_mivor_ai_medical_intelligence')} 
               className="w-full h-full object-contain drop-shadow-sm mix-blend-multiply"
             />
           </div>
@@ -247,7 +246,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
             className="bg-white rounded-3xl p-6 border border-gray-100 shadow-soft hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group"
           >
             <div className="flex items-start gap-4 flex-1 pr-4">
-              <div className="w-13 h-13 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center shrink-0 p-3">
+              <div className="w-13 h-13 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 p-3">
                 <Users size={24} />
               </div>
               <div>
@@ -257,7 +256,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
                 </p>
               </div>
             </div>
-            <div className="w-9 h-9 rounded-full bg-brand-purple text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
+            <div className="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-xs">
               <ArrowRight size={16} />
             </div>
           </div>
@@ -328,7 +327,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
 
         {/* 3.5 HERRAMIENTAS MIVOR */}
         <div className="mb-8">
-          <h3 className="font-bold text-gray-900 mb-4 px-1">{t('Herramientas Clínicas Avanzadas') || 'Herramientas Clínicas Avanzadas'}</h3>
+          <h3 className="font-bold text-gray-900 mb-4 px-1">{t('doctorhome_advanced_clinical_tools') || 'Herramientas Clínicas Avanzadas'}</h3>
           <div className="grid grid-cols-4 gap-4">
             <div 
               onClick={onOpenCalculators}
@@ -337,8 +336,8 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
               <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
                 <Heart size={24} className="stroke-[2.2]" />
               </div>
-              <h3 className="text-sm font-extrabold text-gray-900 mb-1">Calculadoras & Cardio</h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">Riesgo CV, LDL y renal</p>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">{t('patienthome_calculadoras_cardio')}</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctorhome_riesgo_cv_ldl_y_renal')}</p>
             </div>
 
             <div 
@@ -348,8 +347,8 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
               <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
                 <Calendar size={24} className="stroke-[2.2]" />
               </div>
-              <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Prevención</h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">Cribados y calendario</p>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">{t('brand_mivor_prevention')}</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctorhome_cribados_y_calendario')}</p>
             </div>
 
             <div 
@@ -359,8 +358,8 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
               <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 p-2.5 mb-4 group-hover:scale-105 transition-transform">
                 <Sparkles size={24} className="stroke-[2.2]" />
               </div>
-              <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Evidencia</h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">Evidencia en PubMed</p>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">{t('brand_mivor_evidence')}</h3>
+              <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctorhome_evidencia_en_pubmed')}</p>
             </div>
 
             <div 
@@ -371,17 +370,17 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
                 <FileText size={24} className="stroke-[2.2]" />
               </div>
               <h3 className="text-sm font-extrabold text-gray-900 mb-1">MIVOR Scribe</h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">Preparador de Consulta</p>
+              <p className="text-[11px] text-gray-500 leading-relaxed">{t('doctorhome_preparador_de_consulta')}</p>
             </div>
           </div>
         </div>
 
 
         {/* 4. SEARCH / COPILOT BANNER */}
-        <div className="bg-white rounded-3xl p-6 border border-brand-purple/15 shadow-soft mb-12">
+        <div className="bg-white rounded-3xl p-6 border border-brand/15 shadow-soft mb-12">
           
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-brand-purple/10 text-brand-purple flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand flex items-center justify-center">
               <Sparkles size={18} />
             </div>
             <div>
@@ -390,7 +389,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
             </div>
           </div>
 
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 border border-gray-200/80 rounded-2xl p-1.5 focus-within:border-brand-purple/50 focus-within:ring-2 focus-within:ring-brand-purple/10 transition-all">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-slate-50 border border-gray-200/80 rounded-2xl p-1.5 focus-within:border-brand/50 focus-within:ring-2 focus-within:ring-brand/10 transition-all">
             <input
               type="file"
               ref={doctorDesktopFileInputRef}
@@ -402,7 +401,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
             <button
               type="button"
               onClick={() => doctorDesktopFileInputRef.current?.click()}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-brand-purple hover:bg-white transition-all ml-1 shrink-0 cursor-pointer shadow-2xs"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-500 hover:text-brand hover:bg-white transition-all ml-1 shrink-0 cursor-pointer shadow-2xs"
               title={t('doctorhome_adjuntar_cualquier_archivo_clinico_p')}
             >
               <Paperclip size={18} className="stroke-[2.2] -rotate-45" />
@@ -423,7 +422,7 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
               className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                 isListening 
                   ? 'bg-red-500 text-white animate-pulse shadow-md' 
-                  : 'bg-brand-purple text-white hover:bg-brand-purple/90 shadow-xs'
+                  : 'bg-brand text-white hover:bg-brand/90 shadow-xs'
               }`}
               title={isListening ? t('doctorhome_detener_grabacion') : t('doctorhomedesktop_dictar_consulta_con_voz')}
             >

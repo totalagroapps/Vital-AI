@@ -6,6 +6,7 @@ import {
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateSpecialtyName } from '../i18n/catalogTranslations';
 import DoctorAvatar from '../components/DoctorAvatar';
+import PatientTopNav from '../components/PatientTopNav';
 
 const BROWSER_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 const COMMON_TZ = [
@@ -18,7 +19,7 @@ const COMMON_TZ = [
 const dateKey = (iso, tz) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso));
 
-const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, onBooked, preview = false }) => {
+const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, onBooked, preview = false, onNavigate, userProfile, username, onLogout }) => {
   const { t, language, locale: uiLocale } = useLanguage();
   const locale = uiLocale;
 
@@ -134,7 +135,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
           <CalendarClock className="w-8 h-8" />
         </div>
         <h2 className="text-xl font-extrabold text-brand-dark">{t('book_confirmed_title')}</h2>
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-slate-600 mt-2">
           {t('book_confirmed_desc')} <span className="font-bold">{fmtLongDate(confirmed.scheduled_at)}</span>, {fmtTime(confirmed.scheduled_at)} ({tz.replace('_', ' ')})
         </p>
         <p className="text-xs text-amber-600 mt-1">{t('book_confirmed_payment_note')}</p>
@@ -142,7 +143,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
           <button onClick={onBooked} className="px-5 py-3 rounded-2xl bg-brand-blue text-white font-bold text-sm">
             {t('book_view_appointments')}
           </button>
-          <button onClick={onBack} className="px-5 py-3 rounded-2xl border border-gray-200 text-gray-600 font-bold text-sm">
+          <button onClick={onBack} className="px-5 py-3 rounded-2xl border border-slate-200 text-slate-600 font-bold text-sm">
             {t('book_back_to_doctor')}
           </button>
         </div>
@@ -151,9 +152,14 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
   }
 
   return (
-    <div className="min-h-screen bg-base px-5 pt-4 pb-16 lg:px-6 lg:pt-8">
+    <div className="min-h-screen bg-base pb-24 lg:pb-16">
+      {/* Barra superior común del paciente (no se muestra en la vista previa del médico) */}
+      {onNavigate && (
+        <PatientTopNav activeTab="specialists" onNavigate={onNavigate} userProfile={userProfile} username={username} onLogout={onLogout} />
+      )}
+      <div className="px-5 pt-4 lg:px-8 lg:pt-8">
       <div className="max-w-screen-xl mx-auto">
-        <button onClick={onBack} className="mb-5 flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark">
+        <button onClick={onBack} className="mb-5 flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-brand-dark">
           <ArrowLeft className="w-4 h-4" /> {preview ? t('book_preview_close') : t('detail_back_results')}
         </button>
 
@@ -165,36 +171,36 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
           {/* Left: doctor + settings */}
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 space-y-4 h-fit">
+          <div className="bg-white rounded-2xl p-5 border border-slate-100 space-y-4 h-fit">
             <div>
-              <p className="text-xs text-gray-400 mb-2">{preview ? t('sched_title') : t('book_title')}</p>
+              <p className="text-xs text-slate-400 mb-2">{preview ? t('sched_title') : t('book_title')}</p>
               <div className="flex items-center gap-3">
                 <DoctorAvatar avatarUrl={doctor?.avatar_url} fullName={doctor?.full_name} size={48} />
                 <div className="min-w-0">
                   <h2 className="text-lg font-extrabold text-brand-dark truncate">{doctor?.full_name || '…'}</h2>
                   {doctor?.specialties?.length > 0 && (
-                    <p className="text-xs text-gray-400 truncate">
-                      {doctor.specialties.map((s) => translateSpecialtyName(s.name, language)).join(', ')}
+                    <p className="text-xs text-slate-400 truncate">
+                      {doctor.specialties.map((s) => translateSpecialtyName(s.name, language, t)).join(', ')}
                     </p>
                   )}
                 </div>
               </div>
             </div>
             {doctor && (
-              <p className="flex items-center gap-2 text-sm text-gray-600">
+              <p className="flex items-center gap-2 text-sm text-slate-600">
                 <Clock className="w-4 h-4 text-brand-blue" />
                 {doctor.appointment_duration_minutes} {t('book_minutes')}
               </p>
             )}
 
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-1">
+              <p className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
                 <Globe className="w-3.5 h-3.5" /> {t('book_timezone')}
               </p>
               <select
                 value={tz}
                 onChange={(e) => setTz(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm font-medium text-brand-dark bg-white"
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-medium text-brand-dark bg-white"
               >
                 <option value={BROWSER_TZ}>
                   {t('book_timezone_browser')} · {BROWSER_TZ.split('/').pop().replace('_', ' ')}
@@ -212,8 +218,8 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
           </div>
 
           {/* Right: calendar + times */}
-          <div className="lg:col-span-3 bg-white rounded-2xl p-5 lg:p-6 border border-gray-100">
-            <h3 className="text-sm font-bold text-gray-900 mb-4">{t('book_select_datetime')}</h3>
+          <div className="lg:col-span-3 bg-white rounded-2xl p-5 lg:p-6 border border-slate-100">
+            <h3 className="text-sm font-bold text-slate-900 mb-4">{t('book_select_datetime')}</h3>
 
             {loading ? (
               <div className="flex flex-col items-center py-12 text-brand-blue">
@@ -221,23 +227,23 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
                 <p className="text-xs">{t('book_loading_slots')}</p>
               </div>
             ) : visibleSlots.length === 0 ? (
-              <p className="text-sm text-gray-400 py-12 text-center">{t('book_no_slots')}</p>
+              <p className="text-sm text-slate-400 py-12 text-center">{t('book_no_slots')}</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-5 lg:gap-7">
                 {/* calendar */}
                 <div className="sm:col-span-3">
                   <div className="flex items-center justify-between mb-3">
-                    <button disabled={!canPrevMonth} onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))} className="p-1.5 text-gray-400 disabled:opacity-30 hover:text-brand-blue">
+                    <button disabled={!canPrevMonth} onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1))} className="p-1.5 text-slate-400 disabled:opacity-30 hover:text-brand-blue">
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <span className="text-base font-bold text-brand-dark capitalize">{monthLabel}</span>
-                    <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))} className="p-1.5 text-gray-400 hover:text-brand-blue">
+                    <button onClick={() => setViewMonth(new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1))} className="p-1.5 text-slate-400 hover:text-brand-blue">
                       <ChevronRight className="w-5 h-5" />
                     </button>
                   </div>
                   <div className="grid grid-cols-7 gap-1.5 text-center">
                     {weekdayLabels.map((w) => (
-                      <span key={w} className="text-[11px] font-bold text-gray-400 uppercase py-1.5">{w}</span>
+                      <span key={w} className="text-[11px] font-bold text-slate-400 uppercase py-1.5">{w}</span>
                     ))}
                     {grid.map((cell, i) => {
                       if (!cell) return <span key={i} className="aspect-square" />;
@@ -252,7 +258,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
                             className={`w-4/5 aspect-square rounded-full text-sm sm:text-[15px] font-semibold transition-colors ${
                               active ? 'bg-brand-blue text-white'
                                 : has && !isPast ? 'bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20'
-                                : 'text-gray-300'
+                                : 'text-slate-300'
                             }`}
                           >
                             {cell.d}
@@ -266,9 +272,9 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
                 {/* times */}
                 <div className="sm:col-span-2 max-h-[460px] overflow-y-auto pr-1">
                   {!selectedDate ? (
-                    <p className="text-xs text-gray-400 pt-2">{t('book_select_datetime')}</p>
+                    <p className="text-xs text-slate-400 pt-2">{t('book_select_datetime')}</p>
                   ) : !byDay[selectedDate]?.length ? (
-                    <p className="text-xs text-gray-400 pt-2">{t('book_no_slots_day')}</p>
+                    <p className="text-xs text-slate-400 pt-2">{t('book_no_slots_day')}</p>
                   ) : (
                     <div className="space-y-2.5">
                       {byDay[selectedDate].map((s) => (
@@ -291,7 +297,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
             )}
 
             {selectedSlot && !preview && (
-              <div className="mt-5 border-t border-gray-100 pt-4">
+              <div className="mt-5 border-t border-slate-100 pt-4">
                 <p className="text-sm font-bold text-brand-dark capitalize">
                   {fmtLongDate(selectedSlot.start)} · {fmtTime(selectedSlot.start)}
                 </p>
@@ -300,7 +306,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={t('book_reason_placeholder')}
                   rows={3}
-                  className="w-full mt-3 border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-gray-400 resize-none focus:outline-none focus:border-brand-blue"
+                  className="w-full mt-3 border border-slate-300 rounded-xl px-3 py-2.5 text-sm text-brand-dark placeholder:text-slate-400 resize-none focus:outline-none focus:border-brand-blue"
                 />
                 {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
                 <div className="flex gap-2 mt-3">
@@ -311,7 +317,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
                   >
                     {booking ? t('book_confirming') : t('book_confirm')}
                   </button>
-                  <button onClick={() => setSelectedSlot(null)} className="px-4 py-3 rounded-2xl border border-gray-200 text-gray-500 text-sm font-bold">
+                  <button onClick={() => setSelectedSlot(null)} className="px-4 py-3 rounded-2xl border border-slate-200 text-slate-500 text-sm font-bold">
                     {t('book_change_slot')}
                   </button>
                 </div>
@@ -320,6 +326,7 @@ const BookAppointment = ({ apiUrl, token, doctorId, doctor: doctorProp, onBack, 
             {error && !selectedSlot && <p className="text-xs text-red-600 mt-3">{error}</p>}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

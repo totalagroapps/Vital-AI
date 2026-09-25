@@ -87,16 +87,16 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
       : null;
 
     const payload = {
-      first_name: formData.firstName.trim() || 'Médico',
+      first_name: formData.firstName.trim() || t('presencial_unnamed'),
       last_name: formData.lastName.trim() || 'General',
       email: formData.email.trim(),
       medical_license: formData.colegiatedNumber.trim() || `LIC-${Date.now()}`,
-      specialty: formData.specialty.trim() || 'Medicina General',
+      specialty: formData.specialty.trim() || t('doctoronboarding_medicina_general'),
       subspecialties: formData.subspecialty?.trim() || null,
       phone: formData.phone?.trim() || null,
       date_of_birth: parseBirthDate(formData.birthDate),
-      residence_country: formData.country || 'Colombia',
-      country: formData.country || 'Colombia',
+      residence_country: formData.country || t('doctoronboarding_colombia'),
+      country: formData.country || t('doctoronboarding_colombia'),
       city: formData.city?.trim() || null,
       address: formData.address?.trim() || null,
       postal_code: formData.zipCode?.trim() || null,

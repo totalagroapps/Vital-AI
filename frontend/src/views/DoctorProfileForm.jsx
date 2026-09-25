@@ -255,7 +255,7 @@ const DoctorProfileForm = ({ apiUrl, authHeaders, existingProfile, onSaved, onBa
   };
 
   const filteredSpecialties = specialties.filter((s) =>
-    translateSpecialtyName(s.name, language).toLowerCase().includes(specialtyFilter.toLowerCase())
+    translateSpecialtyName(s.name, language, t).toLowerCase().includes(specialtyFilter.toLowerCase())
   );
 
   const inputClass =
@@ -395,7 +395,7 @@ const DoctorProfileForm = ({ apiUrl, authHeaders, existingProfile, onSaved, onBa
                     onChange={() => toggleId('specialty_ids', s.id)}
                     className="accent-brand-blue w-4 h-4"
                   />
-                  {translateSpecialtyName(s.name, language)}
+                  {translateSpecialtyName(s.name, language, t)}
                 </label>
               ))}
               {filteredSpecialties.length === 0 && (

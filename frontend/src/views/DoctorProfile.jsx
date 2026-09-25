@@ -104,7 +104,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
       years_experience: data.years_experience || data.years_of_experience || '',
       professional_college: data.professional_college || '',
       subspecialties: data.subspecialties || '',
-      languages: data.languages || data.language || 'Español (nativo)',
+      languages: data.languages || data.language || t('doctorprofile_espanol_nativo'),
       bio: data.bio || data.professional_description || '',
       presentation_video_url: data.presentation_video_url || '',
       clinic_video_url: data.clinic_video_url || ''
@@ -369,7 +369,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
 
             <div>
               <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-slate-900">{formData.first_name || 'Doctor'} {formData.last_name || ''}</h2>
+                <h2 className="text-xl font-bold text-slate-900">{formData.first_name || t('doctorprofile_doctor')} {formData.last_name || ''}</h2>
                 {/* Badge de verificación dinámico */}
                 {profile?.verification_status === 'verified' ? (
                   <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
@@ -387,7 +387,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
               </div>
               <p className="text-sm text-slate-500 mt-0.5">{formData.specialty || t('main_specialty_label', 'Especialidad médica')}</p>
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-2">
-                <span className="flex items-center gap-1.5"><Mail size={14} /> {formData.email || 'Sin correo'}</span>
+                <span className="flex items-center gap-1.5"><Mail size={14} /> {formData.email || t('doctorprofile_sin_correo')}</span>
                 <span className="flex items-center gap-1.5"><Phone size={14} /> {formData.phone || t('doctorprofile_sin_telefono')}</span>
               </div>
             </div>
@@ -454,13 +454,13 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="first_name" value={formData.first_name} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.first_name || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.first_name || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
                     <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                       <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('email_account_label', 'Correo electrónico')}</label>
-                      <p className="text-xs font-bold text-slate-800">{formData.email || 'Sin especificar'}</p>
+                      <p className="text-xs font-bold text-slate-800">{formData.email || t('medicalhistory_sin_especificar')}</p>
                     </div>
 
                     <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
@@ -468,7 +468,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="last_name" value={formData.last_name} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.last_name || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.last_name || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -477,7 +477,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="address" value={formData.address} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.address || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.address || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -486,7 +486,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.birth_date || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.birth_date || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -495,7 +495,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.city || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.city || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -504,7 +504,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="country" value={formData.country} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.country || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.country || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -513,7 +513,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.postal_code || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.postal_code || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -522,7 +522,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-slate-800">{formData.phone || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.phone || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
 
@@ -531,7 +531,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       {isEditing ? (
                         <input type="text" name="website" value={formData.website} onChange={handleChange} className="w-full text-xs font-semibold text-slate-800 bg-white p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                       ) : (
-                        <p className="text-xs font-bold text-blue-600 truncate">{formData.website || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-blue-600 truncate">{formData.website || t('medicalhistory_sin_especificar')}</p>
                       )}
                     </div>
                   </div>
@@ -546,7 +546,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       longitude={formData.longitude}
                       address={formData.address}
                       city={formData.city}
-                      country={formData.country || 'Colombia'}
+                      country={formData.country || t('doctoronboarding_colombia')}
                       onChange={({ latitude, longitude }) => setFormData(prev => ({ ...prev, latitude, longitude }))}
                       readOnly={!isEditing}
                       height="280px"
@@ -615,11 +615,11 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('main_specialty_label', 'Especialidad principal')}</label>
-                        <p className="text-xs font-bold text-slate-800">{formData.specialty || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.specialty || t('medicalhistory_sin_especificar')}</p>
                       </div>
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('medical_license_label', 'Nº de colegiado / Licencia')}</label>
-                        <p className="text-xs font-bold text-slate-800">{formData.colegiated_number || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.colegiated_number || t('medicalhistory_sin_especificar')}</p>
                       </div>
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('years_exp_label', 'Años de experiencia')}</label>
@@ -627,7 +627,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                       </div>
                       <div className="bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                         <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider mb-1">{t('professional_college_label', 'Colegio profesional')}</label>
-                        <p className="text-xs font-bold text-slate-800">{formData.professional_college || 'Sin especificar'}</p>
+                        <p className="text-xs font-bold text-slate-800">{formData.professional_college || t('medicalhistory_sin_especificar')}</p>
                       </div>
                     </div>
                   )}
@@ -842,7 +842,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                             </div>
                             <div>
                               <h4 className="text-xs font-bold text-slate-800">{edu.degree}</h4>
-                              <p className="text-[11px] text-slate-500">{edu.institution} {edu.start_year && `• ${edu.start_year} - ${edu.end_year || 'Presente'}`}</p>
+                              <p className="text-[11px] text-slate-500">{edu.institution} {edu.start_year && `• ${edu.start_year} - ${edu.end_year || t('doctorprofile_presente')}`}</p>
                             </div>
                           </div>
                           <button onClick={() => handleDeleteEducation(edu.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 cursor-pointer">
@@ -990,9 +990,9 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-sm font-bold text-slate-900 truncate">
-                    {formData.first_name || formData.last_name ? `${formData.first_name} ${formData.last_name}` : 'Sin nombre'}
+                    {formData.first_name || formData.last_name ? `${formData.first_name} ${formData.last_name}` : t('doctorprofile_sin_nombre')}
                   </h3>
-                  <p className="text-xs text-slate-500 truncate">{formData.specialty || 'Sin especialidad'}</p>
+                  <p className="text-xs text-slate-500 truncate">{formData.specialty || t('doctorprofile_sin_especialidad')}</p>
                 </div>
               </div>
 
@@ -1005,7 +1005,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('main_specialty_label', 'Especialidad principal')}</p>
-                    <p className="text-xs font-bold text-slate-800 truncate">{formData.specialty || 'Pendiente'}</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{formData.specialty || t('status_pending')}</p>
                   </div>
                 </div>
 
@@ -1016,7 +1016,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('medical_license_label', 'Nº de colegiado / Licencia')}</p>
-                    <p className="text-xs font-bold text-slate-800 truncate">{formData.colegiated_number || 'Pendiente'}</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{formData.colegiated_number || t('status_pending')}</p>
                   </div>
                 </div>
 
@@ -1040,7 +1040,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('professional_college_label', 'Colegio profesional')}</p>
-                    <p className="text-xs font-bold text-slate-800 truncate">{formData.professional_college || 'Pendiente'}</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{formData.professional_college || t('status_pending')}</p>
                   </div>
                 </div>
 
@@ -1051,7 +1051,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('subspecialty_label', 'Subespecialidades')}</p>
-                    <p className="text-xs font-bold text-slate-800 truncate">{formData.subspecialties || 'Sin subespecialidades'}</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{formData.subspecialties || t('doctorprofile_sin_subespecialidades')}</p>
                   </div>
                 </div>
 
@@ -1062,7 +1062,7 @@ export default function DoctorProfile({ onBack, apiUrl, authHeaders, doctorProfi
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{t('detail_languages')}</p>
-                    <p className="text-xs font-bold text-slate-800 truncate">{formData.languages || 'Sin idiomas registrados'}</p>
+                    <p className="text-xs font-bold text-slate-800 truncate">{formData.languages || t('doctorprofile_sin_idiomas_registrados')}</p>
                   </div>
                 </div>
 

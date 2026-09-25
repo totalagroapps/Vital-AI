@@ -31,7 +31,7 @@ export function UpdateModal({ t, apiUrl }) {
 
     window.onApkDownloadError = (err) => {
       setDownloadState('error');
-      setErrorMessage(err || 'Error al descargar la actualización.');
+      setErrorMessage(err || t('updatemodal_error_al_descargar_la_actualizacion'));
     };
 
     return () => {
@@ -220,7 +220,7 @@ export function UpdateModal({ t, apiUrl }) {
               <span>
                 {bytesInfo.total > 0 
                   ? `${(bytesInfo.current / (1024 * 1024)).toFixed(1)} MB / ${(bytesInfo.total / (1024 * 1024)).toFixed(1)} MB` 
-                  : 'Preparando descarga...'}
+                  : t('updatemodal_preparando_descarga')}
               </span>
               <span className="text-[10px] text-teal-300/80">{t('updatemodal_sin_salir_de_la_app')}</span>
             </div>
@@ -260,9 +260,9 @@ export function UpdateModal({ t, apiUrl }) {
             >
               <Download size={18} />
               {downloadState === 'completed' 
-                ? 'REABRIR INSTALADOR' 
+                ? t('updatemodal_reabrir_instalador') 
                 : downloadState === 'error' 
-                ? 'REINTENTAR DESCARGA' 
+                ? t('updatemodal_reintentar_descarga') 
                 : (t('update_now') || 'ACTUALIZAR AHORA')}
             </button>
           )}

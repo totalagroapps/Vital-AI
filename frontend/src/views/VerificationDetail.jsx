@@ -84,7 +84,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
         }
       } else {
         const err = await response.json().catch(() => ({}));
-        setError(err.detail || 'Error al cargar los médicos');
+        setError(err.detail || t('verificationdetail_error_al_cargar_los_medicos'));
       }
     } catch (err) {
       console.error('Error fetching doctors for verification:', err);
@@ -103,7 +103,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
     const rawLast = (doc.last_name || '').trim();
     const isFemale = /^dra\.?\s+/i.test(rawFirst);
     const cleanFirst = rawFirst.replace(/^(dr\.|dra\.|dr|dra)\s+/i, '').replace(/^(dr\.|dra\.|dr|dra)\s+/i, '').trim();
-    const prefix = isFemale ? 'Dra.' : 'Dr.';
+    const prefix = isFemale ? t('verificationdetail_dra') : t('verificationdetail_dr');
     return `${prefix} ${cleanFirst} ${rawLast}`.trim();
   };
 
@@ -193,11 +193,11 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
         setAuditNotes('');
       } else {
         const err = await response.json().catch(() => ({}));
-        showToast(err.detail || 'Error al actualizar el estado del médico.', 'error');
+        showToast(err.detail || t('verificationdetail_error_al_actualizar_el_estado_del'), 'error');
       }
     } catch (err) {
       console.error('Error updating doctor status:', err);
-      showToast('Error de conexión al actualizar el estado.', 'error');
+      showToast(t('verificationdetail_error_de_conexion_al_actualizar_el'), 'error');
     } finally {
       setUpdating(false);
     }
@@ -406,7 +406,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
               >
                 {filteredDoctors.map((d) => (
                   <option key={d.id} value={d.id}>
-                    {cleanDoctorName(d)} ({d.verification_status === 'verified' ? '✓ Verificado' : d.verification_status === 'rejected' ? '✗ Rechazado' : '⏳ Pendiente'})
+                    {cleanDoctorName(d)} ({d.verification_status === 'verified' ? t('verificationdetail_verificado') : d.verification_status === 'rejected' ? t('verificationdetail_rechazado') : t('verificationdetail_pendiente')})
                   </option>
                 ))}
               </select>
@@ -466,11 +466,11 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                 <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-slate-600 font-medium">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 font-bold border border-teal-100">
                     <Stethoscope size={13} className="text-teal-600" />
-                    {doctor?.specialty || 'Medicina General'}
+                    {doctor?.specialty || t('doctoronboarding_medicina_general')}
                   </span>
                   <span className="flex items-center gap-1.5 text-slate-500">
                     <Mail size={13} className="text-slate-400" />
-                    {doctor?.email || 'Sin correo'}
+                    {doctor?.email || t('doctorprofile_sin_correo')}
                   </span>
                   <span className="flex items-center gap-1.5 text-slate-500">
                     <Phone size={13} className="text-slate-400" />
@@ -485,11 +485,11 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                 {/* Sub-metadatos: Licencia médica y registro */}
                 <div className="mt-2.5 flex flex-wrap items-center gap-4 text-[11px] text-slate-400 font-medium">
                   <span>
-                    {t('verificationdetail_licencia')} <strong className="text-slate-700 font-bold">{doctor?.medical_license || 'Pendiente'}</strong>
+                    {t('verificationdetail_licencia')} <strong className="text-slate-700 font-bold">{doctor?.medical_license || t('status_pending')}</strong>
                   </span>
                   <span>•</span>
                   <span>
-                    {t('verificationdetail_n_colegiado')} <strong className="text-slate-700 font-bold">{doctor?.professional_registration_number || doctor?.medical_license || 'No aportado'}</strong>
+                    {t('verificationdetail_n_colegiado')} <strong className="text-slate-700 font-bold">{doctor?.professional_registration_number || doctor?.medical_license || t('verificationdetail_no_aportado')}</strong>
                   </span>
                   <span>•</span>
                   <span>
@@ -651,7 +651,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                         </div>
                         <div>
                           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">{t('verificationdetail_telefono_de_contacto')}</span>
-                          <span className="text-xs font-bold text-slate-900">{doctor?.phone || 'No registrado'}</span>
+                          <span className="text-xs font-bold text-slate-900">{doctor?.phone || t('verificationdetail_no_registrado')}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 self-end sm:self-center">
@@ -701,7 +701,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                     <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">{t('verificationdetail_especialidad_principal')}</span>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900">{doctor?.specialty || 'Medicina General'}</span>
+                        <span className="text-xs font-bold text-slate-900">{doctor?.specialty || t('doctoronboarding_medicina_general')}</span>
                         <CheckCircle2 size={15} className="text-emerald-500" />
                       </div>
                       <span className="text-[10px] text-slate-400 mt-2 block">{t('verificationdetail_titulo_de_especialista_en_ciencias')}</span>
@@ -711,7 +711,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                     <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">{t('verificationdetail_licencia_medica_estatal')}</span>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-slate-900">{doctor?.medical_license || 'COL-482910'}</span>
+                        <span className="text-xs font-mono font-bold text-slate-900">{doctor?.medical_license || t('verificationdetail_no_registrado')}</span>
                         <CheckCircle2 size={15} className="text-emerald-500" />
                       </div>
                       <span className="text-[10px] text-slate-400 mt-2 block">{t('verificationdetail_registro_publico_estatal_de_profesio')}</span>
@@ -722,7 +722,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">{t('verificationdetail_numero_de_colegiado')}</span>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-mono font-bold text-slate-900">
-                          {doctor?.professional_registration_number || doctor?.medical_license || 'No aportado'}
+                          {doctor?.professional_registration_number || doctor?.medical_license || t('verificationdetail_no_aportado')}
                         </span>
                         {doctor?.professional_registration_number ? (
                           <CheckCircle2 size={15} className="text-emerald-500" />
@@ -823,7 +823,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                     <div className="mt-4 text-center">
                       <p className="text-xs font-bold text-slate-900">
                         {doctor?.verification_status === 'verified' ? t('verificationdetail_colegiacion_y_perfil_aprobado') :
-                         doctor?.verification_status === 'rejected' ? 'Solicitud No Conforme' :
+                         doctor?.verification_status === 'rejected' ? t('verificationdetail_solicitud_no_conforme') :
                          t('verificationdetail_auditoria_pendiente_de_validacion')}
                       </p>
                       <p className="text-[11px] text-slate-400 mt-1 max-w-[220px]">
@@ -860,7 +860,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                         {t('step1personal_certificado_de_colegiacion')}
                       </span>
                       <span className={`font-bold ${doctor?.professional_registration_certificate_url ? 'text-emerald-600' : 'text-amber-600'}`}>
-                        {doctor?.professional_registration_certificate_url ? 'OK' : 'Revisar'}
+                        {doctor?.professional_registration_certificate_url ? 'OK' : t('verificationdetail_revisar')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
@@ -1016,10 +1016,10 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
                   <div className="flex items-center justify-between text-xs mb-2">
                     <span className="font-bold text-slate-800">{t('verificationdetail_auditor_oficial_cgcom')}</span>
-                    <span className="text-slate-400">{doctor?.created_at ? new Date(doctor.created_at).toLocaleDateString() : 'Hoy'}</span>
+                    <span className="text-slate-400">{doctor?.created_at ? new Date(doctor.created_at).toLocaleDateString() : t('verificationdetail_hoy')}</span>
                   </div>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    {t('verificationdetail_expediente_iniciado_en_la_plataforma')} <strong className="font-mono">{doctor?.medical_license || 'COL-482910'}</strong>{t('verificationdetail_datos_personales_cotejados_con_el')}
+                    {t('verificationdetail_expediente_iniciado_en_la_plataforma')} <strong className="font-mono">{doctor?.medical_license || t('verificationdetail_no_registrado')}</strong>{t('verificationdetail_datos_personales_cotejados_con_el')}
                   </p>
                 </div>
 
@@ -1050,10 +1050,10 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                   <span className="text-[10px] font-bold uppercase tracking-wider text-teal-600">{t('verificationdetail_registro_inicial')}</span>
                   <h4 className="text-xs font-bold text-slate-900 mt-0.5">{t('verificationdetail_creacion_del_perfil_profesional')}</h4>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    {t('verificationdetail_el_medico_completo_el_registro')} {doctor?.specialty || 'Medicina General'}.
+                    {t('verificationdetail_el_medico_completo_el_registro')} {doctor?.specialty || t('doctoronboarding_medicina_general')}.
                   </p>
                   <span className="text-[10px] text-slate-400 mt-1 block">
-                    {doctor?.created_at ? new Date(doctor.created_at).toLocaleString() : 'Fecha registrada'}
+                    {doctor?.created_at ? new Date(doctor.created_at).toLocaleString() : t('verificationdetail_fecha_registrada')}
                   </span>
                 </div>
 
@@ -1078,7 +1078,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
                     {t('verificationdetail_estado_actual')}
                   </span>
                   <h4 className="text-xs font-bold text-slate-900 mt-0.5">
-                    {doctor?.verification_status === 'verified' ? 'Aprobado y Verificado Oficialmente' :
+                    {doctor?.verification_status === 'verified' ? t('verificationdetail_aprobado_y_verificado_oficialmente') :
                      doctor?.verification_status === 'rejected' ? t('status_rejected') : t('verificationdetail_pendiente_de_revision')}
                   </h4>
                   <p className="text-[11px] text-slate-500 mt-1">

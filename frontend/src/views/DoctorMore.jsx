@@ -26,7 +26,7 @@ const DoctorMore = ({ onNavigate, onLogout }) => {
     {
       title: t('billing_and_security'),
       items: [
-        { icon: <CreditCard size={20} />, title: t('vitalai_subscription'), desc: t('manage_plan'), action: () => handleFeature(t('vitalai_subscription')), color: 'text-brand-purple', bg: 'bg-purple-50' },
+        { icon: <CreditCard size={20} />, title: t('vitalai_subscription'), desc: t('manage_plan'), action: () => handleFeature(t('vitalai_subscription')), color: 'text-brand', bg: 'bg-purple-50' },
         { icon: <ShieldCheck size={20} />, title: t('legal_compliance'), desc: t('confidentiality_agreements'), action: () => handleFeature(t('legal_compliance')), color: 'text-indigo-500', bg: 'bg-indigo-50' }
       ]
     },
@@ -41,11 +41,11 @@ const DoctorMore = ({ onNavigate, onLogout }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-24 font-sans selection:bg-brand-purple/20">
+    <div className="min-h-screen bg-slate-50 flex flex-col pb-24 font-sans selection:bg-brand/20">
       <div className="relative z-10 px-6 pt-12 flex-1">
         <div className="mb-6">
           <h2 className="text-[28px] leading-tight font-bold text-gray-900 mb-2">
-            {t('more_options')} <span className="text-brand-purple">{t('options')}</span>
+            {t('more_options')} <span className="text-brand">{t('options')}</span>
           </h2>
           <p className="text-sm text-gray-500">
             {t('configure_and_customize')}

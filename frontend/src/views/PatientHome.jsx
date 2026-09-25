@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PatientHomeDesktop from './PatientHomeDesktop';
+import SupportModal from '../components/SupportModal';
+import NotificationsBell from '../components/NotificationsBell';
 import CognitiveGamesModal from './CognitiveGamesModal';
 import PreventiveCalendarModal from './PreventiveCalendarModal';
 import { 
@@ -40,9 +42,6 @@ import LanguageSelector from '../components/LanguageSelector';
 const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachments, apiUrl, authHeaders }) => {
   const { t, language } = useLanguage();
   const [showDrawer, setShowDrawer] = useState(false);
-  const [showAboutModal, setShowAboutModal] = useState(false);
-  const [showHowModal, setShowHowModal] = useState(false);
-  const [showMissionModal, setShowMissionModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showGamesModal, setShowGamesModal] = useState(false);
@@ -87,10 +86,6 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setShowDrawer(false);
-        setShowAboutModal(false);
-        setShowHowModal(false);
-        setShowMissionModal(false);
-        setShowContactModal(false);
         setShowSecurityModal(false);
       }
     };
@@ -99,7 +94,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   }, []);
 
   useEffect(() => {
-    const isOverlayOpen = showDrawer || showAboutModal || showHowModal || showMissionModal || showContactModal || showSecurityModal;
+    const isOverlayOpen = showDrawer || showSecurityModal;
     if (isOverlayOpen) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -107,7 +102,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         document.body.style.overflow = prev;
       };
     }
-  }, [showDrawer, showAboutModal, showHowModal, showMissionModal, showContactModal, showSecurityModal]);
+  }, [showDrawer, showSecurityModal]);
 
   return (
     <>
@@ -122,7 +117,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               type="button"
               onClick={() => setShowDrawer(true)} 
               className="w-8 h-8 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 active:scale-95 transition-all cursor-pointer shadow-2xs"
-              title="Abrir Menú"
+              title={t('patienthome_abrir_menu')}
             >
               <Menu size={18} className="stroke-[2.4]" />
             </button>
@@ -150,14 +145,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           <div className="flex items-center gap-2">
             <LanguageSelector variant="pill" />
             
-            <button 
-              onClick={() => setShowContactModal(true)} 
-              className="w-8 h-8 rounded-full border border-slate-300 bg-white flex items-center justify-center text-black relative active:scale-95 transition-all cursor-pointer shadow-2xs"
-              title={t('patientchat_notificaciones')}
-            >
-              <Bell size={16} className="stroke-[2.2]" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
-            </button>
+            <NotificationsBell onNavigate={onNavigate} />
 
             <button 
               onClick={() => setShowDrawer(true)} 
@@ -528,7 +516,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-violet-800 hover:bg-violet-50 transition-colors text-left cursor-pointer"
                   >
                     <Brain size={18} className="text-violet-600 stroke-[2.4]" />
-                    <span>Mente Activa (Juegos)</span>
+                    <span>{t('patienthome_mente_activa_juegos')}</span>
                   </button>
 
                   <button 
@@ -536,7 +524,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-bold text-sky-800 hover:bg-sky-50 transition-colors text-left cursor-pointer"
                   >
                     <Calendar size={18} className="text-sky-600 stroke-[2.4]" />
-                    <span>Calendario & MIVOR Prevención</span>
+                    <span>{t('patienthome_calendario_mivor_prevencion')}</span>
                   </button>
 
 
@@ -583,187 +571,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           </div>
         )}
 
-        {/* MODAL: SOBRE MIVOR.ai */}
-        {showAboutModal && (
-          <div 
-            onClick={() => setShowAboutModal(false)} 
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
-          >
-            <div 
-              onClick={(e) => e.stopPropagation()} 
-              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 animate-in zoom-in-95 cursor-default"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                    <CheckCircle2 size={18} />
-                  </div>
-                  <h3 className="font-black text-base text-black">{t('patient_about_title') || 'Sobre MIVOR.ai'}</h3>
-                </div>
-                <button onClick={() => setShowAboutModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-black cursor-pointer">
-                  <X size={18} className="stroke-[2.5]" />
-                </button>
-              </div>
-              <div className="py-3 space-y-2.5 text-[13px] text-black font-medium leading-relaxed">
-                <p>
-                  <strong>MIVOR.ai</strong> {t('patienthome_es_una_plataforma_de_salud')}
-                </p>
-                <div className="bg-slate-50 rounded-xl p-3 space-y-2 border border-slate-200 text-[12px] text-black">
-                  <div className="flex items-start gap-2">
-                    <ShieldCheck size={16} className="text-teal-600 shrink-0 mt-0.5" />
-                    <span className="font-semibold text-black">{t('patienthome_cifrado_de_grado_medico_y')}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Heart size={16} className="text-rose-500 shrink-0 mt-0.5" />
-                    <span className="font-semibold text-black">{t('patienthome_juntos_por_una_medicina_mas')}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowAboutModal(false)} className="bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer">
-                  {t('patient_understood') || 'Entendido'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL: CÓMO FUNCIONA */}
-        {showHowModal && (
-          <div 
-            onClick={() => setShowHowModal(false)} 
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
-          >
-            <div 
-              onClick={(e) => e.stopPropagation()} 
-              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 animate-in zoom-in-95 cursor-default"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center">
-                    <Sliders size={18} />
-                  </div>
-                  <h3 className="font-black text-base text-black">{t('patient_how_it_works') || 'Cómo funciona'}</h3>
-                </div>
-                <button onClick={() => setShowHowModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-black cursor-pointer">
-                  <X size={18} className="stroke-[2.5]" />
-                </button>
-              </div>
-              <div className="py-3 space-y-3 text-[13px] text-black font-medium leading-relaxed">
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p><strong className="text-black">{t('patienthome_pregunta_o_sube_tus_informes')}</strong> {t('patienthome_escribe_tus_dudas_de_salud')}</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p><strong className="text-black">{t('patienthome_analisis_clinico_con_ia')}</strong> {t('patienthome_nuestro_sistema_traduce_jerga_tecnic')}</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-blue-100 text-[#0055ff] font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p><strong className="text-black">{t('patienthome_conecta_con_profesionales')}</strong> {t('patienthome_encuentra_especialistas_y_comparte_t')}</p>
-                </div>
-              </div>
-              <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowHowModal(false)} className="bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer">
-                  {t('patient_close') || 'Cerrar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL: MISIÓN / JUNTOS POR UNA MEDICINA */}
-        {showMissionModal && (
-          <div 
-            onClick={() => setShowMissionModal(false)} 
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
-          >
-            <div 
-              onClick={(e) => e.stopPropagation()} 
-              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 animate-in zoom-in-95 cursor-default"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                    <Heart size={18} />
-                  </div>
-                  <h3 className="font-black text-base text-black">{t('patient_our_commitment') || 'Nuestro Compromiso'}</h3>
-                </div>
-                <button onClick={() => setShowMissionModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-black cursor-pointer">
-                  <X size={18} className="stroke-[2.5]" />
-                </button>
-              </div>
-              <div className="py-3 space-y-2.5 text-[13px] text-black font-medium leading-relaxed">
-                <p className="font-bold text-black text-[13.5px]">
-                  {t('patient_commitment_quote') || '"Juntos por una medicina más humana y eficiente."'}
-                </p>
-                <p className="text-black">
-                 {t('patienthome_en_mivor_ai_creemos_que')}
-                </p>
-              </div>
-              <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowMissionModal(false)} className="bg-[#0055ff] hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer">
-                  {t('patient_close') || 'Cerrar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL: CONTACTO */}
-        {showContactModal && (
-          <div 
-            onClick={() => setShowContactModal(false)} 
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
-          >
-            <div 
-              onClick={(e) => e.stopPropagation()} 
-              className="bg-white rounded-3xl max-w-md w-full p-5 shadow-2xl border border-slate-200 animate-in zoom-in-95 cursor-default"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0055ff] flex items-center justify-center">
-                    <MessageCircle size={18} />
-                  </div>
-                  <h3 className="font-black text-base text-black">{t('patient_contact_support') || 'Contacto & Soporte'}</h3>
-                </div>
-                <button onClick={() => setShowContactModal(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-black cursor-pointer">
-                  <X size={18} className="stroke-[2.5]" />
-                </button>
-              </div>
-              <div className="py-3 space-y-2.5 text-[13px] text-black">
-                <p className="font-bold text-black">{t('patienthome_atencion_directa_disponible_24_7')}</p>
-                <a 
-                  href="https://wa.me/34600000000" 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="flex items-center gap-3 p-3 rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 text-black font-bold"
-                >
-                  <MessageCircle size={20} className="text-emerald-700 stroke-[2.4] shrink-0" />
-                  <div>
-                    <p className="text-[13px] text-black font-black">{t('patienthome_whatsapp_24_7')}</p>
-                    <p className="text-[11.5px] text-black font-semibold">{t('documentanalyzer_respuesta_inmediata')}</p>
-                  </div>
-                </a>
-                <a 
-                  href="mailto:soporte@mivor.ai" 
-                  className="flex items-center gap-3 p-3 rounded-2xl border-2 border-blue-200 bg-blue-50/70 text-black font-bold"
-                >
-                  <Mail size={20} className="text-[#0055ff] stroke-[2.4] shrink-0" />
-                  <div>
-                    <p className="text-[13px] text-black font-black">soporte@mivor.ai</p>
-                    <p className="text-[11.5px] text-black font-semibold">{t('patienthome_consultas_medicas_y_tecnicas')}</p>
-                  </div>
-                </a>
-              </div>
-              <div className="pt-2 flex justify-end">
-                <button onClick={() => setShowContactModal(false)} className="bg-slate-200 hover:bg-slate-300 text-black font-bold text-xs px-5 py-2.5 rounded-full cursor-pointer">
-                  {t('patient_close') || 'Cerrar'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* MODAL: AYUDA Y SOPORTE (compartido con la barra superior y el chat) */}
+        <SupportModal isOpen={showContactModal} onClose={() => setShowContactModal(false)} />
 
         {/* MODAL: PROTECCIÓN DE DATOS Y PRIVACIDAD */}
         {showSecurityModal && (

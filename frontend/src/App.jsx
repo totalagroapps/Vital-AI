@@ -16,7 +16,6 @@ import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
 import MedicalHistory from './views/MedicalHistory';
 import BottomNav from './components/BottomNav';
-import DoctorOnboarding from './views/DoctorOnboarding';
 import DoctorCreate from './views/DoctorCreate';
 import DoctorProfile from './views/DoctorProfile';
 import DoctorVerificationDetail from './views/VerificationDetail';
@@ -72,7 +71,7 @@ import {
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { t, language, country } = useLanguage();
+  const { t, language, country, locale } = useLanguage();
   const [token, setToken] = useState(localStorage.getItem('med_token') || null);
   const [username, setUsername] = useState(null);
   const [patientScreen, setPatientScreen] = useState(() => {
@@ -380,7 +379,6 @@ export default function App() {
     }
   }, [location.pathname]);
 
-  const [showDoctorOnboarding, setShowDoctorOnboarding] = useState(false);
   const [patientProfile, setPatientProfile] = useState({
     full_name: '', date_of_birth: '', gender: '', blood_type: '', height: '', weight: '',
     organ_donor: 'No especificado', medical_notes: '', insurance_provider: '',
@@ -515,7 +513,8 @@ export default function App() {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel(); // Stop any ongoing speech
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = detectLanguage(text);
+      // La IA responde en el idioma de la interfaz; la detección solo es el último recurso
+      utterance.lang = locale || detectLanguage(text);
       window.speechSynthesis.speak(utterance);
     } else {
       alert(t('app_tu_navegador_no_soporta_lectura'));
@@ -864,7 +863,7 @@ export default function App() {
         throw new Error(detail);
       }
       if (!response.ok) {
-        let detail = "Error en red";
+        let detail = t('app_error_network');
         try {
           const errData = await response.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -898,7 +897,7 @@ export default function App() {
       fetchSessions();
     } catch (e) {
       console.error(e);
-      setMessages(prev => [...prev, { type: "ai", text: e?.message ? `⚠️ ${e.message}` : "Error de conexión." }]);
+      setMessages(prev => [...prev, { type: "ai", text: e?.message ? `⚠️ ${e.message}` : t('conn_error') }]);
     } finally {
       setIsLoading(false);
     }
@@ -1056,7 +1055,7 @@ export default function App() {
         throw new Error(detail);
       }
       if (!res.ok) {
-        let detail = "Error en el servidor backend";
+        let detail = t('app_error_server');
         try {
           const errData = await res.json();
           if (errData?.detail) detail = typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail);
@@ -1345,6 +1344,10 @@ export default function App() {
       <>
         <EspecialistasVideoSearch
           apiUrl={API_URL}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
           initialFilters={specialistFilters}
           onBack={() => navigate('/paciente/especialistas')}
           onSelectDoctor={(id) => {
@@ -1368,6 +1371,10 @@ export default function App() {
       <>
         <EspecialistasPresencialSearch
           apiUrl={API_URL}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
           initialFilters={specialistFilters}
           onBack={() => navigate('/paciente/especialistas')}
           onSelectDoctor={(id) => {
@@ -1386,6 +1393,10 @@ export default function App() {
       <>
         <EspecialistaDetail
           apiUrl={API_URL}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
           doctorId={selectedDoctorId}
           onBack={() => navigate(detailBack || '/paciente/especialistas')}
           onBook={() => {
@@ -1403,6 +1414,10 @@ export default function App() {
       <>
         <BookAppointment
           apiUrl={API_URL}
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          username={username}
+          onLogout={handleLogout}
           token={token}
           doctorId={selectedDoctorId}
           onBack={() => navigate(bookingBack || '/paciente/especialistas')}
@@ -1499,7 +1514,7 @@ export default function App() {
           apiUrl={API_URL}
           authHeaders={authHeaders}
           onOpenDoctorDirectory={(spec) => {
-            setDoctorDirectorySpecialty(spec || 'Traumatología');
+            setDoctorDirectorySpecialty(spec || t('doctoronboarding_traumatologia'));
             setShowDoctorDirectory(true);
           }}
           onAskFollowUp={(extractedText, filename) => {

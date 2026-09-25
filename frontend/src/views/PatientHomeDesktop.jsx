@@ -1,92 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MivorPacienteHome.css';
-import { 
-  ShieldCheck, 
-  ArrowRight, 
-  Bell, 
-  X, 
-  MessageCircle, 
-  Mail, 
-  CheckCircle2, 
-  Lock, 
-  LogOut, 
-  User, 
-  FileText, 
-  Heart,
-  Sparkles,
+import {
+  ShieldCheck,
+  ArrowRight,
+  X,
+  CheckCircle2,
+  Lock,
   Brain,
-  Folder,
-  Lightbulb,
-  Users,
-  TrendingUp,
-  Stethoscope,
-  Globe,
-  ChevronDown,
-  Calendar
+  Calendar,
+  ChevronRight
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
 
-const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUrl, authHeaders, onOpenGames, onOpenPreventiveCalendar }) => {
-  const { language, changeLanguage, t } = useLanguage();
-  const [showAboutModal, setShowAboutModal] = useState(false);
-  const [showHowModal, setShowHowModal] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
+const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpenGames, onOpenPreventiveCalendar }) => {
+  const { t } = useLanguage();
   const [showSecurityModal, setShowSecurityModal] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showLangDropdown, setShowLangDropdown] = useState(false);
 
-  const tr = (key, fallback) => {
-    const val = t(key);
-    return (val && val !== key) ? val : fallback;
-  };
-
-  const langRef = useRef(null);
-  const userMenuRef = useRef(null);
-
+  // Escape cierra el modal de seguridad y bloquea el scroll mientras está abierto
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (langRef.current && !langRef.current.contains(e.target)) {
-        setShowLangDropdown(false);
-      }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setShowUserMenu(false);
-      }
-    };
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        setShowAboutModal(false);
-        setShowHowModal(false);
-        setShowContactModal(false);
-        setShowSecurityModal(false);
-        setShowUserMenu(false);
-        setShowLangDropdown(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
+    if (!showSecurityModal) return undefined;
+    const handleKeyDown = (e) => { if (e.key === 'Escape') setShowSecurityModal(false); };
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.body.style.overflow = originalOverflow;
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [showSecurityModal]);
 
-  useEffect(() => {
-    const isModalOpen = showAboutModal || showHowModal || showContactModal || showSecurityModal;
-    if (isModalOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [showAboutModal, showHowModal, showContactModal, showSecurityModal]);
-
-  const languages = [
-    { code: 'es', label: t('step1personal_espanol') },
-    { code: 'en', label: t('patienthomedesktop_english') },
-    { code: 'fr', label: 'Français' },
-    { code: 'ar', label: 'العربية' },
+  // Accesos rápidos bajo la tarjeta de seguridad: mismo formato para todos
+  const shortcuts = [
+    { id: 'games', onClick: onOpenGames, icon: Brain, title: t('patienthome_mente_activa'), subtitle: t('patienthomedesktop_memoria_calculo'), hint: t('patienthomedesktop_juegos_diarios_de_estimulacion_cognitiva'), tone: 'bg-violet-100 text-violet-700' },
+    { id: 'prevention', onClick: onOpenPreventiveCalendar, icon: Calendar, title: t('brand_mivor_prevention'), subtitle: t('patienthomedesktop_cribados'), hint: t('patienthomedesktop_calendario_preventivo_y_vigilancia_diges'), tone: 'bg-sky-100 text-sky-700' },
   ];
 
   return (
@@ -106,7 +53,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUr
         <div className="hero-wave-bg pointer-events-none select-none overflow-hidden flex items-center justify-center">
           <img 
             src="/images/mivor_cover_hero.png" 
-            alt="MIVOR.ai Cover" 
+            alt={t('patienthomedesktop_mivor_ai_cover')} 
             className="w-full h-full object-contain object-[54%_center] pointer-events-none select-none" 
           />
         </div>
@@ -137,44 +84,26 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUr
             </div>
           </div>
 
-          {/* Tarjetas de Acceso Directo: Calculadoras Clínicas y Mente Activa */}
-          <div className="flex items-center gap-3 mt-3 w-full max-w-md">
-
-
-            <button
-              type="button"
-              onClick={onOpenGames}
-              className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 hover:bg-violet-50/90 border border-violet-200/80 rounded-2xl shadow-xs transition-all active:scale-98 cursor-pointer group text-left"
-              title="Juegos diarios de estimulación cognitiva, memoria y agilidad mental"
-            >
-              <div className="w-8 h-8 rounded-xl bg-violet-100/90 text-violet-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
-                <Brain size={16} className="text-violet-700 stroke-[2.4]" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="text-xs font-extrabold text-slate-800 leading-tight">Mente Activa</h4>
-                <p className="text-[10px] text-violet-700 font-semibold truncate">Memoria • Cálculo</p>
-              </div>
-            </button>
-          </div>
-
-          {/* Segunda fila: MIVOR Prevención, Consensus, MIVOR Scribe y Modo Cuidador Kiosko */}
-          <div className="flex items-center gap-2 mt-2 w-full max-w-lg">
-            <button
-              type="button"
-              onClick={onOpenPreventiveCalendar}
-              className="flex-1 px-2.5 py-2 bg-white/90 hover:bg-sky-50 border border-sky-200/80 rounded-xl shadow-2xs transition text-left cursor-pointer flex items-center gap-1.5"
-              title="Calendario Preventivo y Vigilancia Digestiva MIVOR Prevención"
-            >
-              <div className="w-6 h-6 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                <Calendar size={13} className="text-sky-700" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-[11px] font-bold text-slate-800 leading-none">MIVOR Prevención</div>
-                <div className="text-[9px] text-sky-700 font-semibold mt-0.5 truncate">Cribados</div>
-              </div>
-            </button>
-
-
+          {/* Accesos rápidos: misma anchura que la tarjeta de seguridad, mismo radio y tipografía */}
+          <div className="grid grid-cols-2 gap-3 mt-3 w-full max-w-[660px]">
+            {shortcuts.map(({ id, onClick, icon: Icon, title, subtitle, hint, tone }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={onClick}
+                title={hint}
+                className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#b9d5fb] rounded-2xl shadow-xs transition-all active:scale-[0.98] cursor-pointer text-left group"
+              >
+                <span className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${tone}`}>
+                  <Icon size={18} strokeWidth={2.4} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-extrabold text-[#050838] leading-tight truncate">{title}</span>
+                  <span className="block text-xs text-slate-500 font-semibold truncate">{subtitle}</span>
+                </span>
+                <ChevronRight size={16} className="text-slate-400 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            ))}
           </div>
         </div>
 
@@ -330,198 +259,6 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, apiUr
           </span>
         </button>
       </section>
-
-      {/* MODAL: SOBRE MIVOR.ai */}
-      {showAboutModal && (
-        <div 
-          onClick={() => setShowAboutModal(false)}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                  <CheckCircle2 size={20} />
-                </div>
-                <h3 className="font-bold text-lg text-slate-900">{t('patient_nav_about') || 'Sobre MIVOR.ai'}</h3>
-              </div>
-              <button 
-                onClick={() => setShowAboutModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-3.5 text-sm text-slate-600 leading-relaxed">
-              <p>
-                <strong>MIVOR.ai</strong> {t('patienthomedesktop_es_una_plataforma_de_salud')}
-              </p>
-              <div className="bg-slate-50 rounded-2xl p-4 space-y-2 border border-slate-100">
-                <div className="flex items-start gap-2.5">
-                  <ShieldCheck size={18} className="text-teal-600 shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-700">{t('patienthomedesktop_privacidad_y_cifrado_de_grado')}</span>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <Heart size={18} className="text-rose-500 shrink-0 mt-0.5" />
-                  <span className="text-xs text-slate-700">{t('patienthomedesktop_enfoque_centrado_en_humanizar_la')}</span>
-                </div>
-              </div>
-              <p className="text-xs text-slate-500 italic">
-                {t('patienthomedesktop_nota_mivor_ai_es_una')}
-              </p>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button 
-                onClick={() => setShowAboutModal(false)}
-                className="bg-[#005dff] hover:bg-[#0052e0] text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
-              >
-                {t('patient_understood') || 'Entendido'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: CÓMO FUNCIONA */}
-      {showHowModal && (
-        <div 
-          onClick={() => setShowHowModal(false)}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#005dff] flex items-center justify-center">
-                  <Sparkles size={20} />
-                </div>
-                <h3 className="font-bold text-lg text-slate-900">{t('patient_how_title') || 'Cómo funciona MIVOR.ai'}</h3>
-              </div>
-              <button 
-                onClick={() => setShowHowModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-3.5 text-sm text-slate-600 leading-relaxed">
-              <p>
-                {t('patient_how_desc') || 'MIVOR.ai integra IA clínica avanzada entrenada con literatura médica validada para ofrecerte orientación y soporte continuo.'}
-              </p>
-              
-              <div className="space-y-2.5">
-                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="w-6 h-6 rounded-full bg-blue-100 text-[#005dff] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</div>
-                  <div>
-                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_orientacion_inteligente_de_salud')}</h5>
-                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_expresa_tus_sintomas_y_recibe')}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</div>
-                  <div>
-                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_explicacion_de_pruebas_y_analiticas')}</h5>
-                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_sube_analiticas_recetas_e_informes')}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                  <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">3</div>
-                  <div>
-                    <h5 className="font-bold text-xs text-slate-900">{t('patienthomedesktop_historial_y_directorio_medico')}</h5>
-                    <p className="text-[11px] text-slate-500">{t('patienthomedesktop_todo_tu_historial_consolidado_y')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button 
-                onClick={() => setShowHowModal(false)}
-                className="bg-[#005dff] hover:bg-[#0052e0] text-white font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
-              >
-                {t('patient_understood') || 'Entendido'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: CONTACTO & SOPORTE */}
-      {showContactModal && (
-        <div 
-          onClick={() => setShowContactModal(false)}
-          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 cursor-default"
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#005dff] flex items-center justify-center">
-                  <MessageCircle size={20} />
-                </div>
-                <h3 className="font-bold text-lg text-slate-900">{t('patient_contact_support') || 'Contacto & Soporte'}</h3>
-              </div>
-              <button 
-                onClick={() => setShowContactModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="py-4 space-y-3 text-sm text-slate-600">
-              <p>{t('patienthomedesktop_estamos_disponibles_las_24_horas')}</p>
-              
-              <div className="space-y-2.5 pt-1">
-                <a 
-                  href="https://wa.me/34600000000" 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="flex items-center gap-3 p-3 rounded-2xl border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 text-emerald-800 transition-colors"
-                >
-                  <MessageCircle size={18} className="text-emerald-600 shrink-0" />
-                  <div className="text-xs">
-                    <p className="font-bold">{t('patienthomedesktop_chat_de_whatsapp_24_7')}</p>
-                    <p className="text-slate-500">{t('patienthomedesktop_atencion_inmediata_a_pacientes')}</p>
-                  </div>
-                </a>
-
-                <a 
-                  href="mailto:soporte@mivor.ai" 
-                  className="flex items-center gap-3 p-3 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 text-blue-900 transition-colors"
-                >
-                  <Mail size={18} className="text-[#005dff] shrink-0" />
-                  <div className="text-xs">
-                    <p className="font-bold">soporte@mivor.ai</p>
-                    <p className="text-slate-500">{t('patienthomedesktop_consultas_tecnicas_e_institucionales')}</p>
-                  </div>
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
-              <button 
-                onClick={() => setShowContactModal(false)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer"
-              >
-                {t('patient_close') || 'Cerrar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MODAL: PROTECCIÓN DE DATOS Y PRIVACIDAD */}
       {showSecurityModal && (

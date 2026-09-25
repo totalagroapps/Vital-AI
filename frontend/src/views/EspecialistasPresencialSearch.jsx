@@ -5,6 +5,7 @@ import { KeepSize } from '../components/DoctorLocationMap';
 import { ArrowLeft, LocateFixed, Loader2, Star, MapPin, SlidersHorizontal, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateSpecialtyName, translateLanguageName } from '../i18n/catalogTranslations';
+import PatientTopNav from '../components/PatientTopNav';
 
 // In-person search: Leaflet map centered on the patient's live location
 // (browser geolocation, not persisted). Hover a pin for a preview card,
@@ -84,7 +85,7 @@ function externalPinIcon() {
 const Badge = ({ children, tone = 'gray' }) => (
   <span
     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-      tone === 'blue' ? 'bg-brand-blue/10 text-brand-blue' : 'bg-gray-100 text-gray-600'
+      tone === 'blue' ? 'bg-brand-blue/10 text-brand-blue' : 'bg-slate-100 text-slate-600'
     }`}
   >
     {children}
@@ -119,7 +120,7 @@ const DoctorPreviewCard = ({ d, language, t }) => (
     <p className="font-bold text-brand-dark text-sm">{d.full_name || t('presencial_unnamed')}</p>
     {(d.specialties || []).length > 0 && (
       <div className="flex flex-wrap gap-1 mt-1.5">
-        {d.specialties.map((s) => <Badge key={s.id}>{translateSpecialtyName(s.name, language)}</Badge>)}
+        {d.specialties.map((s) => <Badge key={s.id}>{translateSpecialtyName(s.name, language, t)}</Badge>)}
       </div>
     )}
     {(d.insurance_companies || []).length > 0 && (
@@ -138,12 +139,12 @@ const DoctorPreviewCard = ({ d, language, t }) => (
           <Star size={11} className="fill-amber-400 text-amber-400" /> {d.rating.toFixed(1)}
         </span>
       )}
-      {d.distance_km != null && <span className="text-[11px] text-gray-400">{d.distance_km} km</span>}
+      {d.distance_km != null && <span className="text-[11px] text-slate-400">{d.distance_km} km</span>}
     </div>
   </div>
 );
 
-const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelectDoctor }) => {
+const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelectDoctor, onNavigate, userProfile, username, onLogout }) => {
   const { t, language } = useLanguage();
 
   const [patientPos, setPatientPos] = useState(null);
@@ -262,7 +263,12 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
   }, [doctors]);
 
   return (
-    <div className="min-h-screen bg-base pb-24 font-sans px-5 pt-4">
+    <div className="min-h-screen bg-base pb-24 font-sans">
+      {/* Barra superior común del paciente (no se muestra en la vista previa del médico) */}
+      {onNavigate && (
+        <PatientTopNav activeTab="specialists" onNavigate={onNavigate} userProfile={userProfile} username={username} onLogout={onLogout} />
+      )}
+      <div className="px-5 pt-4 lg:px-8 lg:pt-8 max-w-screen-2xl mx-auto">
       <style>{`
         .leaflet-tooltip.doctor-tooltip {
           background: #fff;
@@ -281,27 +287,27 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
 
       <div className="max-w-screen-lg mx-auto">
         <div className="flex items-center justify-between gap-2 mb-3">
-          <button onClick={onBack} className="flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark transition-colors">
+          <button onClick={onBack} className="flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-brand-dark transition-colors">
             <ArrowLeft className="w-4 h-4" /> {t('land_back')}
           </button>
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-xl px-3 py-1.5 hover:border-brand-blue/40 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl px-3 py-1.5 hover:border-brand-blue/40 transition-colors"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" /> {t('presencial_change_search')}
           </button>
         </div>
 
         <div className="flex items-center gap-2 mb-1">
-          <MapPin className="text-brand-purple" size={22} />
-          <h2 className="text-xl font-extrabold text-brand-dark">{t('presencial_modality_label')}</h2>
+          <MapPin className="text-brand" size={22} />
+          <h1 className="text-2xl lg:text-3xl font-black text-mivor-navy tracking-tight">{t('presencial_modality_label')}</h1>
         </div>
-        <p className="text-sm text-gray-500 mb-4">{t('presencial_subtitle_hover')}</p>
+        <p className="text-sm text-slate-500 mb-4">{t('presencial_subtitle_hover')}</p>
 
         {locating && !patientPos && (
-          <div className="bg-white rounded-3xl p-10 border border-gray-100 shadow-soft text-center">
-            <Loader2 className="w-8 h-8 mx-auto mb-3 text-brand-purple animate-spin" />
-            <p className="text-sm text-gray-500">{t('presencial_locating')}</p>
+          <div className="bg-white rounded-3xl p-10 border border-slate-100 shadow-soft text-center">
+            <Loader2 className="w-8 h-8 mx-auto mb-3 text-brand animate-spin" />
+            <p className="text-sm text-slate-500">{t('presencial_locating')}</p>
           </div>
         )}
 
@@ -312,17 +318,17 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <p className="text-sm font-bold text-brand-dark mb-1">{t('presencial_locate_blocked_title')}</p>
-              <p className="text-sm text-gray-500 mb-5">{locateError}</p>
+              <p className="text-sm text-slate-500 mb-5">{locateError}</p>
               <div className="flex gap-2">
                 <button
                   onClick={onBack}
-                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600"
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600"
                 >
                   {t('land_back')}
                 </button>
                 <button
                   onClick={locate}
-                  className="flex-1 py-2.5 rounded-xl bg-brand-purple text-white text-sm font-bold hover:opacity-90 transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-brand text-white text-sm font-bold hover:opacity-90 transition-all"
                 >
                   {t('presencial_retry')}
                 </button>
@@ -334,13 +340,13 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
         {patientPos && (
           <>
             <div className="flex items-center gap-2 mb-3">
-              <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                 {t('presencial_radius_label')}
               </label>
               <select
                 value={radiusKm}
                 onChange={(e) => setRadiusKm(Number(e.target.value))}
-                className="bg-white border border-gray-200 rounded-xl py-1.5 px-3 text-sm text-brand-dark focus:outline-none focus:border-brand-blue"
+                className="bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-sm text-brand-dark focus:outline-none focus:border-brand-blue"
               >
                 {RADIUS_OPTIONS.map((km) => (
                   <option key={km} value={km}>{km} km</option>
@@ -348,7 +354,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
               </select>
               {loading && <Loader2 className="w-4 h-4 animate-spin text-brand-blue" />}
 
-              <label className="ml-2 flex items-center gap-1.5 text-xs font-semibold text-gray-600 cursor-pointer">
+              <label className="ml-2 flex items-center gap-1.5 text-xs font-semibold text-slate-600 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showNearby}
@@ -357,7 +363,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
                 />
                 {t('presencial_show_nearby')}
               </label>
-              {showNearby && nearbyLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-gray-400" />}
+              {showNearby && nearbyLoading && <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-400" />}
               {showNearby && nearbyError && (
                 <span className="text-[11px] text-amber-600">{t('presencial_nearby_error')}</span>
               )}
@@ -369,7 +375,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
               </div>
             )}
 
-            <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-soft mb-3 relative isolate" style={{ height: 460 }}>
+            <div className="rounded-3xl overflow-hidden border border-slate-100 shadow-soft mb-3 relative isolate" style={{ height: 460 }}>
               <MapContainer center={[patientPos.lat, patientPos.lng]} zoom={13} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -397,8 +403,8 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
                     <Tooltip direction="auto" className="doctor-tooltip" opacity={1}>
                       <div className="w-44">
                         <p className="font-bold text-brand-dark text-sm">{p.name || amenityLabel(t, p.amenity)}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{amenityLabel(t, p.amenity)}</p>
-                        <p className="text-[10px] text-gray-400 mt-1.5">{t('presencial_external_hint')}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{amenityLabel(t, p.amenity)}</p>
+                        <p className="text-[10px] text-slate-400 mt-1.5">{t('presencial_external_hint')}</p>
                       </div>
                     </Tooltip>
                   </Marker>
@@ -420,13 +426,13 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
               </MapContainer>
 
               <div
-                className="absolute left-3 bottom-3 z-[1000] rounded-xl px-3 py-2 text-[11px] text-gray-600 flex items-center gap-3 bg-white/95 border border-gray-200 shadow-sm"
+                className="absolute left-3 bottom-3 z-[1000] rounded-xl px-3 py-2 text-[11px] text-slate-600 flex items-center gap-3 bg-white/95 border border-slate-200 shadow-sm"
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" /> {t('presencial_you')}
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3 text-gray-500" /> {t('presencial_legend_doctor')}
+                  <MapPin className="w-3 h-3 text-slate-500" /> {t('presencial_legend_doctor')}
                 </span>
                 {showNearby && nearbyPlaces.length > 0 && (
                   <span className="flex items-center gap-1.5">
@@ -437,7 +443,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
             </div>
 
             {!loading && doctors.length === 0 && !error && (
-              <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-6 text-center text-sm text-gray-500 mb-3">
+              <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center text-sm text-slate-500 mb-3">
                 {t('presencial_empty')}
               </div>
             )}
@@ -448,14 +454,14 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
                   <button
                     key={d.id}
                     onClick={() => onSelectDoctor(d.id)}
-                    className="text-left shrink-0 w-60 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-blue/30 transition-all"
+                    className="text-left shrink-0 w-60 bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md hover:border-brand-blue/30 transition-all"
                   >
                     <div className="flex items-center gap-2 mb-1.5">
                       <DoctorMiniAvatar avatarUrl={d.avatar_url} initials={initialsOf(d.full_name)} color={colorOf.get(d.id)} />
                       <div className="min-w-0">
                         <p className="font-bold text-brand-dark text-sm truncate">{d.full_name}</p>
-                        <p className="text-[11px] text-gray-500 truncate">
-                          {(d.specialties || []).map((s) => translateSpecialtyName(s.name, language)).join(', ')}
+                        <p className="text-[11px] text-slate-500 truncate">
+                          {(d.specialties || []).map((s) => translateSpecialtyName(s.name, language, t)).join(', ')}
                         </p>
                       </div>
                     </div>
@@ -471,6 +477,7 @@ const EspecialistasPresencialSearch = ({ apiUrl, initialFilters, onBack, onSelec
             )}
           </>
         )}
+      </div>
       </div>
     </div>
   );

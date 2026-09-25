@@ -17,15 +17,16 @@ import {
 import { useLanguage } from './contexts/LanguageContext';
 import LanguageSelector from './components/LanguageSelector';
 
+// Temas sugeridos: claves i18n (la IA los traduce a los idiomas sin diccionario manual)
 const SUGGESTED_TOPICS = [
-  { es: 'Inmunoterapia Oncológica', en: 'Cancer Immunotherapy', fr: 'Immunothérapie anticancéreuse', ar: 'العلاج المناعي للأورام' },
-  { es: 'Cáncer y Oncología', en: 'Cancer & Oncology', fr: 'Cancer et Oncologie', ar: 'السرطان وعلم الأورام' },
-  { es: 'Cardiología Avanzada', en: 'Advanced Cardiology', fr: 'Cardiologie avancée', ar: 'أمراض القلب المتقدمة' },
-  { es: 'Diabetes y Metabolismo', en: 'Diabetes & Metabolism', fr: 'Diabète et Métabolisme', ar: 'السكري والتمثيل الغذائي' },
-  { es: 'Alzheimer y Neurociencias', en: 'Alzheimer & Neuroscience', fr: 'Alzheimer et Neurosciences', ar: 'الزهايمر وعلم الأعصاب' },
-  { es: 'Terapias Celulares y ARN', en: 'Cell & RNA Therapies', fr: 'Thérapies cellulaires et ARN', ar: 'العلاجات الخلوية وحمض RNA' },
-  { es: 'Longevidad y Antienvejecimiento', en: 'Longevity & Healthy Aging', fr: 'Longévité et Vieillissement', ar: 'طول العمر ومكافحة الشيخوخة' },
-  { es: 'Salud Preventiva', en: 'Preventive Health', fr: 'Santé préventive', ar: 'الوقاية الصحية' },
+  'medsearch_topic_immunotherapy',
+  'medsearch_topic_oncology',
+  'medsearch_topic_cardiology',
+  'medsearch_topic_diabetes',
+  'medsearch_topic_alzheimer',
+  'medsearch_topic_cell_rna',
+  'medsearch_topic_longevity',
+  'medsearch_topic_preventive',
 ];
 
 export default function MedicalSearchModal({ isOpen, onClose, userProfile, token, apiUrl }) {
@@ -58,7 +59,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
       });
       if (!res.ok) throw new Error(t('medicalsearchmodal_error_al_procesar_el_documento'));
       const data = await res.json();
-      setAttachedDocName(data.filename || 'Documento adjunto');
+      setAttachedDocName(data.filename || t('attached_document'));
       let searchTerms = '';
       if (data.diagnosticos && data.diagnosticos.length > 0) {
         searchTerms = data.diagnosticos.slice(0, 3).join(' ');
@@ -160,7 +161,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
       const data = await response.json();
       setResults(data.results || []);
     } catch (err) {
-      setError(err.message || 'Error al conectar con el servidor.');
+      setError(err.message || t('medicalsearchmodal_error_al_conectar_con_el_servidor'));
     } finally {
       setLoading(false);
     }
@@ -169,7 +170,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
   useEffect(() => {
     if (isOpen) {
       const condition = userProfile?.chronic_conditions?.split(',')?.[0]?.trim();
-      const defaultQuery = language === 'es' ? 'salud preventiva' : language === 'fr' ? 'santé préventive' : language === 'ar' ? 'الوقاية الصحية' : 'preventive health';
+      const defaultQuery = t('medsearch_default_query');
       const initialQuery = condition && condition.toLowerCase() !== 'ninguna' && condition.toLowerCase() !== 'none' ? condition : defaultQuery;
       setQuery(initialQuery);
       fetchResults(initialQuery);
@@ -232,7 +233,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
     }
     return (
       <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-        {sourceType || 'Estudio'}
+        {sourceType || t('medicalsearchmodal_estudio')}
       </span>
     );
   };
@@ -347,11 +348,11 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
           {/* Quick Discovery Pills */}
           <div className="space-y-1.5">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              {t('suggested_topics') || 'Avances sugeridos:'}
+              {t('suggested_topics')}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {SUGGESTED_TOPICS.map((topic, i) => {
-                const label = topic[language] || topic.es;
+                const label = t(topic);
                 const isSelected = query.toLowerCase() === label.toLowerCase();
                 return (
                   <button
@@ -473,7 +474,7 @@ export default function MedicalSearchModal({ isOpen, onClose, userProfile, token
                       <p className={`text-slate-600 text-xs md:text-sm leading-relaxed break-words ${
                         isExpanded ? '' : 'line-clamp-3'
                       }`}>
-                        {doc.abstract || 'Sin resumen disponible.'}
+                        {doc.abstract || t('medicalsearchmodal_sin_resumen_disponible')}
                       </p>
 
                       {doc.abstract && doc.abstract.length > 220 && (

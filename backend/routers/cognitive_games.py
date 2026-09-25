@@ -41,6 +41,8 @@ class GameStatsResponse(BaseModel):
     games_breakdown: Dict[str, Dict[str, Any]]
     recent_sessions: List[GameSessionSummary]
     cognitive_wellness_message: str
+    # Código del mensaje para que el frontend lo muestre traducido: 'welcome', 'streak' o 'variety'
+    cognitive_wellness_code: str = "variety"
 
 
 @router.post("/record_session")
@@ -152,10 +154,13 @@ async def get_game_history(
 
         # Mensaje de bienestar
         if total == 0:
+            wellness_code = "welcome"
             wellness = "¡Bienvenido a Mente Activa! Realizar 5 minutos diarios de estimulación cognitiva ayuda a mantener la memoria ágil y activa."
         elif streak >= 3:
+            wellness_code = "streak"
             wellness = f"¡Excelente constancia! Llevas {streak} días entrenando tu mente. La regularidad es la clave para la reserva cognitiva."
         else:
+            wellness_code = "variety"
             wellness = "Completar ejercicios variados de memoria y cálculo promueve la agudeza mental y la plasticidad neuronal."
 
         return GameStatsResponse(
@@ -163,7 +168,8 @@ async def get_game_history(
             streak_days=streak,
             games_breakdown=games_dict,
             recent_sessions=recent_summaries[:15],
-            cognitive_wellness_message=wellness
+            cognitive_wellness_message=wellness,
+            cognitive_wellness_code=wellness_code,
         )
     except Exception as e:
         logger.error(f"Error obteniendo historial de juegos: {e}")

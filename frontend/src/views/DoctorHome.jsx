@@ -11,7 +11,7 @@ import ScribeSoapModal from './ScribeSoapModal';
 import PreventiveCalendarModal from './PreventiveCalendarModal';
 
 const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }) => {
-  const { t, language } = useLanguage();
+  const { t, language, locale } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   
@@ -41,8 +41,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
       return;
     }
     const recognition = new SpeechRecognition();
-    const langCodeMap = { es: 'es-ES', en: 'en-US', fr: 'fr-FR', ar: 'ar-SA' };
-    recognition.lang = langCodeMap[language] || 'es-ES';
+    recognition.lang = locale || language;
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -81,7 +80,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
       <div className="absolute top-14 right-0 w-[50%] h-[230px] pointer-events-none z-0 overflow-hidden">
         <img 
           src="/images/doctor_ai_head.jpg" 
-          alt="MIVOR.ai Medical Intelligence" 
+          alt={t('doctorhome_mivor_ai_medical_intelligence')} 
           className="w-full h-full object-contain mix-blend-multiply" 
         />
       </div>
@@ -106,7 +105,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
           <LanguageSelector />
           <button className="w-10 h-10 rounded-full bg-white/70 backdrop-blur-md flex items-center justify-center text-gray-700 shadow-sm border border-gray-100 relative">
             <Bell size={18} />
-            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand-purple rounded-full border-2 border-white"></span>
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-brand rounded-full border-2 border-white"></span>
           </button>
           <button onClick={onLogout} className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden border-2 border-brand-blue/30 shadow-sm" title={t("logout") || "Cerrar Sesión"}>
             <img src={doctorPhoto} alt={doctorName} className="w-full h-full object-cover" onError={(e) => { e.target.src = 'https://ui-avatars.com/api/?name=Doc&background=0D8ABC&color=fff'; }} />
@@ -120,7 +119,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
           <h2 className="text-2xl font-extrabold text-brand-dark leading-tight mb-2">
             {t("your_medical_practice") || "Tu práctica médica"},<br/>
             {t("enhanced_by_ai") || "potenciada por"}<br/>
-            <span className="text-brand-purple">{t("artificial_intelligence") || "inteligencia artificial."}</span>
+            <span className="text-brand">{t("artificial_intelligence") || "inteligencia artificial."}</span>
           </h2>
           <p className="text-xs text-gray-600 leading-relaxed">
             {t("save_time_make_better_decisions") || "Ahorra tiempo, toma mejores decisiones y ofrece una atención excepcional a cada paciente."}
@@ -158,14 +157,14 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
           
           {/* Card 1: Mis pacientes */}
           <button onClick={() => onNavigate('patients')} className="bg-white rounded-3xl p-5 text-left shadow-soft border border-gray-100 flex flex-col items-start hover:shadow-md transition-shadow group">
-            <div className="w-10 h-10 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-4">
               <Users size={22} />
             </div>
             <h3 className="font-bold text-gray-900 mb-2">{t("my_patients")}</h3>
             <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">
               {t("search_create_manage_patients")}
             </p>
-            <div className="w-6 h-6 rounded-full bg-brand-purple text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
+            <div className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
               <ArrowRight size={14} />
             </div>
           </button>
@@ -231,11 +230,11 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
 
         {/* AI Search Banner */}
         <div className="bg-brand-dark rounded-3xl p-5 shadow-xl relative overflow-hidden mt-6">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-brand-purple/30 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-brand/30 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-blue/20 rounded-full blur-2xl pointer-events-none"></div>
           
           <h3 className="font-bold text-white text-sm mb-1 flex items-center gap-2 relative z-10">
-            <Sparkles size={16} className="text-brand-purpleLight" />
+            <Sparkles size={16} className="text-sky-500" />
             {t("what_do_you_need_to_do")}
           </h3>
           <p className="text-xs text-gray-400 mb-4 relative z-10">{t("search_patient_or_ask_vitalai")}</p>
@@ -270,7 +269,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
             <button 
               type="button" 
               onClick={toggleListening} 
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-brand-purple text-white shadow-glow hover:scale-105'}`}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isListening ? 'bg-red-500 text-white animate-pulse shadow-lg scale-105' : 'bg-brand text-white shadow-glow hover:scale-105'}`}
               title={isListening ? t('doctorhome_detener_grabacion') : t('doctorhome_dictar_busqueda_o_consulta')}
             >
               <Mic size={18} />
@@ -281,7 +280,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
         {/* Stats Row */}
         <div className="grid grid-cols-4 gap-2 mt-6 bg-white rounded-3xl p-4 shadow-soft border border-gray-100">
           <div className="flex flex-col items-start p-2">
-            <Users size={16} className="text-brand-purple mb-2" />
+            <Users size={16} className="text-brand mb-2" />
             <span className="font-extrabold text-gray-900 text-lg">128</span>
             <span className="text-[9px] text-gray-500 leading-tight">{t("active_patients_this_month")}</span>
           </div>
@@ -308,8 +307,8 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
             <div className="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
               <Heart size={22} />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2 leading-tight">Calculadoras & Cardio</h3>
-            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Riesgo CV, LDL y renal</p>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">{t('patienthome_calculadoras_cardio')}</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">{t('doctorhome_riesgo_cv_ldl_y_renal')}</p>
             <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
               <ArrowRight size={14} />
             </div>
@@ -319,8 +318,8 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
             <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4">
               <Calendar size={22} />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Prevención</h3>
-            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Cribados y calendario</p>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">{t('brand_mivor_prevention')}</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">{t('doctorhome_cribados_y_calendario')}</p>
             <div className="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
               <ArrowRight size={14} />
             </div>
@@ -330,8 +329,8 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
               <Sparkles size={22} />
             </div>
-            <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Evidencia</h3>
-            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Evidencia en PubMed</p>
+            <h3 className="font-bold text-gray-900 mb-2 leading-tight">{t('brand_mivor_evidence')}</h3>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">{t('doctorhome_evidencia_en_pubmed')}</p>
             <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
               <ArrowRight size={14} />
             </div>
@@ -342,7 +341,7 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
               <FileText size={22} />
             </div>
             <h3 className="font-bold text-gray-900 mb-2 leading-tight">MIVOR Scribe</h3>
-            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">Preparador de Consulta</p>
+            <p className="text-[10px] text-gray-500 mb-4 leading-relaxed flex-1">{t('doctorhome_preparador_de_consulta')}</p>
             <div className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center self-end group-hover:scale-110 transition-transform">
               <ArrowRight size={14} />
             </div>

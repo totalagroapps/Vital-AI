@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Search, Star, ChevronRight, Video, Loader2, CalendarPlus } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateSpecialtyName, translateLanguageName } from '../i18n/catalogTranslations';
+import PatientTopNav from '../components/PatientTopNav';
 
 // Video search. `initialFilters` (specialty/language/insurance/name) come
 // pre-selected from the landing form; the name field here refines further.
-const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoctor, onBookDoctor }) => {
+const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoctor, onBookDoctor, onNavigate, userProfile, username, onLogout }) => {
   const { t, language } = useLanguage();
   const [doctors, setDoctors] = useState([]);
   const [total, setTotal] = useState(0);
@@ -40,31 +41,36 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
   }, []);
 
   return (
-    <div className="min-h-screen bg-base pb-24 font-sans px-5 pt-4">
+    <div className="min-h-screen bg-base pb-24 font-sans">
+      {/* Barra superior común del paciente (no se muestra en la vista previa del médico) */}
+      {onNavigate && (
+        <PatientTopNav activeTab="specialists" onNavigate={onNavigate} userProfile={userProfile} username={username} onLogout={onLogout} />
+      )}
+      <div className="px-5 pt-4 lg:px-8 lg:pt-8 max-w-screen-xl mx-auto">
       <button
         onClick={onBack}
-        className="mb-4 flex items-center gap-1 text-sm font-bold text-gray-500 hover:text-brand-dark transition-colors"
+        className="mb-4 flex items-center gap-1 text-sm font-bold text-slate-500 hover:text-brand-dark transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> {t('especialistasvideo_especialistas')}
       </button>
 
       <div className="flex items-center gap-2 mb-1">
         <Video className="text-brand-blue" size={22} />
-        <h2 className="text-xl font-extrabold text-brand-dark">{t('especialistasvideo_cita_rapida_por_videollamada')}</h2>
+        <h1 className="text-2xl lg:text-3xl font-black text-mivor-navy tracking-tight">{t('especialistasvideo_cita_rapida_por_videollamada')}</h1>
       </div>
-      <p className="text-sm text-gray-500 mb-4">{t('especialistasvideo_medicos_disponibles_ahora_mismo_sin')}</p>
+      <p className="text-sm text-slate-500 mb-4">{t('especialistasvideo_medicos_disponibles_ahora_mismo_sin')}</p>
 
       <form
         onSubmit={(e) => { e.preventDefault(); fetchDoctors(name); }}
         className="relative mb-5"
       >
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t('land_name_placeholder')}
-          className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-11 pr-4 text-sm text-brand-dark focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all"
+          className="w-full bg-white border border-slate-200 rounded-2xl py-3 pl-11 pr-4 text-sm text-brand-dark focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all"
         />
       </form>
 
@@ -78,12 +84,12 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
           {error}
         </div>
       ) : doctors.length === 0 ? (
-        <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center text-sm text-gray-500">
+        <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500">
           {t('especialistasvideo_no_hay_medicos_disponibles_por')}
         </div>
       ) : (
         <>
-          <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider mb-2">
+          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mb-2">
             {total} {t('especialistasvideo_medico_disponible', { value: total !== 1 ? 's' : '' })}{total !== 1 ? 's' : ''}
           </p>
           <div className="space-y-3">
@@ -94,7 +100,7 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
                 tabIndex={0}
                 onClick={() => onBookDoctor(d.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter') onBookDoctor(d.id); }}
-                className="group w-full text-left bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:border-brand-blue/30 transition-all flex items-center gap-3 cursor-pointer"
+                className="group w-full text-left bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md hover:border-brand-blue/30 transition-all flex items-center gap-3 cursor-pointer"
               >
                 <button
                   type="button"
@@ -109,12 +115,12 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
                     type="button"
                     title={t('especialistasvideo_ver_perfil')}
                     onClick={(e) => { e.stopPropagation(); onSelectDoctor(d.id); }}
-                    className="font-bold text-gray-900 text-sm truncate max-w-full block text-left hover:text-brand-blue transition-colors"
+                    className="font-bold text-slate-900 text-sm truncate max-w-full block text-left hover:text-brand-blue transition-colors"
                   >
                     {d.full_name || t('especialistasvideo_medico_sin_nombre')}
                   </button>
-                  <p className="text-[11px] text-gray-500 truncate">
-                    {(d.specialties || []).map((s) => translateSpecialtyName(s.name, language)).join(', ') || 'Especialidad no informada'}
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {(d.specialties || []).map((s) => translateSpecialtyName(s.name, language, t)).join(', ') || t('detail_specialty_unset')}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     {d.rating != null && (
@@ -123,7 +129,7 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
                       </span>
                     )}
                     {(d.languages || []).length > 0 && (
-                      <span className="text-[10px] text-gray-400 truncate">
+                      <span className="text-[10px] text-slate-400 truncate">
                         {d.languages.map((l) => translateLanguageName(l.code, l.name, language)).join(', ')}
                       </span>
                     )}
@@ -137,7 +143,7 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
                   >
                     {t('especialistasvideo_ver_perfil')} <ChevronRight className="w-4 h-4" />
                   </button>
-                  <span className="text-[10px] text-gray-400 whitespace-nowrap flex items-center gap-1">
+                  <span className="text-[10px] text-slate-400 whitespace-nowrap flex items-center gap-1">
                     <CalendarPlus className="w-3.5 h-3.5" /> {t('especialistasvideo_reservar')}
                   </span>
                 </div>
@@ -146,6 +152,7 @@ const EspecialistasVideoSearch = ({ apiUrl, initialFilters, onBack, onSelectDoct
           </div>
         </>
       )}
+      </div>
     </div>
   );
 };

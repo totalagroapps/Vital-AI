@@ -7,7 +7,6 @@ import {
   Users, 
   User, 
   HelpCircle, 
-  Bell, 
   ChevronDown, 
   LogOut, 
   QrCode, 
@@ -15,6 +14,8 @@ import {
   Shield
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
+import SupportModal from './SupportModal';
+import NotificationsBell from './NotificationsBell';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function PatientTopNav({
@@ -28,6 +29,7 @@ export default function PatientTopNav({
 }) {
   const { t } = useLanguage();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const userMenuRef = useRef(null);
 
   // Close dropdown on outside click or Escape
@@ -74,9 +76,7 @@ export default function PatientTopNav({
     }
   };
 
-  const handleOpenHelp = () => {
-    window.open('https://wa.me/?text=Hola,%20tengo%20una%20consulta%20en%20MIVOR.ai', '_blank', 'noopener,noreferrer');
-  };
+  const handleOpenHelp = () => setShowSupport(true);
 
   return (
     <header className={`bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs select-none ${className}`}>
@@ -113,11 +113,11 @@ export default function PatientTopNav({
                   onClick={() => handleTabClick(tab.screen)}
                   className={`flex items-center gap-1.5 px-2 xl:px-3.5 py-1.5 xl:py-2 rounded-xl text-[11.5px] xl:text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive 
-                      ? 'bg-[#e0f2fe] text-[#0284c7] shadow-xs' 
+                      ? 'bg-mivor-blueSoft text-brand shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
                   }`}
                 >
-                  <Icon size={15} className={isActive ? 'text-[#0284c7] stroke-[2.4]' : 'text-slate-400 stroke-[2]'} />
+                  <Icon size={15} className={isActive ? 'text-brand stroke-[2.4]' : 'text-slate-400 stroke-[2]'} />
                   <span className="hidden xl:inline">{tab.label}</span>
                   <span className="xl:hidden">{tab.shortLabel || tab.label}</span>
                 </button>
@@ -138,23 +138,15 @@ export default function PatientTopNav({
           <button 
             type="button"
             onClick={handleOpenHelp}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#0284c7] transition-colors cursor-pointer py-1.5 px-2 rounded-xl hover:bg-slate-50"
-            title={t('patienttopnav_necesitas_ayuda_escribenos_por_whats')}
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-brand transition-colors cursor-pointer py-1.5 px-2 rounded-xl hover:bg-slate-50"
+            title={t('patient_contact_support')}
           >
             <HelpCircle size={17} className="stroke-[2.2] text-slate-500" />
             <span className="hidden xl:inline">{t('patienttopnav_necesitas_ayuda')}</span>
           </button>
 
-          {/* Campana de Notificaciones */}
-          <button 
-            type="button"
-            onClick={() => handleTabClick('search')}
-            className="relative w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors cursor-pointer" 
-            title={t('patienttopnav_notificaciones_y_avisos_de_salud')}
-          >
-            <Bell size={18} className="stroke-[2.2]" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse" />
-          </button>
+          {/* Campana de avisos (panel propio, sin punto rojo ficticio) */}
+          <NotificationsBell onNavigate={handleTabClick} />
 
           {/* Menú de Usuario con Avatar y Dropdown */}
           <div className="relative pl-1 sm:pl-2 border-l border-slate-200" ref={userMenuRef}>
@@ -196,7 +188,7 @@ export default function PatientTopNav({
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors text-left"
                   >
                     <User size={15} className="text-teal-600" />
-                    <span>{t('patienttopnav_mi_perfil_clinico')}</span>
+                    <span>{t('patienttopnav_mi_perfil')}</span>
                   </button>
 
                   {onOpenEmergencyPassport && (
@@ -273,6 +265,7 @@ export default function PatientTopNav({
         </div>
 
       </div>
+      <SupportModal isOpen={showSupport} onClose={() => setShowSupport(false)} />
     </header>
   );
 }

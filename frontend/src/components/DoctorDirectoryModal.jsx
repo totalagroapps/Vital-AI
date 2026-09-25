@@ -7,6 +7,7 @@ import {
   Video, Film, Play, GraduationCap, Building2, ExternalLink
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { translateSpecialtyName } from '../i18n/catalogTranslations';
 
 export const getVideoEmbedUrl = (url) => {
   if (!url) return null;
@@ -134,12 +135,13 @@ export default function DoctorDirectoryModal({
   if (!isOpen) return null;
 
   const handleWhatsApp = (doctor) => {
-    const patientIntro = patientName ? `Mi nombre es ${patientName}.` : 'Soy usuario de la plataforma MIVOR.ai.';
-    const triageContext = recommendedSpecialty 
-      ? `Acabo de recibir una orientación de salud en MIVOR.ai donde se me sugirió consultar con un especialista en *${doctor.specialty}*.`
-      : `Le contacto porque me gustaría agendar una consulta médica en su especialidad (*${doctor.specialty}*).`;
+    const specialty = translateSpecialtyName(doctor.specialty, language, t);
+    const patientIntro = patientName ? t('directory_wa_intro_named', { name: patientName }) : t('doctordirectorymod_soy_usuario_de_la_plataforma_mivor');
+    const triageContext = recommendedSpecialty
+      ? t('directory_wa_context_triage', { specialty })
+      : t('directory_wa_context_generic', { specialty });
 
-    const text = `Hola ${doctor.full_name}, ${patientIntro}\n\n${triageContext}\n\n¿Tendría disponibilidad para una consulta presencial u online?\n\nMuchas gracias por su atención.`;
+    const text = t('directory_wa_message', { doctor: doctor.full_name, intro: patientIntro, context: triageContext });
     
     // Abrir enlace oficial de WhatsApp
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
@@ -198,7 +200,7 @@ export default function DoctorDirectoryModal({
               </div>
               <div className="text-xs">
                 <span className="font-bold text-brand-purple">{t('doctordirectorymod_especialidad_sugerida_en_tu_consulta')} </span>
-                <span className="font-semibold text-slate-700">{recommendedSpecialty}</span>
+                <span className="font-semibold text-slate-700">{translateSpecialtyName(recommendedSpecialty, language, t)}</span>
               </div>
             </div>
             <button 
@@ -246,7 +248,7 @@ export default function DoctorDirectoryModal({
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                   } ${isRecommended && !isSelected ? 'ring-2 ring-purple-300' : ''}`}
                 >
-                  {spec}
+                  {spec === 'Todos' ? t('doctordirectorymod_todos') : translateSpecialtyName(spec, language, t)}
                   {isRecommended && !isSelected && (
                     <span className="w-1.5 h-1.5 rounded-full bg-brand-purple"></span>
                   )}
@@ -313,7 +315,7 @@ export default function DoctorDirectoryModal({
                         </div>
 
                         <div className="inline-flex items-center gap-1 px-2 py-0.5 mt-0.5 rounded-md text-[11px] font-bold bg-brand-purple/10 text-brand-purple">
-                          {doc.specialty}
+                          {translateSpecialtyName(doc.specialty, language, t)}
                         </div>
 
                         <div className="flex items-center gap-2 mt-1.5 text-[11px] text-slate-500">
@@ -339,13 +341,13 @@ export default function DoctorDirectoryModal({
                     <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                       <span className="flex items-center gap-1 truncate">
                         <Globe size={12} className="text-slate-400" />
-                        {doc.languages || 'Español'}
+                        {doc.languages || t('step1personal_espanol')}
                       </span>
                       {doc.availability_schedule && (
                         <span className="flex items-center gap-1 font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md">
                           <Clock size={11} className="text-slate-400" />
                           {typeof doc.availability_schedule === 'object' 
-                            ? `${doc.availability_schedule.dias || 'Lun-Vie'}`
+                            ? `${doc.availability_schedule.dias || t('doctordirectorymod_lun_vie')}`
                             : String(doc.availability_schedule)}
                         </span>
                       )}
@@ -369,7 +371,7 @@ export default function DoctorDirectoryModal({
                         className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-200 transition-all cursor-pointer"
                       >
                         <MessageCircle size={15} />
-                        <span>WhatsApp</span>
+                        <span>{t('doctordirectorymod_whatsapp')}</span>
                       </button>
 
                       <button
@@ -414,7 +416,7 @@ export default function DoctorDirectoryModal({
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-lg font-bold text-slate-900">{selectedDoctorDetail.full_name}</h3>
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-purple/10 text-brand-purple">
-                        {selectedDoctorDetail.specialty}
+                        {translateSpecialtyName(selectedDoctorDetail.specialty, language, t)}
                       </span>
                     </div>
 
@@ -506,7 +508,7 @@ export default function DoctorDirectoryModal({
                           {getVideoEmbedUrl(selectedDoctorDetail.presentation_video_url)?.includes('embed') ? (
                             <iframe
                               src={getVideoEmbedUrl(selectedDoctorDetail.presentation_video_url)}
-                              title={`Vídeo presentación de ${selectedDoctorDetail.full_name}`}
+                              title={t('directory_video_title', { name: selectedDoctorDetail.full_name })}
                               className="w-full h-full"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
@@ -591,7 +593,7 @@ export default function DoctorDirectoryModal({
                       ) : (
                         selectedDoctorDetail.professional_college ? (
                         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-500 text-center">
-                          {t('doctordirectorymod_titulo_oficial_en_verificado_por', { specialty: selectedDoctorDetail.specialty })} {selectedDoctorDetail.professional_college}.
+                          {t('doctordirectorymod_titulo_oficial_en_verificado_por', { specialty: translateSpecialtyName(selectedDoctorDetail.specialty, language, t) })} {selectedDoctorDetail.professional_college}.
                         </div>
                         ) : null
                       )}
@@ -604,7 +606,7 @@ export default function DoctorDirectoryModal({
                       </div>
                       <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                         <span className="text-[10px] font-bold text-slate-400 block uppercase">{t('doctordirectorymod_idiomas_de_consulta')}</span>
-                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.languages || 'Español'}</p>
+                        <p className="text-xs font-bold text-slate-800 mt-0.5">{selectedDoctorDetail.languages || t('step1personal_espanol')}</p>
                       </div>
                     </div>
                   </div>
@@ -648,7 +650,7 @@ export default function DoctorDirectoryModal({
                     className="py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-200 transition-all cursor-pointer"
                   >
                     <MessageCircle size={15} />
-                    <span>WhatsApp</span>
+                    <span>{t('doctordirectorymod_whatsapp')}</span>
                   </button>
 
                   <button

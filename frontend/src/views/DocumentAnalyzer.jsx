@@ -20,7 +20,8 @@ import {
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import jsPDF from 'jspdf';
+import { translateSpecialtyName } from '../i18n/catalogTranslations';
+import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
 
@@ -88,7 +89,7 @@ const BiomarkerRangeMeter = ({ bm }) => {
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <h4 className="text-xs font-bold text-slate-900 truncate">{bm.parametro}</h4>
-          <p className="text-[10px] text-slate-500">{t('documentanalyzer_ref')} {bm.rango_referencia || 'No especificado'}</p>
+          <p className="text-[10px] text-slate-500">{t('documentanalyzer_ref')} {bm.rango_referencia || t('not_specified')}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="text-sm font-black text-slate-900">{bm.valor} <span className="text-[10px] font-normal text-slate-500">{bm.unidad}</span></span>
@@ -200,24 +201,24 @@ const DocumentAnalyzer = ({
       const ext = (doc.filename || '').split('.').pop().toLowerCase();
       let iconType = 'pdf-red';
       let category = 'informe';
-      let categoryLabel = 'Informe';
-      let sub = 'Documento médico';
+      let categoryLabel = t('docanalyzer_cat_report');
+      let sub = t('docanalyzer_sub_medical_document');
 
       if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) || doc.document_type === 'medical_image') {
         iconType = 'jpg-blue';
         category = 'radiografia';
-        categoryLabel = 'Radiografía';
-        sub = 'Imagen médica';
+        categoryLabel = t('docanalyzer_cat_xray');
+        sub = t('docanalyzer_sub_medical_image');
       } else if (doc.filename?.toLowerCase().includes('receta')) {
         iconType = 'pdf-purple';
         category = 'receta';
-        categoryLabel = 'Receta';
-        sub = 'Receta médica';
+        categoryLabel = t('docanalyzer_cat_prescription');
+        sub = t('docanalyzer_sub_prescription');
       } else if (doc.filename?.toLowerCase().includes('analisis') || doc.filename?.toLowerCase().includes('sangre') || doc.filename?.toLowerCase().includes('orina')) {
         iconType = 'pdf-red';
         category = 'analitica';
-        categoryLabel = 'Analítica';
-        sub = 'Prueba de laboratorio';
+        categoryLabel = t('docanalyzer_cat_lab');
+        sub = t('docanalyzer_sub_lab_test');
       }
 
       return {
@@ -385,89 +386,46 @@ const DocumentAnalyzer = ({
     }
   };
 
-  const generateClientSidePdf = (data) => {
-    try {
-      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-      const margin = 40;
-      let y = 50;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.setTextColor(0, 85, 255);
-      doc.text('MIVOR.ai - INFORME CLÍNICO INTELIGENTE', margin, y);
-      y += 18;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')} | Documento: ${data.filename || 'Estudio Clínico'}`, margin, y);
-      y += 20;
-
-      doc.setDrawColor(0, 85, 255);
-      doc.setLineWidth(1.5);
-      doc.line(margin, y, 555, y);
-      y += 20;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(15, 23, 42);
-      doc.text('1. RESUMEN CLÍNICO', margin, y);
-      y += 15;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9.5);
-      doc.setTextColor(30, 41, 59);
-      const summaryText = data.summary || 'Estudio procesado correctamente.';
-      const splitSummary = doc.splitTextToSize(summaryText, 515);
-      doc.text(splitSummary, margin, y);
-      y += splitSummary.length * 13 + 15;
-
-      if (data.biomarcadores?.length > 0) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(15, 23, 42);
-        doc.text('2. BIOMARCADORES Y PARÁMETROS DE LABORATORIO', margin, y);
-        y += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        data.biomarcadores.forEach((bm) => {
-          if (y > 750) { doc.addPage(); y = 50; }
-          doc.text(`• ${bm.parametro}: ${bm.valor} ${bm.unidad || ''} (Ref: ${bm.rango_referencia || '-'}) [${(bm.estado || 'normal').toUpperCase()}]`, margin + 10, y);
-          y += 14;
-        });
-        y += 10;
-      }
-
-      if (data.medicamentos?.length > 0) {
-        if (y > 730) { doc.addPage(); y = 50; }
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(15, 23, 42);
-        doc.text('3. MEDICAMENTOS DETECTADOS', margin, y);
-        y += 15;
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        data.medicamentos.forEach((m) => {
-          doc.text(`• ${m}`, margin + 10, y);
-          y += 14;
-        });
-        y += 10;
-      }
-
-      const safeName = (data.filename || 'informe_mivor').replace(/[^a-zA-Z0-9_\.-]/g, '_');
-      doc.save(`informe_mivor_${safeName}.pdf`);
-    } catch (e) {
-      console.error('Error generating PDF:', e);
-    }
+  // Informe imprimible (Guardar como PDF). Se imprime con las fuentes del sistema, así que funciona con
+  // cualquier alfabeto (árabe, chino, cirílico…) y respeta la dirección de escritura del idioma.
+  const printAnalysisReport = async (data) => {
+    const esc = escapeHtml;
+    const biomarkers = (data.biomarcadores || []).map((bm) => `
+      <tr>
+        <td><strong>${esc(bm.parametro)}</strong></td>
+        <td>${esc(bm.valor)} ${esc(bm.unidad || '')}</td>
+        <td>${esc(bm.rango_referencia || '-')}</td>
+        <td>${esc((bm.estado || 'normal').toUpperCase())}</td>
+      </tr>`).join('');
+    const medications = (data.medicamentos || []).map((m) => `<span class="badge med-badge">${esc(m)}</span>`).join('');
+    const body = `
+      <div class="header">
+        <h1>${esc(t('docanalyzer_pdf_title'))}</h1>
+        <p>${esc(t('docanalyzer_pdf_meta', { date: new Date().toLocaleDateString(uiLocale), document: data.filename || t('documentanalyzer_estudio_clinico') }))}</p>
+      </div>
+      <h2>${esc(t('docanalyzer_pdf_section_summary'))}</h2>
+      <p style="white-space: pre-wrap;">${esc(data.summary || t('documentanalyzer_estudio_procesado_correctamente'))}</p>
+      ${biomarkers ? `
+        <h2>${esc(t('docanalyzer_pdf_section_biomarkers'))}</h2>
+        <table>
+          <thead><tr>
+            <th>${esc(t('docanalyzer_pdf_col_parameter'))}</th>
+            <th>${esc(t('docanalyzer_pdf_col_value'))}</th>
+            <th>${esc(t('docanalyzer_pdf_col_reference'))}</th>
+            <th>${esc(t('docanalyzer_pdf_col_status'))}</th>
+          </tr></thead>
+          <tbody>${biomarkers}</tbody>
+        </table>` : ''}
+      ${medications ? `<h2>${esc(t('docanalyzer_pdf_section_medications'))}</h2><div>${medications}</div>` : ''}
+    `;
+    await printHtmlContent(t('docanalyzer_pdf_title'), body);
   };
 
   const handleDownloadPdf = async () => {
     if (!analysisResult) return;
     setIsGeneratingPdf(true);
     try {
-      generateClientSidePdf(analysisResult);
+      await printAnalysisReport(analysisResult);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -717,7 +675,7 @@ const DocumentAnalyzer = ({
                       type="button"
                       onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
                       className="p-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
-                      title={sortOrder === 'desc' ? 'Más recientes primero' : 'Más antiguos primero'}
+                      title={sortOrder === 'desc' ? t('documentanalyzer_mas_recientes_primero') : t('documentanalyzer_mas_antiguos_primero')}
                     >
                       <ArrowDownUp size={16} className="stroke-[2.2]" />
                     </button>
@@ -761,7 +719,7 @@ const DocumentAnalyzer = ({
                                     {doc.filename}
                                   </p>
                                   <p className="text-[11px] text-slate-500 font-medium">
-                                    {doc.subtitle || 'Documento clínico'}
+                                    {doc.subtitle || t('documentanalyzer_documento_clinico')}
                                   </p>
                                 </div>
                               </div>
@@ -1059,21 +1017,21 @@ const DocumentAnalyzer = ({
             <div>
               <h3 className="text-xl font-black text-black">
                 {analyzingCount > 1 
-                  ? `MIVOR.ai está analizando tus ${analyzingCount} archivos` 
-                  : 'MIVOR.ai está leyendo tu documento'}
+                  ? t('docanalyzer_analyzing_files', { count: analyzingCount })
+                  : t('vitalai_reading_document')}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
                 {analyzingCount > 1
-                  ? 'Correlacionando hallazgos visuales, biomarcadores y redactando informe conjunto.'
-                  : 'Extrayendo biomarcadores, diagnósticos y generando un informe médico claro.'}
+                  ? t('documentanalyzer_correlacionando_hallazgos_visuales_bioma')
+                  : t('documentanalyzer_extrayendo_biomarcadores_diagnosticos_y_')}
               </p>
             </div>
 
             <div className="space-y-2 pt-2">
               {[
-                "Extrayendo texto con OCR de alta resolución",
-                "Analizando biomarcadores y rangos de referencia",
-                "Redactando resumen explicativo para el paciente"
+                t('docanalyzer_step_ocr'),
+                t('docanalyzer_step_biomarkers'),
+                t('docanalyzer_step_summary')
               ].map((text, i) => (
                 <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200/80 text-xs font-bold text-slate-700 text-left shadow-2xs">
                   <div className="w-2 h-2 rounded-full bg-[#0055ff] animate-pulse shrink-0" />
@@ -1121,7 +1079,7 @@ const DocumentAnalyzer = ({
                     {analysisResult.filename}
                   </h3>
                   <p className="text-xs text-slate-500 font-semibold">
-                    {analysisResult.is_image ? 'Estudio de Imagen / Radiografía' : 'Informe Médico Digitalizado'}
+                    {analysisResult.is_image ? t('documentanalyzer_estudio_de_imagen_radiografia') : t('documentanalyzer_informe_medico_digitalizado')}
                   </p>
                 </div>
               </div>
@@ -1244,7 +1202,8 @@ const DocumentAnalyzer = ({
               else if (corpus.includes('creatinina') || corpus.includes('renal')) fallbackSpec = 'Nefrología';
               else if (corpus.includes('pulmonar') || corpus.includes('asma') || corpus.includes('tórax')) fallbackSpec = 'Neumología';
 
-              const specialty = referral?.specialty || fallbackSpec;
+              const specialtyRaw = referral?.specialty || fallbackSpec;
+              const specialty = translateSpecialtyName(specialtyRaw, language, t);
 
               return (
                 <div className="bg-gradient-to-br from-blue-50/90 via-sky-50/60 to-white rounded-3xl p-6 border border-blue-200 shadow-2xs space-y-4">
@@ -1272,7 +1231,7 @@ const DocumentAnalyzer = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => onOpenDoctorDirectory?.(specialty)}
+                      onClick={() => onOpenDoctorDirectory?.(specialtyRaw)}
                       className="w-full py-3 px-4 rounded-xl bg-[#0055ff] hover:bg-blue-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                     >
                       <Calendar size={16} />
@@ -1282,7 +1241,7 @@ const DocumentAnalyzer = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const msg = encodeURIComponent(`Hola, he revisado un estudio con la guía explicativa de MIVOR.ai con sugerencia de consulta para ${specialty}. Me gustaría consultar disponibilidad.`);
+                        const msg = encodeURIComponent(t('docanalyzer_wa_referral', { specialty }));
                         window.open(`https://wa.me/?text=${msg}`, '_blank');
                       }}
                       className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer"
@@ -1319,7 +1278,7 @@ const DocumentAnalyzer = ({
                     type="button"
                     onClick={() => {
                       const text = analysisResult.preguntas_medico.map((q, i) => `${i + 1}. ${q}`).join('\n');
-                      navigator.clipboard.writeText(`Preguntas sobre mi estudio médico (${analysisResult.filename}):\n\n${text}`);
+                      navigator.clipboard.writeText(t('docanalyzer_questions_clipboard', { filename: analysisResult.filename, questions: text }));
                       setCopiedQuestions(true);
                       setTimeout(() => setCopiedQuestions(false), 2500);
                     }}
@@ -1342,7 +1301,7 @@ const DocumentAnalyzer = ({
                     type="button"
                     onClick={() => {
                       const text = analysisResult.preguntas_medico.map((q, i) => `${i + 1}. ${q}`).join('\n');
-                      const msg = encodeURIComponent(`Hola doctor(a), tengo estas consultas sobre mi informe médico (${analysisResult.filename}):\n\n${text}`);
+                      const msg = encodeURIComponent(t('docanalyzer_questions_wa', { filename: analysisResult.filename, questions: text }));
                       window.open(`https://wa.me/?text=${msg}`, '_blank');
                     }}
                     className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"

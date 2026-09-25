@@ -2,7 +2,8 @@
 // (specialties.name, languages.name). Project convention is the DB always
 // stores English (see CLAUDE.md "Convenciones") — this never writes back,
 // it only maps the string already returned by the backend to its Spanish
-// equivalent when the selected language is "es" ("en" returns it as-is).
+// equivalent when the selected language is "es" ("en" returns it as-is); other languages use
+// i18n keys (specialties) or Intl.DisplayNames (languages).
 // An unmapped catalog value falls back to the English name rather than
 // breaking the screen.
 
@@ -67,12 +68,56 @@ const LANGUAGE_ES = {
   bg: 'Búlgaro', el: 'Griego', tr: 'Turco', uk: 'Ucraniano', hi: 'Hindi',
 };
 
-export function translateSpecialtyName(name, language) {
-  if (language !== 'es') return name;
-  return SPECIALTY_ES[name] || name;
+// Nombres de especialidad en español que llegan como texto libre (perfiles antiguos, respuestas de la
+// IA, listas del directorio) -> nombre de catálogo en inglés.
+const SPECIALTY_ALIASES_ES = {
+  'Medicina General': 'General Medicine',
+  'Atención Primaria': 'Family and Community Medicine',
+  'Traumatología': 'Orthopedic Surgery and Traumatology',
+  'Dermatología': 'Dermatology and Venereology',
+  'Ginecología': 'Obstetrics and Gynecology',
+  'Endocrinología': 'Endocrinology and Nutrition',
+  'Gastroenterología': 'Gastroenterology',
+  'Digestivo': 'Gastroenterology',
+  'Oncología': 'Medical Oncology',
+  'Urgencias': 'Emergency Medicine',
+};
+const SPECIALTY_EN_EXTRA = { 'General Medicine': 'Medicina General' };
+
+const ES_TO_EN = Object.fromEntries(Object.entries(SPECIALTY_ES).map(([en, es]) => [es, en]));
+Object.assign(ES_TO_EN, SPECIALTY_ALIASES_ES);
+const ES_TO_EN_LOWER = Object.fromEntries(Object.entries(ES_TO_EN).map(([es, en]) => [es.toLowerCase(), en]));
+
+const slugify = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+
+// Clave i18n de una especialidad del catálogo (es/en en los diccionarios; el resto lo traduce la IA).
+export const specialtyKey = (englishName) => `catalog_specialty_${slugify(englishName)}`;
+
+// Todas las especialidades conocidas: { clave: [es, en] }. La usa scripts/sync-catalog-i18n.
+export const SPECIALTY_I18N = Object.fromEntries(
+  [...Object.entries(SPECIALTY_ES), ...Object.entries(SPECIALTY_EN_EXTRA)].map(([en, es]) => [specialtyKey(en), [es, en]]),
+);
+
+// Acepta el nombre en inglés (catálogo de la BD) o en español (texto libre) y lo muestra en el idioma
+// de la interfaz. Sin `t`, los idiomas distintos de es/en caen al inglés.
+export function translateSpecialtyName(name, language, t) {
+  if (!name) return name;
+  const trimmed = String(name).trim();
+  const en = ES_TO_EN[trimmed] || ES_TO_EN_LOWER[trimmed.toLowerCase()] || trimmed;
+  if (language === 'es') return SPECIALTY_ES[en] || SPECIALTY_EN_EXTRA[en] || trimmed;
+  if (language === 'en' || typeof t !== 'function') return en;
+  const key = specialtyKey(en);
+  const translated = t(key);
+  return translated && translated !== key ? translated : en;
 }
 
+// Nombre del idioma en el idioma de la interfaz (Intl lo conoce para casi todos los idiomas).
 export function translateLanguageName(code, name, language) {
-  if (language !== 'es') return name;
-  return LANGUAGE_ES[code] || name;
+  if (language === 'es' && LANGUAGE_ES[code]) return LANGUAGE_ES[code];
+  if (language === 'en' || !code) return name;
+  try {
+    return new Intl.DisplayNames([language], { type: 'language' }).of(code) || name;
+  } catch {
+    return name;
+  }
 }

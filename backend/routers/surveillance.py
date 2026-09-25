@@ -10,6 +10,7 @@ from sqlalchemy import select
 import models
 from database import get_db
 from security import get_current_user, resolve_target_patient_id
+from services.localize_service import localize_fields, ui_language
 
 logger = logging.getLogger("surveillance")
 
@@ -195,7 +196,7 @@ def evaluate_captyva_colonoscopy(
 # ============================================================================
 
 @router.post("/digestive/evaluate", response_model=DigestiveSurveillanceResponse)
-async def evaluate_digestive_surveillance(payload: DigestiveSurveillanceRequest):
+async def evaluate_digestive_surveillance(payload: DigestiveSurveillanceRequest, lang: str = Depends(ui_language)):
     """
     Evalúa el intervalo de vigilancia post-polipectomía de colonoscopia (CaPtyVa)
     aplicando las guías europeas ESGE 2020.
@@ -209,6 +210,9 @@ async def evaluate_digestive_surveillance(payload: DigestiveSurveillanceRequest)
             piecemeal_resection_ge_20mm=payload.piecemeal_resection_ge_20mm,
             exam_date_str=payload.exam_date
         )
+        res = await localize_fields(res, lang, [
+            "risk_tier", "interval_text", "guideline_source", "clinical_justification", "action_plan", "warning_signs",
+        ])
         return DigestiveSurveillanceResponse(**res)
     except Exception as e:
         logger.error(f"Error en evaluación CaPtyVa: {e}")
@@ -219,7 +223,8 @@ async def evaluate_digestive_surveillance(payload: DigestiveSurveillanceRequest)
 async def get_preventive_calendar(
     patient_id: Optional[str] = Query(None),
     db: AsyncSession = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
+    lang: str = Depends(ui_language),
 ):
     """
     Genera el calendario preventivo consolidado del paciente según su edad, sexo y antecedentes,
@@ -363,10 +368,17 @@ async def get_preventive_calendar(
         "Mantén al día tu registro de vacunas y analíticas en MIVOR.ai para recibir alertas anticipadas."
     ]
 
-    return PreventiveCalendarResponse(
+    response = PreventiveCalendarResponse(
         patient_age=age,
         patient_gender="Femenino" if is_female else "Masculino",
         screenings=screenings,
         vaccines=vaccines,
         general_recommendations=general_recs
-    )
+    ).model_dump()
+    item_fields = ["title", "recommended_frequency", "target_age_group", "description"]
+    response = await localize_fields(response, lang, [
+        "patient_gender", "general_recommendations",
+        *[f"screenings.[].{f}" for f in item_fields],
+        *[f"vaccines.[].{f}" for f in item_fields],
+    ])
+    return PreventiveCalendarResponse(**response)

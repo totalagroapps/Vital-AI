@@ -95,7 +95,7 @@ export default function Step4OptionalProfile({ formData, updateFormData, onNext,
             </div>
             <label className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-pointer transition-all">
               <Upload size={14} />
-              <span>{profilePhoto ? profilePhoto.name.slice(0, 12) + '...' : 'Subir foto'}</span>
+              <span>{profilePhoto ? profilePhoto.name.slice(0, 12) + '...' : t('profile_avatar_upload')}</span>
               <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'profilePhoto')} />
             </label>
           </div>
