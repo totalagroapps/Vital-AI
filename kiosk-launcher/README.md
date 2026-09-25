@@ -11,7 +11,7 @@ Aplicación independiente nativa de Android que funciona como pantalla de inicio
 3. **🚨 Botón SOS de Emergencia**: Al presionar, obtiene la ubicación GPS exacta del paciente, dispara una alerta con enlace a Google Maps por WhatsApp a los cuidadores y enlaza una llamada de auxilio directa al 112 / 911.
 4. **💬 WhatsApp Familiar**: Acceso directo al chat o grupo de la familia.
 5. **🖼️ Álbum de Recuerdos**: Visualizador de fotos y memorias familiares para estimular la mente activa y la tranquilidad.
-6. **🔒 Modo Cuidador con PIN**: Panel protegido (PIN por defecto: `1234`) para:
+6. **🔒 Modo Cuidador con PIN**: Panel protegido con la clave que el cuidador crea al instalar la app (4 a 8 números; se guarda cifrada con hash, nunca en texto) para:
    - Salir del modo Kiosko y liberar el teléfono.
    - Ajustar redes Wi-Fi y volumen.
    - Configurar los teléfonos de emergencia y familiares.
@@ -41,4 +41,4 @@ Para retirar los permisos de administrador en cualquier momento:
 ```bash
 adb shell dpm remove-active-admin ai.mivor.kiosk/.KioskDeviceAdminReceiver
 ```
-O simplemente ingresa a **Ajustes Cuidador** dentro de la app con el PIN `1234` y presiona **Salir del Modo Kiosko**.
+O simplemente ingresa a **Ajustes Cuidador** dentro de la app con la clave del cuidador y presiona **Salir del Modo Kiosko**.

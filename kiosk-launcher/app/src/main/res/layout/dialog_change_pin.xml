@@ -6,10 +6,12 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:id="@+id/tvChangePinTitle"
         style="@style/DialogTitle"
         android:text="Cambiar clave" />
 
     <TextView
+        android:id="@+id/tvChangePinSub"
         style="@style/DialogSub"
         android:text="De 4 a 8 números" />
 

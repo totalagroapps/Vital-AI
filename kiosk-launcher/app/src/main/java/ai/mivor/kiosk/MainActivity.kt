@@ -3,6 +3,7 @@ package ai.mivor.kiosk
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.KeyguardManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ContentValues
@@ -30,6 +31,7 @@ import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
@@ -40,11 +42,15 @@ import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.ImageViewCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -119,6 +125,15 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         /** Tiempo máximo esperando la ubicación después de la cuenta atrás. */
         private const val LOCATION_EXTRA_WAIT_MS = 6_000L
 
+        /**
+         * Tiempo máximo en WhatsApp antes de abrir emergencias aunque no se haya vuelto a MIVOR.
+         * Automático: algo más que el límite del servicio (60 s), que normalmente termina antes.
+         */
+        private const val SOS_MAX_WHATSAPP_AUTO_MS = 75_000L
+        private const val SOS_MAX_WHATSAPP_MANUAL_MS = 45_000L
+        /** Con la llamada grupal en curso no se interrumpe: se vuelve a mirar cada tanto. */
+        private const val SOS_IN_CALL_RECHECK_MS = 5_000L
+
         private val EMERGENCY_WORDS = listOf("ayuda", "emergencia", "socorro", "me cai", "auxilio", "urgencia")
     }
 
@@ -131,7 +146,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_main)
+        applySystemBarInsets()
+        blockBackNavigation()
 
         config = KioskConfig(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -145,6 +163,17 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         initTextToSpeech()
         requestInitialPermissions()
         startKioskLockMode()
+        handleSosIntent(intent)
+
+        // Primera instalación, o actualización desde una versión con la clave de fábrica 1234
+        if (!config.hasPin && savedInstanceState == null) {
+            showPinSetupDialog(firstTime = true)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleSosIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -157,10 +186,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         super.onResume()
         clockHandler.post(clockRunnable)
         refreshCustomAppTile()
+        // Ya estamos delante: el aviso de respaldo sobra
+        SosNotification.cancel(this)
 
         // De vuelta del aviso por WhatsApp (terminado, fallido o interrumpido): llamar a emergencias
         if (pendingEmergencyDial) {
             pendingEmergencyDial = false
+            sosHandler.removeCallbacks(emergencyWatchdog)
             SosAutomation.cancel()
             sosHandler.postDelayed({ dialEmergency() }, 1200)
             return
@@ -170,6 +202,12 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         if (isVoicePermissionGranted()) {
             startVoiceEngine()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // El marcador de emergencias ya tapa MIVOR: el kiosko vuelve a quedar detrás del bloqueo
+        if (showingOverLockScreen) setShowOverLockScreen(false)
     }
 
     override fun onPause() {
@@ -186,10 +224,31 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         speechRecognizer?.destroy()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        // Prevent back press from exiting Kiosk
-        Toast.makeText(this, "Para salir usa \"Salir con clave\"", Toast.LENGTH_SHORT).show()
+    /** Desde Android 16 (targetSdk 36) onBackPressed() ya no se llama: el gesto atrás pasa por aquí. */
+    private fun blockBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Toast.makeText(this@MainActivity, "Para salir usa \"Salir con clave\"", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    /**
+     * Desde Android 15 (targetSdk 35+) la app dibuja siempre detrás de las barras del sistema:
+     * se deja el hueco de la barra de estado, la de navegación y el recorte de la cámara.
+     */
+    private fun applySystemBarInsets() {
+        val root = findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+        // Fondo azul claro: iconos oscuros en las barras para que se lean
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
     }
 
     private fun initViews() {
@@ -290,11 +349,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun isVoicePermissionGranted() = isGranted(Manifest.permission.RECORD_AUDIO)
 
     private fun requestInitialPermissions() {
-        val permissions = listOf(
+        val permissions = listOfNotNull(
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CALL_PHONE,
+            Manifest.permission.SEND_SMS,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.POST_NOTIFICATIONS else null
         ).filterNot { isGranted(it) }
 
         if (permissions.isNotEmpty()) {
@@ -745,9 +806,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         val tvCountdown = dialogView.findViewById<TextView>(R.id.tvSosCountdown)
         val emergency = config.emergencyNumber
+        val smsNote = if (SosSms.hasPermission(this) && SosSms.recipients(config).isNotEmpty())
+            " También les enviaremos un SMS con tu ubicación." else ""
         dialogView.findViewById<TextView>(R.id.tvSosDetail).text =
-            if (hasFamilyWhatsApp()) "Avisaremos a tu familia por WhatsApp con tu ubicación, los llamaremos y después llamaremos al $emergency."
-            else "Llamaremos al $emergency."
+            if (hasFamilyWhatsApp()) "Avisaremos a tu familia por WhatsApp con tu ubicación, los llamaremos y después llamaremos al $emergency.$smsNote"
+            else "Llamaremos al $emergency.$smsNote"
 
         // Buscar la ubicación mientras corre la cuenta atrás
         sosLocation = null
@@ -799,6 +862,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      * 2) Al volver a MIVOR, llamada a emergencias (ver onResume).
      */
     private fun triggerSosEmergency() {
+        // Respaldo: SMS a todos los contactos en cuanto haya ubicación, pase lo que pase con WhatsApp
+        withSosLocation { location -> sendSosSms(location) }
+
         val whatsapp = whatsappPackage()
         if (whatsapp == null || !hasFamilyWhatsApp()) {
             dialEmergency()
@@ -812,6 +878,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             val automatic = SosWhatsAppService.isEnabled(this)
 
             pendingEmergencyDial = true
+            sosHandler.removeCallbacks(emergencyWatchdog)
+            sosHandler.postDelayed(
+                emergencyWatchdog,
+                if (automatic) SOS_MAX_WHATSAPP_AUTO_MS else SOS_MAX_WHATSAPP_MANUAL_MS
+            )
             val opened = if (groupName.isNotBlank()) {
                 if (automatic) {
                     SosAutomation.start(SosAutomation.Job(SosAutomation.Target.Group(groupName), message, whatsapp))
@@ -834,9 +905,64 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
             if (!opened) {
                 pendingEmergencyDial = false
+                sosHandler.removeCallbacks(emergencyWatchdog)
                 SosAutomation.cancel()
                 dialEmergency()
             }
+        }
+    }
+
+    /**
+     * Si WhatsApp se queda bloqueado (no abre, no encuentra el grupo, la persona no toca nada…)
+     * y no se ha vuelto a MIVOR, se abre igualmente la llamada a emergencias.
+     */
+    private val emergencyWatchdog = object : Runnable {
+        override fun run() {
+            if (!pendingEmergencyDial) return
+            val job = SosAutomation.current
+            if (job != null && job.step == SosAutomation.Step.IN_CALL && job.sawCallScreen) {
+                // La familia ya está al teléfono; emergencias se abrirá al colgar
+                sosHandler.postDelayed(this, SOS_IN_CALL_RECHECK_MS)
+                return
+            }
+            pendingEmergencyDial = false
+            SosAutomation.cancel()
+            // Si Android bloquea abrir el marcador desde segundo plano, queda el aviso a pantalla completa
+            SosNotification.show(this@MainActivity, config.emergencyNumber)
+            dialEmergency()
+        }
+    }
+
+    /** Toque en el aviso de emergencia (o aviso a pantalla completa con el teléfono bloqueado). */
+    private fun handleSosIntent(intent: Intent?) {
+        if (intent?.action != SosNotification.ACTION_SOS_DIAL) return
+        intent.action = null // no repetir la llamada si la pantalla se recrea
+        sosHandler.removeCallbacks(emergencyWatchdog)
+        SosAutomation.cancel()
+
+        // Encender la pantalla y mostrarse sobre el bloqueo solo para esta llamada
+        setShowOverLockScreen(true)
+        val keyguard = getSystemService(KeyguardManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && keyguard?.isKeyguardLocked == true) {
+            // Sin bloqueo seguro se quita solo; con PIN/patrón, el marcador lo pedirá igualmente
+            keyguard.requestDismissKeyguard(this, null)
+        }
+
+        // onResume abre el marcador (con el mismo camino que al volver de WhatsApp)
+        pendingEmergencyDial = true
+    }
+
+    private var showingOverLockScreen = false
+
+    @Suppress("DEPRECATION") // las banderas de ventana solo se usan en Android 8.0 y anteriores
+    private fun setShowOverLockScreen(show: Boolean) {
+        showingOverLockScreen = show
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(show)
+            setTurnScreenOn(show)
+        } else {
+            val flags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            if (show) window.addFlags(flags) else window.clearFlags(flags)
         }
     }
 
@@ -853,6 +979,19 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         }
         waiter.run()
+    }
+
+    private fun sendSosSms(location: Location?) {
+        if (SosSms.recipients(config).isEmpty()) return
+        if (!SosSms.hasPermission(this)) {
+            Toast.makeText(this, "Sin permiso de SMS: no se pudo enviar el aviso por mensaje", Toast.LENGTH_LONG).show()
+            return
+        }
+        // Sin emoji: el SMS ocupa menos partes y llega también a teléfonos antiguos
+        val sent = SosSms.send(this, config, sosMessage(location).removePrefix("🚨 "))
+        if (sent > 0) {
+            Toast.makeText(this, "Aviso SOS enviado por SMS a $sent contacto(s)", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun dialEmergency() {
@@ -1139,13 +1278,17 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // =========================================================================
     /** Pide la clave del cuidador y ejecuta [onSuccess] si es correcta. */
     private fun requestPin(title: String, onSuccess: () -> Unit) {
+        // Sin clave todavía: lo primero es crearla
+        if (!config.hasPin) {
+            showPinSetupDialog(firstTime = true, onDone = onSuccess)
+            return
+        }
+
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_pin, null)
         val dialog = buildDialog(dialogView)
 
         dialogView.findViewById<TextView>(R.id.tvPinTitle).text = title
-        dialogView.findViewById<TextView>(R.id.tvPinHint).text =
-            if (config.isDefaultPin) "Clave inicial: ${KioskConfig.DEFAULT_PIN}. Cámbiala en Ajustes."
-            else "Escribe la clave del cuidador"
+        dialogView.findViewById<TextView>(R.id.tvPinHint).text = "Escribe la clave del cuidador"
 
         val etPin = dialogView.findViewById<EditText>(R.id.etPin)
 
@@ -1156,7 +1299,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 Toast.makeText(this, "Demasiados intentos. Espera $secs segundos.", Toast.LENGTH_SHORT).show()
                 return
             }
-            if (etPin.text.toString().trim() == config.pin) {
+            if (config.checkPin(etPin.text.toString().trim())) {
                 pinFailures = 0
                 dialog.dismiss()
                 onSuccess()
@@ -1198,6 +1341,24 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             setOnClickListener {
                 dialog.dismiss()
                 showSosAutomationHelp()
+            }
+        }
+        dialogView.findViewById<Button>(R.id.btnSettingSosAlert).apply {
+            visibility = if (SosNotification.isFullyAllowed(this@MainActivity)) View.GONE else View.VISIBLE
+            setOnClickListener {
+                dialog.dismiss()
+                MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle("Aviso de emergencia")
+                    .setMessage(
+                        "Si WhatsApp se queda bloqueado durante un SOS, MIVOR muestra un aviso a pantalla " +
+                            "completa para llamar a emergencias.\n\n" +
+                            "Activa las notificaciones de MIVOR y el permiso de \"notificaciones a pantalla completa\"."
+                    )
+                    .setPositiveButton("Abrir ajustes") { _, _ ->
+                        launchExternalIntent(SosNotification.settingsIntent(this@MainActivity))
+                    }
+                    .setNegativeButton("Cerrar", null)
+                    .show()
             }
         }
         dialogView.findViewById<Button>(R.id.btnSettingPin).setOnClickListener {
@@ -1306,25 +1467,44 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         dialog.show()
     }
 
-    private fun showChangePinDialog() {
+    private fun showChangePinDialog() = showPinSetupDialog(firstTime = false)
+
+    /**
+     * Crear (primera vez) o cambiar la clave del cuidador.
+     * La primera vez se puede dejar para "Más tarde" para no bloquear el SOS,
+     * pero Ajustes y "Salir con clave" no se abren hasta que exista.
+     */
+    private fun showPinSetupDialog(firstTime: Boolean, onDone: (() -> Unit)? = null) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_pin, null)
         val dialog = buildDialog(dialogView)
+
+        if (firstTime) {
+            dialogView.findViewById<TextView>(R.id.tvChangePinTitle).text = "Crea la clave del cuidador"
+            dialogView.findViewById<TextView>(R.id.tvChangePinSub).text =
+                "De ${KioskConfig.PIN_MIN_LENGTH} a ${KioskConfig.PIN_MAX_LENGTH} números. " +
+                    "Protege los Ajustes y la salida del modo kiosko."
+        }
 
         val etNew = dialogView.findViewById<EditText>(R.id.etNewPin)
         val etRepeat = dialogView.findViewById<EditText>(R.id.etNewPin2)
 
-        dialogView.findViewById<Button>(R.id.btnCancelNewPin).setOnClickListener { dialog.dismiss() }
+        dialogView.findViewById<Button>(R.id.btnCancelNewPin).apply {
+            if (firstTime) text = "Más tarde"
+            setOnClickListener { dialog.dismiss() }
+        }
         dialogView.findViewById<Button>(R.id.btnSaveNewPin).setOnClickListener {
             val newPin = etNew.text.toString().trim()
+            val problem = KioskConfig.pinProblem(newPin)
             when {
-                newPin.length !in 4..8 || !newPin.all { it.isDigit() } ->
-                    Toast.makeText(this, "La clave debe tener de 4 a 8 números", Toast.LENGTH_SHORT).show()
+                problem != null ->
+                    Toast.makeText(this, problem, Toast.LENGTH_SHORT).show()
                 newPin != etRepeat.text.toString().trim() ->
                     Toast.makeText(this, "Las claves no coinciden", Toast.LENGTH_SHORT).show()
                 else -> {
-                    config.pin = newPin
+                    config.setPin(newPin)
                     dialog.dismiss()
-                    Toast.makeText(this, "Clave cambiada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, if (firstTime) "Clave creada" else "Clave cambiada", Toast.LENGTH_SHORT).show()
+                    onDone?.invoke()
                 }
             }
         }

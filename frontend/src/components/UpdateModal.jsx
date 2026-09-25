@@ -130,7 +130,12 @@ export function UpdateModal({ t, apiUrl }) {
       setDownloadState('downloading');
       setProgressPercent(0);
       setErrorMessage('');
-      window.AndroidUpdater.downloadAndInstall(downloadUrl);
+      // La app nativa verifica dominio, SHA-256 (si el servidor lo publica), paquete y firma antes de instalar
+      if (typeof window.AndroidUpdater.downloadAndInstallVerified === 'function') {
+        window.AndroidUpdater.downloadAndInstallVerified(downloadUrl, updateInfo?.sha256 || '');
+      } else {
+        window.AndroidUpdater.downloadAndInstall(downloadUrl);
+      }
       return;
     }
 

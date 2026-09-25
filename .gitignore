@@ -1,3 +1,8 @@
+# Claves de firma de Android: NUNCA al repositorio (van en los Secrets de GitHub)
+*.jks
+*.keystore
+keystore.properties
+
 # Frontend
 frontend/node_modules/
 frontend/dist/

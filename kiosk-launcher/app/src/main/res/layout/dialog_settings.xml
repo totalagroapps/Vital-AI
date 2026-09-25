@@ -30,6 +30,14 @@
             android:text="Aviso SOS automático"
             app:backgroundTint="@color/c_green" />
 
+        <!-- Solo visible si faltan permisos para el aviso de emergencia a pantalla completa -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingSosAlert"
+            style="@style/BigButton"
+            android:text="Permitir aviso de emergencia"
+            android:visibility="gone"
+            app:backgroundTint="@color/c_red" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettingPin"
             style="@style/BigButton"
