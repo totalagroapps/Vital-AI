@@ -1,13 +1,13 @@
 import React from 'react';
 import { 
   FileText, Activity, Users, Apple, AlertCircle, 
-  Shield, Moon, Type, Download, LogOut, ChevronRight
+  Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw
 } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientMore = ({ onNavigate, onLogout }) => {
+const PatientMore = ({ onNavigate, onLogout, onSwitchProfile }) => {
   const { t } = useLanguage();
 
   // Cada opción lleva a una pantalla real; las que aún no existen se muestran como «Próximamente»
@@ -87,6 +87,19 @@ const PatientMore = ({ onNavigate, onLogout }) => {
               </div>
             </div>
           ))}
+
+          {/* Cambiar de perfil familiar (solo si la cuenta administra a otros familiares) */}
+          {onSwitchProfile && (
+            <div className="pt-4">
+              <button
+                onClick={onSwitchProfile}
+                className="w-full bg-white border border-violet-100 rounded-3xl p-4 flex items-center justify-center gap-2 text-violet-600 hover:bg-violet-50 transition-colors font-bold shadow-soft"
+              >
+                <RefreshCw size={20} />
+                Cambiar perfil
+              </button>
+            </div>
+          )}
 
           {/* Logout Button */}
           <div className="pt-4">

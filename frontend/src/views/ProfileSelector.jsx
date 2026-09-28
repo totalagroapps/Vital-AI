@@ -16,7 +16,7 @@ export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect }
         if (cancelled) return;
         // Con un solo perfil (el propio) no hace falta mostrar el selector.
         if (list.length <= 1) {
-          onProfileSelect(null);
+          onProfileSelect(null, list.length);
           return;
         }
         setProfiles(list);
@@ -54,7 +54,7 @@ export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect }
         {profiles.map((profile) => (
           <div 
             key={profile.user_id}
-            onClick={() => onProfileSelect(profile.is_self ? null : profile.user_id)}
+            onClick={() => onProfileSelect(profile, profiles.length)}
             className="group flex flex-col items-center cursor-pointer transition-transform active:scale-95"
           >
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl sm:rounded-[2.5rem] bg-slate-800 border-4 border-transparent group-hover:border-blue-500 overflow-hidden mb-4 shadow-xl transition-colors flex items-center justify-center relative">

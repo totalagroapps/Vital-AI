@@ -13,6 +13,7 @@ import PatientHome from './views/PatientHome';
 import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
 import ProfileSelector from './views/ProfileSelector';
+import CaregiverBanner from './components/CaregiverBanner';
 
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
@@ -80,6 +81,9 @@ export default function App() {
   const [token, setToken] = useState(() => (tokenAvailableSync ? getToken() : null));
   const [targetPatientId, setTargetPatientId] = useState(null);
   const [profileSelected, setProfileSelected] = useState(false);
+  // Perfil familiar activo (Modo Cuidador) y si la cuenta tiene más de un perfil para elegir
+  const [activeProfile, setActiveProfile] = useState(null);
+  const [hasFamilyProfiles, setHasFamilyProfiles] = useState(false);
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
   useEffect(() => {
     if (tokenAvailableSync) return;
@@ -504,10 +508,45 @@ export default function App() {
     document.body.removeChild(element);
   };
 
+  // Limpia los datos cargados del perfil activo para no mezclar la información de dos personas
+  const resetProfileData = () => {
+    CHAT_STORAGE_KEYS.forEach((key) => sessionStorage.removeItem(key));
+    setSessions([]);
+    setHealthHistory([]);
+    setMessages([]);
+    setCurrentSessionId(null);
+    setTriageSessionId(null);
+    setIsTriageClosed(false);
+    setPatientProfile(null);
+  };
+
+  const handleProfileSelect = (profile, profileCount = 1) => {
+    resetProfileData();
+    setHasFamilyProfiles(profileCount > 1);
+    if (profile && !profile.is_self) {
+      setTargetPatientId(profile.user_id);
+      setActiveProfile({ name: (profile.full_name || '').split(' ')[0] || profile.relationship, relationship: profile.relationship });
+    } else {
+      setTargetPatientId(null);
+      setActiveProfile(null);
+    }
+    setProfileSelected(true);
+  };
+
+  const handleSwitchProfile = () => {
+    resetProfileData();
+    setTargetPatientId(null);
+    setActiveProfile(null);
+    setProfileSelected(false);
+    navigate('/paciente');
+  };
+
   const handleLogout = () => {
     setToken(null);
     setProfileSelected(false);
     setTargetPatientId(null);
+    setActiveProfile(null);
+    setHasFamilyProfiles(false);
     setUsername(null);
     setViewMode('patient');
     clearToken();
@@ -551,15 +590,16 @@ export default function App() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // Se carga después de elegir perfil, y de nuevo al cambiarlo, para mostrar los datos de esa persona
   useEffect(() => {
-    if (token) {
+    if (token && profileSelected) {
       fetchUser();
       checkHealth();
       fetchSessions();
       fetchPatientProfile();
       fetchHistory();
     }
-  }, [token]);
+  }, [token, profileSelected, targetPatientId]);
 
   const authHeaders = {
     'Authorization': `Bearer ${token}`,
@@ -1144,6 +1184,7 @@ export default function App() {
   // Android: esperando a que el Keystore devuelva la sesión (unos milisegundos)
   if (!authReady) return null;
 
+  const renderRoute = () => {
   if (path === '/' || path === '') {
     if (!token) return <Navigate to="/login" />;
     return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
@@ -1223,7 +1264,7 @@ export default function App() {
   }
 
   if (token && !profileSelected && path !== '/login') {
-    return <ProfileSelector apiUrl={API_URL} authHeaders={authHeaders} onProfileSelect={(id) => { setTargetPatientId(id); setProfileSelected(true); }} />;
+    return <ProfileSelector apiUrl={API_URL} authHeaders={authHeaders} onProfileSelect={handleProfileSelect} />;
   }
 
   if (path === '/login') {
@@ -1327,6 +1368,7 @@ export default function App() {
         <PatientMore 
           onNavigate={handleBottomNav} 
           onLogout={handleLogout} 
+          onSwitchProfile={hasFamilyProfiles ? handleSwitchProfile : undefined}
         />
       </>
     );
@@ -1658,5 +1700,15 @@ export default function App() {
 
   // Fallback para cualquier ruta no mapeada: redireccion limpia a /paciente (Punto 16)
   return <Navigate to="/paciente" replace />;
+  };
+
+  return (
+    <>
+      {token && profileSelected && activeProfile && (
+        <CaregiverBanner name={activeProfile.name} relationship={activeProfile.relationship} onSwitchProfile={handleSwitchProfile} />
+      )}
+      {renderRoute()}
+    </>
+  );
 }
 
