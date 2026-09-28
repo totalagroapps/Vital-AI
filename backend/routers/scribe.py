@@ -415,7 +415,7 @@ async def list_scribe_templates():
 
 
 @router.post("/generate_soap", response_model=GenerateSoapResponse)
-async def generate_soap_note(req: GenerateSoapRequest):
+async def generate_soap_note(req: GenerateSoapRequest, current_user: models.User = Depends(get_current_user)):
     """
     Genera una nota médica estructurada SOAP con códigos CIE-10 y una 'Hoja Clara de Cuidados'
     para el paciente a partir del texto dictado o notas de consulta.
@@ -424,7 +424,7 @@ async def generate_soap_note(req: GenerateSoapRequest):
 
 
 @router.post("/prepare_consultation", response_model=PrepareConsultationResponse)
-async def prepare_consultation(req: PrepareConsultationRequest):
+async def prepare_consultation(req: PrepareConsultationRequest, current_user: models.User = Depends(get_current_user)):
     """
     Módulo para el paciente: Genera una guía de 1 página para preparar su cita médica,
     organizando sus preocupaciones en un discurso rápido de 2 minutos, cronograma de síntomas

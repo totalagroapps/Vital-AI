@@ -1252,6 +1252,8 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
         onClose={() => setShowScribeModal(false)}
         initialMode="doctor"
         patientData={selectedPatient}
+        apiUrl={apiUrl}
+        authHeaders={authHeaders}
       />
     </div>
   );

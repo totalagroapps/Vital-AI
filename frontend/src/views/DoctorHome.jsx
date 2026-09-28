@@ -393,6 +393,8 @@ const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }
       onClose={() => setShowScribeModal(false)}
       initialMode="doctor"
       patientData={doctorProfile}
+      apiUrl={apiUrl}
+      authHeaders={authHeaders}
     />
 
     <PreventiveCalendarModal

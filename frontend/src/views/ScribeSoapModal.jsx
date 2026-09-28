@@ -19,7 +19,9 @@ import {
   Pill,
   HelpCircle,
   Calendar,
-  Share2
+  Share2,
+  Save,
+  Loader2
 } from "lucide-react";
 import { printHtmlContent, escapeHtml } from "../utils/printPdf";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -33,7 +35,7 @@ const TEMPLATES = [
   { id: "digestive", nameKey: "scribe_tpl_digestive", specialtyKey: "scribe_tpl_digestive_desc", icon: Compass },
 ];
 
-export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = "doctor", patientData = null }) {
+export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = "doctor", patientData = null, apiUrl = "", authHeaders = {} }) {
   const { t, language, locale } = useLanguage();
   const [activeTab, setActiveTab] = useState(initialMode === "patient" ? "patient_prep" : "soap_scribe");
   const [selectedTemplate, setSelectedTemplate] = useState("general");
@@ -52,6 +54,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
   const [loadingSoap, setLoadingSoap] = useState(false);
   const [soapResult, setSoapResult] = useState(null);
   const [soapViewSubtab, setSoapViewSubtab] = useState("soap"); // "soap" or "patient_sheet"
+  const [isSavingHistory, setIsSavingHistory] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);
 
   // Patient Prep State
@@ -142,11 +145,12 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
         },
       };
 
-      const res = await fetch("/api/scribe/generate_soap", {
+      const res = await fetch(`${apiUrl}/api/scribe/generate_soap`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...authHeaders
         },
         body: JSON.stringify(payload),
       });
@@ -170,11 +174,12 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
     }
     setLoadingPrep(true);
     try {
-      const res = await fetch("/api/scribe/prepare_consultation", {
+      const res = await fetch(`${apiUrl}/api/scribe/prepare_consultation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...authHeaders
         },
         body: JSON.stringify({
           main_concerns: mainConcerns,
@@ -207,6 +212,67 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
   const templateLabel = (id, fallback) => {
     const tmpl = TEMPLATES.find((x) => x.id === id);
     return tmpl ? t(tmpl.nameKey) : fallback;
+  };
+
+  const handleSaveToHistory = async () => {
+    if (!soapResult) return;
+    if (!patientData || !patientData.user_id) {
+      alert("No hay paciente seleccionado para guardar la nota.");
+      return;
+    }
+    
+    setIsSavingHistory(true);
+    try {
+      const { soap_note, suggested_icd10, template_name } = soapResult;
+      
+      const markdownContent = `# NOTA CLÍNICA (MIVOR Scribe)
+Fecha: ${new Date().toLocaleDateString(locale || 'es')}
+Plantilla: ${templateLabel(selectedTemplate, template_name)}
+
+## S - Subjetivo
+${soap_note.subjective || ''}
+
+## O - Objetivo
+${soap_note.objective || ''}
+
+## A - Análisis / Evaluación
+${soap_note.assessment || ''}
+CIE-10 Sugeridos: ${(suggested_icd10 || []).join(', ')}
+
+## P - Plan
+${soap_note.plan || ''}
+`;
+      
+      const blob = new Blob([markdownContent], { type: "text/markdown" });
+      const formData = new FormData();
+      formData.append("file", blob, `Nota_Clinica_Scribe_${new Date().getTime()}.md`);
+      formData.append("document_type", "note");
+      formData.append("notes", "Generado automáticamente desde MIVOR Scribe");
+
+      const safeHeaders = { ...authHeaders };
+      delete safeHeaders["Content-Type"];
+      
+      if (token && !safeHeaders["Authorization"]) {
+        safeHeaders["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${apiUrl}/api/patients/${patientData.user_id}/documents`, {
+        method: "POST",
+        headers: safeHeaders,
+        body: formData,
+      });
+
+      if (res.ok) {
+        alert("✅ Nota clínica guardada exitosamente en el historial del paciente.");
+      } else {
+        alert("Error al guardar la nota en el historial.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Fallo de conexión al guardar el historial.");
+    } finally {
+      setIsSavingHistory(false);
+    }
   };
 
   const handlePrintSoap = () => {
