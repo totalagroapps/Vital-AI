@@ -12,7 +12,7 @@ import remarkGfm from 'remark-gfm';
 import PatientHome from './views/PatientHome';
 import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
-import ProfileSelector from './views/ProfileSelector';
+import ProfileSelector, { profileDisplayName } from './views/ProfileSelector';
 import CaregiverBanner from './components/CaregiverBanner';
 
 import DocumentAnalyzer from './views/DocumentAnalyzer';
@@ -84,6 +84,7 @@ export default function App() {
   // Perfil familiar activo (Modo Cuidador) y si la cuenta tiene más de un perfil para elegir
   const [activeProfile, setActiveProfile] = useState(null);
   const [hasFamilyProfiles, setHasFamilyProfiles] = useState(false);
+  const [profileManageMode, setProfileManageMode] = useState(false);
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
   useEffect(() => {
     if (tokenAvailableSync) return;
@@ -522,10 +523,11 @@ export default function App() {
 
   const handleProfileSelect = (profile, profileCount = 1) => {
     resetProfileData();
+    setProfileManageMode(false);
     setHasFamilyProfiles(profileCount > 1);
     if (profile && !profile.is_self) {
       setTargetPatientId(profile.user_id);
-      setActiveProfile({ name: (profile.full_name || '').split(' ')[0] || profile.relationship, relationship: profile.relationship });
+      setActiveProfile({ name: profileDisplayName(profile), relationship: profile.relationship });
     } else {
       setTargetPatientId(null);
       setActiveProfile(null);
@@ -533,10 +535,11 @@ export default function App() {
     setProfileSelected(true);
   };
 
-  const handleSwitchProfile = () => {
+  const handleSwitchProfile = (manage = false) => {
     resetProfileData();
     setTargetPatientId(null);
     setActiveProfile(null);
+    setProfileManageMode(manage === true);
     setProfileSelected(false);
     navigate('/paciente');
   };
@@ -1264,7 +1267,7 @@ export default function App() {
   }
 
   if (token && !profileSelected && path !== '/login') {
-    return <ProfileSelector apiUrl={API_URL} authHeaders={authHeaders} onProfileSelect={handleProfileSelect} />;
+    return <ProfileSelector apiUrl={API_URL} authHeaders={authHeaders} onProfileSelect={handleProfileSelect} startInManageMode={profileManageMode} />;
   }
 
   if (path === '/login') {
@@ -1368,7 +1371,8 @@ export default function App() {
         <PatientMore 
           onNavigate={handleBottomNav} 
           onLogout={handleLogout} 
-          onSwitchProfile={hasFamilyProfiles ? handleSwitchProfile : undefined}
+          onSwitchProfile={hasFamilyProfiles ? () => handleSwitchProfile() : undefined}
+          onManageProfiles={() => handleSwitchProfile(true)}
         />
       </>
     );
@@ -1705,7 +1709,7 @@ export default function App() {
   return (
     <>
       {token && profileSelected && activeProfile && (
-        <CaregiverBanner name={activeProfile.name} relationship={activeProfile.relationship} onSwitchProfile={handleSwitchProfile} />
+        <CaregiverBanner name={activeProfile.name} relationship={activeProfile.relationship} onSwitchProfile={() => handleSwitchProfile()} />
       )}
       {renderRoute()}
     </>

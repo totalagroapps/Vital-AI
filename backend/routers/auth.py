@@ -5,6 +5,7 @@ import uuid
 import logging
 from collections import defaultdict
 from typing import Optional, List
+from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -296,3 +297,56 @@ async def get_user_profiles(user_id: str = Depends(get_authenticated_user_id), d
         })
         
     return {"profiles": profiles}
+
+
+class LinkFamilyRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=255)
+    password: str = Field(..., min_length=1, max_length=255)
+    relationship: Optional[str] = Field(None, max_length=50)
+
+
+@router.post("/api/auth/profiles/link")
+async def link_family_profile(payload: LinkFamilyRequest, request: Request, user_id: str = Depends(get_authenticated_user_id), db: AsyncSession = Depends(get_db)):
+    """
+    Vincula la cuenta de un familiar para administrarla (Modo Cuidador).
+    Se exigen las credenciales del familiar como prueba de su consentimiento.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    apply_login_rate_limit(client_ip)
+
+    patient = await find_user_by_username(db, payload.username)
+    if not patient or not verify_password(payload.password, patient.hashed_password):
+        raise HTTPException(status_code=400, detail="Correo o contraseña del familiar incorrectos")
+    if patient.id == user_id:
+        raise HTTPException(status_code=400, detail="No puedes vincular tu propia cuenta")
+    if patient.role != "patient":
+        raise HTTPException(status_code=400, detail="Solo se pueden vincular cuentas de paciente")
+
+    existing = await db.execute(select(models.CaregiverPatientLink).where(
+        models.CaregiverPatientLink.caregiver_id == user_id,
+        models.CaregiverPatientLink.patient_id == patient.id,
+    ))
+    if existing.scalars().first():
+        raise HTTPException(status_code=409, detail="Este familiar ya está vinculado")
+
+    relationship = (payload.relationship or "").strip() or "Familiar"
+    db.add(models.CaregiverPatientLink(caregiver_id=user_id, patient_id=patient.id, relationship=relationship))
+    await db.commit()
+    logger.info(f"caregiver {user_id} linked patient {patient.id} ({relationship})")
+    return {"ok": True, "patient_id": patient.id}
+
+
+@router.delete("/api/auth/profiles/{patient_id}")
+async def unlink_family_profile(patient_id: str, user_id: str = Depends(get_authenticated_user_id), db: AsyncSession = Depends(get_db)):
+    """Deja de administrar a un familiar. Solo borra el vínculo; la cuenta del familiar no se toca."""
+    result = await db.execute(select(models.CaregiverPatientLink).where(
+        models.CaregiverPatientLink.caregiver_id == user_id,
+        models.CaregiverPatientLink.patient_id == patient_id,
+    ))
+    link = result.scalars().first()
+    if not link:
+        raise HTTPException(status_code=404, detail="Vínculo no encontrado")
+    await db.delete(link)
+    await db.commit()
+    logger.info(f"caregiver {user_id} unlinked patient {patient_id}")
+    return {"ok": True}

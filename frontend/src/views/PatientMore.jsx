@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientMore = ({ onNavigate, onLogout, onSwitchProfile }) => {
+const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles }) => {
   const { t } = useLanguage();
 
   // Cada opción lleva a una pantalla real; las que aún no existen se muestran como «Próximamente»
@@ -25,7 +25,7 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile }) => {
       title: t('security_and_family'),
       items: [
         { icon: <AlertCircle size={20} />, title: t('sos_button'), desc: t('configure_emergency_alerts'), color: 'text-red-500', bg: 'bg-red-50' },
-        { icon: <Users size={20} />, title: t('family_network'), desc: t('add_caregivers'), color: 'text-violet-600', bg: 'bg-violet-50' },
+        { icon: <Users size={20} />, title: t('family_network'), desc: t('add_caregivers'), action: onManageProfiles, color: 'text-violet-600', bg: 'bg-violet-50' },
         { icon: <Shield size={20} />, title: t('medical_insurance'), desc: t('manage_policy_coverage'), screen: 'history', color: 'text-brand', bg: 'bg-mivor-blueSoft' }
       ]
     },
@@ -59,16 +59,18 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile }) => {
             <div key={idx}>
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-2">{section.title}</h3>
               <div className="bg-white rounded-3xl shadow-soft border border-slate-100 overflow-hidden">
-                {section.items.map((item, i) => (
+                {section.items.map((item, i) => {
+                  const handler = item.action || (item.screen ? () => onNavigate(item.screen) : undefined);
+                  return (
                   <button
                     key={i}
                     type="button"
-                    onClick={item.screen ? () => onNavigate(item.screen) : undefined}
-                    disabled={!item.screen}
-                    aria-disabled={!item.screen}
-                    className={`w-full flex items-center justify-between p-4 transition-colors text-left ${item.screen ? 'hover:bg-slate-50 cursor-pointer' : 'cursor-default'} ${i !== section.items.length - 1 ? 'border-b border-slate-100' : ''}`}
+                    onClick={handler}
+                    disabled={!handler}
+                    aria-disabled={!handler}
+                    className={`w-full flex items-center justify-between p-4 transition-colors text-left ${handler ? 'hover:bg-slate-50 cursor-pointer' : 'cursor-default'} ${i !== section.items.length - 1 ? 'border-b border-slate-100' : ''}`}
                   >
-                    <div className={`flex items-center gap-4 ${item.screen ? '' : 'opacity-60'}`}>
+                    <div className={`flex items-center gap-4 ${handler ? '' : 'opacity-60'}`}>
                       <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${item.bg} ${item.color}`}>
                         {item.icon}
                       </div>
@@ -77,13 +79,14 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile }) => {
                         <p className="text-[11px] text-slate-500">{item.desc}</p>
                       </div>
                     </div>
-                    {item.screen ? (
+                    {handler ? (
                       <ChevronRight size={18} className="text-slate-300" />
                     ) : (
                       <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500 bg-slate-100 px-2 py-1 rounded-full shrink-0">{t('coming_soon_badge')}</span>
                     )}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
