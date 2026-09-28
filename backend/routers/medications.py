@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -8,6 +7,7 @@ from sqlalchemy import select
 import models
 from database import get_db
 from security import get_current_user_id
+from services.medication_alerts import now_local
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ async def get_medications(
     current_user_id: str = Depends(get_current_user_id)
 ):
     if not date:
-        date = datetime.now().strftime('%Y-%m-%d')
+        date = now_local().strftime('%Y-%m-%d')
     q = await db.execute(
         select(models.MedicationReminder).where(
             models.MedicationReminder.user_id == current_user_id,
@@ -94,8 +94,8 @@ async def log_medication(
     if not med:
         raise HTTPException(status_code=404, detail="Recordatorio de medicación no encontrado.")
 
-    date = datetime.now().strftime('%Y-%m-%d')
-    time_str = datetime.now().strftime('%H:%M')
+    date = now_local().strftime('%Y-%m-%d')
+    time_str = now_local().strftime('%H:%M')
 
     # Validar duplicado para este usuario y medicamento hoy (Punto 8)
     q = await db.execute(
@@ -126,7 +126,7 @@ async def unlog_medication(
     db: AsyncSession = Depends(get_db),
     current_user_id: str = Depends(get_current_user_id)
 ):
-    date = datetime.now().strftime('%Y-%m-%d')
+    date = now_local().strftime('%Y-%m-%d')
     # Validar ownership y devolver 404 si no existe (Punto 7)
     q = await db.execute(
         select(models.MedicationLog).where(

@@ -11,7 +11,8 @@ from sqlalchemy import select, desc
 
 import models
 from database import get_db
-from security import get_current_user, resolve_target_patient_id
+from security import get_current_user, resolve_target_patient_id, get_authenticated_user_id
+from services.medication_alerts import pending_medications, now_local
 
 logger = logging.getLogger("caregiver")
 
@@ -297,3 +298,39 @@ async def upload_family_photo(
         "message": "Foto familiar compartida con éxito.",
         "photo": new_photo
     }
+
+
+@router.get("/medication-alerts")
+async def get_medication_alerts(
+    user_id: str = Depends(get_authenticated_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Tomas de medicación vencidas y sin registrar de los familiares que administra el usuario
+    (CaregiverPatientLink). Usa la identidad real, aunque esté viendo el perfil de un familiar.
+    """
+    now = now_local()
+    links = (await db.execute(
+        select(models.CaregiverPatientLink).where(models.CaregiverPatientLink.caregiver_id == user_id)
+    )).scalars().all()
+
+    alerts = []
+    for link in links:
+        pending = await pending_medications(db, link.patient_id, now)
+        if not pending:
+            continue
+        profile = (await db.execute(
+            select(models.PatientProfile).where(models.PatientProfile.user_id == link.patient_id)
+        )).scalars().first()
+        patient_user = await db.get(models.User, link.patient_id)
+        full_name = (profile.full_name if profile else None) or (patient_user.username if patient_user else None) or "Familiar"
+        for item in pending:
+            alerts.append({
+                **item,
+                "patient_id": link.patient_id,
+                "patient_name": full_name,
+                "relationship": link.relationship or "Familiar",
+            })
+
+    alerts.sort(key=lambda a: -a["minutes_late"])
+    return {"alerts": alerts, "checked_at": now.isoformat()}

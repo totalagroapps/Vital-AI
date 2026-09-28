@@ -18,6 +18,7 @@ from database import get_db
 from security import verify_password, get_password_hash, create_access_token, get_current_user_id, get_authenticated_user_id
 from schemas.requests import RegisterRequest
 from storage import s3_client, R2_BUCKET_NAME
+from services.medication_alerts import pending_medications
 
 logger = logging.getLogger('media_v2')
 
@@ -293,7 +294,8 @@ async def get_user_profiles(user_id: str = Depends(get_authenticated_user_id), d
             "is_self": False,
             "full_name": (patient_profile.full_name if patient_profile else None) or (patient_user.username if patient_user else "Familiar"),
             "photo_url": None,
-            "relationship": link.relationship or "Familiar"
+            "relationship": link.relationship or "Familiar",
+            "pending_medications": len(await pending_medications(db, link.patient_id)),
         })
         
     return {"profiles": profiles}

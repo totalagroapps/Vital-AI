@@ -86,6 +86,8 @@ export default function App() {
   const [activeProfile, setActiveProfile] = useState(null);
   const [hasFamilyProfiles, setHasFamilyProfiles] = useState(false);
   const [profileManageMode, setProfileManageMode] = useState(false);
+  // Tomas de medicación vencidas de los familiares que administra esta cuenta (Modo Cuidador)
+  const [medicationAlerts, setMedicationAlerts] = useState([]);
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
   useEffect(() => {
     if (tokenAvailableSync) return;
@@ -556,6 +558,7 @@ export default function App() {
     setTargetPatientId(null);
     setActiveProfile(null);
     setHasFamilyProfiles(false);
+    setMedicationAlerts([]);
     setUsername(null);
     setViewMode('patient');
     clearToken();
@@ -608,6 +611,32 @@ export default function App() {
       fetchPatientProfile();
       fetchHistory();
     }
+  }, [token, profileSelected, targetPatientId]);
+
+  // Avisos de medicación para el cuidador: al entrar, al cambiar de perfil y cada 5 minutos
+  useEffect(() => {
+    if (!token || !profileSelected) return undefined;
+    let cancelled = false;
+    const loadAlerts = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/caregiver/medication-alerts`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setMedicationAlerts(data.alerts || []);
+      } catch (e) {
+        console.error('Error fetching medication alerts:', e);
+      }
+    };
+    loadAlerts();
+    const timer = setInterval(loadAlerts, 5 * 60 * 1000);
+    window.addEventListener('mivor:medications-changed', loadAlerts);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener('mivor:medications-changed', loadAlerts);
+    };
   }, [token, profileSelected, targetPatientId]);
 
   const authHeaders = {
@@ -1720,6 +1749,15 @@ export default function App() {
     hasFamilyProfiles: Boolean(token && profileSelected && hasFamilyProfiles),
     activeProfile: token && profileSelected ? activeProfile : null,
     switchProfile: () => handleSwitchProfile(),
+    medicationAlerts: token && profileSelected ? medicationAlerts : [],
+    // Desde un aviso: entra al perfil del familiar y abre su pantalla de tratamientos
+    openFamilyMedications: (alert) => {
+      handleProfileSelect(
+        { user_id: alert.patient_id, full_name: alert.patient_name, relationship: alert.relationship, is_self: false },
+        2,
+      );
+      navigate('/paciente/tratamientos');
+    },
   };
 
   return (

@@ -6,6 +6,8 @@ export const FamilyProfileContext = createContext({
   hasFamilyProfiles: false,
   activeProfile: null,
   switchProfile: null,
+  medicationAlerts: [],
+  openFamilyMedications: null,
 });
 
 export const useFamilyProfile = () => useContext(FamilyProfileContext);

@@ -120,6 +120,8 @@ export default function PatientTreatments({
       } else {
         await fetch(`${apiUrl}/api/medications/${med.id}/log`, { method: 'POST', headers: authHeaders });
       }
+      // Actualiza al momento los avisos de medicación del cuidador (campana y selector de perfiles)
+      window.dispatchEvent(new Event('mivor:medications-changed'));
     } catch (e) {
       console.error(e);
       // Revert on error

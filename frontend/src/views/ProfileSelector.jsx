@@ -118,6 +118,11 @@ export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect, 
                 ) : (
                   <User size={48} className="text-slate-500" />
                 )}
+                {!isManaging && profile.pending_medications > 0 && (
+                  <div className="absolute top-1.5 right-1.5 flex items-center gap-1 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-black text-white shadow">
+                    {profile.pending_medications} {profile.pending_medications === 1 ? 'toma pendiente' : 'tomas pendientes'}
+                  </div>
+                )}
                 {/* Badge for relationships */}
                 {!profile.is_self && (
                   <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-[10px] font-bold text-center py-1 uppercase tracking-wider text-blue-200">
