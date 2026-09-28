@@ -4,6 +4,8 @@ import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
+import MedicationAlertOverlay from '../components/MedicationAlertOverlay';
+
 
 export default function PatientTreatments({ 
   apiUrl, 
@@ -15,6 +17,8 @@ export default function PatientTreatments({
 }) {
   const { t, locale } = useLanguage();
   const [medications, setMedications] = useState([]);
+  const [snoozedMeds, setSnoozedMeds] = useState([]);
+  const [forceAlert, setForceAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newMed, setNewMed] = useState({ medication_name: '', dosage: '', frequency: '', time_of_day: '' });
@@ -235,6 +239,24 @@ export default function PatientTreatments({
   };
 
   return (
+    <>
+
+      {/* MIVOR Adherencia (Pastillero Gigante) */}
+      {(forceAlert || (medications && medications.some(m => !m.taken_today && m.is_active && !snoozedMeds.includes(m.id)))) && (
+        <MedicationAlertOverlay
+          medications={forceAlert ? medications : medications.filter(m => !snoozedMeds.includes(m.id))}
+          onMarkTaken={(id) => {
+            const med = medications.find(m => m.id === id);
+            if (med) toggleTaken(med);
+            setForceAlert(false);
+          }}
+          onDismiss={(id) => {
+            setSnoozedMeds([...snoozedMeds, id]);
+            setForceAlert(false);
+          }}
+        />
+      )}
+
     <div className="flex flex-col min-h-screen bg-base font-sans relative pb-28 overflow-x-hidden">
       {/* Top Navbar Unificado */}
       <PatientTopNav
@@ -269,7 +291,14 @@ export default function PatientTreatments({
               {t("treatments")}
             </h2>
           </div>
-          <div className="w-10"></div>
+          
+          <button 
+            onClick={() => setForceAlert(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 text-red-600 rounded-full text-xs font-bold active:scale-95 transition-transform cursor-pointer"
+          >
+            <BellRing size={14} /> PROBAR ALARMA
+          </button>
+    
         </div>
 
         <div className="mb-6 relative max-w-full md:max-w-[75%]">
@@ -486,5 +515,6 @@ export default function PatientTreatments({
       </div>
       <BottomNav activeTab="treatments" onTabChange={(tab) => onNavigate(tab)} />
     </div>
+    </>
   );
 }
