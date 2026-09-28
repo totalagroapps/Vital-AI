@@ -528,7 +528,7 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
   );
 
   if (doctorScreen === 'home') {
-    return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} />;
+    return <DoctorHome onNavigate={setDoctorScreen} onLogout={onLogout} doctorProfile={doctorProfile} apiUrl={apiUrl} authHeaders={authHeaders} />;
   }
 
   return (
