@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 import bcrypt
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from dotenv import load_dotenv
 from sqlalchemy.future import select
@@ -60,7 +60,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
+async def get_authenticated_user_id(token: str = Depends(oauth2_scheme)) -> str:
+    """ID del usuario dueño del token (sin tener en cuenta el perfil familiar seleccionado)."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="No se pudieron validar las credenciales de acceso",
@@ -76,6 +77,38 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)) -> str:
     
     return user_id
 
+
+TARGET_PATIENT_HEADER = "X-Target-Patient-Id"
+
+
+async def _resolve_acting_user_id(request: Request, real_user_id: str, db: AsyncSession) -> str:
+    """
+    Perfiles tipo Netflix: si el cliente envía X-Target-Patient-Id y el usuario autenticado
+    es cuidador vinculado de ese paciente (CaregiverPatientLink), se actúa como ese paciente.
+    """
+    target = (request.headers.get(TARGET_PATIENT_HEADER) or "").strip()
+    if not target or target == real_user_id:
+        return real_user_id
+    link = await db.execute(
+        select(models.CaregiverPatientLink).where(
+            models.CaregiverPatientLink.caregiver_id == real_user_id,
+            models.CaregiverPatientLink.patient_id == target,
+        )
+    )
+    if link.scalars().first() is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="No tienes acceso a este perfil familiar.")
+    audit_logger.info(f"caregiver {real_user_id} acting as patient {target} on {request.method} {request.url.path}")
+    return target
+
+
+async def get_current_user_id(
+    request: Request,
+    real_user_id: str = Depends(get_authenticated_user_id),
+    db: AsyncSession = Depends(database.get_db),
+) -> str:
+    """ID efectivo: el del perfil familiar seleccionado (si hay vínculo) o el del propio usuario."""
+    return await _resolve_acting_user_id(request, real_user_id, db)
+
 async def get_optional_current_user_id(token: Optional[str] = Depends(oauth2_scheme_optional)) -> Optional[str]:
     if not token:
         return None
@@ -86,13 +119,13 @@ async def get_optional_current_user_id(token: Optional[str] = Depends(oauth2_sch
         return None
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    user_id: str = Depends(get_current_user_id),
     db: AsyncSession = Depends(database.get_db)
 ) -> models.User:
     """
     Recupera el usuario autenticado desde la base de datos validando identidad y rol.
+    Si hay un perfil familiar seleccionado (X-Target-Patient-Id), devuelve ese paciente.
     """
-    user_id = await get_current_user_id(token)
     result = await db.execute(
         select(models.User).where((models.User.id == user_id) | (models.User.username == user_id))
     )
@@ -238,10 +271,10 @@ async def resolve_target_patient_id(db: AsyncSession, user: models.User, patient
     """
     if not patient_id:
         return user.id
-    if user.role not in ("doctor", "admin", "caregiver") and str(user.id) != str(patient_id):
-        # Allow checking if there's a family link even if they are 'patient' role
-        # We will let `assert_patient_access` do the check.
-        pass
+    if user.role not in ("doctor", "admin"):
+        # Un familiar vinculado (CaregiverPatientLink) puede consultar a su paciente;
+        # cualquier otro usuario sigue operando sobre sí mismo.
+        return patient_id if await can_access_patient_data(db, user, patient_id) else user.id
     await assert_patient_access(db, user, patient_id)
     return patient_id
 

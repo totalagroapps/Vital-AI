@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { User, ChevronRight, Users, Loader2 } from 'lucide-react';
+import { User, Users, Loader2 } from 'lucide-react';
 
 export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect }) {
   const [profiles, setProfiles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProfiles();
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${apiUrl}/api/auth/profiles`, { headers: authHeaders });
+        if (!res.ok) throw new Error(`Error fetching profiles (${res.status})`);
+        const data = await res.json();
+        const list = data.profiles || [];
+        if (cancelled) return;
+        // Con un solo perfil (el propio) no hace falta mostrar el selector.
+        if (list.length <= 1) {
+          onProfileSelect(null);
+          return;
+        }
+        setProfiles(list);
+        setIsLoading(false);
+      } catch (e) {
+        console.error(e);
+        // Fallback: si falla, entra con su propio perfil
+        if (!cancelled) onProfileSelect(null);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
-
-  const fetchProfiles = async () => {
-    try {
-      const res = await fetch(`${apiUrl}/api/auth/profiles`, { headers: authHeaders });
-      if (!res.ok) throw new Error("Error fetching profiles");
-      const data = await res.json();
-      setProfiles(data.profiles || []);
-    } catch (e) {
-      console.error(e);
-      // Fallback: Just let them in if it fails
-      onProfileSelect(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -30,12 +36,6 @@ export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect }
         <Loader2 className="animate-spin text-white w-10 h-10" />
       </div>
     );
-  }
-
-  // If there's only 1 profile, skip the screen entirely.
-  if (profiles.length <= 1) {
-    onProfileSelect(null); // 'null' means use self (no Target-Patient-Id needed)
-    return null;
   }
 
   return (
@@ -72,7 +72,7 @@ export default function ProfileSelector({ apiUrl, authHeaders, onProfileSelect }
             </div>
             
             <h3 className="text-base sm:text-lg font-bold text-slate-200 group-hover:text-white text-center line-clamp-1 max-w-[120px] sm:max-w-[140px]">
-              {profile.full_name.split(' ')[0]}
+              {(profile.full_name || '').split(' ')[0] || profile.relationship}
             </h3>
           </div>
         ))}
