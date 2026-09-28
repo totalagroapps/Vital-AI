@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip, Printer } from 'lucide-react';
+import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip, Printer, BellRing } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import PatientTopNav from '../components/PatientTopNav';
