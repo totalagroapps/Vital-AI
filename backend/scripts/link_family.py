@@ -1,11 +1,11 @@
 import sys
 import asyncio
 from sqlalchemy import select
-from database import SessionLocal
+from database import AsyncSessionLocal
 import models
 
 async def link_accounts(caregiver_username, patient_username, relationship):
-    async with SessionLocal() as db:
+    async with AsyncSessionLocal() as db:
         # Find Caregiver
         cg = await db.execute(select(models.User).where(models.User.username == caregiver_username))
         cg = cg.scalars().first()
