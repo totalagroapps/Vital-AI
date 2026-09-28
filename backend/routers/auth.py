@@ -251,7 +251,7 @@ async def get_me(user_id: str=Depends(get_current_user_id), db: AsyncSession=Dep
 
 
 
-@router.get("/profiles")
+@router.get("/api/auth/profiles")
 async def get_user_profiles(user_id: str = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
     """
     Devuelve los perfiles familiares que este usuario puede administrar.
