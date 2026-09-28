@@ -1222,6 +1222,10 @@ export default function App() {
     return <Navigate to="/login" />;
   }
 
+  if (token && !profileSelected && path !== '/login') {
+    return <ProfileSelector apiUrl={API_URL} authHeaders={authHeaders} onProfileSelect={(id) => { setTargetPatientId(id); setProfileSelected(true); }} />;
+  }
+
   if (path === '/login') {
     if (token) return <Navigate to={viewMode === 'doctor' ? '/medico' : (viewMode === 'verifier' ? '/verificador' : '/paciente')} />;
     return (
