@@ -105,6 +105,11 @@ export default function App() {
   const [specialistFilters, setSpecialistFilters] = useState(null);
 
   const handleNavigate = (screen) => {
+    // Perfiles familiares (Modo Cuidador): abre el selector en modo administración
+    if (screen === 'family_profiles') {
+      handleSwitchProfile(true);
+      return;
+    }
     if (screen === 'doctors' || screen === 'specialists') {
       navigate('/paciente/especialistas');
       return;
@@ -1314,6 +1319,10 @@ export default function App() {
     : 'home';
 
   const handleBottomNav = (tab) => {
+    if (tab === 'family_profiles') {
+      handleSwitchProfile(true);
+      return;
+    }
     if (tab === 'home') navigate('/paciente');
     if (tab === 'ai' || tab === 'triage') {
       startTriageSession();

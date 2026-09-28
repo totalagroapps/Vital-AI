@@ -11,7 +11,8 @@ import {
   LogOut, 
   QrCode, 
   Pill,
-  Shield
+  Shield,
+  HeartHandshake
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import SupportModal from './SupportModal';
@@ -236,6 +237,15 @@ export default function PatientTopNav({
                   >
                     <Users size={15} className="text-emerald-600" />
                     <span>{t('patienttopnav_conectar_con_especialistas')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => { setShowUserMenu(false); handleTabClick('family_profiles'); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-violet-50 hover:text-violet-700 transition-colors text-left"
+                  >
+                    <HeartHandshake size={15} className="text-violet-600" />
+                    <span>Red familiar · Administrar perfiles</span>
                   </button>
                 </div>
 
