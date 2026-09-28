@@ -13,6 +13,9 @@ from database import get_db
 from security import get_current_user
 from services.language_service import language_directive
 from services.localize_service import localize_fields
+from services.note_templates import fill_template_with_llm, parse_fields, MAX_TEMPLATE_CHARS
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger("scribe")
 
@@ -479,3 +482,139 @@ async def prepare_consultation(req: PrepareConsultationRequest, current_user: mo
     }
     guide = await localize_fields(guide, req.language or "es", list(guide.keys()))
     return PrepareConsultationResponse(**guide)
+
+
+
+# ============================================================================
+# PLANTILLAS PERSONALES DEL MÉDICO (ESTILO MEDALLY)
+# ============================================================================
+
+TEMPLATE_EDITOR_ROLES = ("doctor", "admin")
+
+
+class NoteTemplateIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    shortcut: Optional[str] = Field(default=None, max_length=30)
+    body: str = Field(min_length=1, max_length=MAX_TEMPLATE_CHARS)
+
+
+class NoteTemplateOut(BaseModel):
+    id: str
+    name: str
+    shortcut: Optional[str] = None
+    body: str
+
+
+class FillTemplateRequest(BaseModel):
+    template_body: str = Field(min_length=1, max_length=MAX_TEMPLATE_CHARS)
+    consultation_text: str = Field(min_length=5)
+    patient_name: Optional[str] = None
+    patient_age: Optional[int] = None
+    patient_gender: Optional[str] = None
+    vital_signs: Optional[Dict[str, Any]] = None
+    language: Optional[str] = None
+
+
+def _require_template_editor(user: models.User):
+    if user.role not in TEMPLATE_EDITOR_ROLES:
+        raise HTTPException(status_code=403, detail="Las plantillas de informe son solo para médicos.")
+
+
+def _normalize_shortcut(shortcut: Optional[str]) -> Optional[str]:
+    value = (shortcut or "").strip().lower().lstrip("/")
+    value = re.sub(r"\s+", "-", value)
+    return value or None
+
+
+def _template_out(t: models.DoctorNoteTemplate) -> NoteTemplateOut:
+    return NoteTemplateOut(id=t.id, name=t.name, shortcut=t.shortcut, body=t.body)
+
+
+async def _get_own_template(db: AsyncSession, user: models.User, template_id: str) -> models.DoctorNoteTemplate:
+    result = await db.execute(select(models.DoctorNoteTemplate).where(
+        models.DoctorNoteTemplate.id == template_id,
+        models.DoctorNoteTemplate.user_id == user.id,
+    ))
+    template = result.scalars().first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Plantilla no encontrada")
+    return template
+
+
+async def _check_shortcut_free(db: AsyncSession, user: models.User, shortcut: Optional[str], exclude_id: Optional[str] = None):
+    if not shortcut:
+        return
+    query = select(models.DoctorNoteTemplate).where(
+        models.DoctorNoteTemplate.user_id == user.id,
+        models.DoctorNoteTemplate.shortcut == shortcut,
+    )
+    if exclude_id:
+        query = query.where(models.DoctorNoteTemplate.id != exclude_id)
+    if (await db.execute(query)).scalars().first():
+        raise HTTPException(status_code=409, detail=f"Ya tienes otra plantilla con el atajo /{shortcut}")
+
+
+@router.get("/my-templates", response_model=List[NoteTemplateOut])
+async def list_my_templates(current_user: models.User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    _require_template_editor(current_user)
+    result = await db.execute(
+        select(models.DoctorNoteTemplate)
+        .where(models.DoctorNoteTemplate.user_id == current_user.id)
+        .order_by(models.DoctorNoteTemplate.name)
+    )
+    return [_template_out(t) for t in result.scalars().all()]
+
+
+@router.post("/my-templates", response_model=NoteTemplateOut)
+async def create_my_template(payload: NoteTemplateIn, current_user: models.User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    _require_template_editor(current_user)
+    shortcut = _normalize_shortcut(payload.shortcut)
+    await _check_shortcut_free(db, current_user, shortcut)
+    template = models.DoctorNoteTemplate(user_id=current_user.id, name=payload.name.strip(), shortcut=shortcut, body=payload.body)
+    db.add(template)
+    await db.commit()
+    return _template_out(template)
+
+
+@router.put("/my-templates/{template_id}", response_model=NoteTemplateOut)
+async def update_my_template(template_id: str, payload: NoteTemplateIn, current_user: models.User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    _require_template_editor(current_user)
+    template = await _get_own_template(db, current_user, template_id)
+    shortcut = _normalize_shortcut(payload.shortcut)
+    await _check_shortcut_free(db, current_user, shortcut, exclude_id=template.id)
+    template.name = payload.name.strip()
+    template.shortcut = shortcut
+    template.body = payload.body
+    await db.commit()
+    return _template_out(template)
+
+
+@router.delete("/my-templates/{template_id}")
+async def delete_my_template(template_id: str, current_user: models.User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    _require_template_editor(current_user)
+    template = await _get_own_template(db, current_user, template_id)
+    await db.delete(template)
+    await db.commit()
+    return {"ok": True}
+
+
+@router.post("/fill_template")
+async def fill_template(req: FillTemplateRequest, current_user: models.User = Depends(get_current_user)):
+    """
+    Rellena una plantilla personal a partir del dictado. Devuelve {values: {id_campo: valor}};
+    los campos que el dictado no menciona quedan vacíos para que el médico los complete.
+    """
+    _require_template_editor(current_user)
+    lines = []
+    if req.patient_name: lines.append(f"Paciente: {req.patient_name}")
+    if req.patient_age: lines.append(f"Edad: {req.patient_age} años")
+    if req.patient_gender: lines.append(f"Género: {req.patient_gender}")
+    vitals = {k: v for k, v in (req.vital_signs or {}).items() if v}
+    if vitals: lines.append(f"Constantes: {json.dumps(vitals, ensure_ascii=False)}")
+    context = "\n".join(lines)
+    values = await fill_template_with_llm(req.template_body, req.consultation_text, context, req.language)
+    return {
+        "values": values,
+        "field_count": len(parse_fields(req.template_body)),
+        "ai_available": bool(os.getenv("OPENAI_API_KEY")),
+    }

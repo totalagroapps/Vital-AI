@@ -95,6 +95,21 @@ class CaregiverPatientLink(Base):
     relationship = Column(String, nullable=True) # e.g. "Padre", "Madre"
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class DoctorNoteTemplate(Base):
+    """
+    Plantilla de informe personal del médico (estilo MedAlly) para MIVOR Scribe.
+    Sintaxis del cuerpo: {opción A|opción B} elige una, [campo] a rellenar, ((ayuda)) no se copia.
+    """
+    __tablename__ = "doctor_note_templates"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    shortcut = Column(String, nullable=True)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class PatientProfile(Base):
     """
     Historial Médico Digital básico del paciente.

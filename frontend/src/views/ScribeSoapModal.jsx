@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { printHtmlContent, escapeHtml } from "../utils/printPdf";
 import { useLanguage } from "../contexts/LanguageContext";
+import NoteTemplatesPanel from "../components/NoteTemplatesPanel";
 
 // Plantillas clínicas: textos como claves i18n
 const TEMPLATES = [
@@ -479,6 +480,19 @@ ${soap_note.plan || ''}
               >
                 {t('scribesoapmodal_medico_soap')}
               </button>
+              {initialMode !== "patient" && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("templates")}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    activeTab === "templates"
+                      ? "bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm font-semibold"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                  }`}
+                >
+                  {t('notetpl_tab', 'Plantillas')}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setActiveTab("patient_prep")}
@@ -504,7 +518,23 @@ ${soap_note.plan || ''}
 
         {/* Body Container */}
         <div className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-6">
-          {activeTab === "soap_scribe" ? (
+          {activeTab === "templates" ? (
+            /* TAB: PLANTILLAS DE INFORME (ESTILO MEDALLY) */
+            <NoteTemplatesPanel
+              apiUrl={apiUrl}
+              authHeaders={{ ...(token ? { Authorization: `Bearer ${token}` } : {}), ...authHeaders }}
+              consultationText={consultationText}
+              setConsultationText={setConsultationText}
+              isRecording={isRecording}
+              toggleRecording={toggleRecording}
+              patientContext={{
+                patient_name: patientName || undefined,
+                patient_age: patientAge ? parseInt(patientAge, 10) : undefined,
+                patient_gender: patientGender || undefined,
+                vital_signs: { bp: vitalBp || undefined, hr: vitalHr || undefined, temp: vitalTemp || undefined, spo2: vitalSpo2 || undefined },
+              }}
+            />
+          ) : activeTab === "soap_scribe" ? (
             /* TAB 1: DOCTOR SOAP SCRIBE */
             <div className="space-y-6">
               {/* Template Selector Chips */}
