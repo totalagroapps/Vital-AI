@@ -14,7 +14,7 @@ from sqlalchemy import select, func
 import database
 import models
 from database import get_db
-from security import verify_password, get_password_hash, create_access_token, get_current_user_id
+from security import verify_password, get_password_hash, create_access_token, get_current_user_id, get_authenticated_user_id
 from schemas.requests import RegisterRequest
 from storage import s3_client, R2_BUCKET_NAME
 
@@ -242,7 +242,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm=Depends()
 
 
 @router.get('/api/auth/me')
-async def get_me(user_id: str=Depends(get_current_user_id), db: AsyncSession=Depends(get_db)):
+async def get_me(user_id: str=Depends(get_authenticated_user_id), db: AsyncSession=Depends(get_db)):
     result = (await db.execute(select(models.User).where((models.User.id == user_id))))
     user = result.scalars().first()
     if (not user):
@@ -252,7 +252,7 @@ async def get_me(user_id: str=Depends(get_current_user_id), db: AsyncSession=Dep
 
 
 @router.get("/api/auth/profiles")
-async def get_user_profiles(user_id: str = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
+async def get_user_profiles(user_id: str = Depends(get_authenticated_user_id), db: AsyncSession = Depends(get_db)):
     """
     Devuelve los perfiles familiares que este usuario puede administrar.
     Incluye su propio perfil y el de los pacientes vinculados.
@@ -272,8 +272,8 @@ async def get_user_profiles(user_id: str = Depends(get_current_user_id), db: Asy
         "user_id": user.id,
         "role": user.role,
         "is_self": True,
-        "full_name": my_profile.full_name if my_profile else user.username,
-        "photo_url": my_profile.photo_url if my_profile else None,
+        "full_name": (my_profile.full_name if my_profile else None) or user.username,
+        "photo_url": None,
         "relationship": "Yo"
     })
 
@@ -284,13 +284,14 @@ async def get_user_profiles(user_id: str = Depends(get_current_user_id), db: Asy
     for link in links:
         patient_profile = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == link.patient_id))
         patient_profile = patient_profile.scalars().first()
-        
+        patient_user = await db.get(models.User, link.patient_id)
+
         profiles.append({
             "user_id": link.patient_id,
             "role": "patient",
             "is_self": False,
-            "full_name": patient_profile.full_name if patient_profile else "Desconocido",
-            "photo_url": patient_profile.photo_url if patient_profile else None,
+            "full_name": (patient_profile.full_name if patient_profile else None) or (patient_user.username if patient_user else "Familiar"),
+            "photo_url": None,
             "relationship": link.relationship or "Familiar"
         })
         
