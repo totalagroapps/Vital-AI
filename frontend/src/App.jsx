@@ -14,6 +14,7 @@ import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
 import ProfileSelector, { profileDisplayName } from './views/ProfileSelector';
 import CaregiverBanner from './components/CaregiverBanner';
+import { FamilyProfileContext } from './contexts/FamilyProfileContext';
 
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
@@ -1715,13 +1716,19 @@ export default function App() {
   return <Navigate to="/paciente" replace />;
   };
 
+  const familyProfileValue = {
+    hasFamilyProfiles: Boolean(token && profileSelected && hasFamilyProfiles),
+    activeProfile: token && profileSelected ? activeProfile : null,
+    switchProfile: () => handleSwitchProfile(),
+  };
+
   return (
-    <>
+    <FamilyProfileContext.Provider value={familyProfileValue}>
       {token && profileSelected && activeProfile && (
         <CaregiverBanner name={activeProfile.name} relationship={activeProfile.relationship} onSwitchProfile={() => handleSwitchProfile()} />
       )}
       {renderRoute()}
-    </>
+    </FamilyProfileContext.Provider>
   );
 }
 

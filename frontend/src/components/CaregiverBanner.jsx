@@ -5,8 +5,7 @@ import { HeartHandshake, RefreshCw } from 'lucide-react';
 export default function CaregiverBanner({ name, relationship, onSwitchProfile }) {
   return (
     <div
-      className="fixed left-1/2 -translate-x-1/2 z-[70] max-w-[calc(100%-1.5rem)]"
-      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}
+      className="fixed left-1/2 -translate-x-1/2 top-[calc(env(safe-area-inset-top,0px)+0.5rem)] lg:top-auto lg:bottom-4 lg:left-4 lg:translate-x-0 z-[70] max-w-[calc(100%-1.5rem)]"
       role="status"
     >
       <div className="flex items-center gap-2 pl-3 pr-1 py-1 rounded-full bg-violet-600 text-white shadow-lg text-xs font-bold">

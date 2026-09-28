@@ -12,12 +12,14 @@ import {
   QrCode, 
   Pill,
   Shield,
-  HeartHandshake
+  HeartHandshake,
+  RefreshCw
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import SupportModal from './SupportModal';
 import NotificationsBell from './NotificationsBell';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useFamilyProfile } from '../contexts/FamilyProfileContext';
 
 export default function PatientTopNav({
   activeTab = 'home',
@@ -29,6 +31,7 @@ export default function PatientTopNav({
   className = ''
 }) {
   const { t } = useLanguage();
+  const { hasFamilyProfiles, activeProfile, switchProfile } = useFamilyProfile();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const userMenuRef = useRef(null);
@@ -134,6 +137,26 @@ export default function PatientTopNav({
           <div className="hidden sm:block">
             <LanguageSelector variant="pill" />
           </div>
+
+          {/* Cambiar perfil familiar (tipo Netflix): muestra a quién se está administrando */}
+          {hasFamilyProfiles && switchProfile && (
+            <button
+              type="button"
+              onClick={switchProfile}
+              className={`flex items-center gap-1.5 text-xs font-bold transition-colors cursor-pointer py-1.5 px-2.5 rounded-xl border ${
+                activeProfile
+                  ? 'bg-violet-600 border-violet-600 text-white hover:bg-violet-700'
+                  : 'border-slate-200 text-slate-600 hover:text-violet-700 hover:border-violet-200 hover:bg-violet-50'
+              }`}
+              title={activeProfile ? `Administrando a ${activeProfile.name} · Cambiar perfil` : 'Cambiar perfil'}
+              aria-label="Cambiar perfil"
+            >
+              <RefreshCw size={15} className="stroke-[2.2] shrink-0" />
+              <span className="hidden 2xl:inline truncate max-w-[160px]">
+                {activeProfile ? `${activeProfile.name} · Cambiar` : 'Cambiar perfil'}
+              </span>
+            </button>
+          )}
 
           {/* ¿Necesitas ayuda? */}
           <button 
