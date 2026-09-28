@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, Pill, BellRing } from 'lucide-react';
-import { useTranslation } from '../utils/locale';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function MedicationAlertOverlay({ medications, onMarkTaken, onDismiss }) {
-  const { t } = useTranslation();
+  const { t } = useLanguage();
   
   // Find the first active medication that hasn't been taken today
   const pendingMed = medications?.find(m => !m.taken_today && m.is_active);
