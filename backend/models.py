@@ -87,6 +87,14 @@ class MedicalDocument(Base):
 
     patient = relationship("PatientProfile", back_populates="medical_documents")
 
+
+class CaregiverPatientLink(Base):
+    __tablename__ = "caregiver_patient_links"
+    caregiver_id = Column(String, ForeignKey("users.id"), primary_key=True)
+    patient_id = Column(String, ForeignKey("users.id"), primary_key=True)
+    relationship = Column(String, nullable=True) # e.g. "Padre", "Madre"
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class PatientProfile(Base):
     """
     Historial Médico Digital básico del paciente.

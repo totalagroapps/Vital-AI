@@ -199,8 +199,18 @@ async def can_access_patient_data(db: AsyncSession, user: models.User, patient_u
         return True
     if user.role == "admin":
         granted = True
-    elif user.role != "doctor" or patient_user_id is None:
+    elif patient_user_id is None:
         granted = False
+    elif user.role != "doctor":
+        # Check if they are a caregiver linked to this patient
+        link_query = await db.execute(
+            select(models.CaregiverPatientLink)
+            .where(
+                models.CaregiverPatientLink.caregiver_id == user.id,
+                models.CaregiverPatientLink.patient_id == patient_user_id
+            )
+        )
+        granted = link_query.scalars().first() is not None
     elif not await _doctor_is_verified(db, user.id):
         granted = False
     else:
@@ -226,8 +236,12 @@ async def resolve_target_patient_id(db: AsyncSession, user: models.User, patient
     Para endpoints con ?patient_id= opcional: un médico/admin solo puede consultar a un
     paciente al que tenga acceso; cualquier otro usuario siempre opera sobre sí mismo.
     """
-    if not patient_id or user.role not in ("doctor", "admin"):
+    if not patient_id:
         return user.id
+    if user.role not in ("doctor", "admin", "caregiver") and str(user.id) != str(patient_id):
+        # Allow checking if there's a family link even if they are 'patient' role
+        # We will let `assert_patient_access` do the check.
+        pass
     await assert_patient_access(db, user, patient_id)
     return patient_id
 

@@ -12,6 +12,7 @@ import remarkGfm from 'remark-gfm';
 import PatientHome from './views/PatientHome';
 import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
+import ProfileSelector from './views/ProfileSelector';
 
 import DocumentAnalyzer from './views/DocumentAnalyzer';
 import PatientChat from './views/PatientChat';
@@ -77,6 +78,8 @@ export default function App() {
   const { t, language, country, locale } = useLanguage();
   // En Android el token se descifra del Keystore de forma asíncrona: hasta entonces no se decide la ruta
   const [token, setToken] = useState(() => (tokenAvailableSync ? getToken() : null));
+  const [targetPatientId, setTargetPatientId] = useState(null);
+  const [profileSelected, setProfileSelected] = useState(false);
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
   useEffect(() => {
     if (tokenAvailableSync) return;
@@ -503,6 +506,8 @@ export default function App() {
 
   const handleLogout = () => {
     setToken(null);
+    setProfileSelected(false);
+    setTargetPatientId(null);
     setUsername(null);
     setViewMode('patient');
     clearToken();
@@ -557,7 +562,8 @@ export default function App() {
   }, [token]);
 
   const authHeaders = {
-    'Authorization': `Bearer ${token}`
+    'Authorization': `Bearer ${token}`,
+    ...(targetPatientId ? { 'X-Target-Patient-Id': targetPatientId } : {})
   };
 
   

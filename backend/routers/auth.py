@@ -249,3 +249,49 @@ async def get_me(user_id: str=Depends(get_current_user_id), db: AsyncSession=Dep
         raise HTTPException(status_code=404, detail='Usuario no encontrado')
     return {'id': user.id, 'username': user.username, 'role': user.role}
 
+
+
+@router.get("/profiles")
+async def get_user_profiles(user_id: str = Depends(get_current_user_id), db: AsyncSession = Depends(get_db)):
+    """
+    Devuelve los perfiles familiares que este usuario puede administrar.
+    Incluye su propio perfil y el de los pacientes vinculados.
+    """
+    profiles = []
+    
+    # 1. El propio usuario
+    user = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = user.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    my_profile = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
+    my_profile = my_profile.scalars().first()
+    
+    profiles.append({
+        "user_id": user.id,
+        "role": user.role,
+        "is_self": True,
+        "full_name": my_profile.full_name if my_profile else user.username,
+        "photo_url": my_profile.photo_url if my_profile else None,
+        "relationship": "Yo"
+    })
+
+    # 2. Pacientes administrados (Caregiver Links)
+    links = await db.execute(select(models.CaregiverPatientLink).where(models.CaregiverPatientLink.caregiver_id == user_id))
+    links = links.scalars().all()
+    
+    for link in links:
+        patient_profile = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == link.patient_id))
+        patient_profile = patient_profile.scalars().first()
+        
+        profiles.append({
+            "user_id": link.patient_id,
+            "role": "patient",
+            "is_self": False,
+            "full_name": patient_profile.full_name if patient_profile else "Desconocido",
+            "photo_url": patient_profile.photo_url if patient_profile else None,
+            "relationship": link.relationship or "Familiar"
+        })
+        
+    return {"profiles": profiles}
