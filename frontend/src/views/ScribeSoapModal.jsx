@@ -66,6 +66,8 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
   const [prepResult, setPrepResult] = useState(null);
 
   const recognitionRef = useRef(null);
+  // Texto que ya había en la caja al empezar a dictar; lo dictado se añade detrás.
+  const dictationBaseRef = useRef("");
 
   useEffect(() => {
     if (patientData) {
@@ -84,12 +86,24 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
       recognition.interimResults = true;
       recognition.lang = locale || language;
 
+      // event.results trae TODA la sesión de dictado (frases finales + la provisional en curso):
+      // se reconstruye el texto completo en cada evento en lugar de ir añadiendo, porque los
+      // resultados provisionales se repiten ("Dime" → "Dime Cri" → "Dime Cris") y duplicaban palabras.
       recognition.onresult = (event) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
+        let spoken = "";
+        for (let i = 0; i < event.results.length; i++) {
+          const piece = event.results[i][0].transcript.trim();
+          if (!piece) continue;
+          // Chrome en Android repite en cada frase todo lo dicho antes: si la nueva frase ya
+          // contiene el texto acumulado, la reemplaza en vez de sumarla.
+          if (spoken && piece.toLowerCase().startsWith(spoken.toLowerCase())) {
+            spoken = piece;
+          } else {
+            spoken = spoken ? `${spoken} ${piece}` : piece;
+          }
         }
-        setConsultationText((prev) => (prev ? prev + " " + transcript : transcript));
+        const base = dictationBaseRef.current;
+        setConsultationText(base && spoken ? `${base} ${spoken}` : (base || spoken));
       };
 
       recognition.onerror = (e) => {
@@ -115,6 +129,7 @@ export default function ScribeSoapModal({ isOpen, onClose, token, initialMode = 
       setIsRecording(false);
     } else {
       try {
+        dictationBaseRef.current = consultationText.trim();
         recognitionRef.current.start();
         setIsRecording(true);
       } catch (err) {
