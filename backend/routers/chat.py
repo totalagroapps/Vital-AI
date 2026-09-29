@@ -233,7 +233,7 @@ async def get_patient_context(db: AsyncSession, user_id: str) -> str:
         return ""
         
     context = "\n\n--- CONTEXTO CLÍNICO DEL PACIENTE (MEMORIA INTERNA) ---\n"
-    context += "Utiliza esta información solo si es relevante para responder la consulta del paciente. No saludes mencionando estos datos a menos que el paciente pregunte sobre ellos.\n"
+    context += "ESTOS SON LOS DATOS CLÍNICOS REALES DEL PACIENTE EN MIVOR. Si el paciente pregunta por sus medicinas, historial o alergias, USA esta información directamente para responderle con naturalidad, demostrando que conoces su expediente.\n"
     
     if profile:
         context += f"- Nombre: {profile.full_name or 'No especificado'}\n"
