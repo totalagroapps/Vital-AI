@@ -1,3 +1,5 @@
+import json
+from services.universal_rag import search_universal_medical_knowledge, UNIVERSAL_RAG_TOOL
 import os
 import re
 import time
@@ -295,13 +297,62 @@ async def send_standard_chat_message(
             response_stream = await openai_client.chat.completions.create(
                 model='gpt-4o-mini',
                 messages=messages_payload,
+                tools=[UNIVERSAL_RAG_TOOL],
                 stream=True
             )
+            
+            tool_calls = []
             async for chunk in response_stream:
-                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
-                    token = chunk.choices[0].delta.content
-                    full_response += token
-                    yield token
+                if len(chunk.choices) > 0:
+                    delta = chunk.choices[0].delta
+                    if delta.tool_calls:
+                        for tcchunk in delta.tool_calls:
+                            while len(tool_calls) <= tcchunk.index:
+                                tool_calls.append({"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+                            if tcchunk.id:
+                                tool_calls[tcchunk.index]["id"] = tcchunk.id
+                            if tcchunk.function.name:
+                                tool_calls[tcchunk.index]["function"]["name"] = tcchunk.function.name
+                                yield "\n*[Buscando en repositorios médicos oficiales...]*\n"
+                            if tcchunk.function.arguments:
+                                tool_calls[tcchunk.index]["function"]["arguments"] += tcchunk.function.arguments
+                    elif delta.content:
+                        token = delta.content
+                        full_response += token
+                        yield token
+            
+            if tool_calls:
+                messages_payload.append({
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": tool_calls
+                })
+                
+                for tool_call in tool_calls:
+                    if tool_call["function"]["name"] == "search_medical_literature":
+                        args = json.loads(tool_call["function"]["arguments"])
+                        query = args.get("query", "")
+                        search_result = search_universal_medical_knowledge(query)
+                        
+                        messages_payload.append({
+                            "tool_call_id": tool_call["id"],
+                            "role": "tool",
+                            "name": "search_medical_literature",
+                            "content": search_result
+                        })
+                
+                # Second call with the tool result
+                second_stream = await openai_client.chat.completions.create(
+                    model='gpt-4o-mini',
+                    messages=messages_payload,
+                    stream=True
+                )
+                async for chunk in second_stream:
+                    if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                        token = chunk.choices[0].delta.content
+                        full_response += token
+                        yield token
+                        
             ai_db_msg = models.ChatMessage(session_id=session_id, role='assistant', content=full_response)
             db.add(ai_db_msg)
             if session.title == 'Nueva Consulta Libre':
@@ -379,13 +430,61 @@ async def general_chat(
             response_stream = await openai_client.chat.completions.create(
                 model='gpt-4o-mini',
                 messages=messages_payload,
+                tools=[UNIVERSAL_RAG_TOOL],
                 stream=True
             )
+            
+            tool_calls = []
             async for chunk in response_stream:
-                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
-                    token = chunk.choices[0].delta.content
-                    full_response += token
-                    yield token
+                if len(chunk.choices) > 0:
+                    delta = chunk.choices[0].delta
+                    if delta.tool_calls:
+                        for tcchunk in delta.tool_calls:
+                            while len(tool_calls) <= tcchunk.index:
+                                tool_calls.append({"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+                            if tcchunk.id:
+                                tool_calls[tcchunk.index]["id"] = tcchunk.id
+                            if tcchunk.function.name:
+                                tool_calls[tcchunk.index]["function"]["name"] = tcchunk.function.name
+                                yield "\n*[Buscando en repositorios médicos oficiales...]*\n"
+                            if tcchunk.function.arguments:
+                                tool_calls[tcchunk.index]["function"]["arguments"] += tcchunk.function.arguments
+                    elif delta.content:
+                        token = delta.content
+                        full_response += token
+                        yield token
+                        
+            if tool_calls:
+                messages_payload.append({
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": tool_calls
+                })
+                
+                for tool_call in tool_calls:
+                    if tool_call["function"]["name"] == "search_medical_literature":
+                        args = json.loads(tool_call["function"]["arguments"])
+                        query = args.get("query", "")
+                        search_result = search_universal_medical_knowledge(query)
+                        
+                        messages_payload.append({
+                            "tool_call_id": tool_call["id"],
+                            "role": "tool",
+                            "name": "search_medical_literature",
+                            "content": search_result
+                        })
+                
+                second_stream = await openai_client.chat.completions.create(
+                    model='gpt-4o-mini',
+                    messages=messages_payload,
+                    stream=True
+                )
+                async for chunk in second_stream:
+                    if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                        token = chunk.choices[0].delta.content
+                        full_response += token
+                        yield token
+
             if user_id and active_session_id and full_response:
                 ai_db_msg = models.ChatMessage(session_id=active_session_id, role='assistant', content=full_response)
                 db.add(ai_db_msg)
