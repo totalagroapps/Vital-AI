@@ -213,6 +213,52 @@ async def get_session_messages(session_id: str, db: AsyncSession = Depends(get_d
     ]
 
 
+
+import datetime
+async def get_patient_context(db: AsyncSession, user_id: str) -> str:
+    profile_result = await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))
+    profile = profile_result.scalars().first()
+    
+    meds_result = await db.execute(
+        select(models.MedicationReminder).where(
+            models.MedicationReminder.user_id == user_id,
+            models.MedicationReminder.is_active == True
+        )
+    )
+    meds = meds_result.scalars().all()
+    
+    if not profile and not meds:
+        return ""
+        
+    context = "\n\n--- CONTEXTO CLÍNICO DEL PACIENTE (MEMORIA INTERNA) ---\n"
+    context += "Utiliza esta información solo si es relevante para responder la consulta del paciente. No saludes mencionando estos datos a menos que el paciente pregunte sobre ellos.\n"
+    
+    if profile:
+        context += f"- Nombre: {profile.full_name or 'No especificado'}\n"
+        if profile.date_of_birth:
+            try:
+                dob = profile.date_of_birth
+                if isinstance(dob, str):
+                    dob = datetime.datetime.strptime(dob, '%Y-%m-%d').date()
+                age = (datetime.date.today() - dob).days // 365
+                context += f"- Edad: {age} años\n"
+            except:
+                context += f"- Fecha de nacimiento: {profile.date_of_birth}\n"
+        if profile.gender: context += f"- Género: {profile.gender}\n"
+        if profile.allergies: context += f"- Alergias: {profile.allergies}\n"
+        if profile.chronic_conditions: context += f"- Condiciones crónicas: {profile.chronic_conditions}\n"
+        if profile.current_medications: context += f"- Historial de medicamentos: {profile.current_medications}\n"
+        if profile.medical_notes: context += f"- Notas médicas: {profile.medical_notes}\n"
+        
+    if meds:
+        context += "- Medicamentos activos (Tomando actualmente):\n"
+        for m in meds:
+            context += f"  * {m.medication_name}: {m.dosage} ({m.frequency}) a las {m.time_of_day}\n"
+            
+    context += "---------------------------------------------------------\n"
+    return context
+
+
 @router.post('/api/chat/{session_id}/message')
 async def send_standard_chat_message(
     session_id: str,
@@ -234,6 +280,7 @@ async def send_standard_chat_message(
     db.add(user_db_msg)
     
     system_prompt = NATURAL_CLINICAL_CHAT_PROMPT
+    system_prompt += await get_patient_context(db, user_id)
     lang_instruction = language_directive(request.language, request.country, 'patient')
     
     messages_payload = [{'role': 'system', 'content': (system_prompt + lang_instruction)}]
@@ -286,7 +333,8 @@ async def general_chat(
 
     openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
     SYSTEM_PROMPT = NATURAL_CLINICAL_CHAT_PROMPT
-    
+    if user_id:
+        SYSTEM_PROMPT += await get_patient_context(db, user_id)
     lang_instruction = language_directive(request.language, request.country, 'user')
     
     SYSTEM_PROMPT += lang_instruction
