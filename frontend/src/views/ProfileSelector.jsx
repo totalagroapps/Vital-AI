@@ -207,12 +207,23 @@ function AddFamilyForm({ apiUrl, authHeaders, onCancel, onLinked }) {
   const [relationship, setRelationship] = useState('Padre');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
     setError('');
     try {
+      if (isCreating) {
+        const regRes = await fetch(`${apiUrl}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username.trim(), password, role: 'patient' }),
+        });
+        const regData = await regRes.json().catch(() => ({}));
+        if (!regRes.ok) throw new Error(typeof regData.detail === 'string' ? regData.detail : 'No se pudo crear la cuenta');
+      }
+
       const res = await fetch(`${apiUrl}/api/auth/profiles/link`, {
         method: 'POST',
         headers: { ...authHeaders, 'Content-Type': 'application/json' },
@@ -238,19 +249,28 @@ function AddFamilyForm({ apiUrl, authHeaders, onCancel, onLinked }) {
         className="w-full max-w-sm bg-[#111a36] border border-slate-700 rounded-3xl p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between mb-2">
-          <h3 className="text-xl font-black">Agregar familiar</h3>
+          <h3 className="text-xl font-black">{isCreating ? 'Crear cuenta a familiar' : 'Vincular familiar'}</h3>
           <button type="button" onClick={onCancel} aria-label="Cerrar" className="text-slate-400 hover:text-white">
             <X size={22} />
           </button>
         </div>
         
-        <div className="bg-blue-900/40 border border-blue-500/30 rounded-xl p-3 mb-5 flex items-start gap-3">
-          <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-100">
-            <strong>Requisito previo:</strong> Tu familiar debe tener una cuenta ya registrada en MIVOR. <br/><br/>
-            Ingresa aquí su correo y contraseña para confirmar que tienes autorización para administrar su salud.
-          </p>
-        </div>
+        {isCreating ? (
+          <div className="bg-green-900/40 border border-green-500/30 rounded-xl p-3 mb-5 flex items-start gap-3">
+            <Info size={20} className="text-green-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-green-100">
+              <strong>Nueva Cuenta:</strong> Crea el usuario para tu familiar aquí mismo. Al finalizar, quedará vinculado automáticamente.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-blue-900/40 border border-blue-500/30 rounded-xl p-3 mb-5 flex items-start gap-3">
+            <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-blue-100">
+              <strong>Requisito previo:</strong> Tu familiar debe tener una cuenta ya registrada en MIVOR. <br/><br/>
+              Ingresa aquí su correo y contraseña para confirmar que tienes autorización.
+            </p>
+          </div>
+        )}
 
         <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Correo del familiar</label>
         <input
@@ -263,13 +283,14 @@ function AddFamilyForm({ apiUrl, authHeaders, onCancel, onLinked }) {
           className={`${inputClass} mb-4`}
         />
 
-        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Contraseña del familiar</label>
+        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Contraseña {isCreating ? 'nueva' : 'del familiar'}</label>
         <input
           type="password"
           required
           autoComplete="off"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder={isCreating ? "Crea una contraseña..." : "Contraseña actual..."}
           className={`${inputClass} mb-4`}
         />
 
@@ -290,8 +311,20 @@ function AddFamilyForm({ apiUrl, authHeaders, onCancel, onLinked }) {
           className="w-full flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 py-3 font-bold transition-colors"
         >
           {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
-          Vincular familiar
+          {isCreating ? 'Crear y Vincular' : 'Vincular familiar'}
         </button>
+
+        <div className="mt-5 text-center">
+          {isCreating ? (
+            <p className="text-sm text-slate-400">
+              ¿Tu familiar ya tiene cuenta? <button type="button" onClick={() => {setIsCreating(false); setError('');}} className="text-blue-400 font-bold hover:underline">Vincular existente</button>
+            </p>
+          ) : (
+            <p className="text-sm text-slate-400">
+              ¿No tiene cuenta? <button type="button" onClick={() => {setIsCreating(true); setError('');}} className="text-blue-400 font-bold hover:underline">Créala aquí mismo</button>
+            </p>
+          )}
+        </div>
       </form>
     </div>
   );
