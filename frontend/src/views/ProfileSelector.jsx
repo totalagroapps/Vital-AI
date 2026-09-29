@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Users, Loader2, Plus, X, Check } from 'lucide-react';
+import { User, Users, Loader2, Plus, X, Check, Info } from 'lucide-react';
 
 // Primer nombre del perfil; si solo hay correo (cuenta sin perfil médico), la parte antes de la @.
 export const profileDisplayName = (profile) =>
@@ -243,9 +243,14 @@ function AddFamilyForm({ apiUrl, authHeaders, onCancel, onLinked }) {
             <X size={22} />
           </button>
         </div>
-        <p className="text-sm text-slate-400 mb-5">
-          Ingresa el correo y la contraseña de la cuenta MIVOR de tu familiar. Así confirmamos que te autoriza a administrar su salud.
-        </p>
+        
+        <div className="bg-blue-900/40 border border-blue-500/30 rounded-xl p-3 mb-5 flex items-start gap-3">
+          <Info size={20} className="text-blue-400 shrink-0 mt-0.5" />
+          <p className="text-sm text-blue-100">
+            <strong>Requisito previo:</strong> Tu familiar debe tener una cuenta ya registrada en MIVOR. <br/><br/>
+            Ingresa aquí su correo y contraseña para confirmar que tienes autorización para administrar su salud.
+          </p>
+        </div>
 
         <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Correo del familiar</label>
         <input
