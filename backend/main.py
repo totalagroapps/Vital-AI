@@ -2,7 +2,7 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -155,6 +155,27 @@ app.add_middleware(
     allow_headers=['*'],
     expose_headers=['*']
 )
+
+# Cabeceras de seguridad. La API solo devuelve JSON y ficheros, así que la CSP lo bloquea todo;
+# la documentación interactiva (/docs, /redoc) carga Swagger/ReDoc desde un CDN y queda fuera.
+SECURITY_HEADERS = {
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'no-referrer',
+}
+API_CSP = "default-src 'none'; frame-ancestors 'none'"
+CSP_EXEMPT_PREFIXES = ('/docs', '/redoc', '/openapi.json')
+
+
+@app.middleware('http')
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    for name, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(name, value)
+    if not request.url.path.startswith(CSP_EXEMPT_PREFIXES):
+        response.headers.setdefault('Content-Security-Policy', API_CSP)
+    return response
 
 
 # --- ROUTERS ---
