@@ -24,12 +24,19 @@
             android:text="Contactos, país y emergencias"
             app:backgroundTint="@color/c_blue" />
 
-        <!-- Conecta la tablet con la cuenta MIVOR del paciente (tomas por voz, recordatorios) -->
+        <!-- Conecta el kiosko (móvil o tablet) con la cuenta MIVOR del paciente (tomas por voz, recordatorios) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettingMivorLink"
             style="@style/BigButton"
             android:text="Vincular con MIVOR"
             app:backgroundTint="#047857" />
+
+        <!-- Hace del kiosko la app de teléfono para contestar solo a los contactos marcados -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingAutoAnswer"
+            style="@style/BigButton"
+            android:text="Contestar llamadas en altavoz"
+            app:backgroundTint="#0F766E" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettingSosAuto"

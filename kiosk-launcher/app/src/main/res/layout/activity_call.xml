@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pantalla de llamada del kiosko: nombre grande y botones enormes para personas mayores -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="28dp">
+
+    <ImageView
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="48dp"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_phone_call" />
+
+    <TextView
+        android:id="@+id/tvCallName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:textColor="@color/text_title"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvCallState"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textColor="@color/text_sub"
+        android:textSize="24sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSpeaker"
+        style="@style/BigButton.Light"
+        android:layout_height="80dp"
+        android:text="Altavoz"
+        android:textSize="24sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAnswer"
+        style="@style/BigButton"
+        android:layout_height="96dp"
+        android:text="Contestar"
+        android:textSize="30sp"
+        app:backgroundTint="@color/c_green" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHangup"
+        style="@style/BigButton"
+        android:layout_height="96dp"
+        android:text="Colgar"
+        android:textSize="30sp"
+        app:backgroundTint="@color/c_red" />
+</LinearLayout>

@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.KeyguardManager
+import android.app.role.RoleManager
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ContentValues
@@ -29,6 +30,7 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.telecom.TelecomManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -113,6 +115,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         private const val REQUEST_CODE_SPEECH_INPUT = 1001
         private const val REQUEST_CODE_CAMERA = 1002
         private const val REQUEST_CODE_GALLERY = 1003
+        private const val REQUEST_CODE_DIALER_ROLE = 1004
 
         /** Segundos antes de llamar sola: más margen por voz (puede ser una falsa alarma). */
         private const val SOS_COUNTDOWN_VOICE = 10
@@ -201,6 +204,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         startKioskLockMode()
+
+        // Llamada en curso (p. ej. se pulsó Inicio): volver a la pantalla con el botón de colgar
+        if (CallManager.stateOf(CallManager.call) != android.telecom.Call.STATE_DISCONNECTED) {
+            startActivity(Intent(this, CallActivity::class.java))
+            return
+        }
+
         if (isVoicePermissionGranted()) {
             startVoiceEngine()
         }
@@ -561,6 +571,58 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     showPhotoActions(uri, fromCamera = false)
                 }
             }
+            REQUEST_CODE_DIALER_ROLE -> {
+                Toast.makeText(
+                    this,
+                    if (isDefaultDialer()) "Listo: MIVOR contestará las llamadas de los contactos marcados"
+                    else "Sin permiso de app de teléfono: las llamadas no se contestarán solas",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    // =========================================================================
+    // CONTESTAR SOLO EN ALTAVOZ (MIVOR COMO APP DE TELÉFONO)
+    // =========================================================================
+    private fun isDefaultDialer(): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getSystemService(RoleManager::class.java)?.isRoleHeld(RoleManager.ROLE_DIALER) == true
+        } else {
+            getSystemService(TelecomManager::class.java)?.defaultDialerPackage == packageName
+        }
+
+    private fun showAutoAnswerDialog() {
+        val marked = config.contacts.indices.filter { config.isAutoAnswer(it) && config.contact(it).isSet }
+            .map { config.contact(it).name }
+        val status = if (isDefaultDialer()) "Activado ✓" else "Todavía no activado"
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Contestar llamadas en altavoz")
+            .setMessage(
+                "Estado: $status\n\n" +
+                    "Cuando llame un contacto marcado, el teléfono dirá quién llama, contestará solo y " +
+                    "pondrá el altavoz. Las demás llamadas suenan normal, con botones grandes.\n\n" +
+                    "Contactos marcados: ${if (marked.isEmpty()) "ninguno (márcalos en \"Contactos, país y emergencias\")" else marked.joinToString(", ")}.\n\n" +
+                    "Para que funcione, MIVOR tiene que ser la app de teléfono del dispositivo. " +
+                    "Solo sirve en un móvil con SIM."
+            )
+            .setPositiveButton(if (isDefaultDialer()) "Cerrar" else "Activar") { _, _ ->
+                if (!isDefaultDialer()) requestDefaultDialer()
+            }
+            .setNegativeButton("Elegir contactos") { _, _ -> showConfigDialog() }
+            .show()
+    }
+
+    private fun requestDefaultDialer() {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getSystemService(RoleManager::class.java)?.createRequestRoleIntent(RoleManager.ROLE_DIALER)
+        } else {
+            @Suppress("DEPRECATION")
+            Intent(TelecomManager.ACTION_CHANGE_DEFAULT_DIALER)
+                .putExtra(TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME, packageName)
+        }
+        if (intent == null || !launchExternalIntentForResult(intent, REQUEST_CODE_DIALER_ROLE)) {
+            Toast.makeText(this, "Este teléfono no permite cambiar la app de teléfono", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -771,7 +833,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle("Vincular con MIVOR")
-            .setMessage("En la web o app de MIVOR entra en Más > Kiosko MIVOR (tablet) y pulsa «Generar código». Escribe aquí el código:")
+            .setMessage("En la web o app de MIVOR entra en Más > Kiosko MIVOR y pulsa «Generar código». Escribe aquí el código:")
             .setView(input)
             .setPositiveButton("Vincular", null)
             .setNegativeButton("Cancelar", null)
@@ -887,6 +949,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
         val canCall = !forceDialer && isGranted(Manifest.permission.CALL_PHONE)
+        // Siendo la app de teléfono se llama sin salir del modo kiosko: la llamada aparece en
+        // CallActivity, dentro de la misma tarea
+        if (canCall && isDefaultDialer()) {
+            try {
+                getSystemService(TelecomManager::class.java)?.placeCall(Uri.fromParts("tel", cleanNumber, null), null)
+                return
+            } catch (e: SecurityException) {
+                // Sin permiso en este momento: se sigue con el camino de siempre
+            }
+        }
         val action = if (canCall) Intent.ACTION_CALL else Intent.ACTION_DIAL
         launchExternalIntent(Intent(action, Uri.parse("tel:$cleanNumber")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
@@ -1433,6 +1505,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             dialog.dismiss()
             showConfigDialog()
         }
+        dialogView.findViewById<Button>(R.id.btnSettingAutoAnswer).apply {
+            text = if (isDefaultDialer()) "Contestar en altavoz: activado ✓" else "Contestar llamadas en altavoz"
+            setOnClickListener {
+                dialog.dismiss()
+                showAutoAnswerDialog()
+            }
+        }
         dialogView.findViewById<Button>(R.id.btnSettingMivorLink).apply {
             text = if (config.isLinkedToMivor) "MIVOR: ${config.linkedPatientName.ifBlank { "vinculada" }} ✓"
             else "Vincular con MIVOR"
@@ -1522,6 +1601,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         val etEmergency = dialogView.findViewById<EditText>(R.id.etEmergency)
         val etNames = listOf(R.id.etName1, R.id.etName2, R.id.etName3).map { dialogView.findViewById<EditText>(it) }
         val etPhones = listOf(R.id.etPhone1, R.id.etPhone2, R.id.etPhone3).map { dialogView.findViewById<EditText>(it) }
+        val cbAutoAnswer = listOf(R.id.cbAutoAnswer1, R.id.cbAutoAnswer2, R.id.cbAutoAnswer3)
+            .map { dialogView.findViewById<android.widget.CheckBox>(it) }
         val etWhatsapp = dialogView.findViewById<EditText>(R.id.etWhatsapp)
         val etGroup = dialogView.findViewById<EditText>(R.id.etGroup)
         val etMeds = dialogView.findViewById<EditText>(R.id.etMeds)
@@ -1548,6 +1629,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         config.contacts.forEachIndexed { i, contact ->
             etNames[i].setText(contact.name)
             etPhones[i].setText(contact.phone)
+            cbAutoAnswer[i].isChecked = config.isAutoAnswer(i)
         }
         etWhatsapp.setText(config.whatsappNumber)
         etGroup.setText(config.familyGroupName)
@@ -1560,6 +1642,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             config.emergencyNumber = etEmergency.text.toString().ifBlank { country.emergency }
             etNames.indices.forEach { i ->
                 config.setContact(i, Contact(etNames[i].text.toString(), etPhones[i].text.toString()))
+                config.setAutoAnswer(i, cbAutoAnswer[i].isChecked)
             }
             config.whatsappNumber = etWhatsapp.text.toString()
             config.familyGroupName = etGroup.text.toString()

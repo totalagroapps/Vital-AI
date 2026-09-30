@@ -46,6 +46,9 @@ class KioskConfig(context: Context) {
         private val KEY_PHONES = listOf("phone_contact_1", "phone_contact_2", "phone_contact_3")
 
         private val KEY_NAMES = listOf("name_contact_1", "name_contact_2", "name_contact_3")
+        private val KEY_AUTO_ANSWER = listOf("auto_answer_1", "auto_answer_2", "auto_answer_3")
+        /** Se comparan los últimos dígitos: "+34 600 123 456" y "600123456" son el mismo número. */
+        private const val PHONE_MATCH_DIGITS = 9
         private const val KEY_COUNTRY = "country_code"
         private const val KEY_MEDS = "meds_reminder"
         private const val KEY_CUSTOM_APP = "custom_app_package"
@@ -219,6 +222,23 @@ class KioskConfig(context: Context) {
     }
 
     val contacts: List<Contact> get() = (0 until CONTACT_COUNT).map { contact(it) }
+
+    /** Contestar sola, en altavoz, las llamadas de este contacto (lo decide el cuidador). */
+    fun isAutoAnswer(index: Int): Boolean = prefs.getBoolean(KEY_AUTO_ANSWER[index], false)
+
+    fun setAutoAnswer(index: Int, enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_AUTO_ANSWER[index], enabled).apply()
+    }
+
+    /** Índice del contacto configurado cuyo teléfono coincide con el número que llama, o null. */
+    fun contactIndexForNumber(number: String): Int? {
+        val incoming = number.filter { it.isDigit() }.takeLast(PHONE_MATCH_DIGITS)
+        if (incoming.length < 7) return null  // números ocultos o de servicio
+        return contacts.indices.firstOrNull { i ->
+            val saved = contacts[i].phone.filter { it.isDigit() }.takeLast(PHONE_MATCH_DIGITS)
+            saved.isNotEmpty() && saved == incoming
+        }
+    }
 
     /** Número a quien avisar por WhatsApp/SMS: el de WhatsApp familiar o, si falta, el primer contacto. */
     val familyAlertNumber: String

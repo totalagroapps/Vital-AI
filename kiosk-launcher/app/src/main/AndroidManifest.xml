@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <!-- Contestar solo en altavoz: subir el volumen de la llamada -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <queries>
         <!-- Package visibility for Main MIVOR App and WhatsApp -->
@@ -78,6 +80,51 @@
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            App de teléfono del kiosko (solo actúa si el cuidador la pone como predeterminada):
+            contesta sola, en altavoz, las llamadas de los contactos marcados.
+        -->
+        <service
+            android:name=".MivorInCallService"
+            android:exported="true"
+            android:permission="android.permission.BIND_INCALL_SERVICE">
+            <meta-data
+                android:name="android.telecom.IN_CALL_SERVICE_UI"
+                android:value="true" />
+            <intent-filter>
+                <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
+
+        <!--
+            Misma tarea que el kiosko (sin taskAffinity propia): en modo kiosko (lock task) una tarea
+            aparte quedaría oculta y la persona no podría colgar.
+        -->
+        <activity
+            android:name=".CallActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="sensorPortrait"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
+
+        <!-- Requisito para ser la app de teléfono: atender "marcar un número" -->
+        <activity
+            android:name=".DialActivity"
+            android:exported="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.DIAL" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="tel" />
             </intent-filter>
         </activity>
 

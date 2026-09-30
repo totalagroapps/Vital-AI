@@ -58,6 +58,15 @@
                 android:importantForAutofill="no"
                 android:inputType="phone" />
 
+            <CheckBox
+                android:id="@+id/cbAutoAnswer1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Contestar sola sus llamadas, en altavoz"
+                android:textColor="@color/text_title"
+                android:textSize="16sp" />
+
             <TextView
                 style="@style/FormLabel"
                 android:text="Contacto 2" />
@@ -76,6 +85,15 @@
                 android:importantForAutofill="no"
                 android:inputType="phone" />
 
+            <CheckBox
+                android:id="@+id/cbAutoAnswer2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Contestar sola sus llamadas, en altavoz"
+                android:textColor="@color/text_title"
+                android:textSize="16sp" />
+
             <TextView
                 style="@style/FormLabel"
                 android:text="Contacto 3" />
@@ -93,6 +111,15 @@
                 android:hint="Teléfono"
                 android:importantForAutofill="no"
                 android:inputType="phone" />
+
+            <CheckBox
+                android:id="@+id/cbAutoAnswer3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="Contestar sola sus llamadas, en altavoz"
+                android:textColor="@color/text_title"
+                android:textSize="16sp" />
 
         <TextView
             style="@style/FormLabel"

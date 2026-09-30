@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Tablet, Loader2, CheckCircle2, Trash2, KeyRound } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// Vincular la tablet del Kiosko MIVOR con esta cuenta (o con la del familiar que se administra:
+// Vincular el kiosko MIVOR (móvil o tablet) con esta cuenta (o con la del familiar que se administra:
 // authHeaders lleva X-Target-Patient-Id). El kiosko canjea el código por su propia llave.
 export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders }) {
   const { t, locale } = useLanguage();
@@ -32,7 +32,7 @@ export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders })
     loadDevices().then((list) => { knownIds.current = new Set(list.map((d) => d.id)); });
   }, [isOpen, loadDevices]);
 
-  // Mientras el código es válido: cuenta atrás y comprobar si la tablet ya se vinculó
+  // Mientras el código es válido: cuenta atrás y comprobar si el kiosko ya se vinculó
   useEffect(() => {
     if (!code) return undefined;
     const tick = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
