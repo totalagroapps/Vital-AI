@@ -376,3 +376,95 @@ def generate_clinical_pdf(data: dict, filename: str = "documento.pdf") -> bytes:
 
     doc.build(story)
     return buffer.getvalue()
+
+
+def generate_prescription_pdf(data: dict) -> bytes:
+    """
+    Generates a professional Medical Prescription (Receta Medica) PDF using ReportLab.
+    """
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        leftMargin=40,
+        rightMargin=40,
+        topMargin=40,
+        bottomMargin=40
+    )
+
+    styles = getSampleStyleSheet()
+
+    # Brand and UI Palette
+    brand_teal = colors.HexColor("#0f766e")
+    brand_dark = colors.HexColor("#0f172a")
+    slate_600 = colors.HexColor("#475569")
+    
+    title_style = ParagraphStyle(
+        'TitleStyle', parent=styles['Heading1'], fontSize=18, textColor=brand_teal, spaceAfter=20, alignment=1
+    )
+    header_style = ParagraphStyle(
+        'HeaderStyle', parent=styles['Normal'], fontSize=10, textColor=slate_600, spaceAfter=2
+    )
+    section_style = ParagraphStyle(
+        'SectionStyle', parent=styles['Heading2'], fontSize=14, textColor=brand_dark, spaceBefore=20, spaceAfter=10
+    )
+    med_name_style = ParagraphStyle(
+        'MedNameStyle', parent=styles['Normal'], fontSize=12, textColor=colors.black, fontName="Helvetica-Bold", spaceBefore=10, spaceAfter=2
+    )
+    med_inst_style = ParagraphStyle(
+        'MedInstStyle', parent=styles['Normal'], fontSize=10, textColor=colors.black, spaceAfter=10, leftIndent=10
+    )
+
+    story = []
+
+    # Title
+    story.append(Paragraph("<b>RECETA MÉDICA</b>", title_style))
+    
+    # Header Info
+    doctor_name = _safe_escape(data.get("doctor_name", "Dr. / Dra."))
+    specialty = _safe_escape(data.get("specialty", "Medicina General"))
+    license_num = _safe_escape(data.get("license", "No. Colegiado: _________"))
+    
+    patient_name = _safe_escape(data.get("patient_name", "______________________"))
+    date_str = _safe_escape(data.get("date", datetime.now().strftime("%d/%m/%Y")))
+    
+    # Doctor Info
+    story.append(Paragraph(f"<b>{doctor_name}</b>", ParagraphStyle('DocName', parent=styles['Normal'], fontSize=12, textColor=brand_dark)))
+    story.append(Paragraph(f"Especialidad: {specialty}", header_style))
+    story.append(Paragraph(f"Cédula/Licencia: {license_num}", header_style))
+    story.append(Spacer(1, 15))
+    
+    # Patient Info
+    story.append(HRFlowable(width="100%", thickness=1, color=brand_teal, spaceAfter=10, spaceBefore=5))
+    story.append(Paragraph(f"<b>Paciente:</b> {patient_name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Fecha:</b> {date_str}", ParagraphStyle('PatInfo', parent=styles['Normal'], fontSize=11)))
+    story.append(HRFlowable(width="100%", thickness=1, color=brand_teal, spaceAfter=20, spaceBefore=10))
+
+    # Medications (Rx)
+    story.append(Paragraph("<b>Rx</b>", ParagraphStyle('Rx', parent=styles['Heading1'], fontSize=20, textColor=brand_dark, spaceAfter=15)))
+
+    medications = data.get("medications", [])
+    if not medications:
+        story.append(Paragraph("<i>No se prescribieron medicamentos.</i>", header_style))
+    else:
+        for idx, med in enumerate(medications):
+            m_name = _safe_escape(med.get("name", "Medicamento no especificado"))
+            m_dose = _safe_escape(med.get("dose", ""))
+            m_freq = _safe_escape(med.get("frequency", ""))
+            m_dur = _safe_escape(med.get("duration", ""))
+            m_inst = _safe_escape(med.get("instructions", ""))
+            
+            line1 = f"{idx+1}. <b>{m_name}</b> {m_dose}"
+            story.append(Paragraph(line1, med_name_style))
+            
+            instructions = f"Tomar: {m_freq} por {m_dur}."
+            if m_inst:
+                instructions += f" Notas: {m_inst}"
+            story.append(Paragraph(instructions, med_inst_style))
+
+    # Footer (Sign/Stamp)
+    story.append(Spacer(1, 60))
+    story.append(Paragraph("________________________________________", ParagraphStyle('SignLine', parent=styles['Normal'], alignment=1)))
+    story.append(Paragraph("Firma y Sello del Médico", ParagraphStyle('SignText', parent=styles['Normal'], alignment=1, textColor=slate_600, spaceBefore=5)))
+
+    doc.build(story)
+    return buffer.getvalue()

@@ -401,6 +401,43 @@ ${soap_note.plan || ''}
     printHtmlContent(t('scribe_print_sheet_title'), content);
   };
 
+  
+  const handleGeneratePrescription = async () => {
+    if (!soapResult?.soap_note?.plan) return;
+    try {
+      const payload = {
+        patient_name: patientData?.name || patientData?.first_name || "Paciente",
+        plan_text: soapResult.soap_note.plan,
+        date: new Date().toLocaleDateString()
+      };
+      
+      const res = await fetch(`${apiUrl}/api/scribe/generate_prescription`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...authHeaders
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error("Failed to generate prescription");
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Receta_${payload.patient_name.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Error al generar la receta médica.");
+    }
+  };
+
   const handlePrintPrepSheet = () => {
     if (!prepResult) return;
     const content = `
@@ -768,6 +805,14 @@ ${soap_note.plan || ''}
                         ) : (
                           <Copy className="w-4 h-4" />
                         )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleGeneratePrescription}
+                        className="px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                      >
+                        <Pill className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        Generar Receta
                       </button>
                       <button
                         type="button"

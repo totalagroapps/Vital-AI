@@ -653,3 +653,63 @@ async def transcribe_audio(
         logging.error(f"Error transcribing audio: {e}")
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail="Error al transcribir el audio.")
+
+
+@router.post("/generate_prescription")
+async def generate_prescription(
+    payload: dict,
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Genera un PDF de Receta Médica extrayendo los medicamentos del plan con IA.
+    """
+    from services.clinical_pdf_service import generate_prescription_pdf
+    from fastapi.responses import StreamingResponse
+    import io
+    import re
+    from openai import AsyncOpenAI
+    import json
+    
+    # Extraer medicamentos si se envía plan_text
+    plan_text = payload.get("plan_text", "")
+    medications = payload.get("medications", [])
+    
+    if plan_text and not medications:
+        try:
+            openai_client = AsyncOpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+            prompt = f"""
+            Analiza el siguiente plan médico y extrae únicamente los medicamentos recetados.
+            Devuelve un JSON estricto con un arreglo 'medications', donde cada elemento tenga:
+            name (nombre), dose (dosis), frequency (cada cuánto), duration (por cuántos días), instructions (notas adicionales).
+            Si no hay medicamentos, devuelve un arreglo vacío.
+            
+            Plan médico:
+            {plan_text}
+            """
+            resp = await openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            data = json.loads(resp.choices[0].message.content)
+            payload["medications"] = data.get("medications", [])
+        except Exception as e:
+            import logging
+            logging.error(f"Error extrayendo medicamentos: {e}")
+            payload["medications"] = []
+    
+    # Rellenar con los datos del médico
+    payload["doctor_name"] = current_user.full_name or "Dr. MIVOR"
+    payload["specialty"] = current_user.specialty or "Medicina General"
+    payload["license"] = current_user.medical_license or "Sin licencia registrada"
+    
+    pdf_bytes = generate_prescription_pdf(payload)
+    
+    pat_name = payload.get("patient_name", "paciente")
+    safe_fn = re.sub(r'[^a-zA-Z0-9_\.-]', '_', f"Receta_{pat_name}.pdf")
+    
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{safe_fn}"'}
+    )
