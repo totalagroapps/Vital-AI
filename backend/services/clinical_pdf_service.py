@@ -219,10 +219,10 @@ def generate_clinical_pdf(data: dict, filename: str = "documento.pdf") -> bytes:
     diagnosticos = data.get("diagnosticos", [])
     hallazgos = data.get("hallazgos", [])
     if diagnosticos or hallazgos:
-        story.append(Paragraph("2. DIAGN\u00d3STICOS Y HALLAZGOS PRINCIPALES", sec_heading))
+        story.append(Paragraph("2. T\u00c9RMINOS CL\u00cdNICOS Y HALLAZGOS PRINCIPALES", sec_heading))
         if diagnosticos:
             for d in diagnosticos:
-                story.append(Paragraph(f"&bull; <b>Diagn\u00f3stico:</b> {_safe_escape(d)}", bullet_style))
+                story.append(Paragraph(f"&bull; <b>T\u00e9rmino cl\u00ednico:</b> {_safe_escape(d)}", bullet_style))
         if hallazgos:
             for h in hallazgos:
                 story.append(Paragraph(f"&bull; {_safe_escape(h)}", bullet_style))

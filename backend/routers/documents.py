@@ -159,6 +159,7 @@ INSTRUCCIONES EXPLICATIVAS FUNDAMENTALES:
    - Observa marcadores de orientación (letras 'L' o 'R', objetos externos o material de osteosíntesis).
    - REGLA DE SEGURIDAD VITAL: Si observas signos visibles de fractura ósea, desplazamiento, rotura o lesión traumática aguda en cualquiera de las imágenes, indícalo claramente como un hallazgo de atención prioritaria y asigna la severidad a "rojo" para recomendar acudir a valoración médica presencial inmediata.
    - NUNCA digas que "no hay contenido relevante" si estás ante un estudio de imagen: explica siempre con claridad la anatomía visible y los hallazgos para orientar al paciente.
+   - Describe lo que se ve; NUNCA nombres diagnósticos ni enfermedades como hipótesis (nada de "posible X", "compatible con X" o "sugestivo de X"). La interpretación diagnóstica corresponde siempre al profesional médico.
 
 2. SI ES UNA RECETA MÉDICA, INFORME EN PAPEL O ANÁLISIS DE LABORATORIO:
    - Transcribe y explica con fidelidad los términos clínicos, medicamentos con sus pautas/dosis e instrucciones, y parámetros de laboratorio con sus valores y unidades de referencia.
@@ -166,9 +167,9 @@ INSTRUCCIONES EXPLICATIVAS FUNDAMENTALES:
 3. DEBES RESPONDER ÚNICAMENTE UN OBJETO JSON con esta estructura exacta:
 {{
   "resumen": "Resumen claro, comprensible y didáctico para el paciente que explique exactamente lo que se aprecia en el conjunto de imágenes o documentos.",
-  "hallazgos": ["Hallazgo descriptivo 1 (ej. Signos de discontinuidad ósea compatible con fractura en la diáfisis femoral)", "Hallazgo 2..."],
+  "hallazgos": ["Hallazgo descriptivo 1 (ej. Se aprecia una línea de discontinuidad en la cortical de la diáfisis femoral)", "Hallazgo 2..."],
   "medicamentos": ["Medicamentos identificados con dosis, si aplica (vacío si no hay fármacos)"],
-  "diagnosticos": ["Conceptos clínicos o términos explicados para comentar con el médico"],
+  "diagnosticos": ["Términos clínicos que APARECEN ESCRITOS en el documento, explicados para comentar con el médico. Vacío si no hay texto clínico. NUNCA propongas diagnósticos propios."],
   "biomarcadores": [
     {{
       "parametro": "Nombre del analito (ej. Glucosa, Colesterol, Hemoglobina, etc. Lista vacía [] si es radiografía sin valores)",
@@ -253,7 +254,7 @@ Criterios de prioridad sugerida:
 
             report_lines = []
             if diagnosticos:
-                report_lines.append(f"Diagnóstico: {', '.join(diagnosticos)}")
+                report_lines.append(f"Términos clínicos: {', '.join(diagnosticos)}")
             if hallazgos:
                 report_lines.append(f"Hallazgos Radiológicos: {'; '.join(hallazgos)}")
             if summary:
