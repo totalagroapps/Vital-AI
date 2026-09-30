@@ -42,7 +42,7 @@ PyMuPDF==1.28.2
 reportlab==5.0.1
 alembic==1.19.1
 Mako==1.4.1
-cryptography==44.0.1
+cryptography>=47.0.0
 cloudinary==1.42.2
 ddgs==9.16.0
 pywebpush==2.5.0
