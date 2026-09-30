@@ -24,6 +24,13 @@
             android:text="Contactos, país y emergencias"
             app:backgroundTint="@color/c_blue" />
 
+        <!-- Conecta la tablet con la cuenta MIVOR del paciente (tomas por voz, recordatorios) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettingMivorLink"
+            style="@style/BigButton"
+            android:text="Vincular con MIVOR"
+            app:backgroundTint="#047857" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSettingSosAuto"
             style="@style/BigButton"

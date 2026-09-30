@@ -1441,6 +1441,8 @@ export default function App() {
           onLogout={handleLogout} 
           onSwitchProfile={hasFamilyProfiles ? () => handleSwitchProfile() : undefined}
           onManageProfiles={() => handleSwitchProfile(true)}
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
         />
       </>
     );

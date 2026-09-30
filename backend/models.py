@@ -658,3 +658,30 @@ class PushSubscription(Base):
     p256dh = Column(String)
     auth = Column(String)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class DevicePairingCode(Base):
+    """Código de 6 cifras de un solo uso para vincular un kiosko al paciente (caduca en minutos)."""
+    __tablename__ = "device_pairing_codes"
+    id = Column(Integer, primary_key=True, index=True)
+    code_hash = Column(String, unique=True, index=True, nullable=False)
+    patient_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used = Column(Boolean, default=False, nullable=False)
+
+
+class DeviceLink(Base):
+    """
+    Dispositivo vinculado a un paciente (kiosko, reloj…). Se autentica con su propia llave,
+    guardada solo como hash, y solo puede hacer lo que exponen los endpoints /api/device/*.
+    """
+    __tablename__ = "device_links"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    created_by = Column(String, ForeignKey("users.id"), nullable=False)
+    device_name = Column(String, nullable=False)
+    token_hash = Column(String, unique=True, index=True, nullable=False)
+    revoked = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_seen_at = Column(DateTime(timezone=True), nullable=True)

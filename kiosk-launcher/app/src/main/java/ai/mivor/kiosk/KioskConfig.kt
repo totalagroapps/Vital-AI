@@ -49,6 +49,8 @@ class KioskConfig(context: Context) {
         private const val KEY_COUNTRY = "country_code"
         private const val KEY_MEDS = "meds_reminder"
         private const val KEY_CUSTOM_APP = "custom_app_package"
+        private const val KEY_DEVICE_TOKEN = "mivor_device_token"
+        private const val KEY_LINKED_PATIENT = "mivor_linked_patient"
 
         /** Clave que traían las versiones anteriores: si sigue puesta, se obliga a crear otra. */
         private const val OLD_DEFAULT_PIN = "1234"
@@ -182,6 +184,22 @@ class KioskConfig(context: Context) {
     var medsReminder: String
         get() = prefs.getString(KEY_MEDS, "") ?: ""
         set(value) = prefs.edit().putString(KEY_MEDS, value.trim()).apply()
+
+    /**
+     * Llave del kiosko en MIVOR (ver MivorApi). Queda en las preferencias privadas de la app,
+     * a las que solo accede esta app; se puede anular desde la web en cualquier momento.
+     */
+    val deviceToken: String get() = prefs.getString(KEY_DEVICE_TOKEN, "") ?: ""
+    val linkedPatientName: String get() = prefs.getString(KEY_LINKED_PATIENT, "") ?: ""
+    val isLinkedToMivor: Boolean get() = deviceToken.isNotBlank()
+
+    fun linkToMivor(token: String, patientName: String) {
+        prefs.edit().putString(KEY_DEVICE_TOKEN, token).putString(KEY_LINKED_PATIENT, patientName).apply()
+    }
+
+    fun unlinkFromMivor() {
+        prefs.edit().remove(KEY_DEVICE_TOKEN).remove(KEY_LINKED_PATIENT).apply()
+    }
 
     /** Paquete de la app elegida para la tarjeta "Agregar otra función" (vacío = ninguna). */
     var customAppPackage: String

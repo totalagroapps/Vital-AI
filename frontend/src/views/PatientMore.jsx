@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   FileText, Activity, Users, Apple, AlertCircle, 
-  Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw
+  Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw, Tablet
 } from 'lucide-react';
+import KioskLinkModal from '../components/KioskLinkModal';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
 
-const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles }) => {
+const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles, apiUrl, authHeaders }) => {
   const { t } = useLanguage();
+  const [showKioskLink, setShowKioskLink] = useState(false);
 
   // Cada opción lleva a una pantalla real; las que aún no existen se muestran como «Próximamente»
   // (antes abrían un alert de «en desarrollo» y parecían botones rotos).
@@ -26,6 +28,7 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles }
       items: [
         { icon: <AlertCircle size={20} />, title: t('sos_button'), desc: t('configure_emergency_alerts'), color: 'text-red-500', bg: 'bg-red-50' },
         { icon: <Users size={20} />, title: t('family_network'), desc: t('add_caregivers'), action: onManageProfiles, color: 'text-violet-600', bg: 'bg-violet-50' },
+        { icon: <Tablet size={20} />, title: t('kiosk_link_title'), desc: t('kiosk_link_menu_desc'), action: () => setShowKioskLink(true), color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { icon: <Shield size={20} />, title: t('medical_insurance'), desc: t('manage_policy_coverage'), screen: 'history', color: 'text-brand', bg: 'bg-mivor-blueSoft' }
       ]
     },
@@ -118,6 +121,7 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles }
 
       </div>
       <BottomNav activeTab="more" onTabChange={(tab) => onNavigate(tab)} />
+      <KioskLinkModal isOpen={showKioskLink} onClose={() => setShowKioskLink(false)} apiUrl={apiUrl} authHeaders={authHeaders} />
     </div>
   );
 };

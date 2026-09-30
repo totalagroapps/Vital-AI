@@ -85,6 +85,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var speechRecognizer: SpeechRecognizer? = null
     private var speechIntent: Intent? = null
     private var isListening = false
+    /** Esperando la respuesta de MIVOR por internet: no volver a escuchar hasta leerla. */
+    private var awaitingMivor = false
     private var isKioskActive = true
     private var isSpeechAvailableOnDevice = false
 
@@ -512,7 +514,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun restartVoiceListeningWithDelay(delayMs: Long) {
         voiceRestartHandler.removeCallbacksAndMessages(null)
         voiceRestartHandler.postDelayed({
-            if (isVoicePermissionGranted() && isSpeechAvailableOnDevice && sosDialog == null) {
+            if (!awaitingMivor && isVoicePermissionGranted() && isSpeechAvailableOnDevice && sosDialog == null) {
                 startListeningSafe()
             }
         }, delayMs)
@@ -631,7 +633,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
 
-        // 2. LLAMAR A UN CONTACTO: por su nombre o por "hijo", "hija", "cuidador"…
+        // 2. MEDICACIÓN CON MIVOR: "ya me tomé la pastilla", "¿qué me toca?". Va antes que los
+        //    contactos para que "me tomé la pastilla que me dio mi hija" no llame a la hija.
+        if (config.isLinkedToMivor && isMedicationCommand(cmd)) {
+            askMivor(rawText)
+            return
+        }
+
+        // 3. LLAMAR A UN CONTACTO: por su nombre o por "hijo", "hija", "cuidador"…
         val contacts = config.contacts
         val contactIndex = contacts.indices.firstOrNull { i ->
             containsWord(cmd, KioskConfig.normalize(contacts[i].name)) ||
@@ -704,6 +713,95 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         speak("No te entendí. Puedes decir: llamar a ${contacts[0].name}, WhatsApp, qué hora es, o ayuda.")
+    }
+
+    private fun isMedicationCommand(cmd: String) =
+        containsAnyWord(cmd, "tome", "tomado", "pastilla", "pastillas", "medicamento", "medicamentos",
+            "remedio", "remedios", "medicina", "medicinas") || cmd.contains("me toca")
+
+    /** Envía la frase a MIVOR (registra la toma en Mi salud) y lee la respuesta en voz alta. */
+    private fun askMivor(rawText: String) {
+        awaitingMivor = true
+        voiceRestartHandler.removeCallbacksAndMessages(null)
+        tvVoiceStatus.text = "⏳ Consultando con MIVOR…"
+        MivorApi.voice(config.deviceToken, rawText) { result ->
+            awaitingMivor = false
+            val reply = when (result) {
+                is MivorApi.Result.Ok ->
+                    result.value.speech.takeIf { result.value.intent != "unknown" && it.isNotBlank() }
+                        ?: "No te entendí. Puedes decir: ya me tomé la pastilla, o qué me toca."
+                MivorApi.Result.Unlinked -> {
+                    config.unlinkFromMivor()
+                    "Esta tablet ya no está conectada con MIVOR. Pídele a tu cuidador que la vuelva a vincular."
+                }
+                is MivorApi.Result.Error -> {
+                    val local = config.medsReminder
+                    "No pude conectar con MIVOR ahora mismo." + if (local.isNotBlank()) " Tu recordatorio: $local" else ""
+                }
+            }
+            speak(reply)
+            // Volver a escuchar cuando termine de hablar (aprox.), para no escucharse a sí misma
+            restartVoiceListeningWithDelay(1500L + reply.length * 65L)
+        }
+    }
+
+    private fun showMivorLinkDialog() {
+        if (config.isLinkedToMivor) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Conectada con MIVOR")
+                .setMessage(
+                    "Esta tablet está vinculada con la cuenta de ${config.linkedPatientName.ifBlank { "la persona" }}.\n\n" +
+                        "Si la desvinculas aquí, recuerda quitarla también en MIVOR > Más > Kiosko MIVOR."
+                )
+                .setPositiveButton("Cerrar", null)
+                .setNegativeButton("Desvincular") { _, _ ->
+                    config.unlinkFromMivor()
+                    Toast.makeText(this, "Tablet desvinculada", Toast.LENGTH_SHORT).show()
+                }
+                .show()
+            return
+        }
+
+        val input = EditText(this).apply {
+            hint = "Código de 6 cifras"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            filters = arrayOf(android.text.InputFilter.LengthFilter(6))
+            textSize = 28f
+            gravity = android.view.Gravity.CENTER
+        }
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle("Vincular con MIVOR")
+            .setMessage("En la web o app de MIVOR entra en Más > Kiosko MIVOR (tablet) y pulsa «Generar código». Escribe aquí el código:")
+            .setView(input)
+            .setPositiveButton("Vincular", null)
+            .setNegativeButton("Cancelar", null)
+            .create()
+        dialog.setOnShowListener {
+            val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            button.setOnClickListener {
+                val code = input.text.toString().trim()
+                if (code.length != 6) {
+                    input.error = "Deben ser 6 cifras"
+                    return@setOnClickListener
+                }
+                button.isEnabled = false
+                MivorApi.pair(code, "Kiosko ${Build.MODEL}") { result ->
+                    button.isEnabled = true
+                    when (result) {
+                        is MivorApi.Result.Ok -> {
+                            config.linkToMivor(result.value.token, result.value.patientName)
+                            dialog.dismiss()
+                            val who = result.value.patientName.ifBlank { "tu cuenta" }
+                            Toast.makeText(this, "Vinculada con $who", Toast.LENGTH_LONG).show()
+                            speak("Listo. Ya puedes decirme cuando te tomes las pastillas.")
+                        }
+                        is MivorApi.Result.Error -> input.error = result.message
+                        MivorApi.Result.Unlinked -> input.error = "No se pudo vincular."
+                    }
+                }
+            }
+        }
+        dialog.show()
     }
 
     // =========================================================================
@@ -1334,6 +1432,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         dialogView.findViewById<Button>(R.id.btnSettingContacts).setOnClickListener {
             dialog.dismiss()
             showConfigDialog()
+        }
+        dialogView.findViewById<Button>(R.id.btnSettingMivorLink).apply {
+            text = if (config.isLinkedToMivor) "MIVOR: ${config.linkedPatientName.ifBlank { "vinculada" }} ✓"
+            else "Vincular con MIVOR"
+            setOnClickListener {
+                dialog.dismiss()
+                showMivorLinkDialog()
+            }
         }
         dialogView.findViewById<Button>(R.id.btnSettingSosAuto).apply {
             text = if (SosWhatsAppService.isEnabled(this@MainActivity)) "Aviso SOS automático: activado ✓"

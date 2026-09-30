@@ -242,6 +242,9 @@ from routers.notifications import router as notif_router
 app.include_router(scribe_router)
 app.include_router(notif_router)
 
+from routers.devices import router as devices_router
+app.include_router(devices_router)
+
 
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
