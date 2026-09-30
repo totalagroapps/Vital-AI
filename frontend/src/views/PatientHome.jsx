@@ -703,7 +703,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         isOpen={showSymptomCameraModal}
         onClose={() => setShowSymptomCameraModal(false)}
         apiUrl={apiUrl}
-        token={localStorage.getItem('token')}
+        authHeaders={authHeaders}
       />
     </>
   );

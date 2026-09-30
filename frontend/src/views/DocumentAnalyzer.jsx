@@ -30,6 +30,15 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineEleme
 const ACCEPTED_TYPES = '.pdf,.jpg,.jpeg,.png,.webp,.heic,.bmp,.gif';
 const ACCEPTED_MIME = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/bmp', 'image/gif'];
 
+// Categorías que devuelve /api/me/documents (backend/services/document_category.py)
+const CATEGORY_META = {
+  radiografia: { label: 'docanalyzer_cat_xray', sub: 'docanalyzer_sub_medical_image', icon: 'jpg-blue' },
+  foto_clinica: { label: 'docanalyzer_cat_photo', sub: 'docanalyzer_sub_photo', icon: 'jpg-blue' },
+  receta: { label: 'docanalyzer_cat_prescription', sub: 'docanalyzer_sub_prescription', icon: 'pdf-purple' },
+  analitica: { label: 'docanalyzer_cat_lab', sub: 'docanalyzer_sub_lab_test', icon: 'pdf-red' },
+  informe: { label: 'docanalyzer_cat_report', sub: 'docanalyzer_sub_medical_document', icon: 'pdf-red' },
+};
+
 const BiomarkerRangeMeter = ({ bm }) => {
   const { t } = useLanguage();
   const val = parseFloat(bm.valor);
@@ -198,28 +207,14 @@ const DocumentAnalyzer = ({
   const allDocuments = useMemo(() => {
     // Si el backend ya tiene documentos, los adaptamos
     const formattedRealDocs = documents.map(doc => {
-      const ext = (doc.filename || '').split('.').pop().toLowerCase();
-      let iconType = 'pdf-red';
-      let category = 'informe';
-      let categoryLabel = t('docanalyzer_cat_report');
-      let sub = t('docanalyzer_sub_medical_document');
-
-      if (['jpg', 'jpeg', 'png', 'webp', 'heic'].includes(ext) || doc.document_type === 'medical_image') {
-        iconType = 'jpg-blue';
-        category = 'radiografia';
-        categoryLabel = t('docanalyzer_cat_xray');
-        sub = t('docanalyzer_sub_medical_image');
-      } else if (doc.filename?.toLowerCase().includes('receta')) {
-        iconType = 'pdf-purple';
-        category = 'receta';
-        categoryLabel = t('docanalyzer_cat_prescription');
-        sub = t('docanalyzer_sub_prescription');
-      } else if (doc.filename?.toLowerCase().includes('analisis') || doc.filename?.toLowerCase().includes('sangre') || doc.filename?.toLowerCase().includes('orina')) {
-        iconType = 'pdf-red';
-        category = 'analitica';
-        categoryLabel = t('docanalyzer_cat_lab');
-        sub = t('docanalyzer_sub_lab_test');
-      }
+      // La categoría la decide el backend a partir del análisis de la IA (no la extensión:
+      // una receta fotografiada o una foto de la piel no son radiografías)
+      const isImage = doc.document_type === 'medical_image';
+      const category = CATEGORY_META[doc.category] ? doc.category : (isImage ? 'foto_clinica' : 'informe');
+      const meta = CATEGORY_META[category];
+      const iconType = isImage ? 'jpg-blue' : meta.icon;
+      const categoryLabel = t(meta.label);
+      const sub = t(meta.sub);
 
       return {
         ...doc,
@@ -469,6 +464,8 @@ const DocumentAnalyzer = ({
         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200/70">{t('documentanalyzer_analitica')}</span>;
       case 'radiografia':
         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0055ff] border border-blue-200/70">{t('documentanalyzer_radiografia')}</span>;
+      case 'foto_clinica':
+        return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200/70">{t('docanalyzer_cat_photo')}</span>;
       case 'receta':
         return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200/70">{t('documentanalyzer_receta')}</span>;
       case 'informe':

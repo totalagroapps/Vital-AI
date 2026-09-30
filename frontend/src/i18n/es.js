@@ -2426,4 +2426,6 @@ export const es = {
   dose_as_needed: "si lo necesita",
   dose_before_meals: "antes de las comidas",
   dose_after_meals: "después de las comidas",
+  docanalyzer_cat_photo: "Foto clínica",
+  docanalyzer_sub_photo: "Foto de piel o síntoma",
 };

@@ -2433,4 +2433,6 @@ export const en = {
   dose_as_needed: "as needed",
   dose_before_meals: "before meals",
   dose_after_meals: "after meals",
+  docanalyzer_cat_photo: "Clinical photo",
+  docanalyzer_sub_photo: "Skin or symptom photo",
 };

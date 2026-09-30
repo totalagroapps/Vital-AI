@@ -2,14 +2,14 @@ import React, { useState, useRef } from 'react';
 import { Camera, Upload, X, Loader2, FileImage, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-// upload_v2 devuelve 'severidad' como verde / amarillo / rojo
+// /api/documents/upload devuelve 'severidad' como verde / amarillo / rojo
 const SEVERITY_STYLES = {
   rojo: { className: 'bg-red-100 text-red-700', labelKey: 'symptomcamera_nivel_rojo' },
   amarillo: { className: 'bg-amber-100 text-amber-700', labelKey: 'symptomcamera_nivel_amarillo' },
   verde: { className: 'bg-emerald-100 text-emerald-700', labelKey: 'symptomcamera_nivel_verde' },
 };
 
-export default function SymptomCameraModal({ isOpen, onClose, apiUrl, token, onUploadSuccess }) {
+export default function SymptomCameraModal({ isOpen, onClose, apiUrl, authHeaders, onUploadSuccess }) {
   const { t, language } = useLanguage();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -34,16 +34,14 @@ export default function SymptomCameraModal({ isOpen, onClose, apiUrl, token, onU
 
     const formData = new FormData();
     formData.append('files', file);
-    formData.append('patient_id', 'me');
     if (language) formData.append('language', language);
 
     try {
-      // Usamos el endpoint existente que ya tiene GPT-4o-mini Vision integrado
-      const res = await fetch(`${apiUrl}/api/documents/upload_v2?patient_id=me`, {
+      // Mismo endpoint de análisis que Mis documentos (GPT-4o-mini Vision). authHeaders lleva la
+      // sesión y, en Modo Cuidador, el perfil del familiar (X-Target-Patient-Id).
+      const res = await fetch(`${apiUrl}/api/documents/upload`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: authHeaders,
         body: formData
       });
 
