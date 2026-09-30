@@ -657,7 +657,9 @@ class PushSubscription(Base):
     endpoint = Column(String, unique=True, index=True)
     p256dh = Column(String)
     auth = Column(String)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # La columna es "timestamp without time zone": asyncpg (PostgreSQL) rechaza una fecha con zona
+    # horaria y la inserción fallaba con error 500. Se guarda UTC sin zona.
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
 
 class DevicePairingCode(Base):

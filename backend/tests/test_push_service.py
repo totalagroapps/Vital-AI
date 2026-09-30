@@ -36,6 +36,14 @@ def test_public_key_is_derived_from_private_key(vapid_key):
     assert len(raw) == 65 and raw[0] == 4  # punto P-256 sin comprimir, lo que pide el navegador
 
 
+def test_subscription_created_at_default_matches_naive_column():
+    # push_subscriptions.created_at es "timestamp without time zone": en PostgreSQL (asyncpg)
+    # una fecha con zona horaria hace fallar la inserción (error 500 al suscribirse)
+    column = models.PushSubscription.__table__.c.created_at
+    assert column.type.timezone is False
+    assert column.default.arg(None).tzinfo is None
+
+
 def test_no_key_means_no_public_key(monkeypatch):
     monkeypatch.delenv("VAPID_PRIVATE_KEY", raising=False)
     assert push_service.vapid_public_key() is None
