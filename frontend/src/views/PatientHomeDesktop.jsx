@@ -12,7 +12,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import {
-  Camera, useLanguage } from '../contexts/LanguageContext';
+  useLanguage } from '../contexts/LanguageContext';
 import HeroTitle from '../components/HeroTitle';
 import PatientTopNav from '../components/PatientTopNav';
 
