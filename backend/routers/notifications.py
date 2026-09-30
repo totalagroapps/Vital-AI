@@ -1,16 +1,26 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel
 import models
 from database import get_db
 from security import get_authenticated_user_id
+from services.push_service import vapid_public_key
 
 router = APIRouter(prefix="/api/notifications", tags=["Notifications"])
 
 class PushSubIn(BaseModel):
     endpoint: str
     keys: dict
+
+
+@router.get("/vapid-public-key")
+async def get_vapid_public_key():
+    """Clave pública para suscribirse (no es secreta). Se deriva de VAPID_PRIVATE_KEY del servidor."""
+    public_key = vapid_public_key()
+    if not public_key:
+        raise HTTPException(status_code=503, detail="Las notificaciones push no están configuradas en el servidor.")
+    return {"public_key": public_key}
 
 @router.post("/subscribe")
 async def subscribe_push(sub: PushSubIn, db: AsyncSession = Depends(get_db), user_id: str = Depends(get_authenticated_user_id)):

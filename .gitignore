@@ -3,6 +3,8 @@
 *.keystore
 keystore.properties
 *keystore*base64*
+# Claves privadas (p. ej. VAPID): van en variables de entorno, nunca en el repositorio
+*.pem
 *.jks.b64
 
 # Frontend
