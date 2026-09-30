@@ -113,26 +113,38 @@ class PairRequest(BaseModel):
     device_name: str = Field(default='Kiosko MIVOR', max_length=80)
 
 
-@router.post('/api/devices/pair')
-async def pair_device(payload: PairRequest, request: Request, db: AsyncSession = Depends(get_db)):
-    _apply_pair_rate_limit(request.client.host if request.client else 'unknown')
+async def redeem_pairing_code(db: AsyncSession, raw_code: str, device_name: str, token: str) -> Optional[models.DeviceLink]:
+    """
+    Canjea un código de vinculación y crea el dispositivo con la llave indicada (se guarda su hash).
+    Devuelve None si el código no existe, ya se usó o caducó. Lo usan el kiosko y la skill de Alexa.
+    """
     code = (await db.execute(
-        select(models.DevicePairingCode).where(models.DevicePairingCode.code_hash == _hash(payload.code.strip()))
+        select(models.DevicePairingCode).where(models.DevicePairingCode.code_hash == _hash(raw_code.strip()))
     )).scalars().first()
     expires_at = code.expires_at if code else None
     if expires_at is not None and expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     if not code or code.used or expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status_code=400, detail='Código incorrecto o caducado. Genera uno nuevo en MIVOR.')
+        return None
 
     code.used = True
-    token = secrets.token_urlsafe(32)
-    db.add(models.DeviceLink(
+    link = models.DeviceLink(
         patient_id=code.patient_id, created_by=code.created_by,
-        device_name=payload.device_name.strip() or 'Kiosko MIVOR', token_hash=_hash(token),
-    ))
+        device_name=device_name.strip() or 'Kiosko MIVOR', token_hash=_hash(token),
+    )
+    db.add(link)
     await db.commit()
-    return {'device_token': token, 'patient_name': await _patient_name(db, code.patient_id)}
+    return link
+
+
+@router.post('/api/devices/pair')
+async def pair_device(payload: PairRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    _apply_pair_rate_limit(request.client.host if request.client else 'unknown')
+    token = secrets.token_urlsafe(32)
+    link = await redeem_pairing_code(db, payload.code, payload.device_name, token)
+    if not link:
+        raise HTTPException(status_code=400, detail='Código incorrecto o caducado. Genera uno nuevo en MIVOR.')
+    return {'device_token': token, 'patient_name': await _patient_name(db, link.patient_id)}
 
 
 async def get_device_link(

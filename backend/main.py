@@ -245,6 +245,9 @@ app.include_router(notif_router)
 from routers.devices import router as devices_router
 app.include_router(devices_router)
 
+from routers.alexa import router as alexa_router
+app.include_router(alexa_router)
+
 
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler

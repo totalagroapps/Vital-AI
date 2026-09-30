@@ -1,0 +1,91 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "asistente mivor",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "VincularIntent",
+          "slots": [{ "name": "codigo", "type": "AMAZON.NUMBER" }],
+          "samples": [
+            "mi código es {codigo}",
+            "el código es {codigo}",
+            "código {codigo}",
+            "vincular con el código {codigo}",
+            "conectar con el código {codigo}",
+            "{codigo}"
+          ]
+        },
+        {
+          "name": "TomaIntent",
+          "slots": [],
+          "samples": [
+            "ya me tomé la pastilla",
+            "me tomé la pastilla",
+            "ya me he tomado la pastilla",
+            "ya me tomé el medicamento",
+            "me tomé la medicina",
+            "ya tomé la pastilla",
+            "ya me la tomé",
+            "acabo de tomarme la pastilla"
+          ]
+        },
+        {
+          "name": "TomaTodasIntent",
+          "slots": [],
+          "samples": [
+            "me tomé todas",
+            "ya me tomé todas",
+            "me tomé todas las pastillas",
+            "ya me he tomado todas las pastillas",
+            "ya me las tomé todas",
+            "me tomé todos los medicamentos"
+          ]
+        },
+        {
+          "name": "TomaMedicamentoIntent",
+          "slots": [{ "name": "medicamento", "type": "AMAZON.SearchQuery" }],
+          "samples": [
+            "me tomé el {medicamento}",
+            "ya me tomé el {medicamento}",
+            "me tomé la {medicamento}",
+            "ya me tomé la {medicamento}",
+            "ya me he tomado el {medicamento}"
+          ]
+        },
+        {
+          "name": "EstadoIntent",
+          "slots": [],
+          "samples": [
+            "qué me toca",
+            "qué me toca ahora",
+            "qué pastillas me faltan",
+            "qué me falta por tomar",
+            "qué tengo que tomar",
+            "me falta alguna pastilla",
+            "cuáles son mis pastillas de hoy"
+          ]
+        },
+        {
+          "name": "AyudaUrgenteIntent",
+          "slots": [],
+          "samples": [
+            "me he caído",
+            "me caí",
+            "necesito ayuda",
+            "me encuentro mal",
+            "estoy mal",
+            "avisa a mi familia",
+            "avisa a mi hijo",
+            "avisa a mi hija"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
