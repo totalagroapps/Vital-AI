@@ -547,6 +547,7 @@ TEXTO DEL DOCUMENTO:
 async def extract_medication(
     file: Optional[UploadFile] = File(None),
     files: Optional[List[UploadFile]] = File(None),
+    language: Optional[str] = Form(None),
     user_id: str = Depends(get_current_user_id)
 ):
     upload_files = []
@@ -560,7 +561,10 @@ async def extract_medication(
 
     try:
         openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-        system_prompt = 'Extrae los medicamentos recetados o listados en la imagen/documento proporcionado y devuelve ÚNICAMENTE un JSON con esta estructura exacta:\n{\n  "medications": [\n    {\n      "medication_name": "Nombre del medicamento",\n      "dosage": "Dosis (ej. 500mg), vacío si no se especifica",\n      "frequency": "Frecuencia (ej. cada 8 horas, BID, TID, QD, etc), vacío si no se especifica",\n      "time_of_day": "Momento del día (ej. mañana y noche), vacío si no se especifica"\n    }\n  ]\n}\nSi no hay medicamentos, devuelve la lista vacía.'
+        system_prompt = 'Extrae los medicamentos recetados o listados en la imagen/documento proporcionado y devuelve ÚNICAMENTE un JSON con esta estructura exacta:\n{\n  "medications": [\n    {\n      "medication_name": "Nombre del medicamento",\n      "dosage": "Dosis (ej. 500mg), vacío si no se especifica",\n      "frequency": "Frecuencia en lenguaje claro para una persona mayor (ej. 2 veces al día, cada 8 horas, al acostarse), vacío si no se especifica",\n      "time_of_day": "Momento del día (ej. mañana y noche), vacío si no se especifica"\n    }\n  ]\n}\nSi no hay medicamentos, devuelve la lista vacía.\n' + (
+            'NUNCA uses abreviaturas latinas de posología (BID, TID, QID, QD, QHS, PRN, c/8h...): tradúcelas a lenguaje claro. '
+            f'Escribe "frequency" y "time_of_day" en {language_label(language)}; no traduzcas los nombres de los medicamentos.'
+        )
 
         all_medications = []
         import json

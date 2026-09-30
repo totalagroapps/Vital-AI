@@ -3,6 +3,7 @@ import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Pape
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import { emergencyNumber } from '../utils/locale';
+import { plainFrequency } from '../utils/doseText';
 import PatientTopNav from '../components/PatientTopNav';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 import MedicationAlertOverlay from '../components/MedicationAlertOverlay';
@@ -16,7 +17,7 @@ export default function PatientTreatments({
   username,
   onLogout 
 }) {
-  const { t, locale, country } = useLanguage();
+  const { t, locale, country, language } = useLanguage();
   const [medications, setMedications] = useState([]);
   const [snoozedMeds, setSnoozedMeds] = useState([]);
   const [forceAlert, setForceAlert] = useState(false);
@@ -52,6 +53,7 @@ export default function PatientTreatments({
     try {
       const formData = new FormData();
       Array.from(files).forEach(f => formData.append('files', f));
+      if (language) formData.append('language', language);
       const res = await fetch(`${apiUrl}/api/documents/extract_medication`, {
         method: 'POST',
         headers: {
@@ -188,7 +190,7 @@ export default function PatientTreatments({
           ${escapeHtml(m.dosage || t('patienttreatments_segun_indicacion_medica'))}
         </td>
         <td style="padding: 10px 12px; font-size: 14px; border-bottom: 1px solid #e2e8f0;">
-          ${escapeHtml(m.time_of_day || m.frequency || t('patienttreatments_horario_habitual'))}
+          ${escapeHtml(plainFrequency(m.time_of_day || m.frequency, t) || t('patienttreatments_horario_habitual'))}
         </td>
         <td style="padding: 10px 12px; text-align: center; border-bottom: 1px solid #e2e8f0;">
           <span style="display: inline-block; width: 22px; height: 22px; border: 2px solid #0047d6; border-radius: 6px;"></span>
@@ -397,7 +399,7 @@ export default function PatientTreatments({
                     <h4 className={`font-bold truncate text-lg ${med.taken_today ? 'text-slate-900 line-through opacity-70' : 'text-slate-900'}`}>{med.medication_name}</h4>
                     <p className="text-[11px] text-slate-500 font-medium">{med.dosage || t("unspecified_dosage")}</p>
                     <div className="flex items-center gap-3 mt-1.5">
-                      {med.frequency && <span className="text-[10px] bg-blue-100/80 text-blue-800 px-2 py-0.5 rounded-lg font-bold uppercase">{med.frequency}</span>}
+                      {med.frequency && <span className="text-[11px] bg-blue-100/80 text-blue-800 px-2 py-0.5 rounded-lg font-bold">{plainFrequency(med.frequency, t)}</span>}
                       {med.time_of_day && <span className="flex items-center gap-1 text-[10px] text-slate-400 font-medium"><Clock size={10}/> {med.time_of_day}</span>}
                     </div>
                   </div>
