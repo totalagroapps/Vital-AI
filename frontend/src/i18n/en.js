@@ -2440,4 +2440,10 @@ export const en = {
   documentanalyzer_delete_error: "The document could not be deleted. Please try again.",
   legacy_report_hidden: "This summary was created with an earlier version of MIVOR that included possible diagnoses, so it is no longer shown. MIVOR is an informational tool: your doctor always makes the assessment.",
   legacy_report_specialty: "Suggested specialty: {specialty}.",
+  push_activate: "Enable notifications",
+  push_on: "Notifications on",
+  push_blocked: "Notifications blocked",
+  push_blocked_hint: "You blocked them in the browser: enable them from the padlock in the address bar.",
+  push_permission_needed: "You need to allow notifications in your browser.",
+  push_error: "Notifications could not be enabled. Please try again.",
 };

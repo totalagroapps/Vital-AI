@@ -2433,4 +2433,10 @@ export const es = {
   documentanalyzer_delete_error: "No se pudo eliminar el documento. Inténtalo de nuevo.",
   legacy_report_hidden: "Este resumen se generó con una versión anterior de MIVOR que incluía posibles diagnósticos, por eso ya no se muestra. MIVOR es una herramienta informativa: la valoración siempre la hace tu médico.",
   legacy_report_specialty: "Especialidad sugerida: {specialty}.",
+  push_activate: "Activar Notificaciones",
+  push_on: "Notificaciones On",
+  push_blocked: "Notificaciones bloqueadas",
+  push_blocked_hint: "Las bloqueaste en el navegador: actívalas desde el candado de la barra de direcciones.",
+  push_permission_needed: "Debes permitir las notificaciones en tu navegador.",
+  push_error: "No se pudieron activar las notificaciones. Inténtalo de nuevo.",
 };

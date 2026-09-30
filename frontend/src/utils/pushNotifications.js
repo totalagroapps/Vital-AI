@@ -14,7 +14,7 @@ export async function subscribeToPush(apiUrl, token) {
       });
     }
     
-    await fetch(`${apiUrl}/api/notifications/subscribe`, {
+    const res = await fetch(`${apiUrl}/api/notifications/subscribe`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -22,8 +22,8 @@ export async function subscribeToPush(apiUrl, token) {
       },
       body: JSON.stringify(subscription)
     });
-    
-    return true;
+    // Sin confirmación del servidor no se envía ningún aviso: no darlo por activado
+    return res.ok;
   } catch (err) {
     console.error('Failed to subscribe to push', err);
     return false;

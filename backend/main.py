@@ -246,25 +246,14 @@ app.include_router(notif_router)
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from database import AsyncSessionLocal
-from services.medication_alerts import pending_medications
+from services.medication_push import notify_overdue_medications
 from services.push_service import send_push_notification
 
 scheduler = AsyncIOScheduler()
 
 async def check_medication_alerts():
     async with AsyncSessionLocal() as db:
-        # Lógica simplificada: en producción iteraríamos sobre pacientes activos
-        # Para la demo, buscamos pacientes que tengan recordatorios y verificamos
-        from sqlalchemy.future import select
-        import models
-        patients = (await db.execute(select(models.PatientProfile))).scalars().all()
-        for p in patients:
-            pending = await pending_medications(db, p.user_id)
-            for med in pending:
-                if med["minutes_late"] == 60: # Solo avisar exactamente al cumplirse el margen de 60 min para no espamear
-                    title = "¡Alerta de Medicación!"
-                    body = f"A {p.first_name} se le pasó la hora de tomar {med['medication_name']} ({med['dosage']})."
-                    await send_push_notification(db, p.user_id, title, body)
+        await notify_overdue_medications(db, send_push_notification)
 
 @app.on_event("startup")
 async def start_scheduler():
