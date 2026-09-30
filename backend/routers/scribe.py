@@ -10,7 +10,7 @@ from openai import AsyncOpenAI
 
 import models
 from database import get_db
-from security import get_current_user
+from security import get_current_user, require_doctor, require_verified_doctor
 from services.language_service import language_directive
 from services.localize_service import localize_fields
 from services.note_templates import fill_template_with_llm, parse_fields, MAX_TEMPLATE_CHARS
@@ -418,7 +418,7 @@ async def list_scribe_templates():
 
 
 @router.post("/generate_soap", response_model=GenerateSoapResponse)
-async def generate_soap_note(req: GenerateSoapRequest, current_user: models.User = Depends(get_current_user)):
+async def generate_soap_note(req: GenerateSoapRequest, current_user: models.User = Depends(require_doctor)):
     """
     Genera una nota médica estructurada SOAP con códigos CIE-10 y una 'Hoja Clara de Cuidados'
     para el paciente a partir del texto dictado o notas de consulta.
@@ -624,7 +624,7 @@ async def fill_template(req: FillTemplateRequest, current_user: models.User = De
 async def transcribe_audio(
     file: UploadFile = File(...),
     language: Optional[str] = Form("es"),
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(require_doctor)
 ):
     """
     Transcribe un archivo de audio (ej. nota de voz de WhatsApp .ogg, .mp3) 
@@ -658,7 +658,7 @@ async def transcribe_audio(
 @router.post("/generate_prescription")
 async def generate_prescription(
     payload: dict,
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(require_verified_doctor)
 ):
     """
     Genera un PDF de Receta Médica extrayendo los medicamentos del plan con IA.

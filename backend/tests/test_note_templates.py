@@ -139,6 +139,13 @@ async def test_patients_cannot_use_templates(client):
     assert (await client.get("/api/scribe/my-templates", headers=auth("pat-a"))).status_code == 403
     res = await client.post("/api/scribe/fill_template", headers=auth("pat-a"), json={"template_body": BODY, "consultation_text": "texto de prueba"})
     assert res.status_code == 403
+    # Nota SOAP, transcripción y receta son exclusivas del lado médico (MDR / SaMD)
+    res = await client.post("/api/scribe/generate_soap", headers=auth("pat-a"), json={"consultation_text": "texto de prueba"})
+    assert res.status_code == 403
+    res = await client.post("/api/scribe/generate_prescription", headers=auth("pat-a"), json={"plan": "paracetamol"})
+    assert res.status_code == 403
+    res = await client.post("/api/scribe/transcribe_audio", headers=auth("pat-a"), files={"file": ("a.ogg", b"x", "audio/ogg")})
+    assert res.status_code == 403
 
 
 @pytest.mark.asyncio

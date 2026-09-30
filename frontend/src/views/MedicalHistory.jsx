@@ -10,6 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 import PatientTopNav from '../components/PatientTopNav';
+import { relabelLegacyReport } from '../utils/legacyReport';
 
 const MedicalHistory = ({
   patientProfile = {},
@@ -180,7 +181,7 @@ const MedicalHistory = ({
         display_date: new Date(t_item.created_at).toLocaleString(),
         status_label: t_item.status === 'closed_red' ? t('medicalhistory_prioridad_alta') : (t_item.status === 'closed_yellow' ? t('medicalhistory_consulta_prioritaria') : t('medicalhistory_orientacion_general')),
         severity_badge: t_item.status === 'closed_red' ? 'bg-red-50 text-red-700 border border-red-200' : (t_item.status === 'closed_yellow' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
-        text: t_item.final_report || t('medicalhistory_consulta_completada_satisfactoriamente')
+        text: relabelLegacyReport(t_item.final_report) || t('medicalhistory_consulta_completada_satisfactoriamente')
       }));
     }
     const triageSessions = sessions?.filter(s => s.type === "triage") || [];
