@@ -74,17 +74,39 @@ import {
 
 const CHAT_STORAGE_KEYS = ['currentSessionId', 'triageSessionId', 'isTriageClosed', 'chatMessages'];
 
+
+const ACTIVE_PROFILE_KEY = 'mivor_active_profile';
+
+function readStoredProfile() {
+  try {
+    const raw = sessionStorage.getItem(ACTIVE_PROFILE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredProfile(value) {
+  try {
+    if (value) sessionStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(value));
+    else sessionStorage.removeItem(ACTIVE_PROFILE_KEY);
+  } catch { /* sin almacenamiento: el perfil vive solo en memoria */ }
+}
+
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, language, country, locale } = useLanguage();
   // En Android el token se descifra del Keystore de forma asíncrona: hasta entonces no se decide la ruta
   const [token, setToken] = useState(() => (tokenAvailableSync ? getToken() : null));
-  const [targetPatientId, setTargetPatientId] = useState(null);
-  const [profileSelected, setProfileSelected] = useState(false);
+  // El perfil elegido se guarda en sessionStorage (misma vida que el token web) para que
+  // recargar o abrir un enlace directo no devuelva al selector. El servidor valida el vínculo.
+  const [storedProfile] = useState(readStoredProfile);
+  const [targetPatientId, setTargetPatientId] = useState(storedProfile?.targetPatientId || null);
+  const [profileSelected, setProfileSelected] = useState(Boolean(storedProfile));
   // Perfil familiar activo (Modo Cuidador) y si la cuenta tiene más de un perfil para elegir
-  const [activeProfile, setActiveProfile] = useState(null);
-  const [hasFamilyProfiles, setHasFamilyProfiles] = useState(false);
+  const [activeProfile, setActiveProfile] = useState(storedProfile?.activeProfile || null);
+  const [hasFamilyProfiles, setHasFamilyProfiles] = useState(Boolean(storedProfile?.hasFamilyProfiles));
   const [profileManageMode, setProfileManageMode] = useState(false);
   // Tomas de medicación vencidas de los familiares que administra esta cuenta (Modo Cuidador)
   const [medicationAlerts, setMedicationAlerts] = useState([]);
@@ -533,17 +555,17 @@ export default function App() {
     resetProfileData();
     setProfileManageMode(false);
     setHasFamilyProfiles(profileCount > 1);
-    if (profile && !profile.is_self) {
-      setTargetPatientId(profile.user_id);
-      setActiveProfile({ name: profileDisplayName(profile), relationship: profile.relationship });
-    } else {
-      setTargetPatientId(null);
-      setActiveProfile(null);
-    }
+    const isFamily = Boolean(profile && !profile.is_self);
+    const nextTarget = isFamily ? profile.user_id : null;
+    const nextActive = isFamily ? { name: profileDisplayName(profile), relationship: profile.relationship } : null;
+    setTargetPatientId(nextTarget);
+    setActiveProfile(nextActive);
     setProfileSelected(true);
+    writeStoredProfile({ targetPatientId: nextTarget, activeProfile: nextActive, hasFamilyProfiles: profileCount > 1 });
   };
 
   const handleSwitchProfile = (manage = false) => {
+    writeStoredProfile(null);
     resetProfileData();
     setTargetPatientId(null);
     setActiveProfile(null);
@@ -553,6 +575,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    writeStoredProfile(null);
     setToken(null);
     setProfileSelected(false);
     setTargetPatientId(null);
@@ -669,6 +692,9 @@ export default function App() {
         if (data.full_name) {
           setPatientProfile(data);
         }
+      } else if (res.status === 403 && targetPatientId) {
+        // El perfil familiar guardado ya no está vinculado a esta cuenta
+        handleSwitchProfile();
       }
     } catch (e) {
       console.error('Error fetching patient profile:', e);
@@ -1311,6 +1337,9 @@ export default function App() {
       <>
         <Auth 
           onLogin={(jwt, role) => { 
+            // Un login nuevo siempre empieza en el selector de perfiles
+            writeStoredProfile(null);
+            setProfileSelected(false);
             setToken(jwt);
             saveToken(jwt);
             if(role) { 
