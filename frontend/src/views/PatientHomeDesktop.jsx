@@ -61,6 +61,7 @@ const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpe
   const shortcuts = [
     { id: 'games', onClick: onOpenGames, icon: Brain, title: t('patienthome_mente_activa'), subtitle: t('patienthomedesktop_memoria_calculo'), hint: t('patienthomedesktop_juegos_diarios_de_estimulacion_cognitiva'), tone: 'bg-violet-100 text-violet-700' },
     { id: 'prevention', onClick: onOpenPreventiveCalendar, icon: Calendar, title: t('brand_mivor_prevention'), subtitle: t('patienthomedesktop_cribados'), hint: t('patienthomedesktop_calendario_preventivo_y_vigilancia_diges'), tone: 'bg-sky-100 text-sky-700' },
+    { id: 'camera', onClick: onOpenSymptomCamera, icon: Camera, title: 'Análisis Visual (IA)', subtitle: 'Piel y Síntomas', hint: 'Sube una foto de piel o síntoma para revisión', tone: 'bg-indigo-100 text-indigo-700' },
   ];
 
   return (

@@ -395,6 +395,22 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
 
           </div>
 
+          {/* Análisis Visual */}
+          <div 
+            onClick={() => setShowSymptomCameraModal(true)}
+            className="w-full rounded-2xl border border-indigo-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner bg-white"
+          >
+            <div className="flex p-4 items-center justify-between">
+              <div>
+                <h3 className="text-sm font-black text-indigo-800">Análisis Visual (IA)</h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">Sube una foto de un síntoma en tu piel para que la IA lo escanee al instante.</p>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                <Camera size={20} className="text-indigo-600" />
+              </div>
+            </div>
+          </div>
+
           {/* 6. Banner de Medicina Preventiva y Longevidad */}
           <div 
             onClick={() => setShowPreventiveCalendarModal(true)}
