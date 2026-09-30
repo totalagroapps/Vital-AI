@@ -104,6 +104,10 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
   };
 
   const emergencyPhone = getCleanPhoneNumber(profile?.emergency_contact);
+  const emergencyMeds = Array.isArray(profile?.active_medications)
+    ? profile.active_medications
+    : (profile?.current_medications || '').split(',').map(m => m.trim())
+        .filter(m => m && !['ninguna', 'no registrada'].includes(m.toLowerCase()));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center px-4 py-8 relative overflow-x-hidden font-sans">
@@ -342,9 +346,9 @@ const EmergencyPassportView = ({ apiUrl, onNavigateLogin }) => {
                   </h4>
                 </div>
                 <div className="text-sm text-slate-200">
-                  {profile.current_medications && profile.current_medications.toLowerCase() !== 'ninguna' ? (
+                  {emergencyMeds.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
-                      {profile.current_medications.split(',').map((med, i) => (
+                      {emergencyMeds.map((med, i) => (
                         <span key={i} className="bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 text-xs font-medium px-2.5 py-1 rounded-lg">
                           {med.trim()}
                         </span>

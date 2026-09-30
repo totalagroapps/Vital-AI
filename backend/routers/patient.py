@@ -20,6 +20,7 @@ from database import get_db
 from security import get_current_user, require_role, get_current_user_id
 from schemas.requests import PatientProfileSchema
 from storage import s3_client, R2_BUCKET_NAME
+from services.active_medications import get_active_medications
 
 logger = logging.getLogger('media_v2')
 
@@ -83,7 +84,10 @@ async def get_public_emergency_profile(
             'created_at': t.created_at.isoformat() if t.created_at else None
         })
 
-    # 3. URL de emergencia pública y QR Code
+    # 3. Medicación activa: recordatorios de "Mi salud" + texto de la ficha (fuente única)
+    active_medications = await get_active_medications(db, profile.user_id, profile.current_medications)
+
+    # 4. URL de emergencia pública y QR Code
     frontend_base = os.getenv('FRONTEND_URL', 'https://vitalai.up.railway.app').rstrip('/')
     emergency_url = f"{frontend_base}/emergencia/{profile.user_id}"
 
@@ -103,7 +107,8 @@ async def get_public_emergency_profile(
         'blood_type': profile.blood_type or 'N/D',
         'allergies': profile.allergies or 'No registradas',
         'chronic_conditions': profile.chronic_conditions or 'No registradas',
-        'current_medications': profile.current_medications or 'No registrada',
+        'current_medications': ', '.join(active_medications),
+        'active_medications': active_medications,
         'emergency_contact': profile.emergency_contact or 'No especificado',
         'height': profile.height or '--',
         'weight': profile.weight or '--',
@@ -151,6 +156,7 @@ async def get_patient_profile(db: AsyncSession=Depends(get_db), user_id: str=Dep
         'allergies': profile.allergies,
         'chronic_conditions': profile.chronic_conditions,
         'current_medications': profile.current_medications,
+        'active_medications': await get_active_medications(db, user_id, profile.current_medications),
         'emergency_contact': profile.emergency_contact,
         'height': profile.height,
         'weight': profile.weight,
@@ -241,6 +247,10 @@ async def get_patient_detail(
             'medical_notes': profile.medical_notes or '',
             'insurance_provider': profile.insurance_provider or ''
         }
+    profile_dict['active_medications'] = await get_active_medications(
+        db, effective_user_id, profile.current_medications if profile else None
+    )
+    profile_dict['current_medications'] = ', '.join(profile_dict['active_medications'])
 
     # 1. Triajes asistidos del paciente
     triage_res = (await db.execute(

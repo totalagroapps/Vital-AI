@@ -151,7 +151,7 @@ const MedicalHistory = ({
         <strong>${escapeHtml(t('medicalhistory_enfermedades_cronicas'))}</strong> ${escapeHtml(patientProfile?.chronic_conditions || t('none_female'))}
       </div>
       <div style="margin-bottom: 20px;">
-        <strong>${escapeHtml(t('medicalhistory_medicacion_activa'))}</strong> ${escapeHtml(patientProfile?.current_medications || t('none_female'))}
+        <strong>${escapeHtml(t('medicalhistory_medicacion_activa'))}</strong> ${escapeHtml(medicationsList.join(', ') || t('none_female'))}
       </div>
 
       <div style="text-align: center; color: #94a3b8; font-size: 11px; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
@@ -202,7 +202,10 @@ const MedicalHistory = ({
   // Lists of conditions
   const allergiesList = (patientProfile?.allergies || "").split(',').map(s => s.trim()).filter(Boolean);
   const conditionsList = (patientProfile?.chronic_conditions || "").split(',').map(s => s.trim()).filter(Boolean);
-  const medicationsList = (patientProfile?.current_medications || "").split(',').map(s => s.trim()).filter(Boolean);
+  // Fuente única: el backend une los recordatorios de "Mi salud" con el texto de la ficha
+  const medicationsList = Array.isArray(patientProfile?.active_medications)
+    ? patientProfile.active_medications
+    : (patientProfile?.current_medications || "").split(',').map(s => s.trim()).filter(Boolean);
 
   const toggleTriageAccordion = (id) => {
     setExpandedTriages(prev => ({ ...prev, [id]: !prev[id] }));
