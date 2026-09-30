@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Pill, Plus, Check, Clock, Trash2, ArrowLeft, UploadCloud, Loader2, Paperclip, Printer, BellRing } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
+import { emergencyNumber } from '../utils/locale';
 import PatientTopNav from '../components/PatientTopNav';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 import MedicationAlertOverlay from '../components/MedicationAlertOverlay';
@@ -15,7 +16,7 @@ export default function PatientTreatments({
   username,
   onLogout 
 }) {
-  const { t, locale } = useLanguage();
+  const { t, locale, country } = useLanguage();
   const [medications, setMedications] = useState([]);
   const [snoozedMeds, setSnoozedMeds] = useState([]);
   const [forceAlert, setForceAlert] = useState(false);
@@ -227,7 +228,7 @@ export default function PatientTreatments({
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 30px; font-size: 12px; color: #475569; border-top: 2px dashed #cbd5e1; padding-top: 16px;">
           <div>
-            <strong>Teléfono de Emergencias:</strong> 112 / 911<br />
+            <strong>Teléfono de Emergencias:</strong> ${emergencyNumber(country)}<br />
             <strong>Centro de Salud / Hospital:</strong> Consulte su centro habitual
           </div>
           <div style="text-align: right;">
