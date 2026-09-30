@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css'
 import './index.css'
 import { LanguageProvider } from './contexts/LanguageContext'
 import ErrorBoundary from './components/ErrorBoundary'
+import NewVersionBanner from './components/NewVersionBanner'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -14,13 +15,14 @@ createRoot(document.getElementById('root')).render(
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
+        <NewVersionBanner />
       </BrowserRouter>
     </LanguageProvider>
   </StrictMode>,
 )
 
-// Erradicar Service Workers anteriores y purgar CacheStorage persistente
-// Esto evita que Android WebView o navegadores queden atrapados en bundles desactualizados
+// Service Worker solo para notificaciones push (no cachea nada). Las versiones nuevas
+// del frontend las detecta NewVersionBanner.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((registration) => {

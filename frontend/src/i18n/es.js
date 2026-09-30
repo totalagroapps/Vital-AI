@@ -2412,4 +2412,6 @@ export const es = {
   symptomcamera_disclaimer: "Información orientativa: no sustituye la valoración de un profesional sanitario.",
   symptomcamera_cerrar: "Cerrar",
   symptomcamera_error_analisis: "No se pudo analizar la imagen. Inténtalo de nuevo.",
+  newversion_disponible: "Hay una nueva versión de MIVOR disponible.",
+  newversion_actualizar: "Actualizar",
 };
