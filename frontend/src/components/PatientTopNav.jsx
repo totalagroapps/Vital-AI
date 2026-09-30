@@ -88,10 +88,10 @@ export default function PatientTopNav({
 
   return (
     <header className={`bg-white border-b border-slate-200/90 sticky top-0 z-40 shadow-xs select-none ${className}`}>
-      <div className="max-w-[1440px] mx-auto px-3 lg:px-4 xl:px-8 py-2 flex items-center justify-between gap-2 xl:gap-4">
+      <div className="max-w-[1680px] mx-auto px-3 lg:px-4 xl:px-6 2xl:px-8 py-2 flex items-center justify-between gap-2 xl:gap-4">
         
-        {/* 1. BRAND LOGO & SLOGAN */}
-        <div className="flex items-center gap-2.5 xl:gap-6 shrink-0">
+        {/* 1. BRAND LOGO & SLOGAN (puede encogerse: las pestañas se desplazan antes que perder el menú de usuario) */}
+        <div className="flex items-center gap-2.5 xl:gap-6 min-w-0">
           <div 
             onClick={() => handleTabClick('home')} 
             className="flex items-center cursor-pointer select-none shrink-0 group"
@@ -110,7 +110,7 @@ export default function PatientTopNav({
           </div>
 
           {/* 2. HORIZONTAL NAVIGATION TABS (DESKTOP) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 ml-1 xl:ml-2">
+          <nav className="hidden lg:flex items-center gap-1 2xl:gap-1.5 ml-1 xl:ml-2 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {navTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -119,15 +119,16 @@ export default function PatientTopNav({
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabClick(tab.screen)}
-                  className={`flex items-center gap-1.5 px-2 xl:px-3.5 py-1.5 xl:py-2 rounded-xl text-[11.5px] xl:text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  title={tab.label}
+                  className={`flex items-center gap-1.5 px-2 xl:px-2.5 2xl:px-3.5 py-1.5 xl:py-2 rounded-xl text-[11.5px] xl:text-[13px] font-bold transition-all cursor-pointer whitespace-nowrap ${
                     isActive 
                       ? 'bg-mivor-blueSoft text-brand shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-semibold'
                   }`}
                 >
                   <Icon size={15} className={isActive ? 'text-brand stroke-[2.4]' : 'text-slate-400 stroke-[2]'} />
-                  <span className="hidden xl:inline">{tab.label}</span>
-                  <span className="xl:hidden">{tab.shortLabel || tab.label}</span>
+                  {/* Nombre corto; por debajo de 1280 px solo el icono (el nombre completo va en el title) */}
+                  <span className="hidden xl:inline">{tab.shortLabel || tab.label}</span>
                 </button>
               );
             })}
@@ -156,9 +157,10 @@ export default function PatientTopNav({
               aria-label="Cambiar perfil"
             >
               <RefreshCw size={15} className="stroke-[2.2] shrink-0" />
-              <span className="hidden 2xl:inline truncate max-w-[160px]">
-                {activeProfile ? `${activeProfile.name} · Cambiar` : 'Cambiar perfil'}
-              </span>
+              {/* Con el propio perfil basta el icono; administrando a un familiar se ve su nombre */}
+              {activeProfile && (
+                <span className="hidden xl:inline truncate max-w-[140px]">{activeProfile.name}</span>
+              )}
             </button>
           )}
 
@@ -170,13 +172,13 @@ export default function PatientTopNav({
             title={t('patient_contact_support')}
           >
             <HelpCircle size={17} className="stroke-[2.2] text-slate-500" />
-            <span className="hidden xl:inline">{t('patienttopnav_necesitas_ayuda')}</span>
+            <span className="hidden 2xl:inline">{t('patienttopnav_necesitas_ayuda')}</span>
           </button>
 
           {/* Campana de avisos (panel propio, sin punto rojo ficticio) */}
           
           <div className="hidden md:flex">
-            <PushNotificationToggle apiUrl={API_URL} token={getToken()} />
+            <PushNotificationToggle apiUrl={API_URL} token={getToken()} compact />
           </div>
 
           <NotificationsBell onNavigate={handleTabClick} />
@@ -196,7 +198,7 @@ export default function PatientTopNav({
                   getInitials(displayName)
                 )}
               </div>
-              <span className="hidden sm:block text-xs font-bold text-slate-800 truncate max-w-[130px]">
+              <span className="hidden min-[1800px]:block text-xs font-bold text-slate-800 truncate max-w-[130px]">
                 {displayName}
               </span>
               <ChevronDown size={14} className={`hidden sm:block text-slate-400 transition-transform duration-150 ${showUserMenu ? 'rotate-180' : ''}`} />

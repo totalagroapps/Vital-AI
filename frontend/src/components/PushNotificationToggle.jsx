@@ -6,7 +6,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 // Estados: 'unsupported' | 'idle' (sin activar) | 'denied' (bloqueado en el navegador) | 'subscribed'
 // "Activado" significa que existe la suscripción y el servidor la ha guardado, no solo que
 // el navegador tenga el permiso concedido.
-export default function PushNotificationToggle({ apiUrl, token }) {
+// compact: solo el icono (barra superior); el estado se ve por el color y el texto va en el tooltip
+export default function PushNotificationToggle({ apiUrl, token, compact = false }) {
   const { t } = useLanguage();
   const [status, setStatus] = useState('idle');
   const [loading, setLoading] = useState(false);
@@ -50,13 +51,15 @@ export default function PushNotificationToggle({ apiUrl, token }) {
 
   const subscribed = status === 'subscribed';
   const denied = status === 'denied';
+  const label = subscribed ? t('push_on') : denied ? t('push_blocked') : t('push_activate');
 
   return (
     <button
       onClick={handleSubscribe}
       disabled={loading || subscribed || denied}
-      title={denied ? t('push_blocked_hint') : undefined}
-      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+      title={denied ? t('push_blocked_hint') : label}
+      aria-label={label}
+      className={`flex items-center gap-2 ${compact ? 'p-2' : 'px-3 py-1.5'} rounded-full text-xs font-medium border transition-colors ${
         subscribed
           ? 'bg-emerald-50 text-emerald-600 border-emerald-200 cursor-default'
           : denied
@@ -71,7 +74,7 @@ export default function PushNotificationToggle({ apiUrl, token }) {
       ) : (
         <BellOff className="w-4 h-4" />
       )}
-      {subscribed ? t('push_on') : denied ? t('push_blocked') : t('push_activate')}
+      {!compact && label}
     </button>
   );
 }
