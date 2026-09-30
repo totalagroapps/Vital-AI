@@ -35,8 +35,8 @@ import {
   FileText,
   Stethoscope,
   Pill,
-  MessageSquare
-} from 'lucide-react';
+  MessageSquare,
+Camera, } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import HeroTitle from '../components/HeroTitle';
 import LanguageSelector from '../components/LanguageSelector';
