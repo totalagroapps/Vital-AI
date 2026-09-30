@@ -2431,4 +2431,6 @@ export const es = {
   documentanalyzer_delete_document: "Eliminar documento",
   documentanalyzer_confirm_delete: "¿Eliminar definitivamente \"{name}\" y su análisis? Esta acción no se puede deshacer.",
   documentanalyzer_delete_error: "No se pudo eliminar el documento. Inténtalo de nuevo.",
+  legacy_report_hidden: "Este resumen se generó con una versión anterior de MIVOR que incluía posibles diagnósticos, por eso ya no se muestra. MIVOR es una herramienta informativa: la valoración siempre la hace tu médico.",
+  legacy_report_specialty: "Especialidad sugerida: {specialty}.",
 };

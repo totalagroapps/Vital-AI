@@ -2438,4 +2438,6 @@ export const en = {
   documentanalyzer_delete_document: "Delete document",
   documentanalyzer_confirm_delete: "Permanently delete \"{name}\" and its analysis? This cannot be undone.",
   documentanalyzer_delete_error: "The document could not be deleted. Please try again.",
+  legacy_report_hidden: "This summary was created with an earlier version of MIVOR that included possible diagnoses, so it is no longer shown. MIVOR is an informational tool: your doctor always makes the assessment.",
+  legacy_report_specialty: "Suggested specialty: {specialty}.",
 };

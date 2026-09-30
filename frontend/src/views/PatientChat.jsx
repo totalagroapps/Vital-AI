@@ -12,7 +12,7 @@ import { translateSpecialtyName } from '../i18n/catalogTranslations';
 import { useLanguage } from '../contexts/LanguageContext';
 import { emergencyNumber } from '../utils/locale';
 import PatientTopNav from '../components/PatientTopNav';
-import { relabelLegacyReport } from '../utils/legacyReport';
+import { isLegacyReport, legacyReportNotice } from '../utils/legacyReport';
 
 const PatientChat = ({
   messages = [],
@@ -699,7 +699,7 @@ const PatientChat = ({
                                   strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />
                                 }}
                               >
-                                {relabelLegacyReport(msg.text || msg.content)}
+                                {isLegacyReport(msg.text || msg.content) ? legacyReportNotice(t) : (msg.text || msg.content)}
                               </ReactMarkdown>
                             </div>
 

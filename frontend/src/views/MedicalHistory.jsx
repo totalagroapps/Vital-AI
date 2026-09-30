@@ -10,7 +10,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import EmergencyPassportModal from './EmergencyPassportModal';
 import { printHtmlContent, escapeHtml } from '../utils/printPdf';
 import PatientTopNav from '../components/PatientTopNav';
-import { relabelLegacyReport } from '../utils/legacyReport';
+import { isLegacyReport, legacyReportNotice } from '../utils/legacyReport';
 
 const MedicalHistory = ({
   patientProfile = {},
@@ -174,6 +174,10 @@ const MedicalHistory = ({
 
 
 
+  // Informes antiguos con hipótesis diagnósticas: se oculta el texto y se conserva la especialidad
+  const legacyWithSpecialty = (specialty) =>
+    specialty ? `${legacyReportNotice(t)} ${t('legacy_report_specialty', { specialty })}` : legacyReportNotice(t);
+
   const triageItems = useMemo(() => {
     if (patientProfile?.triages && patientProfile.triages.length > 0) {
       return patientProfile.triages.map(t_item => ({
@@ -181,7 +185,9 @@ const MedicalHistory = ({
         display_date: new Date(t_item.created_at).toLocaleString(),
         status_label: t_item.status === 'closed_red' ? t('medicalhistory_prioridad_alta') : (t_item.status === 'closed_yellow' ? t('medicalhistory_consulta_prioritaria') : t('medicalhistory_orientacion_general')),
         severity_badge: t_item.status === 'closed_red' ? 'bg-red-50 text-red-700 border border-red-200' : (t_item.status === 'closed_yellow' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
-        text: relabelLegacyReport(t_item.final_report) || t('medicalhistory_consulta_completada_satisfactoriamente')
+        text: isLegacyReport(t_item.final_report)
+          ? legacyWithSpecialty(t_item.recommended_specialty)
+          : (t_item.final_report || t('medicalhistory_consulta_completada_satisfactoriamente'))
       }));
     }
     const triageSessions = sessions?.filter(s => s.type === "triage") || [];
@@ -193,12 +199,14 @@ const MedicalHistory = ({
           display_date: new Date(s.created_at).toLocaleString(),
           status_label: sev === t('medicalhistory_rojo') || sev === t('medicalhistory_urgencia') ? t('medicalhistory_prioridad_alta') : (sev === t('medicalhistory_naranja') || sev === t('medicalhistory_amarillo') ? t('medicalhistory_consulta_prioritaria') : t('medicalhistory_orientacion_general')),
           severity_badge: sev === 'ROJO' || sev === 'URGENCIA' ? 'bg-red-50 text-red-700 border border-red-200' : (sev === 'NARANJA' || sev === 'AMARILLO' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'),
-          text: s.payload?.summary || s.payload?.title || s.title || t('medicalhistory_consulta_de_orientacion_de_salud')
+          text: isLegacyReport(s.payload?.summary || s.payload?.report)
+            ? legacyWithSpecialty(null)
+            : (s.payload?.summary || s.payload?.title || s.title || t('medicalhistory_consulta_de_orientacion_de_salud'))
         };
       });
     }
     return [];
-  }, [patientProfile?.triages, sessions]);
+  }, [patientProfile?.triages, sessions, t]);
 
   // Lists of conditions
   const allergiesList = (patientProfile?.allergies || "").split(',').map(s => s.trim()).filter(Boolean);
