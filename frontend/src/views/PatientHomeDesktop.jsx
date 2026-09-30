@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import './MivorPacienteHome.css';
 import {
+  Camera,
   ShieldCheck,
   ArrowRight,
   X,
@@ -10,11 +11,12 @@ import {
   Calendar,
   ChevronRight
 } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import {
+  Camera, useLanguage } from '../contexts/LanguageContext';
 import HeroTitle from '../components/HeroTitle';
 import PatientTopNav from '../components/PatientTopNav';
 
-const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpenGames, onOpenPreventiveCalendar }) => {
+const PatientHomeDesktop = ({ onNavigate, onLogout, userProfile, username, onOpenGames, onOpenPreventiveCalendar, onOpenSymptomCamera }) => {
   const { t, language } = useLanguage();
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const heroRef = useRef(null);

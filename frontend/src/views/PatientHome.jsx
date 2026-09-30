@@ -4,6 +4,7 @@ import SupportModal from '../components/SupportModal';
 import NotificationsBell from '../components/NotificationsBell';
 import CognitiveGamesModal from './CognitiveGamesModal';
 import PreventiveCalendarModal from './PreventiveCalendarModal';
+import SymptomCameraModal from './SymptomCameraModal';
 import { 
   Brain, 
   Folder, 
@@ -47,6 +48,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   const [showSecurityModal, setShowSecurityModal] = useState(false);
   const [showGamesModal, setShowGamesModal] = useState(false);
   const [showPreventiveCalendarModal, setShowPreventiveCalendarModal] = useState(false);
+  const [showSymptomCameraModal, setShowSymptomCameraModal] = useState(false);
 
   const homeFileInputRef = useRef(null);
 
@@ -661,6 +663,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           authHeaders={authHeaders}
           onOpenGames={() => setShowGamesModal(true)}
           onOpenPreventiveCalendar={() => setShowPreventiveCalendarModal(true)}
+          onOpenSymptomCamera={() => setShowSymptomCameraModal(true)}
         />
       </div>
 
@@ -678,6 +681,13 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         apiUrl={apiUrl}
         authHeaders={authHeaders}
         patientId={userProfile?.user_id}
+      />
+      
+      <SymptomCameraModal
+        isOpen={showSymptomCameraModal}
+        onClose={() => setShowSymptomCameraModal(false)}
+        apiUrl={apiUrl}
+        token={localStorage.getItem('token')}
       />
     </>
   );
