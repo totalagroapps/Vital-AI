@@ -18,6 +18,8 @@ import {
 import LanguageSelector from './LanguageSelector';
 import SupportModal from './SupportModal';
 import NotificationsBell from './NotificationsBell';
+import PushNotificationToggle from './PushNotificationToggle';
+
 import { useLanguage } from '../contexts/LanguageContext';
 import { useFamilyProfile } from '../contexts/FamilyProfileContext';
 
@@ -170,6 +172,11 @@ export default function PatientTopNav({
           </button>
 
           {/* Campana de avisos (panel propio, sin punto rojo ficticio) */}
+          
+          <div className="hidden md:flex">
+            <PushNotificationToggle apiUrl={import.meta.env.VITE_API_URL || 'http://localhost:8000'} token={localStorage.getItem('token')} />
+          </div>
+
           <NotificationsBell onNavigate={handleTabClick} />
 
           {/* Menú de Usuario con Avatar y Dropdown */}
