@@ -4,7 +4,7 @@ import json
 import logging
 from typing import Optional, List, Dict, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
 from pydantic import BaseModel, Field
 from openai import AsyncOpenAI
 
@@ -618,3 +618,38 @@ async def fill_template(req: FillTemplateRequest, current_user: models.User = De
         "field_count": len(parse_fields(req.template_body)),
         "ai_available": bool(os.getenv("OPENAI_API_KEY")),
     }
+
+
+@router.post("/transcribe_audio")
+async def transcribe_audio(
+    file: UploadFile = File(...),
+    language: Optional[str] = Form("es"),
+    current_user: models.User = Depends(get_current_user)
+):
+    """
+    Transcribe un archivo de audio (ej. nota de voz de WhatsApp .ogg, .mp3) 
+    usando OpenAI Whisper.
+    """
+    from openai import AsyncOpenAI
+    import io
+    
+    audio_bytes = await file.read()
+    
+    audio_file = io.BytesIO(audio_bytes)
+    audio_file.name = file.filename or "audio.ogg"
+    
+    openai_client = AsyncOpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+    
+    try:
+        transcript = await openai_client.audio.transcriptions.create(
+            model="whisper-1",
+            file=audio_file,
+            language=language[:2] if language else "es",
+            response_format="text"
+        )
+        return {"text": transcript}
+    except Exception as e:
+        import logging
+        logging.error(f"Error transcribing audio: {e}")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Error al transcribir el audio.")

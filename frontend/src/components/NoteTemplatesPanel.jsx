@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, Check, Copy, Lightbulb, Loader2, Mic, MicOff, Pencil, Plus, RotateCcw, Save, Search, Sparkles, Trash2, X,
+  ArrowLeft, Check, Copy, Lightbulb, Loader2, Mic, MicOff, Pencil, Plus, RotateCcw, Save, Search, Sparkles, Trash2, X, UploadCloud,
 } from 'lucide-react';
 import { NOTE_TEMPLATE_CATALOG, TEMPLATE_SPECIALTIES } from '../data/noteTemplateCatalog';
 import { defaultValues, emptyFields, parseTemplate, renderReport, selectedOption } from '../utils/noteTemplate';
@@ -39,6 +39,41 @@ export default function NoteTemplatesPanel({
   const [filling, setFilling] = useState(false);
   const [fillInfo, setFillInfo] = useState('');
   const [copied, setCopied] = useState(false);
+
+  const audioInputRef = useRef(null);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+
+  const handleAudioUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingAudio(true);
+    setFillInfo(t('notetpl_uploading_audio', 'Transcribiendo audio...'));
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('language', locale || language);
+
+    try {
+      const res = await fetch(`${apiUrl}/api/scribe/transcribe_audio`, {
+        method: 'POST',
+        headers: authHeaders,
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Audio upload failed');
+      
+      const data = await res.json();
+      setConsultationText(prev => (prev ? prev + '\n' + data.text : data.text));
+      setFillInfo(t('notetpl_audio_success', 'Audio transcrito correctamente.'));
+    } catch (err) {
+      console.error(err);
+      setFillInfo(t('notetpl_audio_error', 'Error al transcribir el audio.'));
+    } finally {
+      setUploadingAudio(false);
+      e.target.value = '';
+    }
+  };
+
   const [editor, setEditor] = useState(null); // { id?, name, shortcut, body }
 
   const loadMine = async () => {
