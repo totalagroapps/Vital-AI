@@ -873,6 +873,29 @@ async def get_my_documents(db: AsyncSession=Depends(get_db), current_user_id: st
     return out
 
 
+@router.delete('/api/me/documents/{document_id}')
+async def delete_my_document(document_id: int, db: AsyncSession = Depends(get_db), current_user_id: str = Depends(get_current_user_id)):
+    """
+    Borra definitivamente un documento de "Mis documentos" (derecho de supresión, RGPD art. 17).
+    La subida solo guarda esta fila (texto extraído + análisis), así que no quedan copias.
+    Un cuidador vinculado puede borrar los de su familiar (get_current_user_id valida el vínculo).
+    Si el documento no existe o es de otra persona se responde 404, sin revelar cuál de los dos.
+    """
+    result = await db.execute(
+        select(models.DocumentMetadata).where(
+            models.DocumentMetadata.id == document_id,
+            models.DocumentMetadata.user_id == current_user_id,
+        )
+    )
+    doc = result.scalars().first()
+    if not doc:
+        raise HTTPException(status_code=404, detail='Documento no encontrado.')
+    await db.delete(doc)
+    await db.commit()
+    logger.info(f'document {document_id} deleted by/for user {current_user_id}')
+    return {'status': 'deleted', 'id': document_id}
+
+
 @router.get('/api/documents/{document_id}/pdf')
 async def download_document_pdf(
     document_id: str, 

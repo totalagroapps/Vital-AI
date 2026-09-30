@@ -6,7 +6,7 @@ import {
   FileDown, Download, TrendingUp, TrendingDown, Minus, HelpCircle, Copy, Check, Share2, BarChart3,
   Sparkles, UserCheck, MapPin, Calendar, Search, ArrowDownUp, HardDrive, Info,
   MoreVertical, MoreHorizontal, Home, Heart, User, Bell, ChevronDown, Eye, X,
-  Database, SlidersHorizontal
+  Database, SlidersHorizontal, Trash2
 } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -348,6 +348,20 @@ const DocumentAnalyzer = ({
     window.addEventListener('paste', handleAnalyzerPaste);
     return () => window.removeEventListener('paste', handleAnalyzerPaste);
   }, [handleAnalyzerPaste]);
+
+  // Borrado definitivo (derecho de supresión). Pide confirmación porque no se puede deshacer.
+  const handleDeleteDocument = async (doc) => {
+    setOpenDocMenuId(null);
+    if (!window.confirm(t('documentanalyzer_confirm_delete', { name: doc.filename }))) return;
+    try {
+      const res = await fetch(`${apiUrl}/api/me/documents/${doc.id}`, { method: 'DELETE', headers: authHeaders });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setDocuments(prev => prev.filter(d => d.id !== doc.id));
+    } catch (e) {
+      console.error('Error eliminando documento:', e);
+      alert(t('documentanalyzer_delete_error'));
+    }
+  };
 
   const handleHistoryClick = (doc) => {
     if (doc.analysis_result) {
@@ -800,6 +814,13 @@ const DocumentAnalyzer = ({
                                       >
                                         <MessageSquare size={14} /> {t('documentanalyzer_preguntar_a_mivor')}
                                       </button>
+                                      <div className="my-1 border-t border-slate-100" />
+                                      <button
+                                        onClick={() => handleDeleteDocument(doc)}
+                                        className="w-full text-left px-3.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                      >
+                                        <Trash2 size={14} /> {t('documentanalyzer_delete_document')}
+                                      </button>
                                     </div>
                                   )}
                                 </div>
@@ -839,7 +860,17 @@ const DocumentAnalyzer = ({
                           <span>{t('analyzed')}</span>
                         </span>
 
-                        <button 
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDocument(doc)}
+                          aria-label={t('documentanalyzer_delete_document')}
+                          title={t('documentanalyzer_delete_document')}
+                          className="w-8 h-8 rounded-full hover:bg-red-50 flex items-center justify-center text-slate-400 hover:text-red-600 active:scale-95"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+
+                        <button
                           type="button"
                           onClick={() => handleHistoryClick(doc)}
                           className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 active:scale-95"

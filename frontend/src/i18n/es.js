@@ -2428,4 +2428,7 @@ export const es = {
   dose_after_meals: "después de las comidas",
   docanalyzer_cat_photo: "Foto clínica",
   docanalyzer_sub_photo: "Foto de piel o síntoma",
+  documentanalyzer_delete_document: "Eliminar documento",
+  documentanalyzer_confirm_delete: "¿Eliminar definitivamente \"{name}\" y su análisis? Esta acción no se puede deshacer.",
+  documentanalyzer_delete_error: "No se pudo eliminar el documento. Inténtalo de nuevo.",
 };

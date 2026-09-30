@@ -2435,4 +2435,7 @@ export const en = {
   dose_after_meals: "after meals",
   docanalyzer_cat_photo: "Clinical photo",
   docanalyzer_sub_photo: "Skin or symptom photo",
+  documentanalyzer_delete_document: "Delete document",
+  documentanalyzer_confirm_delete: "Permanently delete \"{name}\" and its analysis? This cannot be undone.",
+  documentanalyzer_delete_error: "The document could not be deleted. Please try again.",
 };
