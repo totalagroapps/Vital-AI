@@ -24,6 +24,18 @@ from services.document_category import document_category
     ({"resumen": "Informe de alta hospitalaria"}, False, "alta.pdf", "informe"),
     # "tac" no debe coincidir dentro de "contacto"
     ({"resumen": "Evitar el contacto con el sol"}, True, "piel.jpg", "foto_clinica"),
+    # Caso real de producción: el resumen niega ("no hay hallazgos relacionados con fracturas")
+    ({"resumen": "Se presenta una receta médica con varios medicamentos. No se observan imágenes radiológicas, "
+                 "por lo que no hay hallazgos relacionados con fracturas o lesiones óseas.",
+      "medicamentos": ["Betaloc 100 mg - 1 tab BID"], "hallazgos": []}, True, "prescripcion.webp", "receta"),
+    # Radiografía cuyo análisis no dejó hallazgos: se usa el resumen
+    ({"resumen": "Radiografía de fémur en proyección lateral"}, True, "Medical_X-Ray.jpg", "radiografia"),
+    ({}, False, "269-551858-Laboratorios.pdf", "analitica"),
+    # Análisis sin contenido: decide el nombre del archivo
+    ({"resumen": "El documento no proporciona información médica específica."}, True, "Medical_X-Ray_imaging.jpg", "radiografia"),
+    ({"resumen": "El documento no proporciona información médica específica."}, True, "completada-prescripción-médica.webp", "receta"),
+    # Un informe PDF que menciona una fractura sigue siendo un informe
+    ({"hallazgos": ["Fractura en la vértebra C4."]}, False, "20262100018792842.pdf", "informe"),
 ])
 def test_document_category(analysis, is_image, filename, expected):
     assert document_category(analysis, is_image, filename) == expected

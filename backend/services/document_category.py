@@ -39,13 +39,17 @@ def document_category(analysis: Optional[dict], is_image: bool, filename: str = 
     if data.get('biomarcadores'):
         return 'analitica'
     name = (filename or '').lower()
-    text = ' '.join([str(data.get('resumen', ''))] + [str(h) for h in data.get('hallazgos', [])]).lower()
-    looks_like_imaging = bool(_IMAGING_RE.search(text))
-    # Una receta fotografiada también trae "hallazgos" descriptivos: manda que haya fármacos
-    if 'receta' in name or (data.get('medicamentos') and not looks_like_imaging):
+    summary = str(data.get('resumen', '')).lower()
+    findings = ' '.join(str(h) for h in data.get('hallazgos', [])).lower()
+    # Los hallazgos describen lo que se ve; el resumen puede negar ("no hay fracturas"),
+    # así que solo se usa si no hay hallazgos
+    looks_like_imaging = bool(_IMAGING_RE.search(findings or summary))
+    if any(w in name for w in ('receta', 'prescrip')) or (data.get('medicamentos') and ('receta' in summary or not looks_like_imaging)):
         return 'receta'
-    if any(w in name for w in ('analisis', 'análisis', 'sangre', 'orina')):
+    if any(w in name for w in ('analisis', 'análisis', 'sangre', 'orina', 'laborator')):
         return 'analitica'
     if is_image:
-        return 'radiografia' if looks_like_imaging else 'foto_clinica'
+        # El nombre del archivo es la última pista cuando el análisis no dejó contenido
+        named_imaging = any(w in name for w in ('x-ray', 'xray', 'radiograf', 'rayos'))
+        return 'radiografia' if (looks_like_imaging or named_imaging) else 'foto_clinica'
     return 'informe'
