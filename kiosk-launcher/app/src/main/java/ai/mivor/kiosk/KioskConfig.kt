@@ -102,6 +102,12 @@ class KioskConfig(context: Context) {
             Country("PE", "Perú", "51", "106", "es-PE"),
             Country("EC", "Ecuador", "593", "911", "es-EC"),
             Country("US", "Estados Unidos", "1", "911", "es-US"),
+            // Magreb y Francia: número de urgencias médicas (SAMU). La interfaz y la voz del
+            // kiosko son de momento solo en español, por eso el idioma sigue siendo es-ES.
+            Country("FR", "Francia", "33", "15", "es-ES"),
+            Country("MA", "Marruecos", "212", "141", "es-ES"),
+            Country("DZ", "Argelia", "213", "14", "es-ES"),
+            Country("TN", "Túnez", "216", "190", "es-ES"),
             Country("OTRO", "Otro país", "", "112", "es-ES")
         )
 

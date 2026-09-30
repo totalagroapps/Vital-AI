@@ -58,7 +58,7 @@ COUNTRIES = {
     'CH': ('Switzerland', '144'), 'AT': ('Austria', '144'), 'SE': ('Sweden', '112'), 'NO': ('Norway', '113'),
     'DK': ('Denmark', '112'), 'FI': ('Finland', '112'), 'PL': ('Poland', '112'), 'CZ': ('Czechia', '112'),
     'GR': ('Greece', '112'), 'RO': ('Romania', '112'), 'HU': ('Hungary', '112'), 'TR': ('Turkey', '112'),
-    'RU': ('Russia', '103'), 'UA': ('Ukraine', '103'), 'MA': ('Morocco', '150'), 'DZ': ('Algeria', '14'),
+    'RU': ('Russia', '103'), 'UA': ('Ukraine', '103'), 'MA': ('Morocco', '141'), 'DZ': ('Algeria', '14'),
     'TN': ('Tunisia', '190'), 'EG': ('Egypt', '123'), 'SA': ('Saudi Arabia', '997'), 'AE': ('United Arab Emirates', '998'),
     'QA': ('Qatar', '999'), 'JO': ('Jordan', '911'), 'LB': ('Lebanon', '140'), 'IL': ('Israel', '101'),
     'IR': ('Iran', '115'), 'IQ': ('Iraq', '122'), 'IN': ('India', '112'), 'PK': ('Pakistan', '1122'),
