@@ -54,6 +54,25 @@ object MivorApi {
         }
     }
 
+    /** Resumen del día para la pantalla de inicio (la toma de ahora, la siguiente, la lista y las citas). */
+    fun today(token: String, callback: (Result<Today>) -> Unit) = run(callback) {
+        todayResult(request("GET", "/api/device/today", null, token))
+    }
+
+    /** Marca (o desmarca, "deshacer") la toma de hoy de un medicamento. Devuelve el resumen actualizado. */
+    fun setTaken(token: String, medicationId: Int, taken: Boolean, callback: (Result<Today>) -> Unit) = run(callback) {
+        todayResult(request(if (taken) "POST" else "DELETE", "/api/device/medications/$medicationId/taken", null, token))
+    }
+
+    private fun todayResult(response: Pair<Int, JSONObject>): Result<Today> {
+        val (status, json) = response
+        return when (status) {
+            200 -> Result.Ok(Today.from(json))
+            401 -> Result.Unlinked
+            else -> Result.Error("error $status")
+        }
+    }
+
     private fun <T> run(callback: (Result<T>) -> Unit, block: () -> Result<T>) {
         executor.execute {
             val result = try {

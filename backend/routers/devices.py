@@ -22,6 +22,7 @@ import models
 from database import get_db
 from security import get_authenticated_user_id, get_current_user_id
 from services.medication_alerts import now_local, parse_times
+from services.device_today import device_today, set_taken
 from services.voice_commands import handle_voice_command
 
 router = APIRouter(tags=["Dispositivos vinculados"])
@@ -188,6 +189,29 @@ async def device_medications(link: models.DeviceLink = Depends(get_device_link),
             'time': f'{times[0][0]:02d}:{times[0][1]:02d}' if times else None, 'taken_today': m.id in taken,
         })
     return out
+
+
+@router.get('/api/device/today')
+async def device_today_summary(link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
+    """Pantalla de inicio del kiosko: toma de ahora, siguiente, lista de hoy y próximas citas."""
+    return await device_today(db, link.patient_id, await _patient_name(db, link.patient_id))
+
+
+async def _set_taken(db: AsyncSession, link: models.DeviceLink, medication_id: int, taken: bool) -> dict:
+    if not await set_taken(db, link.patient_id, medication_id, taken):
+        raise HTTPException(status_code=404, detail='Medicamento no encontrado.')
+    return await device_today(db, link.patient_id, await _patient_name(db, link.patient_id))
+
+
+@router.post('/api/device/medications/{medication_id}/taken')
+async def device_mark_taken(medication_id: int, link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
+    return await _set_taken(db, link, medication_id, True)
+
+
+@router.delete('/api/device/medications/{medication_id}/taken')
+async def device_unmark_taken(medication_id: int, link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
+    # "Me he equivocado, deshacer"
+    return await _set_taken(db, link, medication_id, False)
 
 
 class VoiceRequest(BaseModel):

@@ -160,3 +160,82 @@ async def test_pairing_is_rate_limited(api):
     codes = [(await api.post("/api/devices/pair", json={"code": f"{i:06d}"})).status_code for i in range(12)]
     assert codes[:10] == [400] * 10
     assert codes[10:] == [429, 429]
+
+
+# ---------------------------------------------------------------------------
+# Pantalla de inicio del kiosko: resumen del día y marcar / deshacer tomas
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_today_summary_due_next_and_done(meds):
+    from services.device_today import device_today, set_taken
+
+    t = await device_today(meds, "papa", "Henry López", now=NOW)
+    assert t["first_name"] == "Henry" and t["has_meds"] and not t["all_done"]
+    assert t["due"]["label"] == "Betaloc 100 mg" and t["due"]["time"] == "08:00"
+    assert t["next"]["name"] == "Omeprazol"
+    assert [m["time"] for m in t["meds"]] == ["08:00", "08:00", "21:00"]
+
+    assert await set_taken(meds, "papa", 1, True, now=NOW)
+    assert await set_taken(meds, "papa", 1, True, now=NOW)  # dos toques no duplican la toma
+    assert await _taken(meds) == [1]
+    t = await device_today(meds, "papa", "Henry López", now=NOW)
+    assert t["due"]["name"] == "Omeprazol" and t["next"]["name"] == "Atorvastatina"
+    assert t["meds"][0]["taken"] and t["meds"][0]["taken_time"] == "08:30"
+
+    # La de la noche no es "de ahora" por la mañana
+    await set_taken(meds, "papa", 2, True, now=NOW)
+    t = await device_today(meds, "papa", "Henry López", now=NOW)
+    assert t["due"] is None and t["next"]["name"] == "Atorvastatina" and not t["all_done"]
+
+    await set_taken(meds, "papa", 3, True, now=NOW)
+    assert (await device_today(meds, "papa", "Henry López", now=NOW))["all_done"]
+
+    # Deshacer
+    assert await set_taken(meds, "papa", 3, False, now=NOW)
+    assert await _taken(meds) == [1, 2]
+    # Un medicamento de otro paciente no se toca
+    assert not await set_taken(meds, "otro", 1, True, now=NOW)
+
+
+@pytest.mark.asyncio
+async def test_today_endpoints_need_the_device_key(api):
+    code = (await api.post("/api/devices/pairing-code")).json()["code"]
+    token = (await api.post("/api/devices/pair", json={"code": code})).json()["device_token"]
+    h = {"X-Device-Token": token}
+
+    assert (await api.get("/api/device/today")).status_code == 401
+    today = (await api.get("/api/device/today", headers=h)).json()
+    assert today["patient_name"] == "Henry López" and len(today["meds"]) == 3
+    assert today["appointments"] == []
+
+    after = (await api.post("/api/device/medications/1/taken", headers=h)).json()
+    assert next(m for m in after["meds"] if m["id"] == 1)["taken"]
+    after = (await api.delete("/api/device/medications/1/taken", headers=h)).json()
+    assert not next(m for m in after["meds"] if m["id"] == 1)["taken"]
+    assert (await api.post("/api/device/medications/999/taken", headers=h)).status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_today_lists_upcoming_appointments_only(meds):
+    import uuid
+    from services.device_today import upcoming_appointments
+
+    meds.add(models.User(id="doc", username="doc@test", role="doctor"))
+    doctor = models.DoctorProfile(id=uuid.uuid4(), user_id="doc", full_name="Dra. Ruiz")
+    meds.add(doctor)
+    now = datetime.now(timezone.utc)
+
+    def appt(days, status=models.AppointmentStatus.confirmed, modality=models.Modality.in_person):
+        start = now + timedelta(days=days)
+        return models.ScheduledAppointment(patient_id="papa", doctor_id=doctor.id, scheduled_at=start,
+                                           scheduled_end=start + timedelta(minutes=30), modality=modality, status=status)
+
+    meds.add_all([appt(1), appt(2, modality=models.Modality.video), appt(-1),
+                  appt(3, status=models.AppointmentStatus.cancelled), appt(60)])
+    await meds.commit()
+
+    out = await upcoming_appointments(meds, "papa")
+    assert [a["doctor"] for a in out] == ["Dra. Ruiz", "Dra. Ruiz"]
+    assert [a["video"] for a in out] == [False, True]
+    assert datetime.fromisoformat(out[0]["starts_at"]).tzinfo is not None

@@ -75,11 +75,31 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private lateinit var tvClock: TextView
     private lateinit var tvDate: TextView
+    private lateinit var tvGreeting: TextView
     private lateinit var tvVoiceStatus: TextView
-    private lateinit var pillVoice: View
-    private lateinit var ivAddIcon: ImageView
-    private lateinit var tvAddTitle: TextView
-    private lateinit var tvAddSub: TextView
+    private lateinit var homePanel: View
+    private lateinit var morePanel: View
+    private lateinit var reminderPanel: View
+    private lateinit var ivCustomIcon: ImageView
+    private lateinit var tvCustomTitle: TextView
+
+    // Inicio v2: resumen del día que llega de MIVOR
+    private var today: Today? = null
+    /** Toma recién marcada: la tarjeta queda en verde un rato, con "deshacer". */
+    private var justTaken: TodayMed? = null
+    private var justTakenAt = 0L
+    private var justTakenTime = ""
+    private var lastTodayFetch = 0L
+    private var lastWeatherFetch = 0L
+    private var lastMinuteChecked = -1
+    /** Medicamento del recordatorio a pantalla completa que se está mostrando. */
+    private var reminderMed: TodayMed? = null
+    private var reminderShownAt = 0L
+    /** Por medicamento: no volver a recordar antes de este instante (ms). Se reinicia cada día. */
+    private val remindAgainAt = mutableMapOf<Int, Long>()
+    private var remindDay = ""
+    /** Abierto desde la alarma de recordatorio con la pantalla apagada. */
+    private var openedByReminder = false
 
     // Voice & TTS Engine
     private var tts: TextToSpeech? = null
@@ -139,6 +159,19 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         /** Con la llamada grupal en curso no se interrumpe: se vuelve a mirar cada tanto. */
         private const val SOS_IN_CALL_RECHECK_MS = 5_000L
 
+        // Inicio v2
+        private const val TODAY_REFRESH_MS = 5 * 60_000L
+        private const val WEATHER_REFRESH_MS = 30 * 60_000L
+        private const val DONE_VISIBLE_MS = 10 * 60_000L
+        private const val SNOOZE_MS = 10 * 60_000L
+        /** Una toma olvidada de hace más de esto ya no salta a pantalla completa (sigue en la tarjeta). */
+        private const val REMINDER_LOOKBACK_MIN = 120
+        private const val REMINDER_REPEAT_MS = 5 * 60_000L
+        /** Sin respuesta, el recordatorio se cierra solo para no tapar "Necesito ayuda". */
+        private const val REMINDER_AUTO_CLOSE_MS = 15 * 60_000L
+        /** Mantener pulsada la hora este tiempo abre los ajustes del cuidador. */
+        private const val CAREGIVER_HOLD_MS = 5_000L
+
         private val EMERGENCY_WORDS = listOf("ayuda", "emergencia", "socorro", "me cai", "auxilio", "urgencia")
     }
 
@@ -169,6 +202,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         requestInitialPermissions()
         startKioskLockMode()
         handleSosIntent(intent)
+        handleMedReminderIntent(intent)
 
         // Primera instalación, o actualización desde una versión con la clave de fábrica 1234
         if (!config.hasPin && savedInstanceState == null) {
@@ -179,6 +213,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleSosIntent(intent)
+        handleMedReminderIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -189,10 +224,14 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onResume() {
         super.onResume()
+        lastMinuteChecked = -1
         clockHandler.post(clockRunnable)
         refreshCustomAppTile()
+        refreshContacts()
         // Ya estamos delante: el aviso de respaldo sobra
         SosNotification.cancel(this)
+        MedReminder.cancelNotification(this)
+        refreshToday()
 
         // De vuelta del aviso por WhatsApp (terminado, fallido o interrumpido): llamar a emergencias
         if (pendingEmergencyDial) {
@@ -240,7 +279,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun blockBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                Toast.makeText(this@MainActivity, "Para salir usa \"Salir con clave\"", Toast.LENGTH_SHORT).show()
+                // Desde "Más cosas", atrás vuelve al inicio; desde el inicio no se sale del kiosko
+                if (morePanel.visibility == View.VISIBLE) showHome()
             }
         })
     }
@@ -266,36 +306,53 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun initViews() {
         tvClock = findViewById(R.id.tvClock)
         tvDate = findViewById(R.id.tvDate)
+        tvGreeting = findViewById(R.id.tvGreeting)
         tvVoiceStatus = findViewById(R.id.tvVoiceStatus)
-        pillVoice = findViewById(R.id.pillVoice)
-        ivAddIcon = findViewById(R.id.ivAddIcon)
-        tvAddTitle = findViewById(R.id.tvAddTitle)
-        tvAddSub = findViewById(R.id.tvAddSub)
+        homePanel = findViewById(R.id.homePanel)
+        morePanel = findViewById(R.id.morePanel)
+        reminderPanel = findViewById(R.id.reminderPanel)
+        ivCustomIcon = findViewById(R.id.ivCustomIcon)
+        tvCustomTitle = findViewById(R.id.tvCustomTitle)
 
-        // Toca para hablar: ventana de voz del sistema o simulador
-        pillVoice.setOnClickListener {
-            if (isSpeechAvailableOnDevice) {
-                triggerSystemSpeechPrompt()
-            } else {
-                showVoiceSimulatorDialog("En este emulador el servicio de voz continuo no está instalado. Usa este simulador o la ventana de voz:")
+        // Hablar con MIVOR: ventana de voz del sistema (o simulador en el emulador).
+        // Pulsación larga: simulador de comandos, útil para probar.
+        findViewById<View>(R.id.btnTalk).apply {
+            setOnClickListener {
+                if (isSpeechAvailableOnDevice) {
+                    triggerSystemSpeechPrompt()
+                } else {
+                    showVoiceSimulatorDialog("En este emulador el servicio de voz continuo no está instalado. Usa este simulador o la ventana de voz:")
+                }
+            }
+            setOnLongClickListener {
+                showVoiceSimulatorDialog()
+                true
             }
         }
 
-        // Pulsación larga: simulador de comandos (ideal para probar en emulador)
-        pillVoice.setOnLongClickListener {
-            showVoiceSimulatorDialog()
-            true
+        findViewById<View>(R.id.btnSos).setOnClickListener { showSosCountdown(SOS_COUNTDOWN_TAP) }
+        findViewById<View>(R.id.btnMore).setOnClickListener { showMore() }
+        findViewById<View>(R.id.btnBackHome).setOnClickListener { showHome() }
+
+        listOf(R.id.contact1, R.id.contact2, R.id.contact3).forEachIndexed { i, id ->
+            findViewById<View>(id).setOnClickListener { callContact(config.contact(i)) }
         }
 
-        findViewById<View>(R.id.cardMivor).setOnClickListener { launchMivorApp() }
-        findViewById<View>(R.id.cardCall).setOnClickListener { showContactsDialog() }
-        findViewById<View>(R.id.cardWhatsapp).setOnClickListener { launchFamilyWhatsApp() }
-        findViewById<View>(R.id.cardSos).setOnClickListener { showSosCountdown(SOS_COUNTDOWN_TAP) }
-        findViewById<View>(R.id.cardCamera).setOnClickListener { openCamera() }
-        findViewById<View>(R.id.cardGallery).setOnClickListener { openGallery() }
+        // Medicación
+        findViewById<View>(R.id.btnTaken).setOnClickListener { today?.due?.let { markTaken(it) } }
+        findViewById<View>(R.id.btnUndo).setOnClickListener { undoTaken() }
+        findViewById<View>(R.id.apptBanner).setOnClickListener { showAppointments() }
+        findViewById<View>(R.id.btnReminderTaken).setOnClickListener { reminderMed?.let { markTaken(it) } }
+        findViewById<View>(R.id.btnReminderSnooze).setOnClickListener { snoozeReminder() }
 
-        // Agregar otra función: abre la app elegida; si no hay ninguna, el cuidador la elige
-        findViewById<View>(R.id.cardAdd).apply {
+        // Más cosas: cada ficha vuelve antes al inicio, para que al regresar no siga abierta
+        findViewById<View>(R.id.tileVideo).setOnClickListener { showHome(); launchFamilyWhatsApp() }
+        findViewById<View>(R.id.tilePhotos).setOnClickListener { showHome(); openGallery() }
+        findViewById<View>(R.id.tileDocPhoto).setOnClickListener { showHome(); openCamera() }
+        findViewById<View>(R.id.tileAppointments).setOnClickListener { showAppointments() }
+        findViewById<View>(R.id.tileMeds).setOnClickListener { showTodayMeds() }
+        // App que elige el cuidador; si no hay ninguna, la elige él (con clave). Pulsación larga: cambiarla
+        findViewById<View>(R.id.tileCustom).apply {
             setOnClickListener { openCustomApp() }
             setOnLongClickListener {
                 requestPin("Cambiar función") { showAppPicker() }
@@ -303,22 +360,52 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         }
 
-        findViewById<View>(R.id.cardSettings).setOnClickListener {
+        // Ajustes del cuidador: sin botón a la vista; se abren manteniendo pulsada la hora 5 segundos
+        setUpCaregiverHold(tvClock)
+    }
+
+    /** Pulsación mantenida de [CAREGIVER_HOLD_MS] sobre [view] para abrir el panel del cuidador. */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setUpCaregiverHold(view: View) {
+        val openSettings = Runnable {
+            view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             requestPin("Ajustes") { showCaregiverSettingsDialog() }
         }
-        findViewById<View>(R.id.cardLogout).setOnClickListener {
-            requestPin("Salir con clave") { exitKioskToHomeChooser() }
+        view.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> clockHandler.postDelayed(openSettings, CAREGIVER_HOLD_MS)
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL ->
+                    clockHandler.removeCallbacks(openSettings)
+            }
+            true
         }
     }
 
     private fun updateClockAndDate() {
         val calendar = Calendar.getInstance()
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-        val dateFormat = SimpleDateFormat("EEEE, d 'de' MMMM", config.country.locale)
+        val locale = config.country.locale
+        val is24h = android.text.format.DateFormat.is24HourFormat(this)
+        val time = SimpleDateFormat(if (is24h) "HH:mm" else "h:mm a", locale).format(calendar.time)
 
-        tvClock.text = timeFormat.format(calendar.time).uppercase(Locale.getDefault())
-        val dateString = dateFormat.format(calendar.time)
-        tvDate.text = dateString.replaceFirstChar { if (it.isLowerCase()) it.titlecase(config.country.locale) else it.toString() }
+        // En formato de 12 horas, "p. m." en pequeño al lado: a tamaño de reloj saltaría de línea
+        tvClock.text = if (is24h) time else {
+            val digits = SimpleDateFormat("h:mm", locale).format(calendar.time)
+            val suffix = " " + SimpleDateFormat("a", locale).format(calendar.time)
+            android.text.SpannableString(digits + suffix).apply {
+                setSpan(android.text.style.RelativeSizeSpan(0.36f), digits.length, length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+        }
+        findViewById<TextView>(R.id.tvMoreClock).text = time
+        findViewById<TextView>(R.id.tvReminderClock).text = time
+        val dateString = SimpleDateFormat("EEEE, d 'de' MMMM", locale).format(calendar.time)
+        tvDate.text = dateString.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }
+
+        // Lo que depende del minuto: saludo, cita, recordatorios y datos de MIVOR
+        val minute = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
+        if (minute != lastMinuteChecked) {
+            lastMinuteChecked = minute
+            onMinuteTick()
+        }
     }
 
     private fun startKioskLockMode() {
@@ -414,7 +501,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private fun speak(text: String) {
         if (!isTtsReady) return
-        tvVoiceStatus.text = "🔊 $text"
+        tvVoiceStatus.text = text
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "MIVOR_VOICE_UTTERANCE")
     }
 
@@ -425,7 +512,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         isSpeechAvailableOnDevice = SpeechRecognizer.isRecognitionAvailable(this)
 
         if (!isSpeechAvailableOnDevice) {
-            tvVoiceStatus.text = "🎙️ Toca para hablar o probar comandos"
+            tvVoiceStatus.text = "Pulsa «Hablar con MIVOR» para darme una orden"
             return
         }
 
@@ -441,7 +528,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             speechRecognizer?.setRecognitionListener(object : RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
                     isListening = true
-                    tvVoiceStatus.text = "🎙️ Escuchando... Di \"Hola MIVOR\" o \"Ayuda\""
+                    tvVoiceStatus.text = "Te escucho. Di «Hola MIVOR» o «Ayuda»"
                 }
 
                 override fun onBeginningOfSpeech() {}
@@ -461,7 +548,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                             restartVoiceListeningWithDelay(1000)
                         }
                         SpeechRecognizer.ERROR_AUDIO -> {
-                            tvVoiceStatus.text = "🎙️ Activa mic en controles del emulador"
+                            tvVoiceStatus.text = "No llega el sonido del micrófono"
                             restartVoiceListeningWithDelay(3000)
                         }
                         SpeechRecognizer.ERROR_CLIENT,
@@ -785,13 +872,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private fun askMivor(rawText: String) {
         awaitingMivor = true
         voiceRestartHandler.removeCallbacksAndMessages(null)
-        tvVoiceStatus.text = "⏳ Consultando con MIVOR…"
+        tvVoiceStatus.text = "Consultando con MIVOR…"
         MivorApi.voice(config.deviceToken, rawText) { result ->
             awaitingMivor = false
             val reply = when (result) {
-                is MivorApi.Result.Ok ->
+                is MivorApi.Result.Ok -> {
+                    // Una toma anotada por voz también cambia la tarjeta de la pantalla de inicio
+                    if (result.value.intent == "medication_taken") refreshToday(force = true)
                     result.value.speech.takeIf { result.value.intent != "unknown" && it.isNotBlank() }
                         ?: "No te entendí. Puedes decir: ya me tomé la pastilla, o qué me toca."
+                }
                 MivorApi.Result.Unlinked -> {
                     config.unlinkFromMivor()
                     "Esta tablet ya no está conectada con MIVOR. Pídele a tu cuidador que la vuelva a vincular."
@@ -1414,6 +1504,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         builder.show()
     }
 
+    /** Ficha "Radio y música" de Más cosas: muestra la app que eligió el cuidador, si hay una. */
     private fun refreshCustomAppTile() {
         val appInfo = config.customAppPackage.takeIf { it.isNotEmpty() }?.let {
             try {
@@ -1424,23 +1515,426 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
 
         if (appInfo == null) {
-            ivAddIcon.setImageResource(R.drawable.ic_add)
-            ImageViewCompat.setImageTintList(ivAddIcon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.c_gray)))
-            ivAddIcon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.circle_gray))
-            val pad = resources.getDimensionPixelSize(R.dimen.tile_icon_pad)
-            ivAddIcon.setPadding(pad, pad, pad, pad)
-            tvAddTitle.text = "Agregar\notra función"
-            tvAddSub.text = "Personaliza tu inicio con más opciones"
+            ivCustomIcon.setImageResource(R.drawable.ic_music)
+            ImageViewCompat.setImageTintList(ivCustomIcon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_sand_ink)))
+            tvCustomTitle.text = "Radio y música"
             return
         }
 
-        ivAddIcon.setImageDrawable(packageManager.getApplicationIcon(appInfo))
-        ImageViewCompat.setImageTintList(ivAddIcon, null)
-        ivAddIcon.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
-        val pad = (4 * resources.displayMetrics.density).toInt()
-        ivAddIcon.setPadding(pad, pad, pad, pad)
-        tvAddTitle.text = packageManager.getApplicationLabel(appInfo)
-        tvAddSub.text = "Toca para abrir"
+        ivCustomIcon.setImageDrawable(packageManager.getApplicationIcon(appInfo))
+        ImageViewCompat.setImageTintList(ivCustomIcon, null)
+        tvCustomTitle.text = packageManager.getApplicationLabel(appInfo)
+    }
+
+    // =========================================================================
+    // INICIO V2: PANELES, FAMILIA, MEDICACIÓN, CITAS, TIEMPO Y RECORDATORIOS
+    // =========================================================================
+    private fun showHome() {
+        morePanel.visibility = View.GONE
+        homePanel.visibility = View.VISIBLE
+    }
+
+    private fun showMore() {
+        refreshCustomAppTile()
+        morePanel.visibility = View.VISIBLE
+        homePanel.visibility = View.GONE
+    }
+
+    /** Caras de la familia: inicial del nombre (las fotos llegarán desde MIVOR). */
+    private fun refreshContacts() {
+        val cards = listOf(R.id.contact1, R.id.contact2, R.id.contact3)
+        val avatars = listOf(R.id.avatar1, R.id.avatar2, R.id.avatar3)
+        val names = listOf(R.id.name1, R.id.name2, R.id.name3)
+        config.contacts.forEachIndexed { i, contact ->
+            findViewById<TextView>(avatars[i]).text = contact.name.trim().take(1).uppercase(config.country.locale)
+            findViewById<TextView>(names[i]).text = contact.name
+            findViewById<View>(cards[i]).apply {
+                alpha = if (contact.isSet) 1f else 0.5f
+                contentDescription = if (contact.isSet) "Llamar a ${contact.name}" else "${contact.name}: sin número todavía"
+            }
+        }
+    }
+
+    private fun firstName(): String =
+        today?.firstName?.takeIf { it.isNotBlank() } ?: config.linkedPatientName.trim().substringBefore(' ')
+
+    private fun nowMinute(): Int = Calendar.getInstance().let { it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE) }
+
+    private fun formatTime(millis: Long): String {
+        val pattern = if (android.text.format.DateFormat.is24HourFormat(this)) "HH:mm" else "h:mm a"
+        return SimpleDateFormat(pattern, config.country.locale).format(Date(millis))
+    }
+
+    /** "Hoy", "Mañana" o "Jueves 3 de octubre". */
+    private fun dayLabel(millis: Long): String {
+        val target = Calendar.getInstance().apply { timeInMillis = millis }
+        val now = Calendar.getInstance()
+        fun dayIndex(c: Calendar) = c.get(Calendar.YEAR) * 400 + c.get(Calendar.DAY_OF_YEAR)
+        return when (dayIndex(target) - dayIndex(now)) {
+            0 -> "Hoy"
+            1 -> "Mañana"
+            else -> SimpleDateFormat("EEEE d 'de' MMMM", config.country.locale).format(Date(millis))
+                .replaceFirstChar { it.titlecase(config.country.locale) }
+        }
+    }
+
+    private fun appointmentText(a: TodayAppointment): String {
+        val what = if (a.video) "Videoconsulta" else "Cita"
+        val who = a.doctor.takeIf { it.isNotBlank() }?.let { " con $it" } ?: " médica"
+        return "${dayLabel(a.startsAtMillis)}, ${formatTime(a.startsAtMillis)} · $what$who"
+    }
+
+    private fun onMinuteTick() {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val hello = when {
+            hour < 6 -> "Buenas noches"
+            hour < 13 -> "Buenos días"
+            hour < 20 -> "Buenas tardes"
+            else -> "Buenas noches"
+        }
+        tvGreeting.text = firstName().takeIf { it.isNotBlank() }?.let { "$hello, $it" } ?: hello
+
+        val elapsed = SystemClock.elapsedRealtime()
+        if (lastTodayFetch == 0L || elapsed - lastTodayFetch > TODAY_REFRESH_MS) refreshToday()
+        if (lastWeatherFetch == 0L || elapsed - lastWeatherFetch > WEATHER_REFRESH_MS) refreshWeather()
+
+        if (justTaken != null && elapsed - justTakenAt > DONE_VISIBLE_MS) justTaken = null
+        renderToday()
+
+        // Recordatorio abierto: repetirlo de vez en cuando y cerrarlo solo si nadie responde
+        if (reminderPanel.visibility == View.VISIBLE) {
+            val shownFor = elapsed - reminderShownAt
+            when {
+                shownFor > REMINDER_AUTO_CLOSE_MS -> closeReminder()
+                shownFor > 60_000L && shownFor % REMINDER_REPEAT_MS < 60_000L -> reminderMed?.let { speak(reminderSpeech(it)) }
+            }
+        } else {
+            checkReminder()
+        }
+    }
+
+    /** Pide a MIVOR el resumen del día. Sin vincular, la tarjeta de medicación no se muestra. */
+    private fun refreshToday(force: Boolean = false) {
+        if (!config.isLinkedToMivor) {
+            today = null
+            renderToday()
+            MedReminder.cancelAlarm(this)
+            return
+        }
+        val elapsed = SystemClock.elapsedRealtime()
+        if (!force && lastTodayFetch != 0L && elapsed - lastTodayFetch < 60_000L) return
+        lastTodayFetch = elapsed
+        MivorApi.today(config.deviceToken) { result ->
+            when (result) {
+                is MivorApi.Result.Ok -> {
+                    today = result.value
+                    renderToday()
+                    checkReminder()
+                    scheduleNextReminderAlarm()
+                }
+                MivorApi.Result.Unlinked -> {
+                    config.unlinkFromMivor()
+                    today = null
+                    renderToday()
+                    MedReminder.cancelAlarm(this)
+                }
+                // Sin conexión: se queda lo último que se supo y se reintenta en el próximo minuto
+                is MivorApi.Result.Error -> lastTodayFetch = 0L
+            }
+        }
+    }
+
+    private fun renderToday() {
+        val data = today
+        val name = firstName()
+
+        // Cita en las próximas 48 horas
+        val soon = data?.appointments?.firstOrNull {
+            it.startsAtMillis > System.currentTimeMillis() && it.startsAtMillis - System.currentTimeMillis() < 48 * 3_600_000L
+        }
+        findViewById<View>(R.id.apptBanner).visibility = if (soon != null) View.VISIBLE else View.GONE
+        soon?.let { findViewById<TextView>(R.id.tvApptBanner).text = appointmentText(it) }
+
+        val card = findViewById<com.google.android.material.card.MaterialCardView>(R.id.medCard)
+        val due = findViewById<View>(R.id.medDue)
+        val done = findViewById<View>(R.id.medDone)
+        val calm = findViewById<View>(R.id.medCalm)
+        val taken = justTaken
+
+        if (data == null || !data.hasMeds) {
+            card.visibility = View.GONE
+            return
+        }
+        card.visibility = View.VISIBLE
+        due.visibility = View.GONE
+        done.visibility = View.GONE
+        calm.visibility = View.GONE
+
+        when {
+            taken != null -> {
+                done.visibility = View.VISIBLE
+                card.strokeColor = ContextCompat.getColor(this, R.color.h_ok)
+                findViewById<TextView>(R.id.tvDoneTitle).text = if (name.isNotBlank()) "¡Hecho, $name!" else "¡Hecho!"
+                findViewById<TextView>(R.id.tvDoneSub).text = "${taken.name} anotado a las $justTakenTime"
+                findViewById<TextView>(R.id.tvDoneNext).text = when {
+                    data.due != null -> "Ahora también: ${data.due.label}"
+                    data.next != null -> "La siguiente: ${data.next.name}, a las ${data.next.time}"
+                    else -> "Ya no te falta ninguna toma hoy"
+                }
+            }
+            data.due != null -> {
+                due.visibility = View.VISIBLE
+                card.strokeColor = ContextCompat.getColor(this, R.color.h_accent)
+                findViewById<TextView>(R.id.tvMedName).text = data.due.label
+                findViewById<TextView>(R.id.tvMedDetail).text =
+                    listOfNotNull(data.due.detail.takeIf { it.isNotBlank() }, data.due.time?.let { "a las $it" })
+                        .joinToString(" · ")
+            }
+            else -> {
+                calm.visibility = View.VISIBLE
+                card.strokeColor = ContextCompat.getColor(this, R.color.h_border)
+                val icon = findViewById<ImageView>(R.id.ivMedCalm)
+                if (data.allDone) {
+                    icon.setImageResource(R.drawable.ic_check)
+                    ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_ok)))
+                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_ok_soft))
+                    findViewById<TextView>(R.id.tvMedCalm).text = "Hoy ya te has tomado todo. ¡Muy bien!"
+                } else {
+                    icon.setImageResource(R.drawable.ic_pill)
+                    ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent)))
+                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent_soft))
+                    findViewById<TextView>(R.id.tvMedCalm).text = data.next?.let { "Próxima pastilla: ${it.name}, a las ${it.time}" }
+                        ?: "Tienes pastillas sin hora fija. Mira «Mis pastillas de hoy»."
+                }
+            }
+        }
+    }
+
+    private fun markTaken(med: TodayMed) {
+        val buttons = listOf(R.id.btnTaken, R.id.btnReminderTaken).map { findViewById<View>(it) }
+        buttons.forEach { it.isEnabled = false }
+        MivorApi.setTaken(config.deviceToken, med.id, true) { result ->
+            buttons.forEach { it.isEnabled = true }
+            when (result) {
+                is MivorApi.Result.Ok -> {
+                    today = result.value
+                    justTaken = med
+                    justTakenAt = SystemClock.elapsedRealtime()
+                    justTakenTime = formatTime(System.currentTimeMillis())
+                    remindAgainAt[med.id] = Long.MAX_VALUE
+                    closeReminder()
+                    showHome()
+                    renderToday()
+                    scheduleNextReminderAlarm()
+                    val next = result.value.due?.let { " Ahora también te toca ${it.label}." }
+                        ?: result.value.next?.let { " La siguiente es ${it.name}, a las ${it.time}." }
+                        ?: " Ya no te falta ninguna toma hoy."
+                    speak("Anotado. ¡Muy bien!$next")
+                }
+                MivorApi.Result.Unlinked -> {
+                    config.unlinkFromMivor()
+                    closeReminder()
+                    refreshToday()
+                    speak("Este teléfono ya no está conectado con MIVOR. Pídele a tu cuidador que lo vuelva a vincular.")
+                }
+                is MivorApi.Result.Error -> speak("No he podido conectar con MIVOR. Inténtalo otra vez en un momento.")
+            }
+        }
+    }
+
+    private fun undoTaken() {
+        val med = justTaken ?: return
+        MivorApi.setTaken(config.deviceToken, med.id, false) { result ->
+            when (result) {
+                is MivorApi.Result.Ok -> {
+                    today = result.value
+                    justTaken = null
+                    // Volver a recordarla, pero no al instante
+                    remindAgainAt[med.id] = System.currentTimeMillis() + SNOOZE_MS
+                    renderToday()
+                    scheduleNextReminderAlarm()
+                    speak("De acuerdo, lo he quitado.")
+                }
+                else -> speak("No he podido conectar con MIVOR. Inténtalo otra vez en un momento.")
+            }
+        }
+    }
+
+    // ----- Recordatorio a pantalla completa -----
+
+    /** Toca la alarma (pantalla apagada): encender, mostrarse sobre el bloqueo y comprobar con datos frescos. */
+    private fun handleMedReminderIntent(intent: Intent?) {
+        if (intent?.action != MedReminder.ACTION_MED_REMINDER) return
+        intent.action = null
+        openedByReminder = true
+        setShowOverLockScreen(true)
+        lastMinuteChecked = -1
+        refreshToday(force = true)
+    }
+
+    private fun checkReminder() {
+        val data = today ?: return
+        if (reminderPanel.visibility == View.VISIBLE || sosDialog != null) return
+        if (CallManager.stateOf(CallManager.call) != android.telecom.Call.STATE_DISCONNECTED) return
+
+        val day = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date())
+        if (day != remindDay) {
+            remindDay = day
+            remindAgainAt.clear()
+        }
+        val now = nowMinute()
+        val wallClock = System.currentTimeMillis()
+        val med = data.meds
+            .filter { !it.taken && it.minuteOfDay != null }
+            .filter { it.minuteOfDay!! <= now && now - it.minuteOfDay!! <= REMINDER_LOOKBACK_MIN }
+            .filter { wallClock >= (remindAgainAt[it.id] ?: 0L) }
+            .minByOrNull { it.minuteOfDay!! }
+        if (med != null) {
+            showReminder(med)
+        } else if (openedByReminder) {
+            // La alarma se adelantó o ya estaba tomada: no dejar la pantalla encendida sobre el bloqueo
+            openedByReminder = false
+            setShowOverLockScreen(false)
+        }
+    }
+
+    private fun reminderSpeech(med: TodayMed): String {
+        val name = firstName()
+        return (if (name.isNotBlank()) "$name, es la hora de ${med.label}." else "Es la hora de ${med.label}.") +
+            " Cuando te la tomes, pulsa Ya me la tomé, o dímelo."
+    }
+
+    private fun showReminder(med: TodayMed) {
+        reminderMed = med
+        reminderShownAt = SystemClock.elapsedRealtime()
+        // No volver a saltar por esta toma salvo que pida "recuérdamelo" (o se deshaga)
+        remindAgainAt[med.id] = Long.MAX_VALUE
+        val name = firstName()
+        findViewById<TextView>(R.id.tvReminderHello).text = if (name.isNotBlank()) "$name, es la hora de" else "Es la hora de"
+        findViewById<TextView>(R.id.tvReminderMed).text = med.label
+        findViewById<TextView>(R.id.tvReminderDetail).apply {
+            val detail = listOfNotNull(med.detail.takeIf { it.isNotBlank() }, med.time).joinToString(" · ")
+            text = detail
+            visibility = if (detail.isBlank()) View.GONE else View.VISIBLE
+        }
+        reminderPanel.visibility = View.VISIBLE
+        speak(reminderSpeech(med))
+    }
+
+    private fun snoozeReminder() {
+        val med = reminderMed ?: return
+        remindAgainAt[med.id] = System.currentTimeMillis() + SNOOZE_MS
+        closeReminder()
+        scheduleNextReminderAlarm()
+        speak("De acuerdo. Te lo recuerdo en 10 minutos.")
+    }
+
+    private fun closeReminder() {
+        reminderPanel.visibility = View.GONE
+        reminderMed = null
+        if (openedByReminder) {
+            openedByReminder = false
+            setShowOverLockScreen(false)
+        }
+    }
+
+    /** Alarma para la próxima toma pendiente de hoy (o para un "recuérdamelo"), por si la pantalla está apagada. */
+    private fun scheduleNextReminderAlarm() {
+        val data = today ?: return MedReminder.cancelAlarm(this)
+        val now = System.currentTimeMillis()
+        val startOfDay = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val pending = data.meds.filter { !it.taken && it.minuteOfDay != null }
+        val atTime = pending.map { startOfDay + it.minuteOfDay!! * 60_000L }.filter { it > now }
+        val snoozed = pending.mapNotNull { remindAgainAt[it.id] }.filter { it in (now + 1) until Long.MAX_VALUE }
+        val next = (atTime + snoozed).minOrNull()
+        if (next != null) MedReminder.schedule(this, next) else MedReminder.cancelAlarm(this)
+    }
+
+    // ----- Citas y pastillas de hoy (fichas de Más cosas) -----
+
+    /** Lista grande y legible dentro de un diálogo, con un botón para cerrar. */
+    private fun showBigList(title: String, lines: List<String>, spoken: String) {
+        val density = resources.displayMetrics.density
+        val body = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding((24 * density).toInt(), (8 * density).toInt(), (24 * density).toInt(), 0)
+            lines.forEach { line ->
+                addView(TextView(this@MainActivity).apply {
+                    text = line
+                    textSize = 21f
+                    setTextColor(ContextCompat.getColor(this@MainActivity, R.color.h_ink))
+                    setPadding(0, (10 * density).toInt(), 0, (10 * density).toInt())
+                })
+            }
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setView(android.widget.ScrollView(this).apply { addView(body) })
+            .setPositiveButton("Cerrar", null)
+            .show()
+        speak(spoken)
+    }
+
+    private fun showAppointments() {
+        if (!config.isLinkedToMivor) {
+            speak("Tus citas aparecerán aquí cuando tu cuidador conecte este teléfono con MIVOR.")
+            return
+        }
+        val list = today?.appointments.orEmpty()
+        if (list.isEmpty()) {
+            showBigList("Mis citas", listOf("No tienes citas en los próximos 30 días."), "No tienes citas en los próximos días.")
+            return
+        }
+        showBigList("Mis citas", list.map { appointmentText(it) }, "Tu próxima cita: ${appointmentText(list.first()).replace(" · ", ". ")}.")
+    }
+
+    private fun showTodayMeds() {
+        if (!config.isLinkedToMivor) {
+            val local = config.medsReminder
+            speak(if (local.isNotBlank()) "Tu recordatorio: $local" else "Tus pastillas aparecerán aquí cuando tu cuidador conecte este teléfono con MIVOR.")
+            return
+        }
+        val meds = today?.meds.orEmpty()
+        if (meds.isEmpty()) {
+            showBigList("Mis pastillas de hoy", listOf("Todavía no hay pastillas en MIVOR."), "Todavía no tienes pastillas en MIVOR.")
+            return
+        }
+        val lines = meds.map { m ->
+            val whenText = m.time?.let { "a las $it" } ?: "sin hora fija"
+            if (m.taken) "${m.label} · tomada${m.takenTime?.let { " a las $it" } ?: ""}"
+            else "${m.label} · $whenText · falta"
+        }
+        val pending = meds.filter { !it.taken }
+        val spoken = if (pending.isEmpty()) "Hoy ya te has tomado todo. ¡Muy bien!"
+        else "Hoy te falta: " + pending.joinToString(", ") { it.name + (it.time?.let { t -> " a las $t" } ?: "") } + "."
+        showBigList("Mis pastillas de hoy", lines, spoken)
+    }
+
+    // ----- Tiempo -----
+
+    @SuppressLint("MissingPermission")
+    private fun refreshWeather() {
+        lastWeatherFetch = SystemClock.elapsedRealtime()
+        if (!isGranted(Manifest.permission.ACCESS_COARSE_LOCATION) && !isGranted(Manifest.permission.ACCESS_FINE_LOCATION)) return
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location == null) {
+                lastWeatherFetch = 0L
+                return@addOnSuccessListener
+            }
+            WeatherApi.fetch(location.latitude, location.longitude) { weather ->
+                val chip = findViewById<View>(R.id.weatherChip)
+                if (weather == null) {
+                    chip.visibility = View.GONE
+                    return@fetch
+                }
+                findViewById<ImageView>(R.id.ivWeather).setImageResource(weather.icon)
+                findViewById<TextView>(R.id.tvWeather).text = "${weather.temperature}° ${weather.label}"
+                chip.contentDescription = "Tiempo: ${weather.temperature} grados, ${weather.label}"
+                chip.visibility = View.VISIBLE
+            }
+        }
     }
 
     // =========================================================================
@@ -1560,7 +2054,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             setOnClickListener {
                 dialog.dismiss()
                 if (isKioskActive) {
-                    exitKioskMode()
+                    // Libera el teléfono y deja elegir otra pantalla de inicio
+                    exitKioskToHomeChooser()
                 } else {
                     isKioskActive = true
                     startKioskLockMode()
@@ -1671,7 +2166,8 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             dialogView.findViewById<TextView>(R.id.tvChangePinTitle).text = "Crea la clave del cuidador"
             dialogView.findViewById<TextView>(R.id.tvChangePinSub).text =
                 "De ${KioskConfig.PIN_MIN_LENGTH} a ${KioskConfig.PIN_MAX_LENGTH} números. " +
-                    "Protege los Ajustes y la salida del modo kiosko."
+                    "Protege los Ajustes y la salida del modo kiosko.\n\n" +
+                    "Para abrir los Ajustes, mantén pulsada la hora 5 segundos."
         }
 
         val etNew = dialogView.findViewById<EditText>(R.id.etNewPin)
@@ -1692,7 +2188,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 else -> {
                     config.setPin(newPin)
                     dialog.dismiss()
-                    Toast.makeText(this, if (firstTime) "Clave creada" else "Clave cambiada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        if (firstTime) "Clave creada. Ajustes: mantén pulsada la hora 5 segundos" else "Clave cambiada",
+                        Toast.LENGTH_LONG
+                    ).show()
                     onDone?.invoke()
                 }
             }

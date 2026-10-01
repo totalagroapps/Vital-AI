@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pantalla de inicio v2 (maqueta "Kiosko MIVOR – Fase 1"): fondo cálido, tinta oscura,
+     azul MIVOR para la medicación, verde solo para "hecho" y rojo solo para pedir ayuda. -->
+<resources>
+    <color name="h_bg">#F4F2EC</color>
+    <color name="h_ink">#17202E</color>
+    <color name="h_ink_sub">#3D4757</color>
+    <color name="h_border">#D9D4C7</color>
+    <color name="h_white">#FFFFFF</color>
+
+    <color name="h_accent">#1D46B8</color>
+    <color name="h_accent_dark">#153587</color>
+    <color name="h_accent_soft">#E4EAFB</color>
+    <color name="h_accent_pale">#C9D8F6</color>
+
+    <color name="h_ok">#1E7B4A</color>
+    <color name="h_ok_dark">#145C37</color>
+    <color name="h_ok_text">#1F4D35</color>
+    <color name="h_ok_soft">#E3F3EA</color>
+
+    <color name="h_sos">#B3261E</color>
+
+    <color name="h_sand">#FCE9CF</color>
+    <color name="h_sand_ink">#8A4B08</color>
+    <color name="h_peach">#F6D9C3</color>
+    <color name="h_peach_ink">#6B2E06</color>
+    <color name="h_mint">#D5ECDD</color>
+    <color name="h_mint_ink">#123F28</color>
+    <color name="h_lilac">#EADFF3</color>
+    <color name="h_lilac_ink">#45206A</color>
+
+    <color name="h_reminder_chip">#29FFFFFF</color>
+    <color name="h_reminder_sub">#E4EAFB</color>
+</resources>

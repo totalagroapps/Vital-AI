@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Botón grande de la pantalla de inicio v2 -->
+    <style name="HButton" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:layout_height">@dimen/h_button</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textSize">@dimen/h_button_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="cornerRadius">20dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconSize">28dp</item>
+        <item name="iconPadding">10dp</item>
+    </style>
+
+    <!-- Botones de dos en fila: el texto puede ocupar dos líneas y el botón crece en vez de cortarse -->
+    <style name="HButton.Outlined">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">@dimen/h_button</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="backgroundTint">@color/h_white</item>
+        <item name="strokeWidth">3dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="iconPadding">6dp</item>
+        <item name="android:textSize">@dimen/h_contact_name</item>
+    </style>
+
+    <!-- Ficha de "Más cosas" -->
+    <style name="HTile">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <style name="HTileIcon">
+        <item name="android:layout_width">@dimen/h_tile_icon</item>
+        <item name="android:layout_height">@dimen/h_tile_icon</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+
+    <style name="HTileText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/h_button_text</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <!-- Contacto de la familia (cara + nombre) -->
+    <style name="HContact">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+        <item name="cardCornerRadius">22dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/h_white</item>
+        <item name="strokeColor">@color/h_border</item>
+        <item name="strokeWidth">2dp</item>
+    </style>
+
+    <style name="HAvatar">
+        <item name="android:layout_width">@dimen/h_avatar</item>
+        <item name="android:layout_height">@dimen/h_avatar</item>
+        <item name="android:background">@drawable/bg_circle</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">@dimen/h_avatar_text</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:importantForAccessibility">no</item>
+    </style>
+</resources>

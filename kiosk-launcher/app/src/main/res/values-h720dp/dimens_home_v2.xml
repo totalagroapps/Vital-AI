@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="h_pad">18dp</dimen>
+    <dimen name="h_gap">12dp</dimen>
+    <dimen name="h_clock">68sp</dimen>
+    <dimen name="h_date">23sp</dimen>
+    <dimen name="h_greeting">19sp</dimen>
+    <dimen name="h_body">20sp</dimen>
+    <dimen name="h_med_name">29sp</dimen>
+    <dimen name="h_button_text">24sp</dimen>
+    <dimen name="h_button">64dp</dimen>
+    <dimen name="h_avatar">64dp</dimen>
+    <dimen name="h_avatar_text">28sp</dimen>
+    <dimen name="h_contact_name">20sp</dimen>
+    <dimen name="h_sos">86dp</dimen>
+    <dimen name="h_sos_text">28sp</dimen>
+    <dimen name="h_tile_icon">52dp</dimen>
+</resources>
