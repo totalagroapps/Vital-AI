@@ -388,14 +388,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         val is24h = android.text.format.DateFormat.is24HourFormat(this)
         val time = SimpleDateFormat(if (is24h) "HH:mm" else "h:mm a", locale).format(calendar.time)
 
-        // En formato de 12 horas, "p. m." en pequeño al lado: a tamaño de reloj saltaría de línea
-        tvClock.text = if (is24h) time else {
-            val digits = SimpleDateFormat("h:mm", locale).format(calendar.time)
-            val suffix = " " + SimpleDateFormat("a", locale).format(calendar.time)
-            android.text.SpannableString(digits + suffix).apply {
-                setSpan(android.text.style.RelativeSizeSpan(0.36f), digits.length, length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-            }
-        }
+        // En formato de 12 horas, el reloj grande va sin "a. m./p. m." (con "11:08" no cabe en la línea);
+        // el saludo de debajo ya dice si es por la mañana, por la tarde o por la noche
+        tvClock.text = if (is24h) time else SimpleDateFormat("h:mm", locale).format(calendar.time)
         findViewById<TextView>(R.id.tvMoreClock).text = time
         findViewById<TextView>(R.id.tvReminderClock).text = time
         val dateString = SimpleDateFormat("EEEE, d 'de' MMMM", locale).format(calendar.time)
@@ -1679,11 +1674,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 done.visibility = View.VISIBLE
                 card.strokeColor = ContextCompat.getColor(this, R.color.h_ok)
                 findViewById<TextView>(R.id.tvDoneTitle).text = if (name.isNotBlank()) "¡Hecho, $name!" else "¡Hecho!"
-                findViewById<TextView>(R.id.tvDoneSub).text = "${taken.name} anotado a las $justTakenTime"
+                findViewById<TextView>(R.id.tvDoneSub).text = "${taken.name} · anotada a las $justTakenTime"
                 findViewById<TextView>(R.id.tvDoneNext).text = when {
                     data.due != null -> "Ahora también: ${data.due.label}"
                     data.next != null -> "La siguiente: ${data.next.name}, a las ${data.next.time}"
-                    else -> "Ya no te falta ninguna toma hoy"
+                    else -> restOfTodayText(data)
                 }
             }
             data.due != null -> {
@@ -1734,7 +1729,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     scheduleNextReminderAlarm()
                     val next = result.value.due?.let { " Ahora también te toca ${it.label}." }
                         ?: result.value.next?.let { " La siguiente es ${it.name}, a las ${it.time}." }
-                        ?: " Ya no te falta ninguna toma hoy."
+                        ?: " ${restOfTodayText(result.value)}."
                     speak("Anotado. ¡Muy bien!$next")
                 }
                 MivorApi.Result.Unlinked -> {
@@ -1745,6 +1740,16 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 }
                 is MivorApi.Result.Error -> speak("No he podido conectar con MIVOR. Inténtalo otra vez en un momento.")
             }
+        }
+    }
+
+    /** Lo que queda hoy cuando no hay más tomas con hora: nada, o las que no tienen hora fija. */
+    private fun restOfTodayText(data: Today): String {
+        val left = data.meds.count { !it.taken }
+        return when (left) {
+            0 -> "Ya no te falta ninguna toma hoy"
+            1 -> "Te queda 1 pastilla sin hora fija"
+            else -> "Te quedan $left pastillas sin hora fija"
         }
     }
 
@@ -1824,6 +1829,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             visibility = if (detail.isBlank()) View.GONE else View.VISIBLE
         }
         reminderPanel.visibility = View.VISIBLE
+        setBarsColor(R.color.h_accent, lightIcons = true)
         speak(reminderSpeech(med))
     }
 
@@ -1835,7 +1841,18 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         speak("De acuerdo. Te lo recuerdo en 10 minutos.")
     }
 
+    /** Color de las franjas de las barras del sistema (el fondo de la raíz) y de sus iconos. */
+    private fun setBarsColor(colorRes: Int, lightIcons: Boolean) {
+        findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
+            .setBackgroundColor(ContextCompat.getColor(this, colorRes))
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !lightIcons
+            isAppearanceLightNavigationBars = !lightIcons
+        }
+    }
+
     private fun closeReminder() {
+        if (reminderPanel.visibility == View.VISIBLE) setBarsColor(R.color.h_bg, lightIcons = false)
         reminderPanel.visibility = View.GONE
         reminderMed = null
         if (openedByReminder) {

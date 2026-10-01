@@ -22,8 +22,8 @@ import androidx.core.content.ContextCompat
  * que muestra el recordatorio y lo dice en voz alta. Con la pantalla encendida, MainActivity
  * lo muestra por su cuenta sin esperar a la alarma.
  *
- * La alarma es "inexacta pero también en reposo" (setAndAllowWhileIdle): no necesita el permiso
- * de alarmas exactas y, en reposo profundo, Android puede retrasarla unos minutos.
+ * La alarma es exacta y también salta en reposo (setExactAndAllowWhileIdle, permiso USE_EXACT_ALARM).
+ * Si Android no la permitiera, se usa la inexacta, que puede llegar algunos minutos tarde.
  */
 object MedReminder {
 
@@ -45,10 +45,14 @@ object MedReminder {
         val alarms = context.getSystemService(AlarmManager::class.java) ?: return
         val pending = alarmIntent(context)
         alarms.cancel(pending)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atMillis, pending)
-        } else {
-            alarms.set(AlarmManager.RTC_WAKEUP, atMillis, pending)
+        // Exacta (USE_EXACT_ALARM en el manifiesto): la inexacta podía llegar hasta 7-8 minutos tarde
+        val exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()
+        when {
+            exactAllowed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
+                alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atMillis, pending)
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
+                alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, atMillis, pending)
+            else -> alarms.setExact(AlarmManager.RTC_WAKEUP, atMillis, pending)
         }
     }
 
