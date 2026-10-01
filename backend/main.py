@@ -100,9 +100,9 @@ DEFAULT_APK_URL = "https://github.com/totalagroapps/Vital-AI/releases/download/l
 @app.get('/api/version')
 def get_version():
     return {
-        "version": os.getenv("APP_LATEST_VERSION", "1.0.4"),
+        "version": os.getenv("APP_LATEST_VERSION", "1.0.5"),
         "apkUrl": os.getenv("APP_APK_URL", DEFAULT_APK_URL),
-        "notes": os.getenv("APP_UPDATE_NOTES", "Corrige la pantalla de inicio en móviles: las tarjetas ya no se montan unas sobre otras."),
+        "notes": os.getenv("APP_UPDATE_NOTES", "La pantalla de inicio vuelve a caber entera sin desplazarse en todos los móviles."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1"),
         # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
         # Solo tiene sentido con una URL fija por versión (no con el tag "latest", que cambia en cada build).

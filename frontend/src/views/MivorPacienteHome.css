@@ -601,3 +601,27 @@
     min-height: auto !important;
   }
 }
+
+/* ZERO-SCROLL POR ESCALONES DE ALTURA (pantalla útil de la app Android, sin barras del sistema).
+   Se compacta solo lo necesario para que todo quepa sin desplazarse y sin solapes. */
+.mivor-mobile-home .mobile-prevention-pill {
+  display: none;
+}
+@media (max-height: 1000px) {
+  /* 1) Descripción de las tarjetas: 2 líneas como máximo */
+  .mivor-mobile-home .mobile-card p {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+}
+@media (max-height: 860px) {
+  /* 2) El banner grande de prevención pasa a ser un botón junto a "Mente Activa" */
+  .mivor-mobile-home .mobile-preventive-promo {
+    display: none !important;
+  }
+  .mivor-mobile-home .mobile-prevention-pill {
+    display: flex;
+  }
+}

@@ -1,6 +1,6 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Corrige la pantalla de inicio en móviles: las tarjetas ya no se montan unas sobre otras.",
+  "notes": "La pantalla de inicio vuelve a caber entera sin desplazarse en todos los móviles.",
   "forceUpdate": false
 }

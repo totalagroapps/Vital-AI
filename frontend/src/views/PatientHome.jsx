@@ -7,6 +7,7 @@ import PreventiveCalendarModal from './PreventiveCalendarModal';
 import SymptomCameraModal from './SymptomCameraModal';
 import { 
   Brain, 
+  CalendarCheck, 
   Folder, 
   Lightbulb, 
   Users, 
@@ -281,6 +282,15 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               <Brain size={13} className="text-violet-600 stroke-[2.6]" />
               <span>{t('patienthome_mente_activa')}</span>
             </button>
+            {/* En móviles bajos sustituye al banner grande de prevención (política zero-scroll) */}
+            <button
+              type="button"
+              onClick={() => setShowPreventiveCalendarModal(true)}
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-sky-50 to-teal-50 border border-sky-200/90 rounded-xl text-[11px] font-extrabold text-sky-800 items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer mobile-prevention-pill"
+            >
+              <CalendarCheck size={13} className="text-sky-600 stroke-[2.6]" />
+              <span>{t('brand_mivor_prevention')}</span>
+            </button>
           </div>
 
           {/* 5. Cuadrícula 2x2 de Servicios (Exacta al diseño) */}
@@ -415,7 +425,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           {/* 6. Banner de Medicina Preventiva y Longevidad */}
           <div 
             onClick={() => setShowPreventiveCalendarModal(true)}
-            className="w-full rounded-2xl border border-sky-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner bg-white"
+            className="w-full rounded-2xl border border-sky-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner mobile-preventive-promo bg-white"
           >
             {language === 'es' ? (
               <img 
