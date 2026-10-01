@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Recordatorio de medicación a la hora exacta (la app no se distribuye por Google Play) -->
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Instalar la app MIVOR Salud junto al kiosko (el cuidador confirma en el instalador de Android) -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.REORDER_TASKS" />

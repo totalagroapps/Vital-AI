@@ -2,4 +2,6 @@
 <!-- Fotos de la cámara en Android 9 o anterior (en 10+ se guardan en la galería) -->
 <paths>
     <external-files-path name="photos" path="Pictures/" />
+    <!-- APK de la app MIVOR Salud descargado por el kiosko para instalarlo -->
+    <cache-path name="mivor_apk" path="mivor/" />
 </paths>

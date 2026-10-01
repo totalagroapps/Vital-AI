@@ -26,6 +26,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- El kiosko MIVOR abre la app en modo adulto mayor con mivor://mayor -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mivor" android:host="mayor" />
+            </intent-filter>
+
         </activity>
 
         <provider

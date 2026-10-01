@@ -334,9 +334,9 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         findViewById<View>(R.id.btnMore).setOnClickListener { showMore() }
         findViewById<View>(R.id.btnBackHome).setOnClickListener { showHome() }
 
-        listOf(R.id.contact1, R.id.contact2, R.id.contact3).forEachIndexed { i, id ->
-            findViewById<View>(id).setOnClickListener { callContact(config.contact(i)) }
-        }
+        findViewById<View>(R.id.cardFamily).setOnClickListener { showContactsDialog() }
+        findViewById<View>(R.id.cardWhatsapp).setOnClickListener { launchFamilyWhatsApp() }
+        findViewById<View>(R.id.cardMivor).setOnClickListener { openMivorSenior() }
 
         // Medicación
         findViewById<View>(R.id.btnTaken).setOnClickListener { today?.due?.let { markTaken(it) } }
@@ -942,6 +942,15 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                             refreshToday(force = true)
                             val who = result.value.patientName.ifBlank { "tu cuenta" }
                             Toast.makeText(this, "Vinculada con $who", Toast.LENGTH_LONG).show()
+                            // El kiosko va siempre con la app MIVOR Salud: ofrecer instalarla si falta
+                            if (!MivorAppInstaller.isInstalled(this)) {
+                                MaterialAlertDialogBuilder(this)
+                                    .setTitle("Instalar MIVOR Salud")
+                                    .setMessage("Para medicamentos, citas, juegos y el asistente, instala también la app MIVOR Salud en este teléfono.")
+                                    .setPositiveButton("Instalar") { _, _ -> installMivorApp() }
+                                    .setNegativeButton("Más tarde", null)
+                                    .show()
+                            }
                             speak("Listo. Ya puedes decirme cuando te tomes las pastillas.")
                         }
                         is MivorApi.Result.Error -> input.error = result.message
@@ -958,20 +967,53 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // =========================================================================
     private fun isInstalled(packageName: String) = packageManager.getLaunchIntentForPackage(packageName) != null
 
-    private fun launchMivorApp() {
-        val launchIntent = packageManager.getLaunchIntentForPackage(MIVOR_PACKAGE_NAME)
-        if (launchIntent != null) {
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            launchExternalIntent(launchIntent)
+    private fun launchMivorApp() = openMivorSenior()
+
+    /** Abre la app MIVOR Salud en modo adulto mayor; si no está instalada, ofrece instalarla. */
+    private fun openMivorSenior() {
+        val intent = MivorAppInstaller.seniorIntent(this)
+        if (intent != null) {
+            launchExternalIntent(intent)
         } else {
+            speak("MIVOR Salud todavía no está instalada. Pídele a tu cuidador que la instale.")
+            requestPin("Instalar MIVOR Salud") { installMivorApp() }
+        }
+    }
+
+    /** Descarga la app MIVOR oficial y abre el instalador de Android (el cuidador pulsa "Instalar"). */
+    private fun installMivorApp() {
+        if (!MivorAppInstaller.canInstall(this)) {
             MaterialAlertDialogBuilder(this)
-                .setTitle("MIVOR Salud")
-                .setMessage("La aplicación MIVOR Salud todavía no está instalada en este teléfono.\n\n¿Quieres abrir la versión web?")
-                .setPositiveButton("Abrir MIVOR web") { _, _ ->
-                    launchExternalIntent(Intent(Intent.ACTION_VIEW, Uri.parse("https://vitalai.up.railway.app")))
+                .setTitle("Permitir instalar MIVOR Salud")
+                .setMessage("Android pide permiso una sola vez para que el kiosko pueda instalar la app MIVOR Salud.\n\n" +
+                    "Activa «Permitir de esta fuente», vuelve atrás y pulsa otra vez la tarjeta de MIVOR Salud.")
+                .setPositiveButton("Abrir ajustes") { _, _ ->
+                    launchExternalIntent(
+                        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))
+                    )
                 }
-                .setNegativeButton("Cerrar", null)
+                .setNegativeButton("Cancelar", null)
                 .show()
+            return
+        }
+        val progress = MaterialAlertDialogBuilder(this)
+            .setTitle("Instalando MIVOR Salud")
+            .setMessage("Descargando…")
+            .setCancelable(false)
+            .show()
+        MivorAppInstaller.download(this, onProgress = { percent ->
+            progress.setMessage(if (percent >= 0) "Descargando… $percent %" else "Descargando…")
+        }) { apk, error ->
+            progress.dismiss()
+            if (apk != null) {
+                launchExternalIntent(MivorAppInstaller.installIntent(this, apk))
+            } else {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("No se pudo instalar")
+                    .setMessage(error ?: "Inténtalo de nuevo más tarde.")
+                    .setPositiveButton("Cerrar", null)
+                    .show()
+            }
         }
     }
 
@@ -1511,16 +1553,22 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
         }
 
+        val tvCustomSub = findViewById<TextView>(R.id.tvCustomSub)
         if (appInfo == null) {
             ivCustomIcon.setImageResource(R.drawable.ic_music)
-            ImageViewCompat.setImageTintList(ivCustomIcon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_sand_ink)))
-            tvCustomTitle.text = "Radio y música"
+            ImageViewCompat.setImageTintList(ivCustomIcon, ColorStateList.valueOf(Color.WHITE))
+            ivCustomIcon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.c_gray))
+            tvCustomTitle.text = "Radio y\nmúsica"
+            tvCustomSub.text = "Tu emisora favorita"
             return
         }
 
+        // Icono de la app elegida sobre círculo blanco (sin teñir)
         ivCustomIcon.setImageDrawable(packageManager.getApplicationIcon(appInfo))
         ImageViewCompat.setImageTintList(ivCustomIcon, null)
+        ivCustomIcon.backgroundTintList = ColorStateList.valueOf(Color.WHITE)
         tvCustomTitle.text = packageManager.getApplicationLabel(appInfo)
+        tvCustomSub.text = "Toca para abrir"
     }
 
     // =========================================================================
@@ -1537,18 +1585,13 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         homePanel.visibility = View.GONE
     }
 
-    /** Caras de la familia: inicial del nombre (las fotos llegarán desde MIVOR). */
+    /** Subtítulo de "Llamar a mi familia": los nombres de los contactos que tienen número. */
     private fun refreshContacts() {
-        val cards = listOf(R.id.contact1, R.id.contact2, R.id.contact3)
-        val avatars = listOf(R.id.avatar1, R.id.avatar2, R.id.avatar3)
-        val names = listOf(R.id.name1, R.id.name2, R.id.name3)
-        config.contacts.forEachIndexed { i, contact ->
-            findViewById<TextView>(avatars[i]).text = contact.name.trim().take(1).uppercase(config.country.locale)
-            findViewById<TextView>(names[i]).text = contact.name
-            findViewById<View>(cards[i]).apply {
-                alpha = if (contact.isSet) 1f else 0.5f
-                contentDescription = if (contact.isSet) "Llamar a ${contact.name}" else "${contact.name}: sin número todavía"
-            }
+        val names = config.contacts.filter { it.isSet }.map { it.name }
+        findViewById<TextView>(R.id.tvFamilySub).text = when {
+            names.isEmpty() -> "Hijo, hija o cuidador"
+            names.size == 1 -> names[0]
+            else -> names.dropLast(1).joinToString(", ") + " o " + names.last()
         }
     }
 
@@ -1665,6 +1708,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
         card.visibility = View.VISIBLE
+        card.setCardBackgroundColor(Color.WHITE)
         due.visibility = View.GONE
         done.visibility = View.GONE
         calm.visibility = View.GONE
@@ -1672,6 +1716,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         when {
             taken != null -> {
                 done.visibility = View.VISIBLE
+                card.setCardBackgroundColor(ContextCompat.getColor(this, R.color.h_ok_soft))
                 card.strokeColor = ContextCompat.getColor(this, R.color.h_ok)
                 findViewById<TextView>(R.id.tvDoneTitle).text = if (name.isNotBlank()) "¡Hecho, $name!" else "¡Hecho!"
                 findViewById<TextView>(R.id.tvDoneSub).text = "${taken.name} · anotada a las $justTakenTime"
@@ -1683,7 +1728,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             data.due != null -> {
                 due.visibility = View.VISIBLE
-                card.strokeColor = ContextCompat.getColor(this, R.color.h_accent)
+                card.strokeColor = ContextCompat.getColor(this, R.color.c_blue)
                 findViewById<TextView>(R.id.tvMedName).text = data.due.label
                 findViewById<TextView>(R.id.tvMedDetail).text =
                     listOfNotNull(data.due.detail.takeIf { it.isNotBlank() }, data.due.time?.let { "a las $it" })
@@ -1691,17 +1736,15 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             else -> {
                 calm.visibility = View.VISIBLE
-                card.strokeColor = ContextCompat.getColor(this, R.color.h_border)
+                card.strokeColor = Color.WHITE
                 val icon = findViewById<ImageView>(R.id.ivMedCalm)
                 if (data.allDone) {
                     icon.setImageResource(R.drawable.ic_check)
-                    ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_ok)))
-                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_ok_soft))
+                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_ok))
                     findViewById<TextView>(R.id.tvMedCalm).text = "Hoy ya te has tomado todo. ¡Muy bien!"
                 } else {
                     icon.setImageResource(R.drawable.ic_pill)
-                    ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent)))
-                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent_soft))
+                    icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.c_blue))
                     val left = data.meds.count { !it.taken }
                     findViewById<TextView>(R.id.tvMedCalm).text = data.next?.let { "Próxima pastilla: ${it.name}, a las ${it.time}" }
                         ?: (if (left == 1) "Hoy te falta 1 pastilla." else "Hoy te faltan $left pastillas.") +
@@ -1844,7 +1887,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     /** Color de las franjas de las barras del sistema (el fondo de la raíz) y de sus iconos. */
     private fun setBarsColor(colorRes: Int, lightIcons: Boolean) {
         findViewById<ViewGroup>(android.R.id.content).getChildAt(0)
-            .setBackgroundColor(ContextCompat.getColor(this, colorRes))
+            .setBackgroundResource(colorRes)
         WindowCompat.getInsetsController(window, window.decorView).apply {
             isAppearanceLightStatusBars = !lightIcons
             isAppearanceLightNavigationBars = !lightIcons
@@ -1852,7 +1895,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     private fun closeReminder() {
-        if (reminderPanel.visibility == View.VISIBLE) setBarsColor(R.color.h_bg, lightIcons = false)
+        if (reminderPanel.visibility == View.VISIBLE) setBarsColor(R.drawable.bg_home, lightIcons = false)
         reminderPanel.visibility = View.GONE
         reminderMed = null
         if (openedByReminder) {

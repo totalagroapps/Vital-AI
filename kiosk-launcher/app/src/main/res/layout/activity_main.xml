@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pantalla de inicio v2 (maqueta "Kiosko MIVOR – Fase 1").
-     Tres paneles a pantalla completa, uno visible cada vez:
-       homePanel      hora, tiempo, cita próxima, "Ahora te toca", familia, voz, Más cosas y Necesito ayuda
-       morePanel      "Más cosas": seis fichas grandes y Volver al inicio
+<!-- Pantalla de inicio del kiosko con el estilo del diseño de referencia (fondo azul con ondas,
+     micrófono grande y tarjetas pastel con icono redondo) y las funciones de la fase 1:
+       homePanel      hora, tiempo, cita próxima, micrófono, MIVOR Salud, "Ahora te toca",
+                      familia, WhatsApp, Necesito ayuda y Más cosas
+       morePanel      "Más cosas": seis tarjetas y Volver al inicio
        reminderPanel  recordatorio hablado a la hora de una toma
-     "Necesito ayuda" queda siempre visible abajo; si el móvil es muy bajo, lo de encima se desplaza.
+     Cero scroll: los bloques reparten la altura con layout_weight.
      Los ajustes del cuidador se abren manteniendo pulsada la hora 5 segundos. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/h_bg"
+    android:background="@drawable/bg_home"
     tools:context=".MainActivity">
 
     <!-- ======================= INICIO ======================= -->
@@ -20,516 +21,699 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingHorizontal="@dimen/h_pad"
-        android:paddingTop="10dp"
-        android:paddingBottom="@dimen/h_pad">
+        android:paddingHorizontal="@dimen/home_pad_h"
+        android:paddingTop="6dp"
+        android:paddingBottom="8dp">
 
-        <ScrollView
+        <!-- Hora, fecha, saludo y tiempo -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="true"
-            android:overScrollMode="never"
-            android:scrollbars="none">
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="8dp">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="@dimen/h_gap">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <!-- Hora y tiempo -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tvClock"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="4dp">
-
-                    <TextView
-                        android:id="@+id/tvClock"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:includeFontPadding="false"
-                        android:textColor="@color/h_ink"
-                        android:textSize="@dimen/h_clock"
-                        android:textStyle="bold"
-                        tools:text="17:45" />
-
-                    <LinearLayout
-                        android:id="@+id/weatherChip"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_soft_round"
-                        android:backgroundTint="@color/h_sand"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="7dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <ImageView
-                            android:id="@+id/ivWeather"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_weather_sun"
-                            app:tint="@color/h_sand_ink" />
-
-                        <TextView
-                            android:id="@+id/tvWeather"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:textColor="@color/h_sand_ink"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            tools:text="18° Soleado" />
-                    </LinearLayout>
-                </LinearLayout>
+                    android:fontFamily="sans-serif-condensed"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/text_title"
+                    android:textSize="@dimen/k_clock"
+                    android:textStyle="bold"
+                    tools:text="11:08" />
 
                 <TextView
                     android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:paddingHorizontal="4dp"
-                    android:textColor="@color/h_ink"
-                    android:textSize="@dimen/h_date"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/text_title"
+                    android:textSize="@dimen/k_date"
                     android:textStyle="bold"
-                    tools:text="Martes, 1 de octubre" />
+                    tools:text="Jueves, 1 de octubre" />
 
                 <TextView
                     android:id="@+id/tvGreeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="4dp"
-                    android:textColor="@color/h_ink_sub"
-                    android:textSize="@dimen/h_greeting"
-                    tools:text="Buenas tardes, Rosa" />
+                    android:fontFamily="sans-serif-condensed-medium"
+                    android:textColor="@color/text_sub"
+                    android:textSize="@dimen/k_greeting"
+                    tools:text="Buenos días, Rosa" />
+            </LinearLayout>
 
-                <!-- Cita próxima (solo si hay una en los próximos días) -->
+            <LinearLayout
+                android:id="@+id/weatherChip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_soft_round"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/ivWeather"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_weather_sun"
+                    app:tint="@color/c_orange" />
+
+                <TextView
+                    android:id="@+id/tvWeather"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/text_title"
+                    android:textSize="@dimen/k_greeting"
+                    android:textStyle="bold"
+                    tools:text="18° Soleado" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Cita próxima (solo si hay una en las próximas 48 horas) -->
+        <LinearLayout
+            android:id="@+id/apptBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/home_card_margin"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_soft_round"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_calendar"
+                app:tint="@color/c_violet" />
+
+            <TextView
+                android:id="@+id/tvApptBanner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:textColor="@color/text_title"
+                android:textSize="@dimen/k_greeting"
+                tools:text="Mañana, 10:00 · Cita con la Dra. Ruiz" />
+        </LinearLayout>
+
+        <!-- ===== Micrófono (escala con la altura disponible) ===== -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="1.5">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_mic_halo_outer"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_mic_halo_inner"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.82"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <FrameLayout
+                android:id="@+id/btnTalk"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_mic_button"
+                android:clickable="true"
+                android:contentDescription="Toca para hablar con MIVOR"
+                android:elevation="10dp"
+                android:focusable="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.64"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:elevation="11dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_mic"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="W,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHeight_percent="0.3"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@android:color/white" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="sans-serif-condensed"
+            android:includeFontPadding="false"
+            android:text="Toca para hablar"
+            android:textColor="@color/text_title"
+            android:textSize="@dimen/mic_text"
+            android:textStyle="bold" />
+
+        <!-- Estado de la voz (lo que está diciendo o escuchando) -->
+        <TextView
+            android:id="@+id/tvVoiceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/text_sub"
+            android:textSize="13sp"
+            tools:text="Te escucho. Di «Hola MIVOR» o «Ayuda»" />
+
+        <!-- ===== Acceder a MIVOR Salud (la app en modo adulto mayor) ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardMivor"
+            style="@style/HomeWide"
+            android:layout_weight="1"
+            android:contentDescription="Acceder a MIVOR Salud"
+            app:cardBackgroundColor="@color/tile_blue">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/wide_pad"
+                android:paddingVertical="4dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="@dimen/mivor_logo"
+                    android:layout_height="@dimen/mivor_logo"
+                    android:background="@android:color/white"
+                    android:importantForAccessibility="no"
+                    android:padding="3dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/logo_mivor_real"
+                    app:shapeAppearanceOverlay="@style/ShapeCircle"
+                    app:strokeColor="@android:color/white"
+                    app:strokeWidth="3dp" />
+
                 <LinearLayout
-                    android:id="@+id/apptBanner"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/h_gap"
-                    android:background="@drawable/bg_soft_round"
-                    android:backgroundTint="@color/h_accent_soft"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="10dp"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                    android:layout_marginStart="@dimen/wide_text_gap"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_calendar"
-                        app:tint="@color/h_accent_dark" />
-
-                    <TextView
-                        android:id="@+id/tvApptBanner"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:textColor="@color/h_accent_dark"
-                        android:textSize="@dimen/h_body"
-                        tools:text="Mañana, 10:00 · Cita con la Dra. Ruiz" />
-                </LinearLayout>
-
-                <!-- Medicación: "Ahora te toca", "Hecho" o la próxima toma -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/medCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/h_gap"
-                    android:visibility="gone"
-                    app:cardBackgroundColor="@color/h_white"
-                    app:cardCornerRadius="24dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/h_accent"
-                    app:strokeWidth="3dp"
-                    tools:visibility="visible">
-
-                    <!-- Toca ahora -->
                     <LinearLayout
-                        android:id="@+id/medDue"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:orientation="horizontal">
 
-                        <LinearLayout
+                        <TextView
+                            style="@style/WideTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:text="MIVOR "
+                            android:textSize="@dimen/mivor_title_2" />
 
-                            <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_pill"
-                                app:tint="@color/h_accent" />
+                        <TextView
+                            style="@style/WideTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Salud"
+                            android:textColor="@color/salud_green"
+                            android:textSize="@dimen/mivor_title_2" />
+                    </LinearLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:letterSpacing="0.04"
-                                android:text="AHORA TE TOCA"
-                                android:textColor="@color/h_accent"
-                                android:textSize="17sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                    <TextView
+                        style="@style/WideSub"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Medicamentos, citas, juegos y tu asistente" />
+                </LinearLayout>
+
+                <ImageView
+                    style="@style/ChevronBig"
+                    android:backgroundTint="@color/chip_blue"
+                    app:tint="@color/c_blue" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===== Medicación: "Ahora te toca", "Hecho" o la próxima toma ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/medCard"
+            style="@style/HomeWide"
+            android:layout_weight="1.1"
+            android:visibility="gone"
+            app:cardBackgroundColor="@android:color/white"
+            app:strokeColor="@color/c_blue"
+            app:strokeWidth="2dp"
+            tools:visibility="visible">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/medDue"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/wide_pad"
+                    android:visibility="visible">
+
+                    <ImageView
+                        style="@style/IconCircleWide"
+                        android:backgroundTint="@color/c_blue"
+                        android:src="@drawable/ic_pill"
+                        app:tint="@android:color/white" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/tile_text_gap"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-condensed"
+                            android:includeFontPadding="false"
+                            android:text="AHORA TE TOCA"
+                            android:textColor="@color/c_blue"
+                            android:textSize="@dimen/tile_sub"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/tvMedName"
+                            style="@style/TileTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:textColor="@color/h_ink"
-                            android:textSize="@dimen/h_med_name"
-                            android:textStyle="bold"
-                            tools:text="Betaloc 50 mg" />
+                            android:layout_marginTop="2dp"
+                            android:textSize="@dimen/wide_title"
+                            tools:text="Betaloc 100 mg" />
 
                         <TextView
                             android:id="@+id/tvMedDetail"
+                            style="@style/WideSub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/h_ink_sub"
-                            android:textSize="@dimen/h_body"
-                            tools:text="Con el desayuno · 08:00" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnTaken"
-                            style="@style/HButton"
-                            android:layout_width="match_parent"
-                            android:layout_marginTop="12dp"
-                            android:text="Ya me la tomé"
-                            android:textColor="@color/h_white"
-                            app:backgroundTint="@color/h_accent"
-                            app:icon="@drawable/ic_check"
-                            app:iconTint="@color/h_white" />
+                            tools:text="2 veces al día · a las 08:00" />
                     </LinearLayout>
 
-                    <!-- Recién tomada -->
-                    <LinearLayout
-                        android:id="@+id/medDone"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTaken"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@color/h_ok_soft"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:visibility="gone">
+                        android:layout_marginStart="6dp"
+                        android:fontFamily="sans-serif-condensed"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minHeight="56dp"
+                        android:paddingHorizontal="12dp"
+                        android:text="Ya me&#10;la tomé"
+                        android:textAllCaps="false"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/tile_title"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/c_blue"
+                        app:cornerRadius="18dp"
+                        app:icon="@drawable/ic_check"
+                        app:iconSize="22dp"
+                        app:iconTint="@android:color/white" />
+                </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                <LinearLayout
+                    android:id="@+id/medDone"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/wide_pad"
+                    android:visibility="gone">
+
+                    <ImageView
+                        style="@style/IconCircleWide"
+                        android:backgroundTint="@color/h_ok"
+                        android:src="@drawable/ic_check"
+                        app:tint="@android:color/white" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/tile_text_gap"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvDoneTitle"
+                            style="@style/WideTitle"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:textColor="@color/h_ok_dark"
+                            tools:text="¡Hecho, Rosa!" />
 
-                            <ImageView
-                                android:layout_width="54dp"
-                                android:layout_height="54dp"
-                                android:background="@drawable/bg_circle"
-                                android:backgroundTint="@color/h_ok"
-                                android:importantForAccessibility="no"
-                                android:padding="12dp"
-                                android:src="@drawable/ic_check"
-                                app:tint="@color/h_white" />
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/tvDoneTitle"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textColor="@color/h_ok_dark"
-                                    android:textSize="@dimen/h_med_name"
-                                    android:textStyle="bold"
-                                    tools:text="¡Hecho, Rosa!" />
-
-                                <TextView
-                                    android:id="@+id/tvDoneSub"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textColor="@color/h_ok_text"
-                                    android:textSize="@dimen/h_greeting"
-                                    tools:text="Betaloc anotado a las 17:45" />
-                            </LinearLayout>
-                        </LinearLayout>
+                        <TextView
+                            android:id="@+id/tvDoneSub"
+                            style="@style/WideSub"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="Betaloc · anotada a las 08:05" />
 
                         <TextView
                             android:id="@+id/tvDoneNext"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:background="@drawable/bg_soft_round"
-                            android:padding="12dp"
-                            android:textColor="@color/h_ink"
-                            android:textSize="@dimen/h_body"
-                            android:textStyle="bold"
-                            tools:text="La siguiente: Sintrom, a las 21:00" />
-
-                        <TextView
-                            android:id="@+id/btnUndo"
+                            style="@style/WideSub"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:background="?attr/selectableItemBackground"
-                            android:gravity="center_vertical"
-                            android:minHeight="44dp"
-                            android:text="Me he equivocado, deshacer"
-                            android:textColor="@color/h_ok_text"
-                            android:textSize="17sp" />
-                    </LinearLayout>
-
-                    <!-- Sin toma ahora: la próxima, o "hoy ya está todo" -->
-                    <LinearLayout
-                        android:id="@+id/medCalm"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:padding="16dp"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:id="@+id/ivMedCalm"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/h_accent_soft"
-                            android:importantForAccessibility="no"
-                            android:padding="10dp"
-                            android:src="@drawable/ic_pill"
-                            app:tint="@color/h_accent" />
-
-                        <TextView
-                            android:id="@+id/tvMedCalm"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:textColor="@color/h_ink"
-                            android:textSize="@dimen/h_body"
+                            android:textColor="@color/text_title"
                             android:textStyle="bold"
-                            tools:text="Próxima pastilla: Sintrom, a las 21:00" />
+                            tools:text="La siguiente: Sintrom, a las 21:00" />
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Familia -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/h_gap"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="4dp">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/ic_call"
-                        app:tint="@color/h_ink" />
 
                     <TextView
+                        android:id="@+id/btnUndo"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="Llamar a mi familia"
-                        android:textColor="@color/h_ink"
-                        android:textSize="@dimen/h_body"
-                        android:textStyle="bold" />
+                        android:background="?attr/selectableItemBackground"
+                        android:fontFamily="sans-serif-condensed-medium"
+                        android:gravity="center"
+                        android:minWidth="64dp"
+                        android:minHeight="48dp"
+                        android:padding="6dp"
+                        android:text="Deshacer"
+                        android:textColor="@color/h_ok_dark"
+                        android:textSize="@dimen/tile_sub" />
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/medCalm"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="@dimen/wide_pad"
+                    android:visibility="gone">
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/contact1"
-                        style="@style/HContact"
-                        android:layout_marginEnd="5dp">
+                    <ImageView
+                        android:id="@+id/ivMedCalm"
+                        style="@style/IconCircleWide"
+                        android:backgroundTint="@color/c_blue"
+                        android:src="@drawable/ic_pill"
+                        app:tint="@android:color/white" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:orientation="vertical"
-                            android:paddingVertical="10dp">
+                    <TextView
+                        android:id="@+id/tvMedCalm"
+                        style="@style/TileTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/tile_text_gap"
+                        android:layout_weight="1"
+                        tools:text="Próxima pastilla: Sintrom, a las 21:00" />
 
-                            <TextView
-                                android:id="@+id/avatar1"
-                                style="@style/HAvatar"
-                                android:backgroundTint="@color/h_accent_pale"
-                                android:textColor="@color/h_accent_dark"
-                                tools:text="C" />
-
-                            <TextView
-                                android:id="@+id/name1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:paddingHorizontal="4dp"
-                                android:textColor="@color/h_ink"
-                                android:textSize="@dimen/h_contact_name"
-                                android:textStyle="bold"
-                                tools:text="Carlos" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/contact2"
-                        style="@style/HContact"
-                        android:layout_marginHorizontal="5dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:orientation="vertical"
-                            android:paddingVertical="10dp">
-
-                            <TextView
-                                android:id="@+id/avatar2"
-                                style="@style/HAvatar"
-                                android:backgroundTint="@color/h_peach"
-                                android:textColor="@color/h_peach_ink"
-                                tools:text="L" />
-
-                            <TextView
-                                android:id="@+id/name2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:paddingHorizontal="4dp"
-                                android:textColor="@color/h_ink"
-                                android:textSize="@dimen/h_contact_name"
-                                android:textStyle="bold"
-                                tools:text="Lucía" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/contact3"
-                        style="@style/HContact"
-                        android:layout_marginStart="5dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_horizontal"
-                            android:orientation="vertical"
-                            android:paddingVertical="10dp">
-
-                            <TextView
-                                android:id="@+id/avatar3"
-                                style="@style/HAvatar"
-                                android:backgroundTint="@color/h_mint"
-                                android:textColor="@color/h_ok_dark"
-                                tools:text="M" />
-
-                            <TextView
-                                android:id="@+id/name3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:ellipsize="end"
-                                android:maxLines="1"
-                                android:paddingHorizontal="4dp"
-                                android:textColor="@color/h_ink"
-                                android:textSize="@dimen/h_contact_name"
-                                android:textStyle="bold"
-                                tools:text="Marta" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
+                    <ImageView
+                        style="@style/ChevronBig"
+                        android:backgroundTint="@color/chip_blue"
+                        app:tint="@color/c_blue" />
                 </LinearLayout>
 
-                <!-- Voz y Más cosas (misma altura los dos) -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:baselineAligned="false"
-                    android:layout_marginTop="@dimen/h_gap"
-                    android:orientation="horizontal">
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnTalk"
-                        style="@style/HButton.Outlined"
-                        android:layout_width="0dp"
-                        android:layout_marginEnd="5dp"
-                        android:layout_weight="1"
-                        android:text="Hablar con MIVOR"
-                        android:textColor="@color/h_accent"
-                        app:icon="@drawable/ic_mic"
-                        app:iconTint="@color/h_accent"
-                        app:strokeColor="@color/h_accent" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnMore"
-                        style="@style/HButton.Outlined"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="5dp"
-                        android:layout_weight="1"
-                        android:text="Más cosas"
-                        android:textColor="@color/h_ink"
-                        app:icon="@drawable/ic_grid"
-                        app:iconTint="@color/h_ink"
-                        app:strokeColor="@color/h_ink" />
-                </LinearLayout>
-
-                <!-- Estado de la voz (lo que está diciendo o escuchando) -->
-                <TextView
-                    android:id="@+id/tvVoiceStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="2"
-                    android:textColor="@color/h_ink_sub"
-                    android:textSize="15sp"
-                    tools:text="Escuchando… Di «Hola MIVOR» o «Ayuda»" />
-            </LinearLayout>
-        </ScrollView>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSos"
-            style="@style/HButton"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/h_sos"
-            android:layout_marginTop="6dp"
-            android:text="Necesito ayuda"
-            android:textColor="@color/h_white"
-            android:textSize="@dimen/h_sos_text"
-            app:backgroundTint="@color/h_sos"
-            app:cornerRadius="24dp"
-            app:icon="@drawable/ic_alert"
-            app:iconSize="34dp"
-            app:iconTint="@color/h_white" />
+            android:layout_height="0dp"
+            android:layout_weight="1.25"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardFamily"
+                style="@style/HomeTile"
+                android:contentDescription="Llamar a mi familia"
+                app:cardBackgroundColor="@color/tile_blue">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_blue"
+                            android:src="@drawable/ic_call"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Llamar a&#10;mi familia" />
+
+                            <TextView
+                                android:id="@+id/tvFamilySub"
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Hijo, hija o cuidador" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_blue"
+                        app:tint="@color/c_blue" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWhatsapp"
+                style="@style/HomeTile"
+                android:contentDescription="Llamar por WhatsApp"
+                app:cardBackgroundColor="@color/tile_green">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_green"
+                            android:src="@drawable/ic_whatsapp"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Llamar&#10;por WhatsApp" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Contacta fácilmente por WhatsApp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_green"
+                        app:tint="@color/c_green" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.25"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnSos"
+                style="@style/HomeTile"
+                android:contentDescription="Necesito ayuda"
+                app:cardBackgroundColor="@color/tile_red">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_red"
+                            android:src="@drawable/ic_emergency_call"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Necesito&#10;ayuda" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Aviso a tu familia y a emergencias" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_red"
+                        app:tint="@color/c_red" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnMore"
+                style="@style/HomeTile"
+                android:contentDescription="Más cosas"
+                app:cardBackgroundColor="@color/tile_violet">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_violet"
+                            android:src="@drawable/ic_grid"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Más&#10;cosas" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fotos, citas, pastillas y más" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_violet"
+                        app:tint="@color/c_violet" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <!-- ======================= MÁS COSAS ======================= -->
@@ -537,207 +721,432 @@
         android:id="@+id/morePanel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/h_bg"
+        android:background="@drawable/bg_home"
         android:orientation="vertical"
-        android:padding="@dimen/h_pad"
+        android:paddingHorizontal="@dimen/home_pad_h"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="4dp">
+            android:paddingHorizontal="8dp">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:accessibilityHeading="true"
+                android:fontFamily="sans-serif-condensed"
                 android:text="Más cosas"
-                android:textColor="@color/h_ink"
-                android:textSize="30sp"
+                android:textColor="@color/text_title"
+                android:textSize="32sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvMoreClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/h_ink_sub"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/text_sub"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                tools:text="17:45" />
+                tools:text="11:08" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="@dimen/h_gap"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:baselineAligned="false"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tileVideo"
+                style="@style/HomeTile"
+                android:contentDescription="Videollamada"
+                app:cardBackgroundColor="@color/tile_green">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tileVideo"
-                    style="@style/HTile"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Videollamada"
-                    app:cardBackgroundColor="@color/h_mint">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView style="@style/HTileIcon" android:src="@drawable/ic_video" app:tint="@color/h_mint_ink" />
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_green"
+                            android:src="@drawable/ic_video"
+                            app:tint="@android:color/white" />
 
-                        <TextView style="@style/HTileText" android:text="Videollamada" android:textColor="@color/h_mint_ink" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Video-&#10;llamada" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Con tu familia por WhatsApp" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tilePhotos"
-                    style="@style/HTile"
-                    android:layout_marginStart="6dp"
-                    android:contentDescription="Mis fotos"
-                    app:cardBackgroundColor="@color/h_peach">
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_green"
+                        app:tint="@color/c_green" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tilePhotos"
+                style="@style/HomeTile"
+                android:contentDescription="Mis fotos"
+                app:cardBackgroundColor="@color/tile_orange">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView style="@style/HTileIcon" android:src="@drawable/ic_photo" app:tint="@color/h_peach_ink" />
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_orange"
+                            android:src="@drawable/ic_gallery"
+                            app:tint="@android:color/white" />
 
-                        <TextView style="@style/HTileText" android:text="Mis fotos" android:textColor="@color/h_peach_ink" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mis&#10;fotos" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fotos de la familia" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="12dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_orange"
+                        app:tint="@color/c_orange" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tileDocPhoto"
-                    style="@style/HTile"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Foto a un papel"
-                    app:cardBackgroundColor="@color/h_accent_soft">
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tileDocPhoto"
+                style="@style/HomeTile"
+                android:contentDescription="Foto a un papel"
+                app:cardBackgroundColor="@color/tile_purple">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView style="@style/HTileIcon" android:src="@drawable/ic_doc_camera" app:tint="@color/h_accent_dark" />
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_purple"
+                            android:src="@drawable/ic_camera"
+                            app:tint="@android:color/white" />
 
-                        <TextView style="@style/HTileText" android:text="Foto a un papel" android:textColor="@color/h_accent_dark" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Foto a&#10;un papel" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Análisis, recetas o informes" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tileAppointments"
-                    style="@style/HTile"
-                    android:layout_marginStart="6dp"
-                    android:contentDescription="Mis citas"
-                    app:cardBackgroundColor="@color/h_lilac">
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_purple"
+                        app:tint="@color/c_purple" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tileAppointments"
+                style="@style/HomeTile"
+                android:contentDescription="Mis citas"
+                app:cardBackgroundColor="@color/tile_violet">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView style="@style/HTileIcon" android:src="@drawable/ic_calendar" app:tint="@color/h_lilac_ink" />
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_violet"
+                            android:src="@drawable/ic_calendar"
+                            app:tint="@android:color/white" />
 
-                        <TextView style="@style/HTileText" android:text="Mis citas" android:textColor="@color/h_lilac_ink" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mis&#10;citas" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Próximas citas médicas" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="12dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_violet"
+                        app:tint="@color/c_violet" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tileMeds"
-                    style="@style/HTile"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Mis pastillas de hoy"
-                    app:cardBackgroundColor="@color/h_white"
-                    app:strokeColor="@color/h_border"
-                    app:strokeWidth="2dp">
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tileMeds"
+                style="@style/HomeTile"
+                android:contentDescription="Mis pastillas de hoy"
+                app:cardBackgroundColor="@color/tile_blue">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView style="@style/HTileIcon" android:src="@drawable/ic_pill" app:tint="@color/h_ink" />
+                        <ImageView
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_blue"
+                            android:src="@drawable/ic_pill"
+                            app:tint="@android:color/white" />
 
-                        <TextView style="@style/HTileText" android:text="Mis pastillas de hoy" android:textColor="@color/h_ink" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Mis pastillas&#10;de hoy" />
+
+                            <TextView
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Lo tomado y lo que falta" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
-                <!-- App que elige el cuidador (por defecto, para radio o música). Pulsación larga: cambiarla -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/tileCustom"
-                    style="@style/HTile"
-                    android:layout_marginStart="6dp"
-                    app:cardBackgroundColor="@color/h_sand">
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/chip_blue"
+                        app:tint="@color/c_blue" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/tileCustom"
+                style="@style/HomeTile"
+                android:contentDescription="Radio y música"
+                app:cardBackgroundColor="@color/tile_gray">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingStart="@dimen/tile_pad"
+                    android:paddingTop="@dimen/tile_pad"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="@dimen/tile_pad">
 
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <ImageView
                             android:id="@+id/ivCustomIcon"
-                            style="@style/HTileIcon"
+                            style="@style/IconCircle"
+                            android:backgroundTint="@color/c_gray"
                             android:src="@drawable/ic_music"
-                            app:tint="@color/h_sand_ink" />
+                            app:tint="@android:color/white" />
 
-                        <TextView
-                            android:id="@+id/tvCustomTitle"
-                            style="@style/HTileText"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            android:paddingHorizontal="6dp"
-                            android:text="Radio y música"
-                            android:textColor="@color/h_sand_ink" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/tile_text_gap"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvCustomTitle"
+                                style="@style/TileTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Radio y&#10;música" />
+
+                            <TextView
+                                android:id="@+id/tvCustomSub"
+                                style="@style/TileSub"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tu emisora favorita" />
+                        </LinearLayout>
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
+
+                    <ImageView
+                        style="@style/Chevron"
+                        android:backgroundTint="@color/circle_gray"
+                        app:tint="@color/c_gray" />
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/btnBackHome"
-            style="@style/HButton"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/h_sos"
-            android:layout_marginTop="@dimen/h_gap"
-            android:text="Volver al inicio"
-            android:textColor="@color/h_white"
-            app:backgroundTint="@color/h_ink"
-            app:icon="@drawable/ic_arrow_back"
-            app:iconTint="@color/h_white" />
+            style="@style/HomeWide"
+            android:layout_weight="0.55"
+            android:contentDescription="Volver al inicio"
+            app:cardBackgroundColor="@color/text_title">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@android:color/white" />
+
+                <TextView
+                    style="@style/WideTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="Volver al inicio"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 
     <!-- ======================= RECORDATORIO ======================= -->

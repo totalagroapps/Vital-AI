@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Download, Sparkles, X, ShieldCheck, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { App as CapApp } from '@capacitor/app';
 
-export const CURRENT_APP_VERSION = '1.0.6';
+export const CURRENT_APP_VERSION = '1.0.7';
 // La versión se consulta primero en la API configurada (VITE_API_URL) y, como respaldo, en version.json
 export const FALLBACK_APK_URL = 'https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk';
 

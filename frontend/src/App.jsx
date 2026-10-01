@@ -10,6 +10,7 @@ import LanguageSelector from './components/LanguageSelector';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import PatientHome from './views/PatientHome';
+import SeniorHome from './views/SeniorHome';
 import PatientTreatments from './views/PatientTreatments';
 import PatientMore from './views/PatientMore';
 import ProfileSelector, { profileDisplayName } from './views/ProfileSelector';
@@ -110,6 +111,17 @@ export default function App() {
   const [profileManageMode, setProfileManageMode] = useState(false);
   // Tomas de medicación vencidas de los familiares que administra esta cuenta (Modo Cuidador)
   const [medicationAlerts, setMedicationAlerts] = useState([]);
+  // Modo adulto mayor: lo activa el kiosko al abrir MIVOR con mivor://mayor (en la web, con ?modo=mayor)
+  const [seniorMode, setSeniorMode] = useState(() => {
+    try {
+      if (new URLSearchParams(window.location.search).get('modo') === 'mayor') localStorage.setItem('mivor_senior_mode', '1');
+      return localStorage.getItem('mivor_senior_mode') === '1';
+    } catch { return false; }
+  });
+  const exitSeniorMode = () => {
+    try { localStorage.removeItem('mivor_senior_mode'); } catch { /* sin almacenamiento */ }
+    setSeniorMode(false);
+  };
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
   useEffect(() => {
     if (tokenAvailableSync) return;
@@ -188,6 +200,26 @@ export default function App() {
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Enlace mivor://mayor desde el kiosko: abrir en modo adulto mayor (en frío y con la app ya abierta)
+  useEffect(() => {
+    let linkHandle = null;
+    const enterSenior = (url) => {
+      if (!url || !String(url).toLowerCase().startsWith('mivor://mayor')) return;
+      try { localStorage.setItem('mivor_senior_mode', '1'); } catch { /* sin almacenamiento */ }
+      setSeniorMode(true);
+      navigate('/paciente');
+    };
+    (async () => {
+      try {
+        enterSenior((await CapApp.getLaunchUrl())?.url);
+        linkHandle = await CapApp.addListener('appUrlOpen', ({ url }) => enterSenior(url));
+      } catch {
+        // Navegador web: no hay enlaces de app
+      }
+    })();
+    return () => { if (linkHandle?.remove) linkHandle.remove(); };
   }, []);
 
   // Native Android hardware back button handler via Capacitor
@@ -1613,6 +1645,21 @@ export default function App() {
           username={username}
         />
         {GlobalBottomNav}
+      </>
+    );
+  }
+
+  if (path === '/paciente' && seniorMode) {
+    return (
+      <>
+        <SeniorHome
+          onNavigate={handleNavigate}
+          userProfile={patientProfile}
+          onExitSeniorMode={exitSeniorMode}
+          apiUrl={API_URL}
+          authHeaders={authHeaders}
+        />
+        <UpdateModal t={t} apiUrl={API_URL} />
       </>
     );
   }

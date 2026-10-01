@@ -100,7 +100,7 @@ DEFAULT_APK_URL = "https://github.com/totalagroapps/Vital-AI/releases/download/l
 @app.get('/api/version')
 async def get_version():
     apk_url = os.getenv("APP_APK_URL", DEFAULT_APK_URL)
-    version = os.getenv("APP_LATEST_VERSION", "1.0.6")
+    version = os.getenv("APP_LATEST_VERSION", "1.0.7")
     # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
     sha256 = os.getenv("APP_APK_SHA256") or None
     if apk_url == DEFAULT_APK_URL:
@@ -114,7 +114,7 @@ async def get_version():
     return {
         "version": version,
         "apkUrl": apk_url,
-        "notes": os.getenv("APP_UPDATE_NOTES", "La pantalla de inicio vuelve a mostrar el banner de medicina preventiva sin desplazarse."),
+        "notes": os.getenv("APP_UPDATE_NOTES", "Nuevo modo adulto mayor: el kiosko MIVOR abre la app con una pantalla sencilla y tarjetas grandes."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1"),
         "sha256": sha256
     }

@@ -15,4 +15,7 @@
     <dimen name="h_sos">86dp</dimen>
     <dimen name="h_sos_text">28sp</dimen>
     <dimen name="h_tile_icon">52dp</dimen>
+    <dimen name="k_clock">50sp</dimen>
+    <dimen name="k_date">19sp</dimen>
+    <dimen name="k_greeting">17sp</dimen>
 </resources>

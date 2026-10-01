@@ -1,6 +1,6 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "La pantalla de inicio vuelve a mostrar el banner de medicina preventiva sin desplazarse.",
+  "notes": "Nuevo modo adulto mayor: el kiosko MIVOR abre la app con una pantalla sencilla y tarjetas grandes.",
   "forceUpdate": false
 }
