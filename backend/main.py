@@ -98,15 +98,25 @@ DEFAULT_APK_URL = "https://github.com/totalagroapps/Vital-AI/releases/download/l
 
 
 @app.get('/api/version')
-def get_version():
+async def get_version():
+    apk_url = os.getenv("APP_APK_URL", DEFAULT_APK_URL)
+    version = os.getenv("APP_LATEST_VERSION", "1.0.6")
+    # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
+    sha256 = os.getenv("APP_APK_SHA256") or None
+    if apk_url == DEFAULT_APK_URL:
+        # Se anuncia la versión del APK ya subido a la release "latest", no la del código recién
+        # desplegado: si no, la app descarga el APK anterior y sigue pidiendo actualizar.
+        from services.published_apk import get_published_apk
+        published = await get_published_apk()
+        if published:
+            version = published["version"]
+            sha256 = sha256 or published["sha256"]
     return {
-        "version": os.getenv("APP_LATEST_VERSION", "1.0.6"),
-        "apkUrl": os.getenv("APP_APK_URL", DEFAULT_APK_URL),
+        "version": version,
+        "apkUrl": apk_url,
         "notes": os.getenv("APP_UPDATE_NOTES", "La pantalla de inicio vuelve a mostrar el banner de medicina preventiva sin desplazarse."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1"),
-        # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
-        # Solo tiene sentido con una URL fija por versión (no con el tag "latest", que cambia en cada build).
-        "sha256": os.getenv("APP_APK_SHA256") or None
+        "sha256": sha256
     }
 
 

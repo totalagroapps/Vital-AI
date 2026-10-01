@@ -123,6 +123,11 @@ jobs:
           cd frontend/public/download
           sha256sum mivor-latest.apk | awk '{print $1}' > mivor-latest.apk.sha256
           echo "SHA-256: $(cat mivor-latest.apk.sha256)"
+          # Manifiesto que lee /api/version: la versión solo se anuncia cuando este APK ya está subido
+          VERSION_NAME=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging mivor-latest.apk | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+          if [ -z "$VERSION_NAME" ]; then echo "::error::No se pudo leer la versión del APK"; exit 1; fi
+          printf '{"version": "%s", "sha256": "%s"}\n' "$VERSION_NAME" "$(cat mivor-latest.apk.sha256)" > mivor-latest.json
+          cat mivor-latest.json
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v7
@@ -145,6 +150,18 @@ jobs:
           files: |
             frontend/public/download/mivor-latest.apk
             frontend/public/download/mivor-latest.apk.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # En un paso aparte para que el manifiesto se suba solo cuando el APK ya está completo
+      - name: Publish Version Manifest
+        uses: softprops/action-gh-release@v3
+        if: steps.signing.outputs.available == 'true' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+        with:
+          tag_name: latest
+          name: "MIVOR.ai Latest Build"
+          body: "Descarga directa de la última versión compilada automáticamente de MIVOR.ai para Android (firmada con la clave de release)."
+          files: frontend/public/download/mivor-latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
