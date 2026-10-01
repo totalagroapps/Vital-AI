@@ -3,6 +3,7 @@ Resumen del día para la pantalla de inicio del kiosko: la toma que toca ahora, 
 la lista de hoy y las próximas citas. Mismas reglas que las órdenes de voz: una toma por
 medicamento y día, con la primera hora del horario.
 """
+import re
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
@@ -13,6 +14,30 @@ from sqlalchemy.orm import selectinload
 import models
 from services.active_medications import format_reminder
 from services.medication_alerts import now_local, parse_times
+
+# Abreviaturas de posología en lenguaje claro (mismas reglas que frontend/src/utils/doseText.js).
+# Orden: las más largas primero para que "qid" no se lea como "qd".
+_DOSE_ABBREVIATIONS = [
+    ('qhs', 'al acostarse'), ('qod', 'en días alternos'), ('qid', '4 veces al día'), ('qds', '4 veces al día'),
+    ('tid', '3 veces al día'), ('tds', '3 veces al día'), ('bid', '2 veces al día'), ('bd', '2 veces al día'),
+    ('qam', 'por la mañana'), ('qpm', 'por la tarde-noche'), ('qd', '1 vez al día'), ('prn', 'si lo necesita'),
+    ('ac', 'antes de las comidas'), ('pc', 'después de las comidas'),
+]
+# q8h, c/8h, cada 12 hs -> "cada 8 horas". "OD" y "hs" sueltos no se tocan (ojo derecho / horas).
+_EVERY_HOURS = re.compile(r'(^|[^\w])(?:q|c/|cada)\s*(\d{1,2})\s*(?:horas?|hrs|hr|hs|h)\.?(?![^\W\d_])', re.IGNORECASE)
+
+
+def plain_frequency(text: Optional[str]) -> str:
+    """"BID" -> "2 veces al día": el kiosko lo lee en voz alta a personas mayores."""
+    out = (text or '').strip()
+    if not out:
+        return ''
+    out = _EVERY_HOURS.sub(lambda m: f'{m.group(1)}cada {m.group(2)} horas', out)
+    for letters, plain in _DOSE_ABBREVIATIONS:
+        dotted = ''.join(rf'{c}\.?' for c in letters)
+        out = re.sub(rf'(^|[^\w]){dotted}(?![^\W\d_])', lambda m: m.group(1) + plain, out, flags=re.IGNORECASE)
+    return out
+
 
 # Minutos de antelación con los que una toma ya se muestra como "Ahora te toca" (igual que la voz)
 DUE_AHEAD_MINUTES = 60
@@ -27,6 +52,14 @@ def _first_time(med: models.MedicationReminder):
 
 def _minutes(t) -> int:
     return t[0] * 60 + t[1]
+
+
+def _greeting_name(patient_name: Optional[str]) -> str:
+    """Nombre de pila para saludar. Si solo hay nombre de usuario ("cristianlv11", un correo), ninguno."""
+    first = (patient_name or '').strip().split(' ')[0]
+    if not first or '@' in first or any(ch.isdigit() for ch in first):
+        return ''
+    return first
 
 
 async def active_medications(db: AsyncSession, patient_id: str) -> List[models.MedicationReminder]:
@@ -54,7 +87,7 @@ async def device_today(db: AsyncSession, patient_id: str, patient_name: str, now
             'id': med.id,
             'name': med.medication_name,
             'label': format_reminder(med.medication_name, med.dosage),
-            'detail': (med.frequency or '').strip(),
+            'detail': plain_frequency(med.frequency),
             'time': f'{t[0]:02d}:{t[1]:02d}' if t else None,
             'taken': med.id in taken_at,
             'taken_time': taken_at.get(med.id),
@@ -71,7 +104,7 @@ async def device_today(db: AsyncSession, patient_id: str, patient_name: str, now
 
     return {
         'patient_name': patient_name,
-        'first_name': (patient_name or '').split(' ')[0],
+        'first_name': _greeting_name(patient_name),
         'server_time': now.strftime('%H:%M'),
         'has_meds': bool(items),
         'all_done': bool(items) and not pending,

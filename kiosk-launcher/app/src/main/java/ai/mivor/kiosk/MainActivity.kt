@@ -342,6 +342,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         findViewById<View>(R.id.btnTaken).setOnClickListener { today?.due?.let { markTaken(it) } }
         findViewById<View>(R.id.btnUndo).setOnClickListener { undoTaken() }
         findViewById<View>(R.id.apptBanner).setOnClickListener { showAppointments() }
+        findViewById<View>(R.id.medCalm).setOnClickListener { showTodayMeds() }
         findViewById<View>(R.id.btnReminderTaken).setOnClickListener { reminderMed?.let { markTaken(it) } }
         findViewById<View>(R.id.btnReminderSnooze).setOnClickListener { snoozeReminder() }
 
@@ -943,6 +944,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                         is MivorApi.Result.Ok -> {
                             config.linkToMivor(result.value.token, result.value.patientName)
                             dialog.dismiss()
+                            refreshToday(force = true)
                             val who = result.value.patientName.ifBlank { "tu cuenta" }
                             Toast.makeText(this, "Vinculada con $who", Toast.LENGTH_LONG).show()
                             speak("Listo. Ya puedes decirme cuando te tomes las pastillas.")
@@ -1555,8 +1557,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
     }
 
+    /** Nombre para saludar. MIVOR ya descarta los nombres de usuario ("cristianlv11"); sin datos, lo mismo aquí. */
     private fun firstName(): String =
-        today?.firstName?.takeIf { it.isNotBlank() } ?: config.linkedPatientName.trim().substringBefore(' ')
+        today?.firstName ?: config.linkedPatientName.trim().substringBefore(' ')
+            .takeIf { name -> '@' !in name && name.none { it.isDigit() } }.orEmpty()
 
     private fun nowMinute(): Int = Calendar.getInstance().let { it.get(Calendar.HOUR_OF_DAY) * 60 + it.get(Calendar.MINUTE) }
 
@@ -1703,8 +1707,10 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                     icon.setImageResource(R.drawable.ic_pill)
                     ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent)))
                     icon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.h_accent_soft))
+                    val left = data.meds.count { !it.taken }
                     findViewById<TextView>(R.id.tvMedCalm).text = data.next?.let { "Próxima pastilla: ${it.name}, a las ${it.time}" }
-                        ?: "Tienes pastillas sin hora fija. Mira «Mis pastillas de hoy»."
+                        ?: (if (left == 1) "Hoy te falta 1 pastilla." else "Hoy te faltan $left pastillas.") +
+                        " Toca aquí para verlas."
                 }
             }
         }
@@ -1902,7 +1908,7 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             return
         }
         val lines = meds.map { m ->
-            val whenText = m.time?.let { "a las $it" } ?: "sin hora fija"
+            val whenText = m.time?.let { "a las $it" } ?: m.detail.ifBlank { "sin hora fija" }
             if (m.taken) "${m.label} · tomada${m.takenTime?.let { " a las $it" } ?: ""}"
             else "${m.label} · $whenText · falta"
         }

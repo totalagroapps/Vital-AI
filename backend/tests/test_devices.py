@@ -239,3 +239,25 @@ async def test_today_lists_upcoming_appointments_only(meds):
     assert [a["doctor"] for a in out] == ["Dra. Ruiz", "Dra. Ruiz"]
     assert [a["video"] for a in out] == [False, True]
     assert datetime.fromisoformat(out[0]["starts_at"]).tzinfo is not None
+
+
+def test_plain_frequency_for_the_kiosk():
+    from services.device_today import plain_frequency
+
+    assert plain_frequency("BID") == "2 veces al día"
+    assert plain_frequency("b.i.d.") == "2 veces al día"
+    assert plain_frequency("QID") == "4 veces al día"  # no se confunde con QD
+    assert plain_frequency("q8h") == "cada 8 horas"
+    assert plain_frequency("1 comprimido PRN") == "1 comprimido si lo necesita"
+    assert plain_frequency("OD") == "OD"  # ojo derecho: no se toca
+    assert plain_frequency("con el desayuno") == "con el desayuno"
+    assert plain_frequency(None) == ""
+
+
+def test_greeting_name_skips_usernames():
+    from services.device_today import _greeting_name
+
+    assert _greeting_name("Henry López") == "Henry"
+    assert _greeting_name("cristianlv11") == ""
+    assert _greeting_name("papa@test.com") == ""
+    assert _greeting_name("") == ""
