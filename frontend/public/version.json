@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.3",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Nueva versión con diseño optimizado 100dvh para móvil (sin scroll) y adecuación regulatoria.",
+  "notes": "Corrige la conexión con el servidor en la app Android y activa los recordatorios de medicación por notificación.",
   "forceUpdate": false
 }

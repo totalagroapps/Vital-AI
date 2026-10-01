@@ -10,6 +10,7 @@ import Step2Professional from './doctor/components/Step2Professional';
 import Step3Professional from './doctor/components/Step3Professional';
 import Step4OptionalProfile from './doctor/components/Step4Professional';
 import Step5Success from './doctor/components/Step5Success';
+import { API_URL } from '../utils/apiUrl';
 
 const parseBirthDate = (str) => {
   if (!str) return null;
@@ -115,7 +116,7 @@ export default function DoctorCreate({ apiUrl, onNavigateLogin, onRegisterSucces
     };
 
     try {
-      const baseApi = apiUrl || import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const baseApi = apiUrl || API_URL;
       const cleanApi = baseApi.replace(/\/$/, '');
       const registerUrl = cleanApi.endsWith('/api')
         ? `${cleanApi}/doctor-profile/register`

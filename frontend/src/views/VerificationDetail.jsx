@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken } from '../utils/authStorage';
+import { API_URL } from '../utils/apiUrl';
 import {
   ChevronRight,
   ExternalLink,
@@ -48,7 +49,7 @@ export default function DoctorVerificationDetail({ apiUrl, authHeaders, onBack, 
   const [auditNotes, setAuditNotes] = useState('');
   const [toast, setToast] = useState(null);
 
-  const effectiveApiUrl = apiUrl || import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' ? window.location.origin : 'https://vitalai.up.railway.app');
+  const effectiveApiUrl = apiUrl || API_URL;
   const cleanApiUrl = effectiveApiUrl.replace(/\/$/, '');
   const baseApi = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;
 

@@ -40,6 +40,9 @@ jobs:
 
       - name: Install Frontend Dependencies & Build Web
         working-directory: frontend
+        env:
+          # La app Android se sirve desde https://localhost: sin esto no sabría dónde está la API
+          VITE_API_URL: https://med-ai-hub-v2-production.up.railway.app
         run: |
           npm install
           npm run build
