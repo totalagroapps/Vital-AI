@@ -165,7 +165,8 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
         </header>
 
         {/* Contenedor Principal Móvil: Ajustado a la pantalla sin scroll vertical (Exacto al diseño) */}
-        <main className="flex-1 min-h-0 flex flex-col justify-between px-3 sm:px-4 py-1 sm:py-1.5 gap-1.5 sm:gap-2 overflow-hidden mobile-main">
+        {/* Si no cabe todo (móviles bajos, barras del sistema), esta zona se desplaza en vez de aplastar las tarjetas */}
+        <main className="flex-1 min-h-0 flex flex-col justify-between px-3 sm:px-4 py-1 sm:py-1.5 gap-1.5 sm:gap-2 overflow-y-auto overscroll-contain mobile-main">
           
           {/* 2. Sección Hero Móvil */}
           <section 
@@ -283,12 +284,12 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           </div>
 
           {/* 5. Cuadrícula 2x2 de Servicios (Exacta al diseño) */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 flex-1 min-h-0 items-stretch mobile-grid">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 flex-1 shrink-0 items-stretch mobile-grid">
             
             {/* Tarjeta 1: Entiende tus pruebas médicas */}
             <div 
               onClick={() => onNavigate('documents')}
-              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edf6ff] hover:bg-[#e2f0fe] border border-[#d0e5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group mobile-card"
             >
               <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -302,7 +303,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+              <div className="flex-1 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                  {t('patienthome_entiende_tus')}<br />{t('patienthome_pruebas_medicas')}
                 </h3>
@@ -315,7 +316,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 2: Organiza tu historial de salud */}
             <div 
               onClick={() => onNavigate('history')}
-              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#edfbf5] hover:bg-[#dcf7ed] border border-[#c4f0de] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group mobile-card"
             >
               <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -329,7 +330,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+              <div className="flex-1 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                  {t('patienthome_organiza_tu')}<br />{t('patienthome_historial_de_salud')}
                 </h3>
@@ -342,7 +343,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 3: Descubre avances médicos */}
             <div 
               onClick={() => onNavigate('search')}
-              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#fff8f2] hover:bg-[#feeee2] border border-[#fedec8] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group mobile-card"
             >
               <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -356,7 +357,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+              <div className="flex-1 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                  {t('patienthome_descubre_avances')}<br />{t('patienthome_medicos')}
                 </h3>
@@ -369,7 +370,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
             {/* Tarjeta 4: Encuentra tu médico */}
             <div 
               onClick={() => onNavigate('doctors')}
-              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group min-h-0 mobile-card"
+              className="bg-[#f8f3ff] hover:bg-[#f1e5fe] border border-[#e8d5fc] rounded-2xl p-2 sm:p-2.5 flex flex-col justify-between shadow-2xs active:scale-[0.98] transition-all cursor-pointer group mobile-card"
             >
               <div className="flex items-center justify-between shrink-0 mb-1 sm:mb-1.5">
                 <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0 mobile-card-icon shadow-2xs">
@@ -383,7 +384,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
                   <ArrowRight size={13} className="stroke-[2.8]" />
                 </div>
               </div>
-              <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+              <div className="flex-1 flex flex-col justify-center gap-1">
                 <h3 className="text-[16px] sm:text-[17.5px] font-black text-black leading-[1.12] tracking-tight">
                  {t('patienthome_encuentra_tu')}<br />{t('patienthome_medico')}
                 </h3>
