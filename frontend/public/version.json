@@ -1,6 +1,6 @@
 {
-  "version": "1.0.5",
+  "version": "1.0.6",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "La pantalla de inicio vuelve a caber entera sin desplazarse en todos los móviles.",
+  "notes": "La pantalla de inicio vuelve a mostrar el banner de medicina preventiva sin desplazarse.",
   "forceUpdate": false
 }

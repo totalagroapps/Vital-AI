@@ -420,7 +420,8 @@
 /* RESPONSIVE MOBILE ZERO-SCROLL FOR COMPACT & BUDGET DEVICES */
 @media (max-height: 800px) {
   .mivor-mobile-home {
-    padding-bottom: 56px !important;
+    /* Alto real de la barra inferior (Inicio / Pregunta a MIVOR…): con menos, tapaba el último bloque */
+    padding-bottom: 68px !important;
   }
   .mivor-mobile-home .mobile-main {
     padding-top: 2px !important;
@@ -470,7 +471,7 @@
 
 @media (max-height: 740px) {
   .mivor-mobile-home {
-    padding-bottom: 54px !important;
+    padding-bottom: 68px !important; /* alto real de la barra inferior */
   }
   .mivor-mobile-home .mobile-main {
     padding-top: 2px !important;
@@ -528,7 +529,7 @@
 
 @media (max-height: 670px) {
   .mivor-mobile-home {
-    padding-bottom: 52px !important;
+    padding-bottom: 68px !important; /* alto real de la barra inferior */
   }
   .mivor-mobile-home .mobile-main {
     padding-top: 1px !important;
@@ -616,8 +617,22 @@
     overflow: hidden !important;
   }
 }
+.mivor-mobile-home .mobile-visual-pill {
+  display: none;
+}
 @media (max-height: 860px) {
-  /* 2) El banner grande de prevención pasa a ser un botón junto a "Mente Activa" */
+  /* 2) Para que quepa el banner de prevención: el Análisis Visual pasa a ser un botón junto a
+     "Mente Activa" y se oculta la línea de ayuda bajo el buscador (repite lo que dice este) */
+  .mivor-mobile-home .mobile-visual-card,
+  .mivor-mobile-home .mobile-helper-line {
+    display: none !important;
+  }
+  .mivor-mobile-home .mobile-visual-pill {
+    display: flex;
+  }
+}
+@media (max-height: 680px) {
+  /* 3) Móviles muy bajos: el banner de prevención también pasa a ser un botón */
   .mivor-mobile-home .mobile-preventive-promo {
     display: none !important;
   }

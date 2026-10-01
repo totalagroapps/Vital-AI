@@ -111,7 +111,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
   return (
     <>
       {/* ================= VISTA MÓVIL (ZERO-SCROLL 100DVH EN CUALQUIER TELÉFONO) ================= */}
-      <div className="block lg:hidden w-full h-[100dvh] max-h-[100dvh] bg-white font-sans text-black flex flex-col justify-between overflow-hidden select-none pb-[58px] sm:pb-[62px] mivor-mobile-home">
+      <div className="block lg:hidden w-full h-[100dvh] max-h-[100dvh] bg-white font-sans text-black flex flex-col justify-between overflow-hidden select-none pb-[68px] mivor-mobile-home">
         
         {/* 1. Barra Superior Móvil: Logo + Idioma + Campana + Perfil (Compacta y Exacta) */}
         <header className="w-full px-3.5 py-1.5 sm:py-2 flex items-center justify-between border-b border-slate-100 bg-white shrink-0 mobile-header">
@@ -265,7 +265,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               </button>
             </div>
             {/* Chispita y subtítulo elegante */}
-            <div className="flex items-center justify-center gap-1.5 mt-1 text-[#0055ff] text-[10.5px] sm:text-[11.5px] font-semibold">
+            <div className="flex items-center justify-center gap-1.5 mt-1 text-[#0055ff] text-[10.5px] sm:text-[11.5px] font-semibold mobile-helper-line">
               <Sparkles size={12} className="stroke-[2.4]" />
               <span>{t('patienthome_resuelve_tus_dudas_sobre_salud')}</span>
             </div>
@@ -282,7 +282,16 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
               <Brain size={13} className="text-violet-600 stroke-[2.6]" />
               <span>{t('patienthome_mente_activa')}</span>
             </button>
-            {/* En móviles bajos sustituye al banner grande de prevención (política zero-scroll) */}
+            {/* En móviles bajos sustituye a la tarjeta de Análisis Visual (política zero-scroll) */}
+            <button
+              type="button"
+              onClick={() => setShowSymptomCameraModal(true)}
+              className="flex-1 py-1.5 px-2.5 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200/90 rounded-xl text-[11px] font-extrabold text-indigo-800 items-center justify-center gap-1.5 shadow-2xs active:scale-95 cursor-pointer mobile-visual-pill"
+            >
+              <Camera size={13} className="text-indigo-600 stroke-[2.6]" />
+              <span>{t('symptomcamera_titulo')}</span>
+            </button>
+            {/* En móviles muy bajos sustituye al banner grande de prevención (política zero-scroll) */}
             <button
               type="button"
               onClick={() => setShowPreventiveCalendarModal(true)}
@@ -409,7 +418,7 @@ const PatientHome = ({ onNavigate, onLogout, userProfile, username, onAddAttachm
           {/* Análisis Visual */}
           <div 
             onClick={() => setShowSymptomCameraModal(true)}
-            className="w-full rounded-2xl border border-indigo-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner bg-white"
+            className="w-full rounded-2xl border border-indigo-200 overflow-hidden shadow-2xs active:scale-[0.99] transition-all cursor-pointer shrink-0 mobile-preventive-banner mobile-visual-card bg-white"
           >
             <div className="flex p-4 items-center justify-between">
               <div>
