@@ -1,0 +1,121 @@
+name: Build Kiosk APK
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - 'kiosk-launcher/**'
+      - '.github/workflows/build-kiosk-apk.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-kiosk:
+    name: Build MIVOR Kiosk APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Accept Android SDK Licenses & Install Platform 36
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+
+      - name: Make Gradlew Executable
+        working-directory: kiosk-launcher
+        run: chmod +x gradlew
+
+      # ------------------------------------------------------------------
+      # Misma clave fija que la app MIVOR (secrets KEYSTORE_BASE64, KEYSTORE_PASSWORD,
+      # KEY_ALIAS, KEY_PASSWORD). Sin ellos no se publica: un kiosko firmado con otra
+      # clave no podría actualizarse encima del instalado.
+      # ------------------------------------------------------------------
+      - name: Prepare Release Signing
+        id: signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "KIOSK_VERSION_CODE=$((GITHUB_RUN_NUMBER + 10))" >> "$GITHUB_ENV"
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/mivor-release.jks"
+            echo "MIVOR_KEYSTORE_FILE=$RUNNER_TEMP/mivor-release.jks" >> "$GITHUB_ENV"
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Faltan los secrets de firma (KEYSTORE_BASE64...)."
+            exit 1
+          fi
+
+      - name: Build Kiosk APK (Release, firmado)
+        working-directory: kiosk-launcher
+        env:
+          MIVOR_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          MIVOR_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          MIVOR_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew clean assembleRelease --stacktrace --no-daemon
+
+      - name: Verify APK Signature
+        env:
+          EXPECTED_CERT_SHA256: ${{ vars.MIVOR_CERT_SHA256 }}
+        run: |
+          APK=kiosk-launcher/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs "$APK" | tee signer.txt
+          ACTUAL=$(grep -m1 "certificate SHA-256 digest" signer.txt | awk '{print $NF}')
+          if [ -n "$EXPECTED_CERT_SHA256" ]; then
+            EXPECTED=$(echo "$EXPECTED_CERT_SHA256" | tr -d ': ' | tr 'A-F' 'a-f')
+            if [ "$ACTUAL" != "$EXPECTED" ]; then
+              echo "::error::El APK está firmado con $ACTUAL y se esperaba $EXPECTED. No se publica."
+              exit 1
+            fi
+          fi
+
+      - name: Prepare Kiosk APK
+        run: |
+          mkdir -p out
+          cp kiosk-launcher/app/build/outputs/apk/release/app-release.apk out/mivor-kiosk.apk
+          cd out
+          sha256sum mivor-kiosk.apk | awk '{print $1}' > mivor-kiosk.apk.sha256
+          VERSION_NAME=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging mivor-kiosk.apk | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+          printf '{"version": "%s", "sha256": "%s"}\n' "$VERSION_NAME" "$(cat mivor-kiosk.apk.sha256)" > mivor-kiosk.json
+          cat mivor-kiosk.json
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: MIVOR-Kiosk-APK
+          path: out/
+          retention-days: 30
+
+      - name: Publish to GitHub Releases (kiosk-latest)
+        uses: softprops/action-gh-release@v3
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+        with:
+          tag_name: kiosk-latest
+          name: "MIVOR Kiosko - última versión"
+          body: "Kiosko MIVOR para el móvil de la persona mayor (firmado con la clave de release). Instalar: descargar mivor-kiosk.apk en el móvil y abrirlo."
+          draft: false
+          prerelease: false
+          files: |
+            out/mivor-kiosk.apk
+            out/mivor-kiosk.apk.sha256
+            out/mivor-kiosk.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove Keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mivor-release.jks"

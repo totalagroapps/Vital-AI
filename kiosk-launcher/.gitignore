@@ -8,3 +8,9 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# Claves de firma: nunca al repositorio (la de release vive en los secrets de GitHub)
+*.jks
+*.keystore
+keystore.properties
+keystore_base64.txt
