@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
 from services.health_readings import InvalidReading, add_reading, parse_voice_reading, spoken_value
-from services.medication_alerts import now_local, parse_times
+from services.medication_alerts import now_for, parse_times
 
 # "ya me tomé", "me la tomé", "ya tomé", "me he tomado", "ya las tomé"
 _TAKEN_RE = re.compile(r"\b(tome|tomado)\b")
@@ -60,7 +60,7 @@ def _join(items: List[str]) -> str:
 
 
 async def handle_voice_command(db: AsyncSession, patient_id: str, text: str, now: Optional[datetime] = None) -> dict:
-    now = now or now_local()
+    now = await now_for(db, patient_id, now)
     cmd = normalize(text)
     today = now.strftime('%Y-%m-%d')
 

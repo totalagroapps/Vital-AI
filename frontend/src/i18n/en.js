@@ -2537,4 +2537,7 @@ export const en = {
   doctordashboard_hr_source_kiosk: "Kiosk",
   doctordashboard_hr_source_voice: "Kiosk (voice)",
   doctordashboard_hr_note: "Home readings entered by the patient or family. Guide thresholds: BP ≥140/90 high, ≥180/120 very high; glucose <70 low, >180 high.",
+  tz_title: "Patient's time zone",
+  tz_auto: "Automatic (now: {zone})",
+  tz_help: "Doses and reminders use the time where the patient lives. It is detected from their phone and kiosk; pick one only if it is wrong.",
 };

@@ -309,6 +309,7 @@ async def get_medication_alerts(
     Tomas de medicación vencidas y sin registrar de los familiares que administra el usuario
     (CaregiverPatientLink). Usa la identidad real, aunque esté viendo el perfil de un familiar.
     """
+    # Un mismo instante para todos; pending_medications lo pasa a la zona horaria de cada familiar
     now = now_local()
     links = (await db.execute(
         select(models.CaregiverPatientLink).where(models.CaregiverPatientLink.caregiver_id == user_id)

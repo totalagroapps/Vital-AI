@@ -133,6 +133,10 @@ class PatientProfile(Base):
     medical_notes = Column(String, nullable=True)
     insurance_provider = Column(String, nullable=True)
     preferred_language = Column(String, default="es")
+    # Zona horaria IANA del paciente ("Europe/Madrid"). La envían su móvil y su kiosko; si el
+    # cuidador la fija a mano (timezone_manual), las detecciones automáticas no la cambian.
+    timezone = Column(String(64), nullable=True)
+    timezone_manual = Column(Boolean, nullable=True, default=False)
     medical_documents = relationship("MedicalDocument", back_populates="patient")
     health_events = relationship("HealthEvent", back_populates="patient", cascade="all, delete-orphan")
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

@@ -695,6 +695,20 @@ export default function App() {
     }
   }, [token, profileSelected, targetPatientId]);
 
+  // Zona horaria del móvil: las tomas de las 08:00 son a las 08:00 donde vive el paciente.
+  // Sin X-Target-Patient-Id: solo cuenta para el propio usuario (el móvil de un cuidador está en otra casa).
+  useEffect(() => {
+    if (!token) return;
+    let zone = '';
+    try { zone = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { /* navegador antiguo */ }
+    if (!zone) return;
+    fetch(`${API_URL}/api/patient/timezone`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ timezone: zone, source: 'auto' }),
+    }).catch(() => { /* sin conexión: se reintenta en el próximo arranque */ });
+  }, [token]);
+
   // Avisos de medicación para el cuidador: al entrar, al cambiar de perfil y cada 5 minutos
   useEffect(() => {
     if (!token || !profileSelected) return undefined;

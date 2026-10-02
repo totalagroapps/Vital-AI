@@ -1,6 +1,6 @@
 {
-  "version": "1.0.10",
+  "version": "1.0.11",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Nuevo: Mis controles de salud (tensión, glucosa y peso), también por voz en el kiosko.",
+  "notes": "Las tomas y recordatorios usan la hora de donde vive cada paciente.",
   "forceUpdate": false
 }

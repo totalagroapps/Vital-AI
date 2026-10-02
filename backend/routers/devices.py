@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import models
 from database import get_db
 from security import get_authenticated_user_id, get_current_user_id
-from services.medication_alerts import now_local, parse_times
+from services.medication_alerts import is_valid_zone, now_for, parse_times
 from services.device_today import device_today, set_taken
 from services.health_readings import InvalidReading, add_reading, list_readings
 from services.push_service import send_push_notification
@@ -152,6 +152,7 @@ async def pair_device(payload: PairRequest, request: Request, db: AsyncSession =
 
 async def get_device_link(
     x_device_token: Optional[str] = Header(default=None),
+    x_timezone: Optional[str] = Header(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> models.DeviceLink:
     if not x_device_token:
@@ -162,6 +163,13 @@ async def get_device_link(
     if not link or link.revoked:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Dispositivo no vinculado o desvinculado.')
     link.last_seen_at = datetime.now(timezone.utc)
+    # El kiosko está en casa del paciente: su zona horaria es la del paciente (salvo que el cuidador la fijara)
+    if is_valid_zone(x_timezone):
+        profile = (await db.execute(
+            select(models.PatientProfile).where(models.PatientProfile.user_id == link.patient_id)
+        )).scalars().first()
+        if profile and not profile.timezone_manual and profile.timezone != x_timezone:
+            profile.timezone = x_timezone
     await db.commit()
     return link
 
@@ -173,7 +181,7 @@ async def device_me(link: models.DeviceLink = Depends(get_device_link), db: Asyn
 
 @router.get('/api/device/medications')
 async def device_medications(link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
-    today = now_local().strftime('%Y-%m-%d')
+    today = (await now_for(db, link.patient_id)).strftime('%Y-%m-%d')
     meds = (await db.execute(
         select(models.MedicationReminder)
         .where(models.MedicationReminder.user_id == link.patient_id, models.MedicationReminder.is_active == True)  # noqa: E712

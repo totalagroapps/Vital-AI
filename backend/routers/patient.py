@@ -429,3 +429,62 @@ async def get_patient_history(
         })
     return response
 
+
+
+# ---------------------------------------------------------------------------
+# Zona horaria del paciente (las tomas de las 08:00 son a las 08:00 donde vive)
+# ---------------------------------------------------------------------------
+from pydantic import BaseModel as _BaseModel
+from security import get_authenticated_user_id
+from services.medication_alerts import APP_TIMEZONE, is_valid_zone
+
+
+class TimezoneUpdate(_BaseModel):
+    timezone: str
+    # 'auto': la detecta el móvil del propio paciente; 'manual': la fija el cuidador ('auto' como
+    # zona en modo manual vuelve a la detección automática)
+    source: str = 'auto'
+
+
+async def _profile_of(db: AsyncSession, user_id: str) -> Optional[models.PatientProfile]:
+    return (await db.execute(select(models.PatientProfile).where(models.PatientProfile.user_id == user_id))).scalars().first()
+
+
+@router.get('/api/patient/timezone')
+async def get_patient_timezone(db: AsyncSession = Depends(get_db), patient_id: str = Depends(get_current_user_id)):
+    profile = await _profile_of(db, patient_id)
+    zone = profile.timezone if profile else None
+    return {'timezone': zone, 'manual': bool(profile and profile.timezone_manual), 'effective': zone or APP_TIMEZONE}
+
+
+@router.post('/api/patient/timezone')
+async def set_patient_timezone(
+    payload: TimezoneUpdate,
+    db: AsyncSession = Depends(get_db),
+    patient_id: str = Depends(get_current_user_id),
+    real_user_id: str = Depends(get_authenticated_user_id),
+):
+    if payload.source == 'auto':
+        # Solo el móvil del propio paciente: el de un cuidador que ve el perfil de su padre está en otra casa
+        profile = await _profile_of(db, real_user_id)
+        if not profile or not is_valid_zone(payload.timezone):
+            return {'status': 'ignored'}
+        if not profile.timezone_manual and profile.timezone != payload.timezone:
+            profile.timezone = payload.timezone
+            await db.commit()
+        return {'status': 'ok', 'timezone': profile.timezone, 'manual': bool(profile.timezone_manual)}
+
+    if payload.source != 'manual':
+        raise HTTPException(status_code=400, detail='Origen no válido.')
+    profile = await _profile_of(db, patient_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail='Perfil no encontrado.')
+    if payload.timezone == 'auto':
+        profile.timezone_manual = False
+    elif is_valid_zone(payload.timezone):
+        profile.timezone = payload.timezone
+        profile.timezone_manual = True
+    else:
+        raise HTTPException(status_code=400, detail='Zona horaria no válida.')
+    await db.commit()
+    return {'status': 'ok', 'timezone': profile.timezone, 'manual': bool(profile.timezone_manual)}

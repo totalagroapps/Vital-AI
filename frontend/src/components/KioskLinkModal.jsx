@@ -2,6 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Tablet, Loader2, CheckCircle2, Trash2, KeyRound } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
+// Zonas habituales de los pacientes (el resto se detecta igualmente del móvil o del kiosko)
+const TIMEZONES = [
+  ['America/Bogota', 'Colombia'], ['America/Mexico_City', 'México (centro)'], ['America/Lima', 'Perú'],
+  ['America/Guayaquil', 'Ecuador'], ['America/Caracas', 'Venezuela'], ['America/Santiago', 'Chile'],
+  ['America/Argentina/Buenos_Aires', 'Argentina'], ['America/New_York', 'EE. UU. (este)'],
+  ['America/Los_Angeles', 'EE. UU. (oeste)'], ['Europe/Madrid', 'España (península)'], ['Atlantic/Canary', 'España (Canarias)'],
+  ['Europe/Paris', 'Francia'], ['Africa/Casablanca', 'Marruecos'], ['Africa/Algiers', 'Argelia'], ['Africa/Tunis', 'Túnez'],
+];
+const zoneLabel = (value) => TIMEZONES.find(([v]) => v === value)?.[1] || value || '';
+
 // Vincular el kiosko MIVOR (móvil o tablet) con esta cuenta (o con la del familiar que se administra:
 // authHeaders lleva X-Target-Patient-Id). El kiosko canjea el código por su propia llave.
 export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders }) {
@@ -11,6 +21,7 @@ export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders })
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [loading, setLoading] = useState(false);
   const [justLinked, setJustLinked] = useState(false);
+  const [zone, setZone] = useState(null);
   const knownIds = useRef(new Set());
 
   const loadDevices = useCallback(async () => {
@@ -25,12 +36,32 @@ export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders })
     }
   }, [apiUrl, authHeaders]);
 
+  const loadZone = useCallback(async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/patient/timezone`, { headers: authHeaders });
+      if (res.ok) setZone(await res.json());
+    } catch { /* sin conexión */ }
+  }, [apiUrl, authHeaders]);
+
   useEffect(() => {
     if (!isOpen) return;
     setCode(null);
     setJustLinked(false);
     loadDevices().then((list) => { knownIds.current = new Set(list.map((d) => d.id)); });
-  }, [isOpen, loadDevices]);
+    loadZone();
+  }, [isOpen, loadDevices, loadZone]);
+
+  // El cuidador fija la zona horaria del paciente ('auto' = la del móvil y el kiosko del paciente)
+  const changeZone = async (value) => {
+    try {
+      const res = await fetch(`${apiUrl}/api/patient/timezone`, {
+        method: 'POST',
+        headers: { ...authHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timezone: value, source: 'manual' }),
+      });
+      if (res.ok) loadZone();
+    } catch { /* sin conexión */ }
+  };
 
   // Mientras el código es válido: cuenta atrás y comprobar si el kiosko ya se vinculó
   useEffect(() => {
@@ -128,6 +159,24 @@ export default function KioskLinkModal({ isOpen, onClose, apiUrl, authHeaders })
               {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <KeyRound className="w-5 h-5" />}
               {t('kiosk_link_generate')}
             </button>
+          )}
+
+          {zone && (
+            <div>
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">{t('tz_title')}</h3>
+              <select
+                value={zone.manual ? zone.timezone : 'auto'}
+                onChange={(e) => changeZone(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800"
+              >
+                <option value="auto">{t('tz_auto', { zone: zoneLabel(zone.effective) })}</option>
+                {TIMEZONES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                {zone.manual && !TIMEZONES.some(([v]) => v === zone.timezone) && (
+                  <option value={zone.timezone}>{zone.timezone}</option>
+                )}
+              </select>
+              <p className="text-[11px] text-slate-500 mt-1.5">{t('tz_help')}</p>
+            </div>
           )}
 
           <div>

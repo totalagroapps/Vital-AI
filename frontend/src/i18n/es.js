@@ -2530,4 +2530,7 @@ export const es = {
   doctordashboard_hr_source_kiosk: "Kiosko",
   doctordashboard_hr_source_voice: "Kiosko (voz)",
   doctordashboard_hr_note: "Registros domiciliarios introducidos por el paciente o su familia. Umbrales orientativos: PA ≥140/90 elevada, ≥180/120 muy elevada; glucemia <70 baja, >180 elevada.",
+  tz_title: "Zona horaria del paciente",
+  tz_auto: "Automática (ahora: {zone})",
+  tz_help: "Las tomas y los recordatorios usan la hora de donde vive el paciente. Se detecta sola desde su móvil y su kiosko; elige una solo si no es correcta.",
 };

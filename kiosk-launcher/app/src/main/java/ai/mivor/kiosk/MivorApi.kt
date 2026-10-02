@@ -94,6 +94,8 @@ object MivorApi {
             conn.readTimeout = TIMEOUT_MS
             conn.setRequestProperty("Accept", "application/json")
             token?.let { conn.setRequestProperty("X-Device-Token", it) }
+            // Zona horaria del móvil: MIVOR calcula las tomas en la hora de donde vive el paciente
+            conn.setRequestProperty("X-Timezone", java.util.TimeZone.getDefault().id)
             if (body != null) {
                 conn.doOutput = true
                 conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")

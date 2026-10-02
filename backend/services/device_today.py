@@ -13,7 +13,7 @@ from sqlalchemy.orm import selectinload
 
 import models
 from services.active_medications import format_reminder
-from services.medication_alerts import now_local, parse_times
+from services.medication_alerts import now_for, parse_times
 
 # Abreviaturas de posología en lenguaje claro (mismas reglas que frontend/src/utils/doseText.js).
 # Orden: las más largas primero para que "qid" no se lea como "qd".
@@ -71,7 +71,7 @@ async def active_medications(db: AsyncSession, patient_id: str) -> List[models.M
 
 
 async def device_today(db: AsyncSession, patient_id: str, patient_name: str, now: Optional[datetime] = None) -> dict:
-    now = now or now_local()
+    now = await now_for(db, patient_id, now)
     today = now.strftime('%Y-%m-%d')
     meds = await active_medications(db, patient_id)
     logs = (await db.execute(
@@ -145,7 +145,7 @@ async def upcoming_appointments(db: AsyncSession, patient_id: str) -> List[dict]
 
 async def set_taken(db: AsyncSession, patient_id: str, medication_id: int, taken: bool, now: Optional[datetime] = None) -> bool:
     """Marca o desmarca la toma de hoy. False si el medicamento no es de este paciente."""
-    now = now or now_local()
+    now = await now_for(db, patient_id, now)
     today = now.strftime('%Y-%m-%d')
     med = (await db.execute(
         select(models.MedicationReminder)

@@ -38,6 +38,43 @@ def now_local() -> datetime:
     return datetime.now(app_tz())
 
 
+def zone_or_default(name: Optional[str]) -> ZoneInfo:
+    """Zona IANA válida ("Europe/Madrid") o la de la app si falta o no existe."""
+    if name:
+        try:
+            return ZoneInfo(name)
+        except Exception:
+            pass
+    return app_tz()
+
+
+def is_valid_zone(name: Optional[str]) -> bool:
+    if not name or len(name) > 64:
+        return False
+    try:
+        ZoneInfo(name)
+        return True
+    except Exception:
+        return False
+
+
+async def patient_tz(db: AsyncSession, patient_id: str) -> ZoneInfo:
+    """Zona horaria del paciente (la de su móvil o la que fijó el cuidador); por defecto la de la app."""
+    name = (await db.execute(
+        select(models.PatientProfile.timezone).where(models.PatientProfile.user_id == patient_id)
+    )).scalars().first()
+    return zone_or_default(name)
+
+
+async def now_for(db: AsyncSession, patient_id: str, now: Optional[datetime] = None) -> datetime:
+    """La hora "de reloj" del paciente: la toma de las 08:00 es a las 08:00 donde él vive."""
+    # now_local() es el único reloj (los tests lo congelan); se pasa a la zona del paciente
+    base = now or now_local()
+    if base.tzinfo is None:
+        base = base.replace(tzinfo=app_tz())
+    return base.astimezone(await patient_tz(db, patient_id))
+
+
 def parse_times(time_of_day: Optional[str]) -> List[Tuple[int, int]]:
     """Horas (h, m) que aparecen en el texto libre del horario, ordenadas."""
     times = set()
@@ -61,7 +98,7 @@ async def pending_medications(db: AsyncSession, patient_id: str, now: Optional[d
     Tomas vencidas y sin registrar hoy para un paciente.
     Solo se registra una toma por medicamento y día, así que se usa la primera hora del horario.
     """
-    now = now or now_local()
+    now = await now_for(db, patient_id, now)
     today = now.strftime("%Y-%m-%d")
 
     reminders = (await db.execute(
