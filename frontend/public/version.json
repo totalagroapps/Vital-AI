@@ -1,6 +1,6 @@
 {
-  "version": "1.0.7",
+  "version": "1.0.8",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Nuevo modo adulto mayor: el kiosko MIVOR abre la app con una pantalla sencilla y tarjetas grandes.",
+  "notes": "Modo adulto mayor: el saludo ya no queda tapado y el botón atrás vuelve al kiosko.",
   "forceUpdate": false
 }

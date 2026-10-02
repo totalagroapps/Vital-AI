@@ -229,6 +229,13 @@ export default function App() {
       try {
         backHandle = await CapApp.addListener('backButton', ({ canGoBack }) => {
           const currentPath = window.location.pathname;
+          // Modo adulto mayor: atrás desde su inicio vuelve al kiosko en vez de recorrer el historial
+          let senior = false;
+          try { senior = localStorage.getItem('mivor_senior_mode') === '1'; } catch { /* sin almacenamiento */ }
+          if (senior && currentPath === '/paciente') {
+            CapApp.exitApp();
+            return;
+          }
           if (currentPath !== '/' && currentPath !== '/paciente') {
             window.history.back();
           } else if (canGoBack) {
@@ -1840,7 +1847,8 @@ export default function App() {
 
   return (
     <FamilyProfileContext.Provider value={familyProfileValue}>
-      {token && profileSelected && activeProfile && (
+      {/* En modo adulto mayor (el móvil del kiosko) no se muestra: tapaba el saludo y no le sirve a la persona mayor */}
+      {token && profileSelected && activeProfile && !seniorMode && (
         <CaregiverBanner name={activeProfile.name} relationship={activeProfile.relationship} onSwitchProfile={() => handleSwitchProfile()} />
       )}
       {renderRoute()}
