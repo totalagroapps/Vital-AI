@@ -50,6 +50,12 @@ class PatientProfileSchema(BaseModel):
     preferred_language: Optional[str] = 'es'
 
 
+
+class DoctorSupportRequest(BaseModel):
+    messages: List[ChatMessage]
+    language: Optional[str] = 'es'
+
+
 class DoctorQueryRequest(BaseModel):
     query: str
     patient_id: str

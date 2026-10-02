@@ -1,6 +1,7 @@
+import DoctorSupportModal from '../components/DoctorSupportModal';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Users, Calendar, Sparkles, BookOpen, Search, Mic, ArrowRight, 
+  Users, Calendar, Sparkles, BookOpen, Search, Bot, Mic, ArrowRight, 
   Bell, ChevronDown, LogOut, ShieldCheck, Paperclip, Heart, FileText 
 } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -8,6 +9,7 @@ import LanguageSelector from '../components/LanguageSelector';
 
 const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculators, onOpenConsensus, onOpenScribe, onOpenPreventiveCalendar }) => {
   const { t, language, locale } = useLanguage();
+    const [showSupport, setShowSupport] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -140,6 +142,11 @@ const DoctorHomeDesktop = ({ onNavigate, onLogout, doctorProfile, onOpenCalculat
 
         {/* Right Controls */}
         <div className="flex items-center gap-4">
+        <button onClick={() => setShowSupport(true)} className="flex items-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-xl hover:bg-purple-100 transition-colors font-semibold text-sm">
+          <Bot size={18} />
+          Soporte IA
+        </button>
+
           <LanguageSelector />
           
           <div className="relative">

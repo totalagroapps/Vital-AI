@@ -609,3 +609,40 @@ async def get_specialists(specialty: str=None, city: str=None, db: AsyncSession=
     return output
 
 
+
+
+@router.post('/api/doctor/support_chat')
+async def ask_doctor_support(
+    request: schemas.requests.DoctorSupportRequest,
+    current_user: models.User = Depends(security.require_role(['doctor', 'admin']))
+):
+    from openai import AsyncOpenAI
+    from fastapi.responses import StreamingResponse
+    import os
+    
+    openai_client = AsyncOpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    
+    SYSTEM_PROMPT = """Eres el Asistente Experto de Soporte Técnico y Uso de MIVOR.ai exclusivo para Profesionales Sanitarios.
+Tu objetivo es ayudar a los médicos a entender cómo usar la plataforma, dónde están las funciones y cómo integrarlas en su flujo clínico.
+MIVOR.ai tiene: Scribe Médico (generación de SOAP por voz), Prescripciones automáticas, Kiosko Nativo Android para adultos mayores (App separada que funciona de pantalla de inicio con control de voz, avisos de pastillas y signos vitales), Triaje Inteligente de Pacientes, y Copiloto Clínico de Pacientes (permite hacer preguntas cruzando historial, analíticas y radiografías).
+Responde de forma concisa, profesional y yendo directo a la solución de interfaz."""
+
+    messages_payload = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+    for msg in request.messages:
+        messages_payload.append({'role': msg.role, 'content': msg.content})
+
+    async def event_stream():
+        try:
+            response_stream = await openai_client.chat.completions.create(
+                model='gpt-4o-mini',
+                messages=messages_payload,
+                stream=True
+            )
+            async for chunk in response_stream:
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+        except Exception as e:
+            yield f'\n\n[Error de conexión: {str(e)}]'
+
+    return StreamingResponse(event_stream(), media_type='text/plain')
+

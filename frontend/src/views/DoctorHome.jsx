@@ -1,5 +1,6 @@
+import DoctorSupportModal from '../components/DoctorSupportModal';
 import React, { useState, useRef } from 'react';
-import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Mic, Video, ClipboardList, ArrowRight, ShieldCheck, Paperclip, Heart, FileText } from 'lucide-react';
+import { Bell, Users, Calendar, Sparkles, BookOpen, FlaskConical, Search, Bot, Mic, Video, ClipboardList, ArrowRight, ShieldCheck, Paperclip, Heart, FileText } from 'lucide-react';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -12,6 +13,7 @@ import PreventiveCalendarModal from './PreventiveCalendarModal';
 
 const DoctorHome = ({ onNavigate, onLogout, doctorProfile, apiUrl, authHeaders }) => {
   const { t, language, locale } = useLanguage();
+    const [showSupport, setShowSupport] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
   
