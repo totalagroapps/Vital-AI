@@ -1322,6 +1322,11 @@ export default function App() {
   if (!authReady) return null;
 
   const renderRoute = () => {
+
+  if (path === '/cuidador') {
+    if (!token) return <Navigate to="/login" />;
+    return <CaregiverDashboard apiUrl={API_URL} onNavigateHome={() => navigate('/paciente')} />;
+  }
   if (path === '/' || path === '') {
     if (!token) return <Navigate to="/login" />;
     return <Navigate to={viewMode === 'doctor' ? '/medico' : '/paciente'} />;
@@ -1468,6 +1473,7 @@ export default function App() {
       navigate('/paciente/tratamientos');
     }
     if (tab === 'more') navigate('/paciente/mas');
+      if (tab === '/cuidador') navigate('/cuidador');
     if (tab === 'general_chat') {
       startNewSession();
       navigate('/paciente/chat');

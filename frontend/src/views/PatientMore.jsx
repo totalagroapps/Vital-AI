@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { 
+import { HeartHandshake, 
   FileText, Activity, Users, Apple, AlertCircle, 
   Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw, Tablet, HeartPulse
 } from 'lucide-react';
