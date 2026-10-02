@@ -1323,6 +1323,12 @@ export default function App() {
 
   const renderRoute = () => {
 
+  if (path === '/paciente/nutricion') {
+    if (!token) return <Navigate to="/login" />;
+    return <NutritionDashboard apiUrl={API_URL} onNavigateHome={() => navigate('/paciente')} />;
+  }
+
+
   if (path === '/cuidador') {
     if (!token) return <Navigate to="/login" />;
     return <CaregiverDashboard apiUrl={API_URL} onNavigateHome={() => navigate('/paciente')} />;
@@ -1474,6 +1480,7 @@ export default function App() {
     }
     if (tab === 'more') navigate('/paciente/mas');
       if (tab === '/cuidador') navigate('/cuidador');
+      if (tab === '/paciente/nutricion') navigate('/paciente/nutricion');
     if (tab === 'general_chat') {
       startNewSession();
       navigate('/paciente/chat');
