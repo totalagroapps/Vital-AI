@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import database
 import models
 import security
+import schemas.requests
 from services.language_service import language_directive, language_label
 from database import get_db
 from security import get_current_user, require_role, get_current_user_id

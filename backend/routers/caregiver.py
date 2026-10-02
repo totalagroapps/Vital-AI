@@ -16,9 +16,9 @@ async def get_patient_timeline(
     db: AsyncSession = Depends(database.get_db),
     current_user: models.User = Depends(security.get_current_user)
 ):
-    \"\"\"
+    """
     Devuelve un timeline cronológico de los eventos del paciente (Triajes, Pastillas, Signos Vitales).
-    \"\"\"
+    """
     # 1. Verificar acceso: ¿el perfil pertenece al usuario o es cuidador?
     profile_res = await db.execute(
         select(models.PatientProfile)
