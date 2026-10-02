@@ -148,3 +148,18 @@ async def test_access_to_third_party_data_is_audited(db, world, caplog):
         "patient_data_access granted=True actor=doc-1 role=doctor patient=pat-1",
         "patient_data_access granted=False actor=doc-2 role=doctor patient=pat-1",
     ]
+
+
+@pytest.mark.asyncio
+async def test_doctor_sees_patient_health_readings(client, db):
+    from services.health_readings import add_reading
+    await add_reading(db, "pat-1", "blood_pressure", 150, 95)
+    await add_reading(db, "pat-1", "weight", 70, None)
+    await add_reading(db, "pat-4", "glucose", 100, None)  # otro paciente: no debe aparecer
+
+    res = await client.get("/api/doctor/patients/pat-1", headers=auth("doc-1"))
+    assert res.status_code == 200
+    hr = res.json()["health_readings"]
+    assert set(hr["latest"]) == {"blood_pressure", "weight"}
+    assert hr["latest"]["blood_pressure"]["display"] == "150/95 mmHg"
+    assert hr["latest"]["blood_pressure"]["level"] == "high"

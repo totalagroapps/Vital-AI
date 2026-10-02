@@ -860,9 +860,11 @@ class MainActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         speak("No te entendí. Puedes decir: llamar a ${contacts[0].name}, WhatsApp, qué hora es, o ayuda.")
     }
 
+    /** Tomas de medicación y controles de salud ("tengo la tensión 130 85"): los resuelve MIVOR. */
     private fun isMedicationCommand(cmd: String) =
         containsAnyWord(cmd, "tome", "tomado", "pastilla", "pastillas", "medicamento", "medicamentos",
-            "remedio", "remedios", "medicina", "medicinas") || cmd.contains("me toca")
+            "remedio", "remedios", "medicina", "medicinas",
+            "tension", "presion", "glucosa", "azucar", "glucemia", "peso", "pese", "kilos") || cmd.contains("me toca")
 
     /** Envía la frase a MIVOR (registra la toma en Mi salud) y lee la respuesta en voz alta. */
     private fun askMivor(rawText: String) {

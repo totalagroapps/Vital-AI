@@ -100,7 +100,7 @@ DEFAULT_APK_URL = "https://github.com/totalagroapps/Vital-AI/releases/download/l
 @app.get('/api/version')
 async def get_version():
     apk_url = os.getenv("APP_APK_URL", DEFAULT_APK_URL)
-    version = os.getenv("APP_LATEST_VERSION", "1.0.9")
+    version = os.getenv("APP_LATEST_VERSION", "1.0.10")
     # Opcional: SHA-256 (hex) del APK de APP_APK_URL; la app rechaza el archivo si no coincide.
     sha256 = os.getenv("APP_APK_SHA256") or None
     if apk_url == DEFAULT_APK_URL:
@@ -114,7 +114,7 @@ async def get_version():
     return {
         "version": version,
         "apkUrl": apk_url,
-        "notes": os.getenv("APP_UPDATE_NOTES", "Modo adulto mayor: recuerda el perfil elegido y ya no pregunta quién usa MIVOR cada vez."),
+        "notes": os.getenv("APP_UPDATE_NOTES", "Nuevo: Mis controles de salud (tensión, glucosa y peso), también por voz en el kiosko."),
         "forceUpdate": os.getenv("APP_FORCE_UPDATE", "false").lower() in ("true", "1"),
         "sha256": sha256
     }
@@ -256,7 +256,9 @@ from routers.devices import router as devices_router
 app.include_router(devices_router)
 
 from routers.alexa import router as alexa_router
+from routers.health import router as health_router
 app.include_router(alexa_router)
+app.include_router(health_router)
 
 
 import logging

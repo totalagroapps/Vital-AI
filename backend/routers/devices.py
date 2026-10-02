@@ -11,7 +11,7 @@ import secrets
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from pydantic import BaseModel, Field
@@ -23,6 +23,8 @@ from database import get_db
 from security import get_authenticated_user_id, get_current_user_id
 from services.medication_alerts import now_local, parse_times
 from services.device_today import device_today, set_taken
+from services.health_readings import InvalidReading, add_reading, list_readings
+from services.push_service import send_push_notification
 from services.voice_commands import handle_voice_command
 
 router = APIRouter(tags=["Dispositivos vinculados"])
@@ -212,6 +214,27 @@ async def device_mark_taken(medication_id: int, link: models.DeviceLink = Depend
 async def device_unmark_taken(medication_id: int, link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
     # "Me he equivocado, deshacer"
     return await _set_taken(db, link, medication_id, False)
+
+
+class DeviceReading(BaseModel):
+    kind: Literal['blood_pressure', 'glucose', 'weight']
+    value1: float
+    value2: Optional[float] = None
+
+
+@router.get('/api/device/readings')
+async def device_readings(link: models.DeviceLink = Depends(get_device_link), db: AsyncSession = Depends(get_db)):
+    return await list_readings(db, link.patient_id, 30)
+
+
+@router.post('/api/device/readings')
+async def device_add_reading(payload: DeviceReading, link: models.DeviceLink = Depends(get_device_link),
+                             db: AsyncSession = Depends(get_db)):
+    try:
+        return await add_reading(db, link.patient_id, payload.kind, payload.value1, payload.value2,
+                                 source='kiosk', notify=send_push_notification)
+    except InvalidReading as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 class VoiceRequest(BaseModel):

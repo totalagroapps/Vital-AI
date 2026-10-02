@@ -1,6 +1,6 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.10",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Modo adulto mayor: recuerda el perfil elegido y ya no pregunta quién usa MIVOR cada vez.",
+  "notes": "Nuevo: Mis controles de salud (tensión, glucosa y peso), también por voz en el kiosko.",
   "forceUpdate": false
 }

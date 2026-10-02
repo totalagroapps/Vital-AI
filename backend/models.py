@@ -687,3 +687,20 @@ class DeviceLink(Base):
     revoked = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_seen_at = Column(DateTime(timezone=True), nullable=True)
+
+
+class HealthReading(Base):
+    """
+    Control de salud que apunta el paciente (o su familia): tensión, glucosa o peso.
+    value1 es la sistólica / la glucosa / el peso; value2, la diastólica (solo tensión).
+    source: 'app' (MIVOR), 'kiosk' (kiosko) o 'voice' (orden de voz del kiosko).
+    """
+    __tablename__ = "health_readings"
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, ForeignKey("users.id"), index=True, nullable=False)
+    created_by = Column(String, nullable=True)
+    kind = Column(String(20), nullable=False)
+    value1 = Column(Float, nullable=False)
+    value2 = Column(Float, nullable=True)
+    source = Column(String(10), nullable=False, default='app')
+    measured_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())

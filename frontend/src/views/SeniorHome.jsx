@@ -3,6 +3,7 @@ import { Pill, HeartPulse, Users, CalendarDays, Phone, Brain, PhoneCall, Mic, Ch
 import { useLanguage } from '../contexts/LanguageContext';
 import { detectCountry, emergencyNumber } from '../utils/locale';
 import CognitiveGamesModal from './CognitiveGamesModal';
+import HealthChecksModal from './HealthChecksModal';
 import doctoraImg from '../assets/senior-doctora.webp';
 
 // Inicio de MIVOR en modo adulto mayor (lo abre el kiosko con mivor://mayor).
@@ -33,6 +34,7 @@ const TILES = [
 const SeniorHome = ({ onNavigate, userProfile, onExitSeniorMode, apiUrl, authHeaders }) => {
   const { t } = useLanguage();
   const [showGames, setShowGames] = useState(false);
+  const [showHealth, setShowHealth] = useState(false);
   const [notice, setNotice] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -54,7 +56,7 @@ const SeniorHome = ({ onNavigate, userProfile, onExitSeniorMode, apiUrl, authHea
   const act = (id) => {
     switch (id) {
       case 'meds': return onNavigate('treatments');
-      case 'vitals': return setNotice(t('senior_coming_soon'));
+      case 'vitals': return setShowHealth(true);
       case 'family': return callFamily();
       case 'appts': return onNavigate('citas');
       case 'call': return open(familyPhone ? `tel:${familyPhone}` : 'tel:');
@@ -161,6 +163,7 @@ const SeniorHome = ({ onNavigate, userProfile, onExitSeniorMode, apiUrl, authHea
         </div>
       )}
 
+      <HealthChecksModal isOpen={showHealth} onClose={() => setShowHealth(false)} apiUrl={apiUrl} authHeaders={authHeaders} />
       <CognitiveGamesModal isOpen={showGames} onClose={() => setShowGames(false)} apiUrl={apiUrl} authHeaders={authHeaders} />
     </div>
   );

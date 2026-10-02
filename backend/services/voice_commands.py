@@ -2,7 +2,8 @@
 Órdenes de voz de dispositivos vinculados (kiosko, y en el futuro un reloj).
 
 Reglas fijas, sin IA: "ya me tomé la pastilla / el Betaloc / todas" registra la toma en
-Mi salud, y "¿qué me toca?" dice lo que falta hoy. Devuelve la frase que el dispositivo lee
+Mi salud, "¿qué me toca?" dice lo que falta hoy y "tengo la tensión 130 85", "glucosa 110" o
+"peso 72" apuntan un control de salud. Devuelve la frase que el dispositivo lee
 en voz alta. Lo que no se entiende vuelve como 'unknown' para que el dispositivo lo trate.
 Registrar tomas es adherencia, no diagnóstico: aquí no se interpreta ningún síntoma.
 """
@@ -15,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
+from services.health_readings import InvalidReading, add_reading, parse_voice_reading, spoken_value
 from services.medication_alerts import now_local, parse_times
 
 # "ya me tomé", "me la tomé", "ya tomé", "me he tomado", "ya las tomé"
@@ -72,6 +74,24 @@ async def handle_voice_command(db: AsyncSession, patient_id: str, text: str, now
         .where(models.MedicationLog.user_id == patient_id, models.MedicationLog.taken_date == today)
     )).scalars().all())
     pending = [m for m in meds if m.id not in taken_ids]
+
+    # Controles de salud. "Me tomé la pastilla de la tensión" (sin números) sigue siendo una toma.
+    reading = parse_voice_reading(cmd)
+    if reading:
+        kind, numbers = reading
+        enough = len(numbers) >= (2 if kind == 'blood_pressure' else 1)
+        if enough:
+            from services.push_service import send_push_notification
+            try:
+                data = await add_reading(db, patient_id, kind, numbers[0], numbers[1] if kind == 'blood_pressure' else None,
+                                         source='voice', notify=send_push_notification)
+            except InvalidReading as exc:
+                return _reply('reading_ask', f'{exc} Dímelo otra vez, por ejemplo: tengo la tensión 130 85.')
+            return _reply('reading_saved', f"Anotado: {spoken_value(kind, data['value1'], data['value2'])}. {data['message']}")
+        if not _TAKEN_RE.search(cmd) and 'pastilla' not in cmd:
+            example = {'blood_pressure': 'tengo la tensión 130 85', 'glucose': 'tengo la glucosa en 110',
+                       'weight': 'peso 72 kilos'}[kind]
+            return _reply('reading_ask', f'Dime los números, por ejemplo: {example}.')
 
     if _TAKEN_RE.search(cmd):
         if not meds:

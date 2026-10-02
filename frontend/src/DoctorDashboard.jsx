@@ -20,7 +20,7 @@ import {
   ArrowLeft, Download, FolderOpen, User, Activity, FileText, Send, Bot, Clock, 
   ChevronRight, Users, LogOut, Search, Loader2, Calendar, Printer, Heart, 
   ShieldCheck, Sparkles, Mic, Pill, AlertTriangle, Stethoscope, CheckCircle2, 
-  MessageSquare, ExternalLink, Paperclip, X, Image as ImageIcon, Trash2 
+  MessageSquare, ExternalLink, Paperclip, X, Image as ImageIcon, Trash2, HeartPulse, Droplet, Scale 
 } from 'lucide-react';
 
 export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
@@ -893,6 +893,113 @@ export default function DoctorDashboard({ apiUrl, authHeaders, onLogout }) {
                   </div>
                 )}
               </div>
+
+              {/* CONTROLES DE SALUD que apunta el paciente o su familia (tensión, glucosa, peso; 90 días) */}
+              {(() => {
+                const hr = patientDetail?.health_readings;
+                const items = Array.isArray(hr?.items) ? hr.items : [];
+                const kinds = [
+                  { kind: 'blood_pressure', icon: HeartPulse, label: t('doctordashboard_hr_bp'), tone: 'text-blue-600 bg-blue-50' },
+                  { kind: 'glucose', icon: Droplet, label: t('doctordashboard_hr_glucose'), tone: 'text-rose-600 bg-rose-50' },
+                  { kind: 'weight', icon: Scale, label: t('doctordashboard_hr_weight'), tone: 'text-emerald-600 bg-emerald-50' },
+                ];
+                const levelStyle = {
+                  normal: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                  high: 'bg-amber-50 text-amber-700 border-amber-200',
+                  low: 'bg-amber-50 text-amber-700 border-amber-200',
+                  urgent_high: 'bg-red-50 text-red-700 border-red-200',
+                  urgent_low: 'bg-red-50 text-red-700 border-red-200',
+                };
+                const levelLabel = (l) => t(`doctordashboard_hr_level_${l}`);
+                const when = (iso) => (iso ? new Date(iso).toLocaleString(locale, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '--');
+                const range = (kind) => {
+                  const vals = items.filter((r) => r.kind === kind);
+                  if (vals.length < 2) return null;
+                  const v1 = vals.map((r) => r.value1);
+                  if (kind === 'blood_pressure') {
+                    const v2 = vals.map((r) => r.value2);
+                    return `${Math.min(...v1)}–${Math.max(...v1)} / ${Math.min(...v2)}–${Math.max(...v2)}`;
+                  }
+                  return `${Math.min(...v1)}–${Math.max(...v1)}`;
+                };
+                return (
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                        <HeartPulse className="w-4 h-4 text-brand-teal" />
+                        {t('doctordashboard_hr_title')}
+                      </h3>
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-brand-teal border border-teal-100">
+                        {items.length} {t('doctordashboard_hr_count')}
+                      </span>
+                    </div>
+                    {items.length === 0 ? (
+                      <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center text-sm text-gray-500 shadow-xs">
+                        {t('doctordashboard_hr_empty')}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          {kinds.map(({ kind, icon: Icon, label, tone }) => {
+                            const last = hr?.latest?.[kind];
+                            const r = range(kind);
+                            return (
+                              <div key={kind} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center ${tone}`}><Icon className="w-4 h-4" /></span>
+                                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{label}</span>
+                                </div>
+                                {last ? (
+                                  <>
+                                    <p className="text-xl font-extrabold text-gray-900">{last.display}</p>
+                                    <p className="text-[11px] text-gray-500">{when(last.measured_at)}</p>
+                                    {last.level && (
+                                      <span className={`inline-block mt-2 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${levelStyle[last.level]}`}>
+                                        {levelLabel(last.level)}
+                                      </span>
+                                    )}
+                                    {r && <p className="text-[11px] text-gray-500 mt-2">{t('doctordashboard_hr_range')} {r}</p>}
+                                  </>
+                                ) : (
+                                  <p className="text-sm text-gray-400">{t('doctordashboard_hr_no_data')}</p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="text-left text-[11px] uppercase tracking-wider text-gray-500 border-b border-gray-100">
+                                <th className="px-4 py-2">{t('doctordashboard_hr_date')}</th>
+                                <th className="px-4 py-2">{t('doctordashboard_hr_type')}</th>
+                                <th className="px-4 py-2">{t('doctordashboard_hr_value')}</th>
+                                <th className="px-4 py-2">{t('doctordashboard_hr_source')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {items.slice(0, 20).map((r) => (
+                                <tr key={r.id} className="border-b border-gray-50 last:border-0">
+                                  <td className="px-4 py-2 text-gray-600 whitespace-nowrap">{when(r.measured_at)}</td>
+                                  <td className="px-4 py-2 text-gray-900">{kinds.find((k) => k.kind === r.kind)?.label}</td>
+                                  <td className="px-4 py-2 font-bold text-gray-900 whitespace-nowrap">
+                                    {r.display}
+                                    {r.level && r.level !== 'normal' && (
+                                      <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold border ${levelStyle[r.level]}`}>{levelLabel(r.level)}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-500">{t(`doctordashboard_hr_source_${r.source}`)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-[11px] text-gray-400 mt-2">{t('doctordashboard_hr_note')}</p>
+                      </>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Triage and Docs Tabs Area */}
               <div className="space-y-8">

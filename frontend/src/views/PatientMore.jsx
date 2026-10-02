@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   FileText, Activity, Users, Apple, AlertCircle, 
-  Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw, Tablet
+  Shield, Moon, Type, Download, LogOut, ChevronRight, RefreshCw, Tablet, HeartPulse
 } from 'lucide-react';
 import KioskLinkModal from '../components/KioskLinkModal';
+import HealthChecksModal from './HealthChecksModal';
 import BottomNav from '../components/BottomNav';
 import { useLanguage } from '../contexts/LanguageContext';
 import LanguageSelector from '../components/LanguageSelector';
@@ -11,6 +12,7 @@ import LanguageSelector from '../components/LanguageSelector';
 const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles, apiUrl, authHeaders }) => {
   const { t } = useLanguage();
   const [showKioskLink, setShowKioskLink] = useState(false);
+  const [showHealthChecks, setShowHealthChecks] = useState(false);
 
   // Cada opción lleva a una pantalla real; las que aún no existen se muestran como «Próximamente»
   // (antes abrían un alert de «en desarrollo» y parecían botones rotos).
@@ -18,6 +20,7 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles, 
     {
       title: t('my_health'),
       items: [
+        { icon: <HeartPulse size={20} />, title: t('senior_vitals_title'), desc: t('senior_vitals_sub'), action: () => setShowHealthChecks(true), color: 'text-rose-600', bg: 'bg-rose-50' },
         { icon: <FileText size={20} />, title: t('exam_vault'), desc: t('upload_medical_results'), screen: 'documents', color: 'text-brand', bg: 'bg-mivor-blueSoft' },
         { icon: <Activity size={20} />, title: t('wearables_and_watches'), desc: t('connect_health_apps'), color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { icon: <Apple size={20} />, title: t('nutrition_ai'), desc: t('personalized_diets_advice'), color: 'text-orange-500', bg: 'bg-orange-50' }
@@ -122,6 +125,7 @@ const PatientMore = ({ onNavigate, onLogout, onSwitchProfile, onManageProfiles, 
       </div>
       <BottomNav activeTab="more" onTabChange={(tab) => onNavigate(tab)} />
       <KioskLinkModal isOpen={showKioskLink} onClose={() => setShowKioskLink(false)} apiUrl={apiUrl} authHeaders={authHeaders} />
+      <HealthChecksModal isOpen={showHealthChecks} onClose={() => setShowHealthChecks(false)} apiUrl={apiUrl} authHeaders={authHeaders} />
     </div>
   );
 };

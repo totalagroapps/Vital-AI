@@ -375,12 +375,17 @@ async def get_patient_detail(
         'available_specialists': recommended_specialists
     }
 
+    # Controles de salud que apunta el paciente o su familia (tensión, glucosa, peso), últimos 90 días
+    from services.health_readings import list_readings
+    health_readings = await list_readings(db, effective_user_id, 90)
+
     return {
         'profile': profile_dict,
         'triages': triages_list,
         'medications': medications_list,
         'documents': documents_list,
-        'smart_referral': smart_referral
+        'smart_referral': smart_referral,
+        'health_readings': health_readings
     }
 
 
