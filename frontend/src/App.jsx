@@ -78,9 +78,16 @@ const CHAT_STORAGE_KEYS = ['currentSessionId', 'triageSessionId', 'isTriageClose
 
 const ACTIVE_PROFILE_KEY = 'mivor_active_profile';
 
+// En modo adulto mayor (el móvil del kiosko) el perfil elegido se recuerda también tras cerrar la app:
+// si no, la persona mayor veía "¿Quién está usando MIVOR hoy?" cada vez que MIVOR arrancaba de cero.
+const isSeniorModeStored = () => {
+  try { return localStorage.getItem('mivor_senior_mode') === '1'; } catch { return false; }
+};
+
 function readStoredProfile() {
   try {
-    const raw = sessionStorage.getItem(ACTIVE_PROFILE_KEY);
+    const raw = sessionStorage.getItem(ACTIVE_PROFILE_KEY)
+      || (isSeniorModeStored() ? localStorage.getItem(ACTIVE_PROFILE_KEY) : null);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -89,8 +96,13 @@ function readStoredProfile() {
 
 function writeStoredProfile(value) {
   try {
-    if (value) sessionStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(value));
-    else sessionStorage.removeItem(ACTIVE_PROFILE_KEY);
+    if (value) {
+      sessionStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(value));
+      if (isSeniorModeStored()) localStorage.setItem(ACTIVE_PROFILE_KEY, JSON.stringify(value));
+    } else {
+      sessionStorage.removeItem(ACTIVE_PROFILE_KEY);
+      localStorage.removeItem(ACTIVE_PROFILE_KEY);
+    }
   } catch { /* sin almacenamiento: el perfil vive solo en memoria */ }
 }
 
@@ -119,7 +131,10 @@ export default function App() {
     } catch { return false; }
   });
   const exitSeniorMode = () => {
-    try { localStorage.removeItem('mivor_senior_mode'); } catch { /* sin almacenamiento */ }
+    try {
+      localStorage.removeItem('mivor_senior_mode');
+      localStorage.removeItem(ACTIVE_PROFILE_KEY);
+    } catch { /* sin almacenamiento */ }
     setSeniorMode(false);
   };
   const [authReady, setAuthReady] = useState(tokenAvailableSync);
@@ -207,7 +222,12 @@ export default function App() {
     let linkHandle = null;
     const enterSenior = (url) => {
       if (!url || !String(url).toLowerCase().startsWith('mivor://mayor')) return;
-      try { localStorage.setItem('mivor_senior_mode', '1'); } catch { /* sin almacenamiento */ }
+      try {
+        localStorage.setItem('mivor_senior_mode', '1');
+        // El perfil ya elegido en esta sesión pasa a recordarse también tras cerrar la app
+        const current = sessionStorage.getItem(ACTIVE_PROFILE_KEY);
+        if (current) localStorage.setItem(ACTIVE_PROFILE_KEY, current);
+      } catch { /* sin almacenamiento */ }
       setSeniorMode(true);
       navigate('/paciente');
     };

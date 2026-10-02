@@ -1,6 +1,6 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "apkUrl": "https://github.com/totalagroapps/Vital-AI/releases/download/latest/mivor-latest.apk",
-  "notes": "Modo adulto mayor: el saludo ya no queda tapado y el botón atrás vuelve al kiosko.",
+  "notes": "Modo adulto mayor: recuerda el perfil elegido y ya no pregunta quién usa MIVOR cada vez.",
   "forceUpdate": false
 }
